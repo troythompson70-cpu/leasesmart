@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>LeaseSmart Beta v1.1 Functional Fix Build</title>
+<!-- BUILD_ID: 20260521-v1.1.4 — deploy this file to Netlify root -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f8fafb;color:#111827;min-height:100vh}
+button,input,textarea,select{font-family:inherit}
+
+/* BETA DEMO BANNER */
+.beta-banner{background:linear-gradient(135deg,#FFD43B,#FFA500);color:#000;text-align:center;padding:10px 20px;font-size:14px;font-weight:700;position:sticky;top:0;z-index:300;letter-spacing:.3px}
+.beta-banner a{color:#000;text-decoration:underline;margin-left:8px}
+/* DEMO MODE BADGE */
+.demo-badge{display:inline-flex;align-items:center;gap:6px;background:#fff7ed;border:1.5px solid #f5a62344;color:#d97706;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px}
+/* DISCLAIMER */
+.disclaimer{background:#f8fafb;border:1.5px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:16px;font-size:13px;color:#6b7280;line-height:1.6}
+.disclaimer strong{color:#374151}
+/* FEEDBACK FLOAT BTN */
+.fb-float{position:fixed;bottom:24px;right:20px;z-index:999;background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;border:none;border-radius:50px;padding:12px 20px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px #22d98a44;display:flex;align-items:center;gap:8px}
+/* FEEDBACK MODAL */
+.fb-modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center}
+.fb-modal.open{display:flex}
+.fb-sheet{background:#fff;border-radius:20px 20px 0 0;padding:28px 24px 40px;width:100%;max-width:600px;max-height:80vh;overflow-y:auto}
+.fb-sheet h3{font-size:20px;font-weight:900;color:#111827;margin-bottom:16px}
+.fb-input{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;font-size:16px;color:#111827;outline:none;margin-bottom:12px;font-family:inherit}
+.fb-input:focus{border-color:#22d98a}
+.fb-textarea{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;font-size:15px;color:#111827;outline:none;margin-bottom:12px;min-height:100px;resize:vertical;line-height:1.6;font-family:inherit}
+.fb-close{background:none;border:none;color:#9ca3af;font-size:14px;cursor:pointer;float:right;margin-top:-4px}
+.fb-sent{background:#f0fdf4;border:2px solid #22d98a33;border-radius:12px;padding:20px;text-align:center;display:none}
+/* SCREENS */
+.pg{display:none;min-height:100vh}
+.pg.show{display:block}
+#search-pg{display:none;min-height:100vh;align-items:center;justify-content:center;background:#f8fafb}
+#search-pg.show{display:flex}
+
+/* SHARED */
+.green-btn{width:100%;padding:18px;background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;font-size:18px;font-weight:800;border:none;border-radius:14px;cursor:pointer;display:block;text-align:center}
+.ghost-btn{background:transparent;border:1.5px solid #d1d5db;color:#6b7280;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px}
+.section-card{background:#fff;border:1.5px solid #e5e7eb;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.tag-green{background:#f0fdf4;border:1.5px solid #22d98a44;color:#16a34a;font-size:12px;font-weight:600;padding:5px 13px;border-radius:20px;display:inline-block}
+
+/* HOME */
+.home-wrap{max-width:860px;margin:0 auto;padding:48px 20px 80px}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:40px}
+.brand-mark{width:56px;height:56px;background:linear-gradient(135deg,#22d98a,#0ea060);border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#000;flex-shrink:0;box-shadow:0 4px 16px #22d98a44}
+.brand-name{font-size:22px;font-weight:900;color:#111827}
+.brand-sub{font-size:10px;color:#22d98a;font-weight:700;letter-spacing:3px;text-transform:uppercase}
+.brand-contact a{color:#3b82f6;text-decoration:none;font-size:13px}
+.home-eyebrow{font-size:13px;font-weight:700;color:#16a34a;letter-spacing:1px;background:#f0fdf4;border:1.5px solid #22d98a33;padding:7px 18px;border-radius:50px;display:inline-block;margin-bottom:20px}
+.home-h1{font-size:clamp(32px,7vw,54px);font-weight:900;line-height:1.1;margin-bottom:16px;letter-spacing:-1.5px;color:#111827}
+.home-h1 span{color:#16a34a}
+.home-p{font-size:18px;color:#6b7280;line-height:1.8;margin-bottom:32px}
+.home-note{text-align:center;color:#9ca3af;font-size:13px;margin:12px 0 40px}
+.trust-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:48px;justify-content:center}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:40px}
+.feat-card{background:#fff;border:1.5px solid #e5e7eb;border-radius:16px;padding:22px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.feat-icon{font-size:28px;margin-bottom:10px}
+.feat-title{font-weight:800;font-size:16px;margin-bottom:6px;color:#111827}
+.feat-desc{color:#6b7280;font-size:14px;line-height:1.6}
+.home-footer{text-align:center;color:#9ca3af;font-size:12px;margin-top:40px;padding-top:24px;border-top:1.5px solid #e5e7eb;line-height:1.9}
+.home-footer a{color:#22d98a;text-decoration:none}
+.admin-area{text-align:center;margin-top:28px;padding-top:20px;border-top:1.5px solid #e5e7eb}
+
+/* QUIZ */
+#quiz-pg .modal{position:fixed;inset:0;background:#f8fafb;display:flex;flex-direction:column;z-index:200}
+.qz-head{background:#fff;border-bottom:2px solid #e5e7eb;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.qz-brand{display:flex;align-items:center;gap:8px}
+.qz-mark{width:32px;height:32px;background:linear-gradient(135deg,#22d98a,#0ea060);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#000}
+.qz-name{font-weight:800;font-size:14px;color:#111827}
+.qz-sub{font-size:9px;color:#22d98a;font-weight:700;letter-spacing:2px}
+.qz-count-num{color:#22d98a;font-weight:800;font-size:14px;text-align:right}
+.qz-count-pct{color:#9ca3af;font-size:11px;text-align:right}
+.qz-prog{height:5px;background:#e5e7eb;flex-shrink:0}
+.qz-prog-fill{height:100%;background:linear-gradient(90deg,#22d98a,#0ea060);transition:width .4s ease}
+.qz-dots{background:#f4f7fa;padding:10px 20px;display:flex;gap:4px;overflow-x:auto;flex-shrink:0}
+.qz-dot{height:6px;border-radius:4px;background:#d1d5db;width:6px;flex-shrink:0;transition:all .3s}
+.qz-dot.done{background:#22d98a}
+.qz-dot.cur{background:#22d98a;width:24px}
+.qz-body{flex:1;overflow-y:auto;padding:28px 20px 40px}
+.qz-inner{max-width:560px;margin:0 auto}
+.q-card{background:#fff;border:2px solid #e5e7eb;border-radius:20px;padding:28px 24px;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.q-icon{font-size:34px;margin-bottom:10px}
+.q-lbl{color:#16a34a;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.q-title{font-size:clamp(17px,4vw,22px);font-weight:800;color:#111827;margin-bottom:6px;line-height:1.3}
+.q-sub{color:#9ca3af;font-size:13px;margin-bottom:16px}
+.q-opt{color:#9ca3af;font-size:12px;font-style:italic;display:block;margin-bottom:14px}
+.q-input{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:15px 16px;color:#111827;font-size:16px;outline:none;margin-bottom:12px;transition:border-color .2s}
+.q-input:focus{border-color:#22d98a}
+.q-next{background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;width:100%}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:4px}
+.opt{background:#f8fafb;border:2px solid #e5e7eb;border-radius:11px;padding:13px 12px;color:#374151;font-size:14px;font-weight:600;cursor:pointer;text-align:left;min-height:52px;width:100%;transition:all .15s}
+.opt.on{background:#22d98a;border-color:#22d98a;color:#000;font-weight:700}
+.multi-confirm{background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;width:100%;margin-top:12px}
+.opts-check{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
+.opt-check{display:flex;align-items:flex-start;gap:12px;background:#f8fafb;border:2px solid #e5e7eb;border-radius:11px;padding:14px;cursor:pointer;text-align:left;width:100%;font-size:15px;color:#374151}
+.opt-check.on{background:#22d98a;border-color:#22d98a;color:#000;font-weight:700}
+.opt-check input[type=checkbox]{width:22px;height:22px;min-width:22px;margin-top:2px;accent-color:#22d98a;cursor:pointer}
+.q-calendar{width:100%;max-width:100%;min-height:48px;margin-bottom:12px}
+.ls-version-footer{text-align:center;padding:20px;color:#9ca3af;font-size:11px;border-top:1px solid #e5e7eb;margin-top:40px;line-height:1.7}
+.ls-version-footer strong{color:#374151;font-size:12px}
+.state-search{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:13px 16px;color:#111827;font-size:16px;outline:none;margin-bottom:10px}
+.state-list{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:260px;overflow-y:auto}
+.back-link{background:none;border:none;color:#9ca3af;font-size:14px;cursor:pointer;margin-top:18px;padding:8px;display:block}
+.privacy{color:#d1d5db;font-size:11px;text-align:center;margin-top:16px}
+
+/* SEARCH SCREEN */
+.search-box{text-align:center;padding:40px 24px;max-width:480px;width:100%}
+.search-icon{font-size:60px;margin-bottom:18px;display:inline-block;animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.search-h{font-size:26px;font-weight:900;color:#111827;margin-bottom:8px}
+.search-stage{color:#6b7280;font-size:14px;margin-bottom:28px;min-height:20px}
+.search-bar{height:8px;background:#e5e7eb;border-radius:8px;overflow:hidden;margin:0 auto 12px;max-width:360px}
+.search-fill{height:100%;background:linear-gradient(90deg,#22d98a,#0ea060);border-radius:8px;transition:width .6s ease;width:0}
+.search-pct{color:#22d98a;font-weight:900;font-size:22px}
+
+/* DASHBOARD */
+.dash-head{background:#fff;border-bottom:2px solid #e5e7eb;position:sticky;top:0;z-index:99}
+.dash-head-in{max-width:1200px;margin:0 auto;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.dash-mark{width:34px;height:34px;background:linear-gradient(135deg,#22d98a,#0ea060);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#000}
+.dash-name{font-weight:800;font-size:15px;color:#111827}
+.dash-sub{color:#22d98a;font-size:9px;letter-spacing:2px;font-weight:700}
+.pchip{background:#f0fdf4;border:1.5px solid #22d98a33;border-radius:20px;padding:5px 12px;font-size:11px;color:#374151}
+.stats-bar{background:#fff;border-bottom:2px solid #e5e7eb;display:flex;overflow-x:auto;justify-content:center}
+.stat-box{padding:12px 18px;text-align:center;border-right:1.5px solid #e5e7eb;flex-shrink:0}
+.stat-n{font-size:22px;font-weight:900}
+.stat-l{font-size:9px;color:#9ca3af;letter-spacing:1px;font-weight:700;margin-top:2px}
+.tabs{background:#fff;border-bottom:2px solid #e5e7eb;display:flex;overflow-x:auto;padding:0 18px}
+.tab-btn{background:none;border:none;color:#9ca3af;padding:13px 18px;cursor:pointer;font-size:13px;font-weight:600;border-bottom:2px solid transparent;white-space:nowrap}
+.tab-btn.on{color:#22d98a;border-bottom-color:#22d98a}
+.tab-content{max-width:1200px;margin:0 auto;padding:22px 18px}
+
+/* ACTIVITY BAR */
+.act-bar{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.act-title{color:#9ca3af;font-size:9px;font-weight:700;letter-spacing:1.5px;margin-bottom:10px}
+.act-row{display:flex;gap:8px;flex-wrap:wrap}
+.act-item{display:flex;align-items:center;gap:8px;background:#f8fafb;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px 12px}
+.act-cnt{font-weight:900;font-size:18px;color:#111827;line-height:1}
+.act-lbl{color:#9ca3af;font-size:8px;letter-spacing:.5px;font-weight:700}
+
+/* FILTER */
+.filt-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.filt-btn{background:#fff;border:2px solid #e5e7eb;border-radius:20px;padding:6px 14px;color:#6b7280;font-size:12px;font-weight:600;cursor:pointer}
+.filt-btn.on{background:#22d98a;border-color:#22d98a;color:#000;font-weight:700}
+
+/* CARDS */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.l-card{background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:border-color .2s,box-shadow .2s}
+.l-card:hover{border-color:#22d98a;box-shadow:0 4px 16px rgba(34,217,138,.15)}
+.l-card.top-pick{border-color:#22d98a;box-shadow:0 4px 16px rgba(34,217,138,.15)}
+.card-top-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;display:inline-block;margin-right:4px}
+.card-pri{background:#22d98a;color:#000;font-weight:900;font-size:12px;padding:2px 8px;border-radius:6px}
+.card-name{font-weight:800;font-size:18px;color:#111827;margin-bottom:2px}
+.card-addr{color:#9ca3af;font-size:13px;margin-bottom:10px}
+.card-rent-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.card-rent{color:#16a34a;font-weight:900;font-size:22px}
+.card-sz{color:#6b7280;font-size:13px}
+.card-why{background:#f0fdf4;border:1.5px solid #22d98a33;border-radius:8px;padding:10px 12px;font-size:13px;color:#374151;margin-bottom:12px;line-height:1.5}
+.card-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;font-size:12px;color:#6b7280}
+.card-flag{background:#fff7ed;border:1.5px solid #f5a62344;border-radius:6px;padding:6px 10px;font-size:11px;color:#d97706;margin-bottom:10px}
+.card-btns{display:flex;gap:7px;flex-wrap:wrap}
+.c-btn{font-size:12px;padding:6px 12px;border-radius:8px;background:#f4f7fa;color:#6b7280;text-decoration:none;font-weight:600;border:1.5px solid #e5e7eb;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.c-btn-green{background:#f0fdf4;color:#16a34a;border-color:#22d98a33}
+.c-btn-blue{background:#eff6ff;color:#2563eb;border-color:#3b82f633}
+
+/* DETAIL */
+.det-wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px}
+.photo-wrap{border-radius:16px;overflow:hidden;margin-bottom:20px;position:relative;background:#e5e7eb;height:240px}
+.photo-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-nav{position:absolute;top:12px;right:12px;display:flex;gap:6px}
+.photo-nav button{background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:6px;padding:5px 11px;font-size:15px;cursor:pointer}
+.photo-dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:5px}
+.ph-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);border:none;cursor:pointer;padding:0}
+.ph-dot.on{background:#fff}
+.photo-cnt{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.5);color:#fff;border-radius:6px;padding:4px 10px;font-size:11px}
+.det-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.det-name{font-size:28px;font-weight:900;color:#111827;margin-bottom:4px}
+.det-addr{color:#6b7280;font-size:15px;margin-bottom:4px}
+.det-mgmt{color:#3b82f6;font-size:14px;margin-bottom:20px}
+.map-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.map-btn{padding:10px 16px;background:#f0fdf4;border:1.5px solid #22d98a44;color:#16a34a;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.map-btn-blue{background:#eff6ff;border-color:#3b82f633;color:#2563eb}
+.why-card{background:#f0fdf4;border:2px solid #22d98a33;border-radius:14px;padding:18px;margin-bottom:16px}
+.why-lbl{color:#16a34a;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:8px}
+.why-txt{color:#374151;line-height:1.7;font-size:15px}
+.det-sec{background:#f8fafb;border:2px solid #e5e7eb;border-radius:14px;padding:18px;margin-bottom:14px}
+.det-sec-lbl{color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.score-row{margin-bottom:10px}
+.score-row-top{display:flex;justify-content:space-between;font-size:13px;color:#6b7280;margin-bottom:4px}
+.score-bg{height:6px;background:#e5e7eb;border-radius:4px;overflow:hidden}
+.score-fill{height:100%;border-radius:4px;transition:width .5s}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fact{background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px}
+.fact-lbl{color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:.5px;margin-bottom:4px}
+.fact-val{font-size:14px;color:#111827}
+.fact-val-g{color:#16a34a;font-weight:800}
+.tr-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.tr-chip{background:#eff6ff;border:1.5px solid #3b82f633;border-radius:8px;padding:8px 12px;font-size:13px;color:#2563eb}
+.route-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.route-btn{padding:9px 14px;background:#eff6ff;border:1.5px solid #3b82f633;color:#2563eb;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.nj-bar{background:#f0fdf4;border:1.5px solid #22d98a33;border-radius:8px;padding:10px 14px;font-size:12px;color:#16a34a;display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.nj-bar a{color:#16a34a;text-decoration:none;font-weight:600}
+.nbr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.nbr-box{background:#f0fdf4;border:1.5px solid #22d98a22;border-radius:10px;padding:12px;text-align:center}
+.nbr-num{color:#16a34a;font-weight:900;font-size:20px}
+.nbr-lbl{color:#9ca3af;font-size:10px;margin-top:2px}
+.nbr-grp{margin-bottom:10px}
+.nbr-grp-lbl{color:#9ca3af;font-size:11px;font-weight:700;margin-bottom:6px}
+.nbr-tags{display:flex;gap:6px;flex-wrap:wrap}
+.nbr-tag{background:#f4f7fa;border:1.5px solid #e5e7eb;border-radius:6px;padding:4px 10px;font-size:12px;color:#6b7280}
+.dual-card{background:#f0fdf4;border:2px solid #22d98a33;border-radius:14px;padding:18px;margin-bottom:14px}
+.dual-ttl{color:#16a34a;font-weight:800;font-size:15px;margin-bottom:8px}
+.dual-desc{color:#6b7280;font-size:13px;margin-bottom:14px;line-height:1.6}
+.dual-links{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.dual-a{padding:10px 16px;background:#fff;border:1.5px solid #e5e7eb;color:#374151;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600}
+.dual-b{padding:10px 16px;background:#f0fdf4;border:1.5px solid #22d98a44;color:#16a34a;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600}
+.dual-miss{padding:10px 16px;background:#fff7ed;border:1.5px solid #f5a62333;color:#d97706;border-radius:8px;font-size:13px}
+.miss-card{background:#fff7ed;border:2px solid #f5a62344;border-radius:12px;padding:16px;margin-bottom:14px}
+.miss-ttl{color:#d97706;font-weight:700;margin-bottom:8px;font-size:14px}
+.miss-item{color:#6b7280;font-size:13px;margin-bottom:4px}
+.status-card{background:#f8fafb;border:2px solid #e5e7eb;border-radius:14px;padding:18px;margin-bottom:14px}
+.st-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.st-btn{padding:8px 13px;border:2px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:11px;font-weight:700;background:#fff;color:#6b7280;transition:all .15s}
+.st-btn.on{background:#22d98a;border-color:#22d98a;color:#000}
+.notes-in{width:100%;background:#fff;border:2px solid #e5e7eb;border-radius:10px;padding:12px;color:#374151;font-size:14px;min-height:72px;outline:none;resize:vertical;line-height:1.5}
+.det-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.cta-a{flex:1;padding:16px;background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center}
+.cta-b{padding:16px 20px;background:#f4f7fa;color:#6b7280;border:1.5px solid #e5e7eb;border-radius:14px;cursor:pointer;font-size:16px}
+
+/* GUIDE */
+.guide-wrap{max-width:720px}
+.script-card{background:#f0fdf4;border:2px solid #22d98a33;border-radius:14px;padding:20px;margin-bottom:24px}
+.script-lbl{color:#16a34a;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:10px}
+.script-txt{color:#111827;font-size:15px;line-height:1.85;font-style:italic}
+.gq{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:10px;display:flex;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.gq-num{background:#f0fdf4;color:#16a34a;font-weight:900;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;border:1.5px solid #22d98a33}
+.gq-txt{color:#111827;font-weight:600;font-size:14px;margin-bottom:4px}
+.gq-why{color:#6b7280;font-size:13px}
+.who-row{display:flex;gap:16px;padding:13px 0;border-bottom:1.5px solid #e5e7eb;flex-wrap:wrap}
+.who-name{color:#2563eb;font-weight:700;font-size:14px;min-width:130px}
+.who-tip{color:#6b7280;font-size:13px}
+
+/* ADMIN */
+.admin-head{background:#fff;border-bottom:2px solid #e5e7eb;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
+.admin-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.admin-stat{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:14px 20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.admin-card{background:#fff;border:2px solid;border-radius:14px;padding:18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.admin-approve{background:#f0fdf4;border:1.5px solid #22d98a44;color:#16a34a;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:700}
+.admin-flag{background:#fff7ed;border:1.5px solid #f5a62333;color:#d97706;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:700}
+.admin-reject{background:#fef2f2;border:1.5px solid #ef444433;color:#dc2626;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:700}
+
+@media(max-width:600px){
+  .home-wrap{padding:36px 16px 60px}
+  .card-grid{grid-template-columns:1fr}
+  .facts{grid-template-columns:1fr 1fr}
+  .det-cta{flex-direction:column}
+  .opts{grid-template-columns:1fr}
+}
+
+/* READABILITY IMPROVEMENTS */
+body { font-size: 16px !important; }
+.q-title { font-size: 20px !important; font-weight: 700 !important; }
+.q-lbl { font-size: 14px !important; font-weight: 600 !important; }
+.q-input, input[type="text"], input[type="email"], input[type="date"] { font-size: 16px !important; padding: 14px !important; }
+.opt { font-size: 15px !important; padding: 12px 16px !important; }
+.card-name { font-size: 18px !important; font-weight: 700 !important; }
+.card-rent { font-size: 16px !important; font-weight: 700 !important; }
+.det-name { font-size: 24px !important; font-weight: 900 !important; }
+.det-sec-lbl { font-size: 15px !important; font-weight: 700 !important; }
+.facts { gap: 16px !important; }
+.green-btn { font-size: 16px !important; padding: 16px !important; }
+.verify-badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-right:6px;margin-bottom:4px}
+.conf-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:4px;margin-left:6px}
+.conf-demo{background:#fef3c7;color:#d97706}
+.conf-est{background:#eff6ff;color:#2563eb}
+.conf-verified{background:#f0fdf4;color:#16a34a}
+.conf-pending{background:#f4f7fa;color:#6b7280}
+.intel-card{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:12px}
+.intel-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid #f3f4f6}
+.intel-row:last-child{border-bottom:none}
+.fav-btn{background:#fff;border:2px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer}
+.fav-btn.on{background:#fef3c7;border-color:#f5a623;color:#d97706}
+#qaPanel{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.65);display:none;overflow-y:auto;padding:20px}
+#qaPanel.show{display:block}
+.qa-inner{max-width:900px;margin:0 auto;background:#fff;border-radius:16px;padding:24px}
+.qa-inner h2{font-size:22px;font-weight:900;margin-bottom:12px}
+.qa-section{margin-bottom:20px}
+.qa-tag{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;margin:4px 4px 0 0}
+.qa-crit{background:#fef2f2;color:#dc2626}
+.qa-demo{background:#fef3c7;color:#d97706}
+.qa-fix{background:#f0fdf4;color:#16a34a}
+</style>
+</head>
+<body>
+
+<!-- BETA DEMO BANNER - shows on all screens -->
+<div class="beta-banner" id="lsBuildBanner">
+  <strong>LeaseSmart Beta v1.1 Functional Fix Build</strong> &mdash; Updated Today &mdash; Build <span id="lsBuildId">loading</span>
+  &nbsp;|&nbsp; <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a>
+</div>
+
+<!-- QA PANEL (?qa=true) -->
+<div id="qaPanel"><div class="qa-inner" id="qaContent"></div></div>
+
+<!-- FLOATING FEEDBACK BUTTON -->
+<button class="fb-float" onclick="openFeedback()">&#128172; Send Feedback</button>
+
+<!-- FEEDBACK MODAL -->
+<div class="fb-modal" id="fbModal">
+  <div class="fb-sheet">
+    <button class="fb-close" onclick="closeFeedback()">&#10005; Close</button>
+    <h3>&#128172; Send Feedback to TGT</h3>
+    <p style="color:#6b7280;font-size:14px;margin-bottom:16px">Tell us what worked, what was confusing, or what you would improve. Every response goes directly to Tee Gates.</p>
+    <input class="fb-input" type="text" id="fbName" placeholder="Your name"/>
+    <input class="fb-input" type="email" id="fbEmail" placeholder="your@email.com"/>
+    <select class="fb-input" id="fbType" style="-webkit-appearance:none">
+      <option value="">What type of feedback?</option>
+      <option>Something is broken or not working</option>
+      <option>Design is hard to read or use</option>
+      <option>Feature I would like to see</option>
+      <option>Something confused me</option>
+      <option>General feedback</option>
+      <option>Request a real live search setup</option>
+    </select>
+    <textarea class="fb-textarea" id="fbMsg" placeholder="Tell us everything. The more specific, the better. What did you try? What happened? What did you expect?"></textarea>
+    <button class="green-btn" onclick="submitFeedback()">Submit Feedback &rarr;</button>
+    <div class="fb-sent" id="fbSent">
+      <div style="font-size:36px;margin-bottom:8px">&#10003;</div>
+      <div style="font-weight:800;color:#16a34a;font-size:18px;margin-bottom:6px">Feedback received!</div>
+      <div style="color:#6b7280;font-size:14px">Thank you. Tee Gates and the TGT team will review this personally.<br/>leasesmart@tgttechnologies.com</div>
+    </div>
+  </div>
+</div>
+
+<!-- HOME PAGE -->
+<div id="home-pg" class="pg show">
+<div class="home-wrap">
+  <div class="brand">
+    <div class="brand-mark">LS</div>
+    <div>
+      <div class="brand-name">LeaseSmart</div>
+      <div class="brand-sub">By TGT Technologies Inc.</div>
+      <div class="brand-contact"><a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a> &bull; Tee Gates, Founder</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
+    <div class="demo-badge">&#9888;&#65039; BETA DEMO MODE</div>
+    <div class="demo-badge" style="background:#f0fdf4;border-color:#22d98a44;color:#16a34a">&#128274; TGT Technologies Inc.</div>
+  </div>
+  <div class="home-eyebrow">&#127758; All 50 States &bull; Sample Listings &bull; Beta 2026</div>
+  <h1 class="home-h1">Apartment Hunting<br/><span>Made Simple.</span></h1>
+  <p class="home-p">Compare rent, square footage, deposits, parking, pets, move-in dates, listing links, direct property links, tours, and follow-ups in one dashboard. Built for renters who want to make better lease decisions before applying or signing.</p>
+  <div class="disclaimer">
+    <strong>&#128274; Beta Demo Notice:</strong> This is a test version for feedback purposes. Sample listings are used in demo mode. Verified listing data will be reviewed by TGT Technologies before being shown to real customers. All real listing details &mdash; pricing, availability, parking, pet rules, and fees &mdash; must be verified directly with the property before applying or signing a lease.
+  </div>
+  <button class="green-btn" id="startBtn">&#127968; Start Demo Search &rarr;</button>
+  <button class="ghost-btn" id="resumeBtn" style="display:none;width:100%;margin-top:10px;padding:14px;font-size:15px;font-weight:700" onclick="resumeSession()">&#128260; Continue Last Search</button>
+  <p class="home-note">Saved on this device &bull; 3 minutes &bull; Works on any phone</p>
+  <div class="trust-row">
+    <span class="tag-green">&#128269; AI Search</span>
+    <span class="tag-green">&#128279; Dual-Link Verify</span>
+    <span class="tag-green">&#10003; Instant Results</span>
+    <span class="tag-green">&#128506; Map + Transit</span>
+    <span class="tag-green">&#128062; Pet Filtered</span>
+    <span class="tag-green">&#128202; Scored 0-100</span>
+  </div>
+  <div class="feat-grid">
+    <div class="feat-card"><div class="feat-icon">&#129302;</div><div class="feat-title">AI Matches You, Everywhere</div><div class="feat-desc">All 50 states. AI scores every listing against your budget, parking, pets, transit, and move-in date.</div></div>
+    <div class="feat-card"><div class="feat-icon">&#128269;</div><div class="feat-title">Dual-Link Verification</div><div class="feat-desc">Every listing shows the Apartments.com link AND the official property site. Catch bait-and-switch before paying an application fee.</div></div>
+    <div class="feat-card"><div class="feat-icon">&#127966;</div><div class="feat-title">Maps and Native GPS</div><div class="feat-desc">Tap to open Apple Maps on iPhone or Google Maps on Android. Get directions to the apartment and your workplace.</div></div>
+    <div class="feat-card"><div class="feat-icon">&#127968;</div><div class="feat-title">Neighborhood Deep Dive</div><div class="feat-desc">Walk Score, safety rating, schools, grocery stores, parks &mdash; all surfaced so you feel the neighborhood before you visit.</div></div>
+    <div class="feat-card"><div class="feat-icon">&#128222;</div><div class="feat-title">Personalized Call Guide</div><div class="feat-desc">Your name, move-in date, pet, and parking need pre-filled into a real call script for every leasing office.</div></div>
+    <div class="feat-card"><div class="feat-icon">&#9888;</div><div class="feat-title">Missing Data Flags</div><div class="feat-desc">Orange warnings tell you exactly what to confirm before applying &mdash; parking, pets, deposit amounts.</div></div>
+  </div>
+  <button class="green-btn" id="startBtn2">Try the Demo &rarr;</button>
+
+  <div style="background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:24px;margin-top:40px;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+    <div style="color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">For Beta Testers</div>
+    <p style="color:#374151;font-size:15px;line-height:1.7;margin-bottom:16px">I am testing a new tool called <strong>LeaseSmart by TGT Technologies</strong>. It helps renters compare apartments side by side &mdash; tracking pricing, square footage, parking, pets, direct property links, tours, and follow-ups all in one dashboard.</p>
+    <p style="color:#374151;font-size:15px;line-height:1.7;margin-bottom:16px">This is a <strong>beta demo</strong>, so I am looking for feedback on the experience, layout, and what would make apartment searching easier for you.</p>
+    <p style="color:#6b7280;font-size:14px;line-height:1.6">After testing, tell me: <strong>What was clear?</strong> What was confusing? Would this help you during a real apartment search?</p>
+    <div style="margin-top:16px;padding-top:16px;border-top:1.5px solid #e5e7eb;font-size:13px;color:#9ca3af">
+      Contact: <a href="mailto:leasesmart@tgttechnologies.com" style="color:#22d98a;font-weight:600">leasesmart@tgttechnologies.com</a> &bull; <a href="mailto:support@tgttechnologies.com" style="color:#22d98a;font-weight:600">support@tgttechnologies.com</a>
+    </div>
+  </div>
+  <div class="admin-area">
+    <button class="back-link" id="adminToggle">Admin Login &mdash; TGT Technologies</button>
+    <div id="adminBox" style="display:none;margin-top:12px">
+      <input type="password" id="adminCode" placeholder="Enter admin code" style="background:#f8fafb;border:2px solid #e5e7eb;border-radius:8px;padding:10px 14px;color:#111827;font-size:14px;outline:none;width:160px;letter-spacing:4px"/>
+      <button onclick="tryAdmin()" style="background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:800;cursor:pointer;margin-left:8px">Enter</button>
+    </div>
+  </div>
+  <div class="home-footer">
+    <strong style="color:#16a34a">LeaseSmart by TGT Technologies Inc.</strong><br/>
+    Tee Gates, Founder<br/>
+    <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a> &bull; <a href="mailto:support@tgttechnologies.com">support@tgttechnologies.com</a><br/>
+    <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1 Functional Fix Build</strong><br>Updated Today</div>
+  </div>
+</div>
+</div>
+
+<!-- QUIZ PAGE -->
+<div id="quiz-pg" class="pg">
+<div class="modal">
+  <div class="qz-head">
+    <div class="qz-brand">
+      <div class="qz-mark">LS</div>
+      <div><div class="qz-name">LeaseSmart</div><div class="qz-sub">TGT TECHNOLOGIES INC.</div></div>
+    </div>
+    <div><div class="qz-count-num" id="stepNum">1 of 21</div><div class="qz-count-pct" id="stepPct">0%</div></div>
+  </div>
+  <div class="qz-prog"><div class="qz-prog-fill" id="progFill"></div></div>
+  <div class="qz-dots" id="stepDots"></div>
+  <div class="qz-body">
+    <div class="qz-inner">
+      <div class="q-card" id="qCard"></div>
+      <button class="back-link" id="backBtn" style="display:none" onclick="goBack()">&#8592; Back</button>
+      <p class="privacy">&#128274; Your info is private. We never sell your data.</p>
+      <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1 Functional Fix Build</strong><br>Updated Today</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SEARCH PAGE -->
+<div id="search-pg" class="pg">
+<div class="search-box">
+  <div class="search-icon">&#128269;</div>
+  <div class="search-h" id="searchTitle">Finding your matches&hellip;</div>
+  <div class="search-stage" id="searchStage">Reading your profile&hellip;</div>
+  <div class="search-bar"><div class="search-fill" id="searchFill"></div></div>
+  <div class="search-pct" id="searchPct">0%</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1 Functional Fix Build</strong><br>Updated Today</div>
+</div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div id="dash-pg" class="pg">
+  <header class="dash-head">
+    <div class="dash-head-in">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="dash-mark">LS</div>
+        <div><div class="dash-name">LeaseSmart</div><div class="dash-sub">YOUR MATCHES</div></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="pchip" id="profChip">Loading&hellip;</div>
+        <button class="ghost-btn" onclick="showPage('home-pg')">New Search</button>
+      </div>
+    </div>
+  </header>
+  <div style="background:#fff7ed;border-bottom:1.5px solid #f5a62333;padding:10px 18px;font-size:12px;color:#d97706;text-align:center;font-weight:600">
+    &#9888;&#65039; BETA DEMO MODE &mdash; Sample listings shown for testing. Not real listings. Verified data coming in live mode. &nbsp;|&nbsp; <a href="mailto:leasesmart@tgttechnologies.com" style="color:#d97706">leasesmart@tgttechnologies.com</a>
+  </div>
+  <div class="stats-bar" id="statsBar"></div>
+  <div class="tabs">
+    <button class="tab-btn on" onclick="showTab('tab-matches',this)">&#127968; Matches</button>
+    <button class="tab-btn" onclick="showTab('tab-favorites',this)">&#11088; Favorites</button>
+    <button class="tab-btn" onclick="showTab('tab-guide',this)">&#128222; Call Guide</button>
+    <button class="tab-btn" onclick="showTab('tab-verify',this)">&#128269; Verify Links</button>
+    <button class="tab-btn" onclick="showTab('tab-profile',this)">&#128100; Profile</button>
+  </div>
+  <div class="tab-content">
+    <div id="tab-matches"></div>
+    <div id="tab-favorites" style="display:none"></div>
+    <div id="tab-guide" style="display:none"></div>
+    <div id="tab-verify" style="display:none"></div>
+    <div id="tab-profile" style="display:none"></div>
+  </div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1 Functional Fix Build</strong><br>Updated Today</div>
+</div>
+
+<!-- DETAIL PAGE -->
+<div id="detail-pg" class="pg">
+  <header class="dash-head">
+    <div class="dash-head-in">
+      <div class="dash-mark">LS</div>
+      <button class="ghost-btn" onclick="showPage('dash-pg')">&#8592; Back to Matches</button>
+    </div>
+  </header>
+  <div class="det-wrap" id="detailContent"></div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1 Functional Fix Build</strong><br>Updated Today</div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div id="admin-pg" class="pg">
+  <div class="admin-head">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="dash-mark">LS</div>
+      <div style="font-weight:800;font-size:15px;color:#111827">LeaseSmart Admin &bull; TGT Technologies</div>
+    </div>
+    <button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Home</button>
+  </div>
+  <div class="tab-content"><div id="adminContent"></div></div>
+</div>
+
+<script>
+// v1.1 Functional Fix Build — change this string on every deploy to bust cache
+var LS_BUILD = '20260521-v1.1.4';
+
+// ================================================================
+// STATE
+// ================================================================
+var APP = {
+  listings: [],
+  profile: {},
+  filter: 'all',
+  photoIdx: 0,
+  photos: [],
+  adminList: [],
+  curDetail: null,
+  quizStep: 0,
+  quizAnswers: {},
+  multiSel: [],
+  customBudget: ''
+};
+
+var ADMIN_CODE = 'TGT2026';
+
+var US_STATES = [
+  'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
+  'Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa',
+  'Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan',
+  'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada',
+  'New Hampshire','New Jersey','New Mexico','New York','North Carolina',
+  'North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island',
+  'South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
+  'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
+];
+
+var STEPS = [
+  {id:'name',   type:'text', icon:'&#128075;', lbl:'Your name',         q:'What is your full name?',                             ph:'First and last name'},
+  {id:'email',  type:'text', icon:'&#128231;', lbl:'Email address',     q:'Your email — we will send your matches here.',        ph:'your@email.com'},
+  {id:'phone',  type:'text', icon:'&#128241;', lbl:'Phone number',      q:'Best number to reach you?',                          ph:'(XXX) XXX-XXXX', opt:true},
+  {id:'movein', type:'calendar',icon:'&#128197;', lbl:'Move-in date',      q:'When do you need to move in?'},
+  {id:'state',  type:'state',icon:'&#128506;', lbl:'Search state',      q:'Which state are you searching in?',                  sub:'All 50 states covered'},
+  {id:'city',   type:'text', icon:'&#128205;', lbl:'City or area',      q:'What city, town, or zip code?',                      ph:'e.g. Austin TX or 78701'},
+  {id:'work',   type:'text', icon:'&#127970;', lbl:'Work or school',    q:'Where do you work or go to school?',                 ph:'Full address or city', opt:true},
+  {id:'budget', type:'multi',icon:'&#128176;', lbl:'Monthly budget',    q:'What is your monthly rent range? Select all that apply.',
+    opts:['Under $800','$800-$1,000','$1,000-$1,200','$1,200-$1,500','$1,500-$1,800','$1,800-$2,000','$2,000-$2,200','$2,200-$2,500','$2,500-$3,000','$3,000-$4,000','$4,000+','Flexible']},
+  {id:'flex',   type:'single',icon:'&#128161;',lbl:'Budget flexibility', q:'If the perfect place is slightly over budget, what do you do?',
+    opts:['Strict — nothing over my max','Show up to 10% over if worth it','Show up to 20% over for a great match','Show me everything — I will decide']},
+  {id:'beds',   type:'multi',icon:'&#128719;', lbl:'Bedrooms',          q:'How many bedrooms? Select all you would consider.',
+    opts:['Studio','1 Bedroom','2 Bedrooms','3 Bedrooms','4+ Bedrooms','Flexible']},
+  {id:'baths',  type:'single',icon:'&#128703;',lbl:'Bathrooms',         q:'Minimum bathrooms needed?',
+    opts:['1 Bathroom','1.5 Bathrooms','2 Bathrooms','2+ Bathrooms','No preference']},
+  {id:'park',   type:'multi',icon:'&#128663;', lbl:'Parking',           q:'What parking do you need?',
+    opts:['Assigned resident spot','Covered or garage parking','Surface resident lot','Permit parking','Street parking is fine','No car needed']},
+  {id:'pets',   type:'multi',icon:'&#128062;', lbl:'Pets',              q:'Do you have any pets?',
+    opts:['No pets','Small dog under 25 lbs','Medium dog 25-50 lbs','Large dog over 50 lbs','Cat','Multiple pets','ESA Animal','Service animal']},
+  {id:'transit',type:'multi',icon:'&#128652;', lbl:'Transit',           q:'What public transportation do you need nearby?',
+    opts:['Bus routes to downtown','Bus to major city','Commuter rail or train','Subway or metro','Highway access','No transit needed']},
+  {id:'commute',type:'single',icon:'&#9201;',lbl:'Commute time',      q:'How long are you willing to commute one-way?',
+    opts:['Under 15 min','15-25 min','25-35 min','35-45 min','45-60 min','Over an hour is fine','Remote — work from home']},
+  {id:'laundry',type:'multi',icon:'&#128085;',lbl:'Laundry',           q:'Laundry preference? Select all that apply.',
+    opts:['In-unit washer and dryer','Washer and dryer hookups','In-building laundry','Laundromat nearby','No preference']},
+  {id:'amenities',type:'multi',icon:'&#10024;',lbl:'Amenities',        q:'Which amenities matter? Select all that apply.',
+    opts:['Fitness center','Swimming pool','Outdoor space','Dog park','Package receiving','EV charging','Storage unit','Elevator building','Gated community']},
+  {id:'vibe',   type:'multi',icon:'&#127960;', lbl:'Neighborhood vibe', q:'What kind of neighborhood fits your lifestyle?',
+    opts:['Walkable and urban','Quiet and suburban','Near parks','Family-friendly','Young professional area','Near good schools','Safe low-crime priority','Near shopping']},
+  {id:'avoid',  type:'multi',icon:'&#128683;', lbl:'Hard NO list',      q:'What would make you reject a listing immediately?',
+    opts:['Private house or basement','Street parking only','No overnight parking','55 plus senior communities','No pets allowed','Over my max budget','No transit access','High crime area']},
+  {id:'life',   type:'multi',icon:'&#127775;', lbl:'About you',         q:'Tell us more so we match better.',
+    opts:['First-time renter','Moving from another state','Relocating for work','Single parent','Retiree or senior','Student','Young professional','Growing family','Remote worker','Military or veteran']},
+  {id:'extras', type:'text', icon:'&#128172;', lbl:'Anything else?',    q:'Any special requests or things we should know?',     ph:'The more detail the better.', opt:true}
+];
+
+// ================================================================
+// LEASESMART PLATFORM CORE — Phase 1 Beta Foundation
+// Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
+// ================================================================
+var LS_VERSION = 'Beta v1.2 — Housing Intelligence Foundation';
+var LS_STORE = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null };
+
+function lsLoad() {
+  try {
+    var raw = localStorage.getItem('leasesmart_store_v1');
+    if (raw) LS_STORE = Object.assign(LS_STORE, JSON.parse(raw));
+  } catch (e) { console.warn('LeaseSmart: storage load failed', e); }
+}
+
+function lsSave() {
+  try { localStorage.setItem('leasesmart_store_v1', JSON.stringify(LS_STORE)); } catch (e) { console.warn('LeaseSmart: storage save failed', e); }
+}
+
+function lsTrack(event, data) {
+  LS_STORE.analytics.push({ event: event, data: data || {}, ts: new Date().toISOString() });
+  if (LS_STORE.analytics.length > 500) LS_STORE.analytics = LS_STORE.analytics.slice(-500);
+  lsSave();
+}
+
+function lsPersistProfile(profile) {
+  LS_STORE.profile = profile;
+  LS_STORE.session = { profile: profile, listings: APP.listings, savedAt: new Date().toISOString() };
+  lsSave();
+}
+
+function lsPersistSearch(profile) {
+  var entry = { id: Date.now(), criteria: profile, label: (profile.city || '') + ', ' + (profile.state || ''), savedAt: new Date().toISOString() };
+  LS_STORE.searches.unshift(entry);
+  if (LS_STORE.searches.length > 20) LS_STORE.searches = LS_STORE.searches.slice(0, 20);
+  lsSave();
+}
+
+function lsGetFavorites() { return LS_STORE.favorites || []; }
+
+function lsIsFavorite(id) { return lsGetFavorites().some(function(f) { return f.id === id; }); }
+
+function lsToggleFavorite(listing) {
+  var favs = lsGetFavorites();
+  var idx = favs.findIndex(function(f) { return f.id === listing.id; });
+  if (idx >= 0) favs.splice(idx, 1);
+  else favs.unshift({ id: listing.id, complex: listing.complex, address: listing.address, rent: listing.rent, savedAt: new Date().toISOString(), snapshot: listing });
+  LS_STORE.favorites = favs;
+  lsSave();
+  lsTrack(idx >= 0 ? 'favorite_remove' : 'favorite_add', { id: listing.id });
+  return idx < 0;
+}
+
+function normalizeListing(raw) {
+  var l = raw || {};
+  var label = l.verificationLabel || (l.source === 'leasesmart_verified' ? 'Verified Listing' : (l.source === 'leasesmart_demo' ? 'Demo Listing' : 'Source Pending'));
+  return Object.assign({
+    propertyName: l.complex || l.propertyName || 'Unknown Property',
+    address: l.address || '', city: l.city || l.town || '', state: l.state || '', zip: l.zip || '',
+    rent: l.rent || '', rentLow: l.rentLow || 0, bedrooms: l.bedrooms || '', bathrooms: l.bathrooms || '',
+    phone: l.phone || '', photos: l.photos || [], listingUrl: l.aptLink || l.listingUrl || null,
+    propertyUrl: l.directLink || l.propertyUrl || null, source: l.source || 'source_pending',
+    verificationLabel: label, verificationStatus: l.verificationStatus || 'PENDING',
+    confidenceScore: l.confidenceScore != null ? l.confidenceScore : (label === 'Verified Listing' ? 85 : label === 'Demo Listing' ? 15 : 0),
+    lastUpdated: l.lastUpdated || new Date().toISOString().slice(0, 10),
+    transitIntel: l.transitIntel || null, safety: l.safety || null, monthlyCost: l.monthlyCost || null,
+    intelligenceScores: l.intelligenceScores || {}
+  }, l, {
+    complex: l.complex || l.propertyName, aptLink: l.aptLink || l.listingUrl, directLink: l.directLink || l.propertyUrl,
+    town: l.town || l.city
+  });
+}
+
+function scoreListing(profile, listing) {
+  var p = profile || {};
+  var rent = listing.rentLow || 1950;
+  var budgetMax = 2500;
+  var bud = join(p.budget);
+  if (bud.indexOf('$1,800') >= 0) budgetMax = 2000;
+  if (bud.indexOf('$2,500') >= 0) budgetMax = 3000;
+  if (bud.indexOf('Flexible') >= 0) budgetMax = 99999;
+  var budgetPts = rent <= budgetMax ? Math.min(25, Math.round(25 - ((rent - budgetMax * 0.8) / budgetMax) * 10)) : Math.max(0, 25 - Math.round((rent - budgetMax) / 50));
+  if (budgetPts < 0) budgetPts = 0;
+  var parkNeed = join(p.park).toLowerCase();
+  var parkPts = 12;
+  if (parkNeed.indexOf('assigned') >= 0 && (listing.parking || '').toLowerCase().indexOf('assign') >= 0) parkPts = 20;
+  else if (parkNeed.indexOf('no car') >= 0) parkPts = 18;
+  var petNeed = join(p.pets).toLowerCase();
+  var petPts = 10;
+  if (petNeed.indexOf('no pet') >= 0) petPts = 15;
+  else if ((listing.pets || '').toLowerCase().indexOf('dog') >= 0 || (listing.pets || '').toLowerCase().indexOf('cat') >= 0) petPts = 14;
+  var transitPts = 10;
+  var ti = listing.transitIntel || {};
+  if (ti.bus && ti.bus.walkMinutes <= 5) transitPts += 4;
+  if (ti.train && ti.train.walkMinutes <= 12) transitPts += 4;
+  if (join(p.transit).indexOf('No transit') >= 0) transitPts = 18;
+  transitPts = Math.min(18, transitPts);
+  var life = (join(p.life) + join(p.vibe)).toLowerCase();
+  var lifestylePts = 50;
+  if (life.indexOf('walkable') >= 0 && (listing.neighborhood || {}).walkScore >= 80) lifestylePts += 15;
+  if (life.indexOf('family') >= 0 && (listing.neighborhood || {}).nearbySchools) lifestylePts += 12;
+  if (life.indexOf('safe') >= 0 && listing.safety) lifestylePts += (listing.safety.score || 50) * 0.2;
+  lifestylePts = Math.min(100, Math.round(lifestylePts));
+  var safetyPts = listing.safety ? listing.safety.score : 70;
+  var familyPts = life.indexOf('family') >= 0 || life.indexOf('school') >= 0 ? Math.min(100, safetyPts + 10) : 60;
+  var petScore = petPts * 6;
+  var transportScore = Math.min(100, Math.round(((ti.bus ? 40 : 0) + (ti.train ? 35 : 0) + transitPts * 1.5)));
+  var amenPts = Math.min(12, ((listing.amenities || []).length * 2));
+  var moveinPts = 8;
+  var total = Math.min(100, Math.round(budgetPts + parkPts + petPts + transitPts + amenPts + moveinPts + (lifestylePts * 0.08)));
+  return {
+    score: total,
+    scoreBreakdown: { budget: budgetPts, parking: parkPts, pets: petPts, transit: transitPts, movein: moveinPts, amenities: amenPts },
+    intelligenceScores: { lifestyle: lifestylePts, transportation: transportScore, safety: safetyPts, family: familyPts, pet: petScore }
+  };
+}
+
+function applyIntelligenceToListings(listings, profile) {
+  return listings.map(function(l) {
+    var n = normalizeListing(l);
+    var s = scoreListing(profile, n);
+    return Object.assign({}, n, s);
+  }).sort(function(a, b) { return b.score - a.score; }).map(function(l, i) { l.priority = i + 1; return l; });
+}
+
+function buildMonthlyCost(listing) {
+  var rent = listing.rentLow || 1950;
+  return {
+    rent: { amount: rent, label: 'Estimated', confidence: listing.verificationLabel === 'Demo Listing' ? 'demo' : 'estimated' },
+    utilities: { electric: 95, gas: 45, water: 35, internet: 70, label: 'Estimated' },
+    transportation: { transitPass: 110, fuel: 120, parking: 75, label: 'Estimated' },
+    petFees: { amount: 35, label: 'Estimated' },
+    insurance: { amount: 18, label: 'Estimated' },
+    total: rent + 95 + 45 + 35 + 70 + 110 + 120 + 75 + 35 + 18
+  };
+}
+
+function confTag(kind) {
+  var map = { demo: 'conf-demo', estimated: 'conf-est', verified: 'conf-verified', pending: 'conf-pending' };
+  var labels = { demo: 'Demo', estimated: 'Estimated', verified: 'Verified', pending: 'Source Pending' };
+  return '<span class="conf-label ' + (map[kind] || 'conf-pending') + '">' + (labels[kind] || 'Source Pending') + '</span>';
+}
+
+function verificationBadgeHtml(l) {
+  var label = l.verificationLabel || 'Source Pending';
+  var st = { 'Verified Listing': 'background:#f0fdf4;color:#16a34a;border:1px solid #22d98a44',
+    'Demo Listing': 'background:#fef3c7;color:#d97706;border:1px solid #f5a62355',
+    'Source Pending': 'background:#f4f7fa;color:#6b7280;border:1px solid #e5e7eb' };
+  return '<span class="verify-badge" style="' + (st[label] || st['Source Pending']) + '">' + label + '</span>';
+}
+
+function resumeSession() {
+  if (!LS_STORE.session || !LS_STORE.session.profile) return;
+  APP.profile = LS_STORE.session.profile;
+  APP.listings = applyIntelligenceToListings(LS_STORE.session.listings || getFallback(), APP.profile);
+  APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
+  buildDashboard();
+  showPage('dash-pg');
+  lsTrack('session_resume');
+}
+
+// ================================================================
+// NAVIGATION
+// ================================================================
+function showPage(id) {
+  document.querySelectorAll('.pg').forEach(function(p) { p.classList.remove('show'); });
+  document.getElementById(id).classList.add('show');
+  window.scrollTo(0, 0);
+}
+
+function showTab(tabId, btn) {
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on');
+  document.querySelectorAll('#dash-pg .tab-content > div').forEach(function(d) { d.style.display = 'none'; });
+  document.getElementById(tabId).style.display = 'block';
+}
+
+// ================================================================
+// QUIZ
+// ================================================================
+function startQuiz() {
+  APP.quizStep = 0;
+  APP.quizAnswers = {};
+  showPage('quiz-pg');
+  renderStep();
+}
+
+function renderStep() {
+  var step = STEPS[APP.quizStep];
+  var total = STEPS.length;
+  var pct = Math.round((APP.quizStep / total) * 100);
+
+  document.getElementById('stepNum').textContent = (APP.quizStep + 1) + ' of ' + total;
+  document.getElementById('stepPct').textContent = pct + '% complete';
+  document.getElementById('progFill').style.width = pct + '%';
+
+  // Dots
+  var dotsEl = document.getElementById('stepDots');
+  dotsEl.innerHTML = '';
+  for (var i = 0; i < total; i++) {
+    var d = document.createElement('div');
+    d.className = 'qz-dot' + (i < APP.quizStep ? ' done' : i === APP.quizStep ? ' cur' : '');
+    dotsEl.appendChild(d);
+  }
+
+  document.getElementById('backBtn').style.display = APP.quizStep > 0 ? 'block' : 'none';
+  APP.multiSel = [];
+  APP.customBudget = '';
+
+  var card = document.getElementById('qCard');
+  card.innerHTML = buildStepHTML(step);
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = '';
+
+  wireStepEvents(step);
+}
+
+function buildStepHTML(step) {
+  var h = '';
+  h += '<div class="q-icon">' + step.icon + '</div>';
+  h += '<div class="q-lbl">' + step.lbl + '</div>';
+  h += '<div class="q-title">' + step.q + '</div>';
+  if (step.sub) h += '<div class="q-sub">' + step.sub + '</div>';
+  if (step.opt) h += '<span class="q-opt">Optional &mdash; skip if unsure</span>';
+
+  if (step.type === 'text') {
+    h += '<input class="q-input" id="qInput" type="text" placeholder="' + (step.ph || '') + '" autocomplete="off"/>';
+    h += '<button class="q-next" id="qNextBtn">Continue &rarr;</button>';
+  } else if (step.type === 'single') {
+    h += '<div class="opts" id="optsGrid">';
+    step.opts.forEach(function(o) {
+      h += '<button class="opt" data-val="' + o + '">' + o + '</button>';
+    });
+    h += '</div>';
+  } else if (step.type === 'multi') {
+    h += '<div class="opts opts-check" id="optsGrid">';
+    step.opts.forEach(function(o) {
+      var esc = o.replace(/"/g, '&quot;');
+      h += '<label class="opt-check"><input type="checkbox" class="multi-cb" data-val="' + esc + '"/><span>' + o + '</span></label>';
+    });
+    h += '</div>';
+    if (step.id === 'budget') {
+      h += '<input class="q-input" id="customBudget" type="text" placeholder="Or type a custom amount e.g. $1,750/mo" style="margin-top:12px"/>';
+    }
+    h += '<div id="multiSelPreview" style="font-size:13px;color:#6b7280;margin:8px 0;min-height:18px"></div>';
+    h += '<button class="multi-confirm" id="qNextBtn">Confirm Selection &rarr;</button>';
+  } else if (step.type === 'state') {
+    h += '<input class="state-search" id="stateSearch" type="text" placeholder="Search states..." autocomplete="off"/>';
+    h += '<div class="state-list" id="stateList"></div>';
+  } else if (step.type === 'calendar') {
+    h += '<p style="font-size:14px;color:#6b7280;margin-bottom:10px">Tap to open your device calendar (phone or desktop).</p>';
+    h += '<input class="q-input q-calendar" id="qCalendar" type="date" min="' + new Date().toISOString().slice(0, 10) + '"/>';
+    h += '<button class="q-next" id="qNextBtn">Continue &rarr;</button>';
+  }
+
+  return h;
+}
+
+function wireStepEvents(step) {
+  if (step.type === 'text') {
+    var inp = document.getElementById('qInput');
+    var btn = document.getElementById('qNextBtn');
+    if (inp) {
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') submitText();
+      });
+      setTimeout(function() { inp.focus(); }, 100);
+    }
+    if (btn) btn.addEventListener('click', submitText);
+
+  } else if (step.type === 'single') {
+    var grid = document.getElementById('optsGrid');
+    if (grid) {
+      grid.addEventListener('click', function(e) {
+        var btn = e.target.closest('.opt');
+        if (btn) advance(btn.getAttribute('data-val'));
+      });
+    }
+
+  } else if (step.type === 'multi') {
+    function updateMultiPreview() {
+      var prev = document.getElementById('multiSelPreview');
+      if (prev) prev.textContent = APP.multiSel.length ? ('Selected: ' + APP.multiSel.join(' · ')) : 'Select one or more options';
+    }
+    var grid = document.getElementById('optsGrid');
+    if (grid) {
+      grid.addEventListener('change', function(e) {
+        var cb = e.target;
+        if (!cb || !cb.classList.contains('multi-cb')) return;
+        var val = cb.getAttribute('data-val');
+        var label = cb.closest('.opt-check');
+        var idx = APP.multiSel.indexOf(val);
+        if (cb.checked) {
+          if (idx < 0) APP.multiSel.push(val);
+          if (label) label.classList.add('on');
+        } else {
+          if (idx >= 0) APP.multiSel.splice(idx, 1);
+          if (label) label.classList.remove('on');
+        }
+        updateMultiPreview();
+      });
+      grid.addEventListener('click', function(e) {
+        var label = e.target.closest('.opt-check');
+        if (label && e.target.tagName !== 'INPUT') {
+          var inp = label.querySelector('.multi-cb');
+          if (inp) { inp.checked = !inp.checked; inp.dispatchEvent(new Event('change', { bubbles: true })); }
+        }
+      });
+    }
+    updateMultiPreview();
+    var nextBtn = document.getElementById('qNextBtn');
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function() {
+        var val = APP.multiSel.slice();
+        if (step.id === 'budget') {
+          var customB = document.getElementById('customBudget');
+          if (customB && customB.value.trim()) val.push('Custom: ' + customB.value.trim());
+        }
+        advance(val.length ? val : ['No preference']);
+      });
+    }
+
+  } else if (step.type === 'state') {
+    renderStateList('');
+    var search = document.getElementById('stateSearch');
+    if (search) {
+      search.addEventListener('input', function() { renderStateList(this.value); });
+    }
+  } else if (step.type === 'calendar') {
+    var cal = document.getElementById('qCalendar');
+    var btn = document.getElementById('qNextBtn');
+    var calDone = false;
+    function formatCal(iso) {
+      var p = iso.split('-');
+      return new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10))
+        .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    function submitCal() {
+      if (calDone || !cal || !cal.value) return;
+      calDone = true;
+      advance(formatCal(cal.value));
+    }
+    if (cal) {
+      setTimeout(function() { try { cal.showPicker(); } catch (e) { cal.focus(); } }, 150);
+      cal.addEventListener('change', submitCal);
+      cal.addEventListener('input', submitCal);
+    }
+    if (btn) btn.addEventListener('click', function() {
+      if (!cal || !cal.value) { if (cal) cal.focus(); return; }
+      submitCal();
+    });
+  }
+}
+
+function formatCalendarDate(iso) {
+  var p = iso.split('-');
+  return new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10))
+    .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function renderStateList(filter) {
+  var list = document.getElementById('stateList');
+  if (!list) return;
+  list.innerHTML = '';
+  US_STATES.filter(function(s) {
+    return s.toLowerCase().indexOf(filter.toLowerCase()) >= 0;
+  }).forEach(function(s) {
+    var btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = s;
+    btn.addEventListener('click', function() { advance(s); });
+    list.appendChild(btn);
+  });
+}
+
+function submitText() {
+  var step = STEPS[APP.quizStep];
+  var inp = document.getElementById('qInput');
+  var val = inp ? inp.value.trim() : '';
+  if (!val && !step.opt) { if (inp) inp.focus(); return; }
+  advance(val || 'Not specified');
+}
+
+function advance(val) {
+  var step = STEPS[APP.quizStep];
+  APP.quizAnswers[step.id] = val;
+  if (APP.quizStep < STEPS.length - 1) {
+    APP.quizStep++;
+    renderStep();
+  } else {
+    submitSteps();
+  }
+}
+
+function submitSteps() {
+  APP.profile = Object.assign({}, APP.quizAnswers);
+  runSearch();
+}
+
+function goBack() {
+  if (APP.quizStep > 0) { APP.quizStep--; renderStep(); }
+}
+
+// ================================================================
+// SEARCH
+// ================================================================
+function finishListingsFlow() {
+  var listings = getFallback();
+  APP.listings = listings.map(function(l, i) {
+    l.priority = i + 1;
+    if (l.score == null) l.score = Math.max(65, 92 - i * 2);
+    if (!l.scoreBreakdown) l.scoreBreakdown = { budget: 22, parking: 18, pets: 12, transit: 16, movein: 9, amenities: 4 };
+    return l;
+  });
+  APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
+  buildDashboard();
+  showPage('dash-pg');
+}
+
+function runSearch() {
+  showPage('search-pg');
+  var name = APP.profile.name || '';
+  document.getElementById('searchTitle').textContent = 'Finding your matches' + (name ? ', ' + name.split(' ')[0] : '') + '\u2026';
+
+  var stages = [
+    'Reading your search profile\u2026',
+    'Matching sample listings for ' + (APP.profile.city || APP.profile.state || 'your area') + '\u2026',
+    'Building your results dashboard\u2026'
+  ];
+  var pcts = [20, 55, 90];
+  var i = 0;
+
+  function tick() {
+    if (i >= stages.length) {
+      document.getElementById('searchFill').style.width = '100%';
+      document.getElementById('searchPct').textContent = '100%';
+      setTimeout(finishListingsFlow, 350);
+      return;
+    }
+    document.getElementById('searchStage').textContent = stages[i];
+    document.getElementById('searchFill').style.width = pcts[i] + '%';
+    document.getElementById('searchPct').textContent = pcts[i] + '%';
+    i++;
+    setTimeout(tick, 650);
+  }
+  tick();
+}
+
+function callAI(cb) {
+  // Beta demo: client has no API credentials; use 8 local sample listings (LS-003)
+  setTimeout(function() { cb(getFallback()); }, 300);
+  return;
+
+  var p = APP.profile;
+  function j(v) { return Array.isArray(v) ? v.join(', ') : (v || 'Not specified'); }
+
+  var prompt = 'You are LeaseSmart AI. Generate 8 realistic managed apartment listings. NO private houses, NO basements, NO 55+ unless requested. Real addresses in the requested state/city.\n\nClient profile:\nName: ' + p.name + '\nState: ' + p.state + '\nCity: ' + p.city + '\nWork: ' + (p.work || 'Not specified') + '\nBudget: ' + j(p.budget) + '\nBedrooms: ' + j(p.beds) + '\nBathrooms: ' + p.baths + '\nParking: ' + j(p.park) + '\nPets: ' + j(p.pets) + '\nTransit: ' + j(p.transit) + '\nCommute: ' + p.commute + '\nLaundry: ' + p.laundry + '\nAmenities: ' + j(p.amenities) + '\nNeighborhood: ' + j(p.vibe) + '\nDealbreakers: ' + j(p.avoid) + '\nLifestyle: ' + j(p.life) + '\nExtras: ' + (p.extras || 'None') + '\n\nReturn ONLY a valid JSON array. No markdown, no explanation:\n[{"id":1,"priority":1,"complex":"Name","address":"123 Main St, City, State ZIP","phone":"(555) 555-5555","town":"City","state":"State","rent":"$1,950/mo","rentLow":1950,"size":"920 Sq Ft","bathrooms":"1","bedrooms":"2","available":"July 1","washerDryer":"In-unit","pets":"Dogs OK","parking":"Assigned spot","transit":"Bus 0.2 mi","highways":"I-95 5 min","amenities":["Gym"],"deposit":"$1,000","aptLink":"https://www.apartments.com/example","directLink":null,"managementCo":"Company Name","score":88,"scoreBreakdown":{"budget":23,"parking":20,"pets":13,"transit":18,"movein":9,"amenities":5},"availability":"available","status":"NOT CALLED","whyItFits":"2 sentences why this matches the client.","notes":"Any flags to note.","verificationStatus":"NEEDS DIRECT LINK","missingData":["Confirm overnight parking"],"neighborhood":{"overview":"2-3 sentence description.","walkScore":72,"transitScore":65,"safetyRating":"Above average","nearbySchools":["School 0.4 mi"],"nearbyTransit":["Bus 0.2 mi"],"nearbyHighways":["I-95 0.5 mi"],"nearbyAmenities":["Grocery 0.3 mi"],"driveTimes":{"toWork":"20 min","toDowntown":"15 min","toAirport":"30 min"}}}]';
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 5000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  }).then(function(r) { return r.json(); })
+    .then(function(data) {
+      var txt = '';
+      if (data.content) {
+        data.content.forEach(function(b) { if (b.text) txt += b.text; });
+      }
+      txt = txt.replace(/```json/g, '').replace(/```/g, '').trim();
+      try { cb(JSON.parse(txt)); } catch(e) { cb(getFallback()); }
+    })
+    .catch(function() { cb(getFallback()); });
+}
+
+function getFallback() {
+  var c = APP.profile.city || 'Your City';
+  var s = APP.profile.state || 'NJ';
+  var zip = '07102';
+  function demoTransit(busRoute, busMin, trainLine, trainMin) {
+    return {
+      bus: { stopId: 'DEMO-' + busRoute, route: busRoute, stopName: 'Main St & Center', walkMinutes: busMin, blocks: Math.ceil(busMin / 2), confidence: 'demo', source: 'leasesmart_demo' },
+      train: trainLine ? { station: 'Central Station', line: trainLine, walkMinutes: trainMin, confidence: 'demo', source: 'leasesmart_demo' } : null,
+      commute: APP.profile.work ? { destination: APP.profile.work, estimatedMinutes: 18 + busMin, transfers: 1, monthlyTransitCost: 110, confidence: 'demo' } : null
+    };
+  }
+  function demoSafety(score) {
+    return { score: score, summary: 'Demo safety estimate — not live crime data. Area shows below-average violent crime and average property crime in this illustrative model.',
+      source: 'LeaseSmart Demo Model', asOf: '2026-05-01', confidence: 'demo', violentTrend: 'below_average', propertyTrend: 'average' };
+  }
+  function demo(id, name, street, rent, rentLow, why, washer, pets, park, busR, busM, train, trainM, amenities, missing) {
+    var l = {
+      id: id, complex: name, address: street + ', ' + c + ', ' + s + ' ' + zip, city: c, town: c, state: s, zip: zip,
+      rent: rent, rentLow: rentLow, size: '900 Sq Ft', bathrooms: '1', bedrooms: '2', available: 'July 1',
+      phone: '(555) 20' + id + '-0000', phoneConfidence: 'demo',
+      photos: [], photosConfidence: 'demo',
+      washerDryer: washer, pets: pets, parking: park, transit: 'Bus ' + busM + ' min walk', highways: 'I-95 8 min',
+      amenities: amenities, deposit: '$1,000',
+      aptLink: 'https://www.apartments.com', directLink: null,
+      listingUrl: 'https://www.apartments.com', propertyUrl: null,
+      source: 'leasesmart_demo', verificationLabel: 'Demo Listing', verificationStatus: 'DEMO',
+      confidenceScore: 12, lastUpdated: '2026-05-21',
+      availability: 'available', status: 'NOT CALLED', whyItFits: why,
+      notes: 'Illustrative demo property — not a verified real listing.', missingData: missing || ['Confirm overnight parking'],
+      managementCo: name + ' Mgmt', transitIntel: demoTransit(busR, busM, train, trainM),
+      safety: demoSafety(72 + id), monthlyCost: null,
+      neighborhood: { overview: 'Demo neighborhood profile for ' + c + '.', walkScore: 70 + id, transitScore: 65 + id, safetyRating: 'Demo estimate',
+        nearbySchools: ['Sample Elem 0.5 mi'], nearbyTransit: ['Bus stop ~' + busM + ' min'], nearbyHighways: ['Highway 8 min'],
+        nearbyAmenities: ['Grocery 0.4 mi'], driveTimes: { toWork: '20 min', toDowntown: '14 min', toAirport: '32 min' } }
+    };
+    l.monthlyCost = buildMonthlyCost(l);
+    return l;
+  }
+  return [
+    demo(1, 'Riverside Commons', '100 Riverside Dr', '$1,950/mo', 1950, 'Strong fit for budget, parking, and pet needs in demo model.', 'In-unit', 'Dogs and cats OK', 'Assigned spot', '74', 4, 'NEC', 12, ['Gym', 'Pool'], ['Confirm overnight parking']),
+    demo(2, 'The Maple at Midtown', '45 Maple Ave', '$2,100/mo', 2100, 'Urban demo listing with covered parking and transit.', 'In-building', 'Cats only', 'Covered lot', '11', 3, 'PATH', 10, ['Fitness'], ['Confirm pet policy']),
+    demo(3, 'Parkview Terrace', '200 Parkview Blvd', '$2,050/mo', 2050, 'Balanced demo option near bus and parks.', 'In-unit', 'Dogs OK', 'Garage', '87', 5, null, 0, ['Dog park'], []),
+    demo(4, 'Harbor Point Apartments', '88 Harbor St', '$2,250/mo', 2250, 'Demo waterfront-style building.', 'Hookups', 'Cats welcome', 'Surface lot', '1', 8, 'Light Rail', 14, ['Pool'], []),
+    demo(5, 'Cedar Grove Residences', '12 Cedar Ln', '$1,850/mo', 1850, 'Quiet demo suburban-style complex.', 'In-building', 'No pets', 'Assigned', '42', 6, null, 0, ['Fitness'], []),
+    demo(6, 'Summit Place', '500 Summit Rd', '$2,400/mo', 2400, 'Premium demo high-rise amenities.', 'In-unit', 'Dogs and cats OK', 'Garage', '31', 2, 'Metro', 8, ['Concierge', 'Pool'], []),
+    demo(7, 'Oakwood Flats', '77 Oakwood Dr', '$2,000/mo', 2000, 'Mid-range demo with hookups.', 'Hookups', 'ESA considered', 'Permit parking', '74', 4, null, 0, ['Storage'], []),
+    demo(8, 'Metro Heights', '300 Metro Ave', '$2,175/mo', 2175, 'Walkable demo urban location.', 'In-building', 'Cats only', 'Street/resident', '5', 3, 'Subway', 6, ['Fitness'], [])
+  ];
+}
+
+// ================================================================
+// DASHBOARD
+// ================================================================
+function buildDashboard() {
+  var p = APP.profile;
+  var beds = Array.isArray(p.beds) ? p.beds[0] : p.beds;
+  document.getElementById('profChip').textContent = (p.name || '').split(' ')[0] + ' \u2022 ' + (p.state || '') + ' \u2022 ' + (beds || '');
+  updateStats();
+  renderMatches();
+  renderFavorites();
+  renderGuide();
+  renderVerify();
+  renderProfile();
+}
+
+function scColor(s) { return s >= 85 ? '#16a34a' : s >= 70 ? '#d97706' : '#dc2626'; }
+function scLabel(s) { return s >= 85 ? 'TOP PICK' : s >= 70 ? 'GOOD FIT' : 'REVIEW'; }
+
+function join(v) { return Array.isArray(v) ? v.join(', ') : (v || ''); }
+
+function updateStats() {
+  var ls = APP.listings;
+  var items = [
+    { v: ls.length, l: 'TOTAL', c: '#111827' },
+    { v: ls.filter(function(l) { return l.score >= 85; }).length, l: 'TOP PICKS', c: '#16a34a' },
+    { v: ls.filter(function(l) { return l.score >= 70 && l.score < 85; }).length, l: 'GOOD FIT', c: '#d97706' },
+    { v: ls.filter(function(l) { return l.status === 'NOT CALLED'; }).length, l: 'NOT CALLED', c: '#9ca3af' },
+    { v: ls.filter(function(l) { return l.status === 'CALLED'; }).length, l: 'CALLED', c: '#16a34a' },
+    { v: ls.filter(function(l) { return l.status === 'FOLLOW UP'; }).length, l: 'FOLLOW UP', c: '#d97706' },
+    { v: ls.filter(function(l) { return l.status === 'EMAIL SENT'; }).length, l: 'EMAILED', c: '#2563eb' },
+    { v: ls.filter(function(l) { return l.status === 'TOUR SCHEDULED'; }).length, l: 'TOURS', c: '#7c3aed' }
+  ];
+  document.getElementById('statsBar').innerHTML = items.map(function(s) {
+    return '<div class="stat-box"><div class="stat-n" style="color:' + s.c + '">' + s.v + '</div><div class="stat-l">' + s.l + '</div></div>';
+  }).join('');
+}
+
+function setFilter(f) {
+  APP.filter = f;
+  renderMatches();
+}
+
+function renderMatches() {
+  var ls = APP.listings;
+  var f = APP.filter;
+  var shown = f === 'top' ? ls.filter(function(l) { return l.score >= 85; }) :
+              f === 'good' ? ls.filter(function(l) { return l.score >= 70 && l.score < 85; }) :
+              f === 'rev' ? ls.filter(function(l) { return l.score < 70; }) : ls;
+
+  var top = ls.filter(function(l) { return l.score >= 85; }).length;
+  var good = ls.filter(function(l) { return l.score >= 70 && l.score < 85; }).length;
+  var rev = ls.filter(function(l) { return l.score < 70; }).length;
+
+  // Activity bar
+  var statItems = [
+    { icon: '&#128203;', name: 'NOT CALLED', status: 'NOT CALLED' },
+    { icon: '&#128222;', name: 'CALLED', status: 'CALLED' },
+    { icon: '&#128260;', name: 'FOLLOW UP', status: 'FOLLOW UP' },
+    { icon: '&#128231;', name: 'EMAILED', status: 'EMAIL SENT' },
+    { icon: '&#127968;', name: 'TOURS', status: 'TOUR SCHEDULED' }
+  ];
+  var actHTML = '<div class="act-bar"><div class="act-title">YOUR SEARCH ACTIVITY</div><div class="act-row">';
+  statItems.forEach(function(si) {
+    var count = ls.filter(function(l) { return l.status === si.status; }).length;
+    actHTML += '<div class="act-item"><span style="font-size:16px">' + si.icon + '</span><div><div class="act-cnt">' + count + '</div><div class="act-lbl">' + si.name + '</div></div></div>';
+  });
+  actHTML += '</div></div>';
+
+  // Filters
+  var filtHTML = '<div class="filt-row">' +
+    '<button class="filt-btn' + (f === 'all' ? ' on' : '') + '" onclick="setFilter(\'all\')">All (' + ls.length + ')</button>' +
+    '<button class="filt-btn' + (f === 'top' ? ' on' : '') + '" onclick="setFilter(\'top\')">&#11088; Top (' + top + ')</button>' +
+    '<button class="filt-btn' + (f === 'good' ? ' on' : '') + '" onclick="setFilter(\'good\')">&#10003; Good (' + good + ')</button>' +
+    '<button class="filt-btn' + (f === 'rev' ? ' on' : '') + '" onclick="setFilter(\'rev\')">&#128064; Review (' + rev + ')</button>' +
+    '</div>';
+
+  // Cards
+  var cardsHTML = '<div class="card-grid">';
+  shown.forEach(function(l) {
+    var sc = scColor(l.score);
+    var sl = scLabel(l.score);
+    var avC = l.availability === 'available' ? '#16a34a' : '#d97706';
+    cardsHTML += '<div class="l-card' + (l.score >= 85 ? ' top-pick' : '') + '" onclick="openDetail(' + l.id + ')">';
+    cardsHTML += '<div class="card-top-row"><div>';
+    cardsHTML += '<span class="badge" style="background:' + sc + '20;color:' + sc + '">' + sl + ' \u00b7 ' + l.score + '</span>';
+    cardsHTML += '<span class="badge" style="background:' + avC + '20;color:' + avC + '">' + (l.availability === 'available' ? '&#10003; Available' : '&#9888; Check') + '</span>';
+    cardsHTML += '<span class="badge" style="background:#f4f7fa;color:#6b7280">' + l.status + '</span>';
+    cardsHTML += verificationBadgeHtml(l);
+    if (l.intelligenceScores) cardsHTML += '<span class="badge" style="background:#eff6ff;color:#2563eb">Life ' + (l.intelligenceScores.lifestyle || '--') + '</span>';
+    cardsHTML += '</div><span class="card-pri">#' + l.priority + '</span></div>';
+    cardsHTML += '<div class="card-name">' + l.complex + '</div>';
+    cardsHTML += '<div class="card-addr">' + l.address + '</div>';
+    cardsHTML += '<div class="card-rent-row"><span class="card-rent">' + l.rent + '</span><span class="card-sz">' + l.size + ' \u00b7 ' + l.bedrooms + 'BR/' + l.bathrooms + 'BA</span></div>';
+    cardsHTML += '<div class="card-why">' + l.whyItFits + '</div>';
+    cardsHTML += '<div class="card-meta">';
+    cardsHTML += '<div>&#128663; ' + (l.parking || '').slice(0, 28) + '</div>';
+    cardsHTML += '<div>&#128062; ' + (l.pets || '').slice(0, 28) + '</div>';
+    cardsHTML += '<div>&#128652; ' + (l.transit || '').slice(0, 28) + '</div>';
+    cardsHTML += '<div>&#128739; ' + (l.highways || '').slice(0, 28) + '</div>';
+    cardsHTML += '</div>';
+    if (l.missingData && l.missingData.length) {
+      cardsHTML += '<div class="card-flag">&#9888;&#65039; Confirm: ' + l.missingData.slice(0, 2).join(' \u00b7 ') + '</div>';
+    }
+    cardsHTML += '<div class="card-btns" onclick="event.stopPropagation()">';
+    cardsHTML += '<button class="fav-btn' + (lsIsFavorite(l.id) ? ' on' : '') + '" onclick="toggleFavorite(' + l.id + ',this)">' + (lsIsFavorite(l.id) ? '&#9733; Saved' : '&#9734; Save') + '</button>';
+    if (l.aptLink) cardsHTML += '<a class="c-btn" href="' + l.aptLink + '" target="_blank" rel="noreferrer">Apts.com &#8599;</a>';
+    if (l.directLink) cardsHTML += '<a class="c-btn c-btn-green" href="' + l.directLink + '" target="_blank" rel="noreferrer">Direct Site &#8599;</a>';
+    cardsHTML += '<button class="c-btn c-btn-blue" onclick="openMap(\'' + escAddr((l.address || '') + ', ' + (l.city || '') + ', ' + (l.state || '')) + '\')">&#128506; Map</button>';
+    cardsHTML += '<button class="c-btn c-btn-green" onclick="openDetail(' + l.id + ')" style="margin-left:auto">Details &#8594;</button>';
+    cardsHTML += '</div></div>';
+  });
+  cardsHTML += '</div>';
+
+  document.getElementById('tab-matches').innerHTML = actHTML + filtHTML + cardsHTML;
+}
+
+function toggleFavorite(id, btn) {
+  var l = APP.listings.find(function(x) { return x.id === id; });
+  if (!l) return;
+  var on = lsToggleFavorite(l);
+  if (btn) { btn.className = 'fav-btn' + (on ? ' on' : ''); btn.innerHTML = on ? '&#9733; Saved' : '&#9734; Save'; }
+  renderFavorites();
+}
+
+function renderFavorites() {
+  var el = document.getElementById('tab-favorites');
+  if (!el) return;
+  var favs = lsGetFavorites();
+  var html = '<div style="max-width:720px"><h2 style="font-weight:900;font-size:22px;margin-bottom:8px">&#11088; Saved Favorites</h2>';
+  html += '<p style="color:#6b7280;font-size:14px;margin-bottom:16px">Stored on this device. Cloud sync requires account (post-beta).</p>';
+  if (!favs.length) {
+    html += '<div style="color:#9ca3af;padding:32px;text-align:center">No favorites yet. Tap Save on any listing card.</div></div>';
+    el.innerHTML = html;
+    return;
+  }
+  favs.forEach(function(f) {
+    html += '<div class="l-card" style="margin-bottom:12px;cursor:pointer" onclick="openDetail(' + f.id + ')">';
+    html += '<div class="card-name">' + f.complex + '</div><div class="card-addr">' + f.address + '</div>';
+    html += '<div class="card-rent-row"><span class="card-rent">' + f.rent + '</span></div>';
+    html += '<div class="card-btns" onclick="event.stopPropagation()"><button class="fav-btn on" onclick="toggleFavorite(' + f.id + ')">&#9733; Remove</button>';
+    html += '<button class="c-btn c-btn-green" onclick="openDetail(' + f.id + ')">Details &#8594;</button></div></div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function escAddr(addr) {
+  return addr.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// ================================================================
+// DETAIL
+// ================================================================
+function openDetail(id) {
+  var l = APP.listings.find(function(x) { return x.id === id; });
+  if (!l) return;
+  APP.curDetail = l;
+  APP.photoIdx = 0;
+  APP.photos = (l.photos && l.photos.length) ? l.photos : [];
+  lsTrack('detail_open', { id: l.id });
+  renderDetail(l);
+  showPage('detail-pg');
+}
+
+function renderDetail(l) {
+  var sc = scColor(l.score);
+  var el = document.getElementById('detailContent');
+  var html = '';
+
+  // Photos — Truth First: no stock images presented as property photos
+  html += '<div class="photo-wrap" style="display:flex;align-items:center;justify-content:center;flex-direction:column;background:#f3f4f6">';
+  if (APP.photos.length && l.photosConfidence === 'verified') {
+    html += '<img id="detPhoto" src="' + APP.photos[0] + '" alt="property photo"/>';
+  } else {
+    html += '<div style="text-align:center;padding:40px;color:#6b7280"><div style="font-size:48px;margin-bottom:8px">&#128247;</div><div style="font-weight:700">No verified property photos</div><div style="font-size:13px;margin-top:6px">Demo listing — photos appear after source verification</div>' + confTag('demo') + '</div>';
+  }
+  html += '</div>';
+
+  // Badges
+  html += '<div class="det-badges">';
+  html += verificationBadgeHtml(l);
+  html += '<span class="badge" style="background:#f4f7fa;color:#6b7280;font-size:12px">Source: ' + (l.source || 'pending') + ' &bull; Confidence ' + (l.confidenceScore || 0) + '%</span>';
+  html += '<span class="badge" style="background:' + sc + '20;color:' + sc + ';font-size:13px">' + scLabel(l.score) + ' \u00b7 ' + l.score + '/100</span>';
+  html += '<span class="badge" style="background:#f0fdf4;color:#16a34a;font-size:13px">Priority #' + l.priority + '</span>';
+  html += '<span class="badge" style="background:#f4f7fa;color:#6b7280;font-size:13px" id="detStatus">' + l.status + '</span>';
+  html += '</div>';
+
+  html += '<div class="det-name">' + l.complex + '</div>';
+  html += '<div class="det-addr">' + l.address + '</div>';
+  html += '<div class="det-mgmt">' + l.phone + confTag(l.phoneConfidence || 'demo') + (l.managementCo ? ' \u00b7 ' + l.managementCo : '') + '</div>';
+  html += '<div style="font-size:12px;color:#9ca3af;margin-bottom:12px">Updated: ' + (l.lastUpdated || '--') + ' &bull; Zip: ' + (l.zip || '--') + '</div>';
+
+  if (l.intelligenceScores) {
+    html += '<div class="det-sec"><div class="det-sec-lbl">Housing Intelligence Scores ' + confTag('estimated') + '</div><div class="nbr-grid">';
+    [['Lifestyle', l.intelligenceScores.lifestyle], ['Transportation', l.intelligenceScores.transportation], ['Safety', l.intelligenceScores.safety], ['Family', l.intelligenceScores.family], ['Pet', l.intelligenceScores.pet]].forEach(function(row) {
+      html += '<div class="nbr-box"><div class="nbr-num">' + row[1] + '</div><div class="nbr-lbl">' + row[0] + '</div></div>';
+    });
+    html += '</div></div>';
+  }
+
+  // Map buttons
+  html += '<div class="map-btns">';
+  html += '<button class="map-btn" onclick="openMap(\'' + escAddr(l.address) + '\')">&#128506; Open in Maps</button>';
+  if (APP.profile.work) {
+    html += '<button class="map-btn" onclick="openDirs(\'' + escAddr(l.address) + '\',\'' + escAddr(APP.profile.work) + '\')">&#129517; Directions to Work</button>';
+  }
+  html += '<button class="map-btn map-btn-blue" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.address) + '&layer=satellite\')">&#127920; Satellite View</button>';
+  html += '<a class="map-btn" href="tel:' + l.phone + '">&#128222; Call Now</a>';
+  html += '</div>';
+
+  // Why it fits
+  html += '<div class="why-card"><div class="why-lbl">WHY THIS MATCHES YOU</div><div class="why-txt">' + l.whyItFits + '</div></div>';
+
+  // Truth First disclaimer
+  html += '<div style="background:#fff7ed;border:1.5px solid #f5a62333;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#d97706"><strong>Truth First:</strong> ' + (l.verificationLabel || 'Source Pending') + ' — verify rent, fees, parking, pets, and availability with the property before applying.</div>';
+
+  if (l.monthlyCost) {
+    var mc = l.monthlyCost;
+    html += '<div class="det-sec"><div class="det-sec-lbl">True Monthly Cost Estimate ' + confTag('estimated') + '</div><div class="intel-card">';
+    html += '<div class="intel-row"><span>Rent</span><strong>$' + mc.rent.amount + '</strong></div>';
+    html += '<div class="intel-row"><span>Utilities (elec/gas/water/net)</span><strong>$' + (mc.utilities.electric + mc.utilities.gas + mc.utilities.water + mc.utilities.internet) + '</strong></div>';
+    html += '<div class="intel-row"><span>Transportation</span><strong>$' + (mc.transportation.transitPass + mc.transportation.fuel + mc.transportation.parking) + '</strong></div>';
+    html += '<div class="intel-row"><span>Pet + Insurance</span><strong>$' + (mc.petFees.amount + mc.insurance.amount) + '</strong></div>';
+    html += '<div class="intel-row" style="font-weight:800;color:#111827"><span>Estimated Total</span><strong>$' + mc.total + '/mo</strong></div></div></div>';
+  }
+
+  if (l.transitIntel) {
+    var ti = l.transitIntel;
+    html += '<div class="det-sec"><div class="det-sec-lbl">Transportation Intelligence ' + confTag(ti.bus && ti.bus.confidence === 'demo' ? 'demo' : 'estimated') + '</div><div class="intel-card">';
+    if (ti.bus) html += '<div style="font-weight:700;margin-bottom:8px">Nearest Bus Stop ' + confTag('demo') + '</div><div class="intel-row"><span>Stop ID</span><span>' + ti.bus.stopId + '</span></div><div class="intel-row"><span>Route</span><span>' + ti.bus.route + '</span></div><div class="intel-row"><span>Walk</span><span>' + ti.bus.walkMinutes + ' min (~' + ti.bus.blocks + ' blocks)</span></div>';
+    if (ti.train) html += '<div style="font-weight:700;margin:12px 0 8px">Nearest Train ' + confTag('demo') + '</div><div class="intel-row"><span>Station</span><span>' + ti.train.station + '</span></div><div class="intel-row"><span>Line</span><span>' + ti.train.line + '</span></div><div class="intel-row"><span>Walk</span><span>' + ti.train.walkMinutes + ' min</span></div>';
+    if (ti.commute) html += '<div style="font-weight:700;margin:12px 0 8px">Commute to ' + ti.commute.destination + '</div><div class="intel-row"><span>Est. time</span><span>' + ti.commute.estimatedMinutes + ' min</span></div><div class="intel-row"><span>Monthly transit</span><span>$' + ti.commute.monthlyTransitCost + '</span></div>';
+    html += '</div></div>';
+  }
+
+  if (l.safety) {
+    html += '<div class="det-sec"><div class="det-sec-lbl">Crime &amp; Safety ' + confTag('demo') + '</div><div class="intel-card">';
+    html += '<div style="font-size:28px;font-weight:900;color:#16a34a;margin-bottom:8px">' + l.safety.score + '/100</div>';
+    html += '<p style="font-size:14px;color:#374151;line-height:1.6;margin-bottom:10px">' + l.safety.summary + '</p>';
+    html += '<div style="font-size:12px;color:#9ca3af">Source: ' + l.safety.source + ' &bull; As of ' + l.safety.asOf + ' &bull; Confidence: ' + l.safety.confidence + '</div></div></div>';
+  }
+
+  // Score breakdown
+  html += '<div class="det-sec"><div class="det-sec-lbl">Match Score Breakdown</div>';
+  var scoreItems = [
+    { label: 'Budget fit', key: 'budget', max: 25 },
+    { label: 'Parking', key: 'parking', max: 20 },
+    { label: 'Pets / ESA', key: 'pets', max: 15 },
+    { label: 'Transit', key: 'transit', max: 18 },
+    { label: 'Move-in date', key: 'movein', max: 10 },
+    { label: 'Amenities', key: 'amenities', max: 12 }
+  ];
+  scoreItems.forEach(function(f) {
+    var val = (l.scoreBreakdown || {})[f.key] || 0;
+    var pct = Math.round((val / f.max) * 100);
+    var bc = pct >= 80 ? '#16a34a' : pct >= 55 ? '#d97706' : '#dc2626';
+    html += '<div class="score-row"><div class="score-row-top"><span>' + f.label + '</span><span style="color:' + bc + ';font-weight:700">' + val + '/' + f.max + '</span></div>';
+    html += '<div class="score-bg"><div class="score-fill" style="width:' + pct + '%;background:' + bc + '"></div></div></div>';
+  });
+  html += '</div>';
+
+  // Facts
+  html += '<div class="det-sec"><div class="det-sec-lbl">Apartment Details</div><div class="facts">';
+  var facts = [
+    { label: 'Rent', val: l.rent, green: true },
+    { label: 'Bedrooms', val: l.bedrooms },
+    { label: 'Bathrooms', val: l.bathrooms },
+    { label: 'Size', val: l.size },
+    { label: 'Available', val: l.available },
+    { label: 'Laundry', val: l.washerDryer },
+    { label: 'Deposit', val: l.deposit },
+    { label: 'Management', val: l.managementCo }
+  ];
+  facts.forEach(function(f) {
+    html += '<div class="fact"><div class="fact-lbl">' + f.label + '</div><div class="fact-val' + (f.green ? ' fact-val-g' : '') + '">' + (f.val || 'Not listed') + '</div></div>';
+  });
+  html += '</div></div>';
+
+  // Transit
+  html += '<div class="det-sec"><div class="det-sec-lbl">Transit and Commute</div>';
+  html += '<div class="tr-chips">';
+  if (l.transit) html += '<div class="tr-chip">&#128652; ' + l.transit + '</div>';
+  if (l.highways) html += '<div class="tr-chip">&#128739; ' + l.highways + '</div>';
+  html += '</div><div class="route-btns">';
+  if (APP.profile.work) {
+    html += '<a class="route-btn" href="https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(l.address) + '&destination=' + encodeURIComponent(APP.profile.work) + '&travelmode=transit" target="_blank">&#128652; Plan Transit Route to Work &#8599;</a>';
+  }
+  html += '<a class="route-btn" href="https://www.google.com/maps/search/transit+near+' + encodeURIComponent(l.address) + '" target="_blank">&#128269; Find Nearby Stops &#8599;</a>';
+  html += '</div>';
+  if (l.state === 'New Jersey' || l.state === 'NJ') {
+    html += '<div class="nj-bar">&#128646; NJ Transit: <a href="https://www.njtransit.com/schedule/bus" target="_blank">Bus Schedules &#8599;</a><a href="https://www.njtransit.com/schedule/rail" target="_blank">Train Schedules &#8599;</a><a href="https://www.njtransit.com/trip-planner" target="_blank">Trip Planner &#8599;</a></div>';
+  }
+  if (l.neighborhood && l.neighborhood.driveTimes) {
+    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">';
+    Object.keys(l.neighborhood.driveTimes).forEach(function(k) {
+      var label = k.replace(/([A-Z])/g, ' $1').trim();
+      html += '<div style="background:#f4f7fa;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:12px;color:#6b7280"><span>' + label + ': </span><strong style="color:#111827">' + l.neighborhood.driveTimes[k] + '</strong></div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Neighborhood
+  if (l.neighborhood) {
+    var nb = l.neighborhood;
+    html += '<div class="det-sec"><div class="det-sec-lbl">Neighborhood Intel</div>';
+    if (nb.overview) html += '<p style="color:#374151;font-size:14px;line-height:1.7;margin-bottom:16px">' + nb.overview + '</p>';
+    html += '<div class="nbr-grid">';
+    html += '<div class="nbr-box"><div class="nbr-num">' + (nb.walkScore || '--') + '</div><div class="nbr-lbl">Walk Score</div></div>';
+    html += '<div class="nbr-box"><div class="nbr-num">' + (nb.transitScore || '--') + '</div><div class="nbr-lbl">Transit Score</div></div>';
+    html += '<div class="nbr-box"><div class="nbr-num" style="font-size:14px">' + (nb.safetyRating || '--') + '</div><div class="nbr-lbl">Safety</div></div>';
+    html += '</div>';
+    var nbrGroups = [
+      { icon: '&#127979;', lbl: 'Schools', data: nb.nearbySchools },
+      { icon: '&#128652;', lbl: 'Transit', data: nb.nearbyTransit },
+      { icon: '&#128739;', lbl: 'Highways', data: nb.nearbyHighways },
+      { icon: '&#127978;', lbl: 'Nearby', data: nb.nearbyAmenities }
+    ];
+    nbrGroups.forEach(function(g) {
+      if (g.data && g.data.length) {
+        html += '<div class="nbr-grp"><div class="nbr-grp-lbl">' + g.icon + ' ' + g.lbl + '</div><div class="nbr-tags">';
+        g.data.forEach(function(t) { html += '<span class="nbr-tag">' + t + '</span>'; });
+        html += '</div></div>';
+      }
+    });
+    html += '</div>';
+  }
+
+  // Dual link
+  html += '<div class="dual-card"><div class="dual-ttl">&#128269; Dual-Link Verification</div>';
+  html += '<div class="dual-desc">Compare the listing price vs the official property site. A $50 or more difference may mean bait-and-switch. Always confirm directly.</div>';
+  html += '<div class="dual-links">';
+  if (l.aptLink) {
+    html += '<a class="dual-a" href="' + l.aptLink + '" target="_blank" rel="noreferrer">&#128203; Apartments.com &#8599;</a>';
+  } else {
+    html += '<div class="dual-miss">No marketplace link</div>';
+  }
+  if (l.directLink) {
+    html += '<a class="dual-b" href="' + l.directLink + '" target="_blank" rel="noreferrer">&#127962; Official Property Site &#8599;</a>';
+  } else {
+    html += '<div class="dual-miss">&#128260; ' + (l.verificationStatus || 'NEEDS DIRECT LINK') + '</div>';
+  }
+  html += '</div><div style="color:#9ca3af;font-size:11px;margin-top:6px">Tip: If prices differ, call and ask which is correct for a ' + l.bedrooms + 'BR available ' + l.available + '.</div></div>';
+
+  // Missing data
+  if (l.missingData && l.missingData.length) {
+    html += '<div class="miss-card"><div class="miss-ttl">&#9888;&#65039; Confirm Before Applying</div>';
+    l.missingData.forEach(function(m) { html += '<div class="miss-item">\u2022 ' + m + '</div>'; });
+    html += '</div>';
+  }
+
+  // Status
+  html += '<div class="status-card"><div class="det-sec-lbl">Update Your Status</div><div class="st-btns">';
+  ['NOT CALLED', 'CALLED', 'FOLLOW UP', 'EMAIL SENT', 'TOUR SCHEDULED', 'NOT INTERESTED'].forEach(function(s) {
+    html += '<button class="st-btn' + (l.status === s ? ' on' : '') + '" onclick="updateStatus(' + l.id + ',\'' + s + '\',this)">' + s + '</button>';
+  });
+  html += '</div><textarea class="notes-in" placeholder="Your notes \u2014 what they said, tour details, pricing confirmed, red flags\u2026"></textarea></div>';
+
+  // CTA
+  html += '<div class="det-cta">';
+  html += '<a class="cta-a" href="tel:' + l.phone + '">&#128222; Call Now</a>';
+  if (l.aptLink) {
+    html += '<a class="cta-a" href="' + l.aptLink + '" target="_blank" rel="noreferrer" style="background:#f4f7fa;color:#374151;border:1.5px solid #e5e7eb">View Listing &#8599;</a>';
+  }
+  html += '<button class="cta-b" onclick="showPage(\'dash-pg\')">&#8592;</button>';
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+function changePhoto(dir) {
+  APP.photoIdx = (APP.photoIdx + dir + APP.photos.length) % APP.photos.length;
+  updatePhoto();
+}
+
+function goPhoto(i) {
+  APP.photoIdx = i;
+  updatePhoto();
+}
+
+function updatePhoto() {
+  var img = document.getElementById('detPhoto');
+  if (img) img.src = APP.photos[APP.photoIdx];
+  var cnt = document.getElementById('photoCnt');
+  if (cnt) cnt.textContent = '\uD83D\uDCF7 ' + (APP.photoIdx + 1) + '/' + APP.photos.length;
+  document.querySelectorAll('.ph-dot').forEach(function(d, i) {
+    d.classList.toggle('on', i === APP.photoIdx);
+  });
+}
+
+function updateStatus(id, status, btn) {
+  var l = APP.listings.find(function(x) { return x.id === id; });
+  if (l) l.status = status;
+  document.querySelectorAll('.st-btn').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on');
+  var badge = document.getElementById('detStatus');
+  if (badge) badge.textContent = status;
+  updateStats();
+  renderMatches();
+}
+
+// ================================================================
+// MAPS
+// ================================================================
+function openMap(addr) {
+  var ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var android = /Android/.test(navigator.userAgent);
+  var enc = encodeURIComponent(addr);
+  if (ios) window.open('maps://maps.apple.com/?q=' + enc);
+  else if (android) window.open('geo:0,0?q=' + enc);
+  else window.open('https://www.google.com/maps/search/?api=1&query=' + enc);
+}
+
+function openDirs(dest, work) {
+  var ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var android = /Android/.test(navigator.userAgent);
+  var d = encodeURIComponent(dest);
+  var o = encodeURIComponent(work || '');
+  if (ios) window.open('maps://maps.apple.com/?saddr=' + o + '&daddr=' + d);
+  else if (android) window.open('google.navigation:q=' + d);
+  else window.open('https://www.google.com/maps/dir/' + o + '/' + d);
+}
+
+// ================================================================
+// CALL GUIDE
+// ================================================================
+function renderGuide() {
+  var p = APP.profile;
+  var pet = join(p.pets);
+  var noPet = !pet || pet.indexOf('No pets') >= 0;
+  var beds = Array.isArray(p.beds) ? p.beds[0] : p.beds;
+  var movein = Array.isArray(p.movein) ? p.movein[0] : p.movein;
+
+  var script = '"Hi, my name is ' + (p.name || 'your name') + '. I am looking for a ' + ((beds || '2-bedroom')).toLowerCase() + ' apartment for a ' + (movein || 'July 1') + ' move-in.' + (!noPet ? ' I have a ' + pet.toLowerCase() + '.' : '') + ' I need confirmed overnight resident parking. Do you have availability?"';
+
+  var html = '<div class="guide-wrap">';
+  html += '<h2 style="color:#111827;font-weight:900;margin-bottom:8px;font-size:22px">&#128222; Your Personalized Call Guide</h2>';
+  html += '<p style="color:#6b7280;margin-bottom:20px;font-size:15px">Built from your answers. Use this every time you call a leasing office.</p>';
+  html += '<div class="script-card"><div class="script-lbl">YOUR OPENING SCRIPT</div><div class="script-txt">' + script + '</div></div>';
+  html += '<div style="color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:14px;text-transform:uppercase">Questions to Ask</div>';
+
+  var questions = [
+    { q: 'Is a ' + (beds || '2-bedroom') + ' available for ' + (movein || 'July 1') + '?', w: 'Confirm availability first. Do not waste time on unavailable units.' },
+    { q: 'What is the exact rent, and are there move-in specials?', w: 'Compare to Apartments.com. A $50 difference is a red flag.' },
+    !noPet ? { q: 'Do you allow ' + pet + '? Full pet policy and all fees?', w: 'Get one-time fee plus monthly pet rent plus deposit.' } : null,
+    { q: 'Is there assigned overnight resident parking, not street only?', w: 'Ask: assigned spot, resident lot, garage, or permit program?' },
+    { q: 'What are total move-in costs, deposit, admin fee, application fee?', w: 'Budget all upfront costs, not just first month.' },
+    { q: 'Is there a washer and dryer in the unit or in the building?', w: 'Confirm before touring.' },
+    p.work ? { q: 'What transit or highways are nearby for commuting to ' + p.work + '?', w: 'Verify your commute before committing.' } : null,
+    { q: 'Can I schedule a tour this week?', w: 'Available units move fast. Lock in the visit.' }
+  ].filter(Boolean);
+
+  questions.forEach(function(q, i) {
+    html += '<div class="gq"><div class="gq-num">Q' + (i + 1) + '</div><div><div class="gq-txt">' + q.q + '</div><div class="gq-why">&#128161; ' + q.w + '</div></div></div>';
+  });
+
+  html += '<div style="color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:1px;margin:20px 0 14px;text-transform:uppercase">Who You Will Talk To</div>';
+  var whos = [
+    { n: 'Leasing Agent', t: 'First contact. Ask all your questions here.' },
+    { n: 'Answering Service', t: 'Leave name, phone, bedroom need, move-in, pet, parking. Ask for callback.' },
+    { n: 'Voicemail', t: '"Hi, I am ' + (p.name || 'calling') + ', looking for a ' + (beds || '2BR') + ' for ' + (movein || 'July 1') + '. I have a pet and need overnight parking. Please call me back."' },
+    { n: 'Tour Guide', t: 'Re-confirm ALL details in person. Ask to see the parking area.' }
+  ];
+  whos.forEach(function(w) {
+    html += '<div class="who-row"><div class="who-name">' + w.n + '</div><div class="who-tip">' + w.t + '</div></div>';
+  });
+  html += '</div>';
+
+  document.getElementById('tab-guide').innerHTML = html;
+}
+
+// ================================================================
+// VERIFY LINKS
+// ================================================================
+function renderVerify() {
+  var html = '<div style="max-width:720px">';
+  html += '<h2 style="color:#111827;font-weight:900;margin-bottom:8px;font-size:22px">&#128269; Dual-Link Verification</h2>';
+  html += '<p style="color:#6b7280;margin-bottom:16px;font-size:15px">Compare every listing marketplace price vs the official property site.</p>';
+  html += '<div style="background:#f0fdf4;border:2px solid #22d98a33;border-radius:12px;padding:16px;margin-bottom:20px;font-size:14px;color:#374151;line-height:1.7"><strong style="color:#16a34a">How to use:</strong> Open both links. If prices differ by $50 or more, call and ask which is correct before applying.</div>';
+
+  APP.listings.forEach(function(l) {
+    var ok = !!l.directLink;
+    html += '<div style="background:#fff;border:2px solid #e5e7eb;border-radius:14px;padding:18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px">';
+    html += '<div><div style="font-weight:700;font-size:15px;color:#111827">' + l.complex + '</div><div style="color:#9ca3af;font-size:12px">' + l.address + '</div></div>';
+    html += '<span style="background:' + (ok ? '#f0fdf4' : '#fff7ed') + ';color:' + (ok ? '#16a34a' : '#d97706') + ';border:1.5px solid ' + (ok ? '#22d98a44' : '#f5a62333') + ';padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700">' + (ok ? '&#10003; VERIFIED' : '&#9888; ' + (l.verificationStatus || 'NEEDS DIRECT LINK')) + '</span>';
+    html += '</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
+    if (l.aptLink) html += '<a class="c-btn" href="' + l.aptLink + '" target="_blank" rel="noreferrer">Apartments.com &#8599;</a>';
+    else html += '<span style="color:#9ca3af;font-size:13px">No marketplace link</span>';
+    if (l.directLink) html += '<a class="c-btn c-btn-green" href="' + l.directLink + '" target="_blank" rel="noreferrer">Official Site &#8599;</a>';
+    else html += '<span style="color:#d97706;font-size:13px">Direct site needed</span>';
+    html += '<button class="c-btn" onclick="openDetail(' + l.id + ')">View &#8594;</button>';
+    html += '</div></div>';
+  });
+  html += '</div>';
+  document.getElementById('tab-verify').innerHTML = html;
+}
+
+// ================================================================
+// PROFILE
+// ================================================================
+function renderProfile() {
+  var p = APP.profile;
+  var html = '<div style="max-width:720px">';
+  html += '<h2 style="color:#111827;font-weight:900;margin-bottom:8px;font-size:22px">&#128100; Your Search Profile</h2>';
+  html += '<p style="color:#6b7280;font-size:14px;margin-bottom:16px">Saved on this device via localStorage. ' + LS_VERSION + '</p>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+  Object.keys(p).forEach(function(k) {
+    if (k === 'commuteDestinations') return;
+    var v = p[k];
+    var label = k.replace(/([A-Z])/g, ' $1').toUpperCase();
+    var display = Array.isArray(v) ? v.join(', ') : (v || '--');
+    html += '<div style="background:#fff;border:2px solid #e5e7eb;border-radius:10px;padding:12px"><div style="color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:.5px;margin-bottom:4px">' + label + '</div><div style="color:#374151;font-size:13px">' + display + '</div></div>';
+  });
+  html += '</div>';
+  html += '<h3 style="font-weight:800;margin:24px 0 12px;font-size:16px">Saved Searches (' + (LS_STORE.searches || []).length + ')</h3>';
+  if (!(LS_STORE.searches || []).length) html += '<p style="color:#9ca3af;font-size:14px">No saved searches yet.</p>';
+  else (LS_STORE.searches || []).slice(0, 5).forEach(function(s) {
+    html += '<div style="background:#f8fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px;font-size:13px"><strong>' + s.label + '</strong><br/><span style="color:#9ca3af">' + s.savedAt + '</span></div>';
+  });
+  html += '<h3 style="font-weight:800;margin:24px 0 12px;font-size:16px">Feedback Submitted (' + (LS_STORE.feedback || []).length + ')</h3>';
+  html += '<p style="color:#6b7280;font-size:13px">' + (LS_STORE.feedback || []).length + ' items stored locally for beta review export.</p>';
+  html += '<button class="green-btn" style="margin-top:24px" onclick="showPage(\'home-pg\')">Start New Search &rarr;</button>';
+  html += '</div>';
+  document.getElementById('tab-profile').innerHTML = html;
+}
+
+// ================================================================
+// ADMIN
+// ================================================================
+function tryAdmin() {
+  var code = document.getElementById('adminCode').value;
+  if (code === ADMIN_CODE) {
+    renderAdmin();
+    showPage('admin-pg');
+  } else {
+    alert('Incorrect code. Try again.');
+  }
+}
+
+function renderAdmin() {
+  var ls = APP.adminList;
+  if (!ls.length) {
+    document.getElementById('adminContent').innerHTML = '<div style="color:#9ca3af;text-align:center;padding:40px;font-size:16px">No submissions yet. Wait for a client to complete the questionnaire.</div>';
+    return;
+  }
+  var statColors = { APPROVED: '#16a34a', REJECTED: '#dc2626', 'NEEDS REVIEW': '#d97706', PENDING: '#9ca3af' };
+  var counts = {};
+  ls.forEach(function(l) { counts[l.adminStatus] = (counts[l.adminStatus] || 0) + 1; });
+
+  var html = '<div class="admin-stats">';
+  Object.keys(counts).forEach(function(k) {
+    html += '<div class="admin-stat"><div style="font-size:22px;font-weight:900;color:' + (statColors[k] || '#111827') + '">' + counts[k] + '</div><div style="color:#9ca3af;font-size:9px;letter-spacing:1px;margin-top:4px">' + k + '</div></div>';
+  });
+  html += '</div>';
+
+  ls.forEach(function(l, idx) {
+    var bc = statColors[l.adminStatus] || '#9ca3af';
+    html += '<div class="admin-card" style="border-color:' + bc + '44">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px">';
+    html += '<div><div style="font-weight:800;font-size:16px;color:#111827">' + l.complex + '</div>';
+    html += '<div style="color:#9ca3af;font-size:12px">' + l.address + '</div>';
+    html += '<div style="color:#16a34a;font-weight:700;margin-top:4px">' + l.rent + ' \u00b7 Score: ' + l.score + '/100</div></div>';
+    html += '<span style="background:' + bc + '22;color:' + bc + ';padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700">' + l.adminStatus + '</span></div>';
+    html += '<div style="background:#f0fdf4;border:1.5px solid #22d98a22;border-radius:8px;padding:10px 14px;margin-bottom:12px;color:#374151;font-size:13px">' + l.whyItFits + '</div>';
+    html += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+    html += '<button class="admin-approve" onclick="adminAction(' + idx + ',\'APPROVED\')">&#10003; Approve</button>';
+    html += '<button class="admin-flag" onclick="adminAction(' + idx + ',\'NEEDS REVIEW\')">&#9888; Flag</button>';
+    html += '<button class="admin-reject" onclick="adminAction(' + idx + ',\'REJECTED\')">&#10005; Reject</button>';
+    if (l.aptLink) html += '<a class="c-btn" href="' + l.aptLink + '" target="_blank" rel="noreferrer">Apts.com &#8599;</a>';
+    if (l.directLink) html += '<a class="c-btn c-btn-green" href="' + l.directLink + '" target="_blank" rel="noreferrer">Direct &#8599;</a>';
+    html += '</div></div>';
+  });
+  document.getElementById('adminContent').innerHTML = html;
+}
+
+function adminAction(idx, status) {
+  if (APP.adminList[idx]) APP.adminList[idx].adminStatus = status;
+  renderAdmin();
+}
+
+// ================================================================
+// FEEDBACK
+// ================================================================
+function openFeedback() {
+  document.getElementById('fbModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFeedback() {
+  document.getElementById('fbModal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('fbSent').style.display = 'none';
+  document.querySelector('.fb-sheet .green-btn').style.display = 'block';
+}
+
+function submitFeedback() {
+  var name = document.getElementById('fbName').value.trim();
+  var email = document.getElementById('fbEmail').value.trim();
+  var type = document.getElementById('fbType').value;
+  var msg = document.getElementById('fbMsg').value.trim();
+  if (!name || !msg) { alert('Please enter your name and feedback before submitting.'); return; }
+  LS_STORE.feedback.unshift({
+    id: 'FB-' + Date.now(), name: name, email: email, type: type || 'General',
+    message: msg, session: (APP.profile && APP.profile.city) ? APP.profile.city + ', ' + APP.profile.state : 'no_search',
+    ts: new Date().toISOString()
+  });
+  lsSave();
+  lsTrack('feedback_submit', { type: type });
+  document.querySelector('.fb-sheet .green-btn').style.display = 'none';
+  document.getElementById('fbSent').style.display = 'block';
+  setTimeout(function() {
+    document.getElementById('fbName').value = '';
+    document.getElementById('fbEmail').value = '';
+    document.getElementById('fbType').value = '';
+    document.getElementById('fbMsg').value = '';
+  }, 500);
+}
+
+function renderQAPanel() {
+  var el = document.getElementById('qaContent');
+  if (!el) return;
+  var html = '<button class="ghost-btn" onclick="document.getElementById(\'qaPanel\').classList.remove(\'show\')" style="float:right">Close</button>';
+  html += '<h2>LeaseSmart QA Panel</h2><p style="color:#6b7280;margin-bottom:16px">' + LS_VERSION + ' &bull; Readiness ~32/100</p>';
+  html += '<div class="qa-section"><strong>Beta Blockers (CRITICAL)</strong><br/>';
+  ['Real inventory pipeline', 'Backend + database', 'Cloud user accounts', 'Secure admin', 'Verified links/photos/phones/addresses'].forEach(function(t) {
+    html += '<span class="qa-tag qa-crit">' + t + '</span>';
+  });
+  html += '</div><div class="qa-section"><strong>Phase 1 Fixed</strong><br/>';
+  ['Saved profile (localStorage)', 'Saved favorites', 'Saved searches', 'Dynamic lifestyle scoring', 'Verification labels', 'Feedback persistence', 'QA panel', 'Transportation UI (demo)', 'Monthly cost (estimated)', 'Safety module (demo)'].forEach(function(t) {
+    html += '<span class="qa-tag qa-fix">' + t + '</span>';
+  });
+  html += '</div><div class="qa-section"><strong>Demo Features (must stay labeled)</strong><br/>';
+  ['8 demo listings', 'Demo phones (555)', 'No verified photos', 'Demo transit/safety data', 'Generic Apartments.com links'].forEach(function(t) {
+    html += '<span class="qa-tag qa-demo">' + t + '</span>';
+  });
+  html += '</div><div class="qa-section"><strong>Session Stats</strong><p style="font-size:14px;margin-top:8px">Favorites: ' + lsGetFavorites().length + ' &bull; Searches saved: ' + (LS_STORE.searches || []).length + ' &bull; Feedback: ' + (LS_STORE.feedback || []).length + ' &bull; Analytics events: ' + (LS_STORE.analytics || []).length + '</p></div>';
+  html += '<p style="font-size:12px;color:#9ca3af;margin-top:16px">Full registry: LEASESMART_ISSUE_REGISTRY.md</p>';
+  el.innerHTML = html;
+}
+
+function initLeaseSmart() {
+  var bid = document.getElementById('lsBuildId');
+  if (bid) bid.textContent = LS_BUILD;
+  document.title = 'LeaseSmart Beta v1.1 Functional Fix Build (' + LS_BUILD + ')';
+
+  if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
+    sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
+    var sep = location.search ? '&' : '?';
+    location.replace(location.pathname + location.search + sep + 'v=' + encodeURIComponent(LS_BUILD) + location.hash);
+    return;
+  }
+
+  try { lsLoad(); } catch (e) { /* optional storage */ }
+  if (LS_STORE.session && LS_STORE.session.profile) {
+    var rb = document.getElementById('resumeBtn');
+    if (rb) rb.style.display = 'block';
+  }
+}
+
+// ================================================================
+// INIT
+// ================================================================
+document.addEventListener('DOMContentLoaded', function() {
+  initLeaseSmart();
+  document.getElementById('startBtn').addEventListener('click', startQuiz);
+  document.getElementById('startBtn2').addEventListener('click', startQuiz);
+
+  var toggle = document.getElementById('adminToggle');
+  var box = document.getElementById('adminBox');
+  var visible = false;
+  toggle.addEventListener('click', function() {
+    visible = !visible;
+    box.style.display = visible ? 'block' : 'none';
+  });
+});
+</script>
+</body>
+</html>
