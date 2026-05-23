@@ -1,9 +1,24 @@
 /**
  * Phase 1 clean build verification — no Phase 2/3 leakage
+ *
+ * RETIRED for v1.1.7+ foundation builds.
+ * v1.1.7 intentionally includes Edit Filters, Start Over, and filter modal.
+ * Use foundation-v1.1.7-test.mjs + filter-ux-test.mjs + foundation-behavior-test.mjs instead.
  */
 import { readFileSync } from 'fs';
 
+const RETIRED_FOR = 'v1.1.7+';
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+
+if (html.includes("LS_BUILD = '20260522-v1.1.7'") || html.includes('Foundation Fix Build')) {
+  console.log(JSON.stringify({
+    result: 'RETIRED',
+    reason: 'phase1-clean-test.mjs is for Phase 1 clean builds only; v1.1.7 foundation includes Edit Filters by design',
+    retiredFor: RETIRED_FOR,
+    useInstead: ['foundation-v1.1.7-test.mjs', 'filter-ux-test.mjs', 'foundation-behavior-test.mjs']
+  }, null, 2));
+  process.exit(0);
+}
 const tests = [];
 function assert(name, cond, detail) {
   tests.push({ name, pass: !!cond, detail: detail || '' });

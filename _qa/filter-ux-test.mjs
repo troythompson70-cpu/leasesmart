@@ -1,5 +1,5 @@
 /**
- * Live beta test findings — verification suite
+ * Edit Filters + sample label verification — v1.1.7 foundation
  */
 import { readFileSync } from 'fs';
 
@@ -29,9 +29,12 @@ assert('refreshListingsFromProfile', html.includes('function refreshListingsFrom
 assert('startOver resets to step 0', /function startOver[\s\S]*?APP\.quizStep = 0/.test(html));
 assert('applyFilters stays on dashboard', /function applyFilters[\s\S]*?showPage\('dash-pg'\)/.test(html));
 
-// 7: Demo notice & badge
-assert('Beta Sample Listing label', html.includes("verificationLabel: 'Beta Sample Listing'"));
-assert('Demo results notice', html.includes('Beta Sample Listings') && html.includes('Real apartment availability'));
+// 7: Demo notice & badge (v1.1.7 labels)
+assert('Sample verification label', html.includes("verificationLabel: 'Sample Listing — Not Real Availability'"));
+assert('Sample card badge text', html.includes('SAMPLE LISTING &mdash; For Demo Only'));
+assert('Demo results notice class', html.includes('demo-results-notice'));
+assert('Dashboard disclaimer text', html.includes('sample listings for testing the experience'));
+assert('Not real availability disclaimer', html.includes('not real apartment availability'));
 
 // Filter fields
 assert('EDIT_FILTER_IDS includes budget', html.includes("'budget'"));
