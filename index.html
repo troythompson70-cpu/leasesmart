@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<title>LeaseSmart Beta v1.1.7</title>
-<!-- BUILD_ID: 20260522-v1.1.7 — deploy this file to Netlify root -->
+<title>LeaseSmart Beta v1.1.8</title>
+<!-- BUILD_ID: 20260523-v1.1.8 — deploy this file to site root -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f8fafb;color:#111827;min-height:100vh}
@@ -34,22 +34,24 @@ button,input,textarea,select{font-family:inherit}
 .fb-textarea{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;font-size:15px;color:#111827;outline:none;margin-bottom:12px;min-height:100px;resize:vertical;line-height:1.6;font-family:inherit}
 .fb-close{background:none;border:none;color:#9ca3af;font-size:14px;cursor:pointer;float:right;margin-top:-4px}
 .fb-sent{background:#f0fdf4;border:2px solid #22d98a33;border-radius:12px;padding:20px;text-align:center;display:none}
-/* EDIT FILTERS MODAL */
+/* EDIT FILTERS / PROFILE MODAL */
 .filter-modal{position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px}
 .filter-modal.open{display:flex}
-.filter-sheet{background:#fff;border-radius:16px;padding:24px 22px 28px;width:100%;max-width:720px;max-height:92vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.15)}
-.filter-sheet h3{font-size:22px;font-weight:900;color:#111827;margin-bottom:6px}
-.filter-sheet-sub{color:#6b7280;font-size:14px;margin-bottom:20px;line-height:1.5}
-.filter-group{margin-bottom:18px;padding-bottom:16px;border-bottom:1.5px solid #f3f4f6}
+.filter-sheet{background:#fff;border-radius:16px;padding:28px 26px 32px;width:100%;max-width:920px;max-height:92vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.15)}
+.filter-sheet h3{font-size:24px;font-weight:900;color:#111827;margin-bottom:8px}
+.filter-sheet-sub{color:#6b7280;font-size:16px;margin-bottom:22px;line-height:1.55}
+.filter-group{margin-bottom:22px;padding-bottom:20px;border-bottom:1.5px solid #f3f4f6}
 .filter-group:last-of-type{border-bottom:none}
-.filter-group-lbl{font-weight:800;font-size:14px;margin-bottom:10px;color:#111827}
-.filter-chks{display:flex;flex-direction:column;gap:8px;max-height:150px;overflow-y:auto;padding-right:4px}
-.filter-chk{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:#374151;cursor:pointer}
-.filter-chk input{width:18px;height:18px;margin-top:2px;accent-color:#22d98a;flex-shrink:0}
-.filter-date{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:12px 14px;font-size:16px}
-.filter-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
-.filter-actions .green-btn{flex:1;min-width:160px}
-.filter-actions .ghost-btn{padding:14px 18px;font-size:14px;font-weight:700}
+.filter-group-lbl{font-weight:800;font-size:17px;margin-bottom:12px;color:#111827}
+.filter-chks{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px 14px;max-height:none;overflow:visible;padding-right:0}
+.filter-chk{display:flex;align-items:flex-start;gap:12px;font-size:17px;color:#374151;cursor:pointer;line-height:1.45;padding:10px 12px;border-radius:10px;border:1.5px solid #eef0f3;background:#fafbfc}
+.filter-chk:hover{border-color:#22d98a55;background:#f6fffb}
+.filter-chk input{width:20px;height:20px;margin-top:2px;accent-color:#22d98a;flex-shrink:0}
+.filter-text,.filter-date,.filter-select{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;font-size:17px;color:#111827}
+.filter-select{cursor:pointer}
+.filter-actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+.filter-actions .green-btn{flex:1;min-width:180px;font-size:17px;padding:16px 20px}
+.filter-actions .ghost-btn{padding:16px 20px;font-size:16px;font-weight:700}
 .demo-results-notice{background:#fff7ed;border:2px solid #f5a62355;border-radius:14px;padding:16px 20px;margin-bottom:18px;font-size:14px;color:#374151;line-height:1.65}
 .demo-results-notice strong{color:#d97706;display:block;margin-bottom:4px;font-size:15px}
 .sample-card-badge{display:inline-block;background:#fff7ed;border:1.5px solid #f5a62366;color:#d97706;font-size:11px;font-weight:800;padding:4px 10px;border-radius:6px;margin-bottom:8px;letter-spacing:.3px}
@@ -339,7 +341,7 @@ body { font-size: 16px !important; }
 
 <!-- BETA DEMO BANNER - shows on all screens -->
 <div class="beta-banner" id="lsBuildBanner">
-  <strong>LeaseSmart Beta v1.1.7</strong> &mdash; Foundation Fix Build &mdash; Build <span id="lsBuildId">loading</span>
+  <strong>LeaseSmart Beta v1.1.8</strong> &mdash; UX Polish Build &mdash; Build <span id="lsBuildId">loading</span>
   &nbsp;|&nbsp; <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a>
 </div>
 
@@ -347,11 +349,11 @@ body { font-size: 16px !important; }
 <div class="filter-modal" id="filterModal">
   <div class="filter-sheet">
     <button class="fb-close" onclick="closeEditFilters()">&#10005; Close</button>
-    <h3>&#128269; Edit Search Filters</h3>
-    <p class="filter-sheet-sub">Adjust what you are looking for. Your matches refresh instantly. Name, email, and phone stay saved.</p>
+    <h3 id="filterModalTitle">&#128269; Edit Search Filters</h3>
+    <p class="filter-sheet-sub" id="filterModalSub">Adjust what you are looking for. Your matches refresh instantly. Name, email, and phone stay saved.</p>
     <div id="filterFormBody"></div>
     <div class="filter-actions">
-      <button class="green-btn" onclick="applyFilters()">Apply Filters &rarr;</button>
+      <button class="green-btn" id="filterApplyBtn" onclick="applyFilters()">Apply Filters &rarr;</button>
       <button class="ghost-btn" type="button" onclick="closeEditFilters()">Cancel</button>
     </div>
   </div>
@@ -460,7 +462,7 @@ body { font-size: 16px !important; }
     <strong style="color:#16a34a">LeaseSmart by TGT Technologies Inc.</strong><br/>
     Tee Gates, Founder<br/>
     <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a> &bull; <a href="mailto:support@tgttechnologies.com">support@tgttechnologies.com</a><br/>
-    <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1.7</strong><br>Updated Today</div>
+    <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1.8</strong><br>Updated Today</div>
   </div>
 </div>
 </div>
@@ -482,7 +484,7 @@ body { font-size: 16px !important; }
       <div class="q-card" id="qCard"></div>
       <button class="back-link" id="backBtn" style="display:none" onclick="goBack()">&#8592; Back</button>
       <p class="privacy">&#128274; Your info is private. We never sell your data.</p>
-      <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.7</strong><br>Updated Today</div>
+      <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.8</strong><br>Updated Today</div>
     </div>
   </div>
 </div>
@@ -496,7 +498,7 @@ body { font-size: 16px !important; }
   <div class="search-stage" id="searchStage">Reading your profile&hellip;</div>
   <div class="search-bar"><div class="search-fill" id="searchFill"></div></div>
   <div class="search-pct" id="searchPct">0%</div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.7</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.8</strong><br>Updated Today</div>
 </div>
 </div>
 
@@ -533,7 +535,7 @@ body { font-size: 16px !important; }
     <div id="tab-verify" style="display:none"></div>
     <div id="tab-profile" style="display:none"></div>
   </div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.7</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.8</strong><br>Updated Today</div>
 </div>
 
 <!-- DETAIL PAGE -->
@@ -545,7 +547,7 @@ body { font-size: 16px !important; }
     </div>
   </header>
   <div class="det-wrap" id="detailContent"></div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.7</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.8</strong><br>Updated Today</div>
 </div>
 
 <!-- ADMIN PAGE -->
@@ -561,8 +563,8 @@ body { font-size: 16px !important; }
 </div>
 
 <script>
-// v1.1.7 Foundation fixes — profile persistence, Edit Filters, sample labels
-var LS_BUILD = '20260522-v1.1.7';
+// v1.1.8 UX polish — larger Edit Filters, flat layout, editable profile
+var LS_BUILD = '20260523-v1.1.8';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 
 // ================================================================
@@ -633,6 +635,8 @@ var STEPS = [
 ];
 
 var EDIT_FILTER_IDS = ['movein', 'budget', 'beds', 'baths', 'commute', 'amenities', 'laundry', 'pets', 'park', 'transit'];
+var EDIT_PERSONAL_IDS = ['name', 'email', 'phone', 'state', 'city'];
+var EDIT_PROFILE_IDS = EDIT_PERSONAL_IDS.concat(EDIT_FILTER_IDS);
 
 function getStepById(id) {
   for (var i = 0; i < STEPS.length; i++) {
@@ -902,9 +906,37 @@ function startOver() {
 }
 
 function openEditFilters() {
+  APP.editModalMode = 'filters';
+  APP.returnTab = 'tab-matches';
+  setEditModalHeader('filters');
   renderFilterForm();
   document.getElementById('filterModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+function openEditProfile() {
+  APP.editModalMode = 'profile';
+  APP.returnTab = 'tab-profile';
+  setEditModalHeader('profile');
+  renderFilterForm();
+  document.getElementById('filterModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function setEditModalHeader(mode) {
+  var title = document.getElementById('filterModalTitle');
+  var sub = document.getElementById('filterModalSub');
+  var btn = document.getElementById('filterApplyBtn');
+  if (!title || !sub || !btn) return;
+  if (mode === 'profile') {
+    title.innerHTML = '&#128100; Edit Profile';
+    sub.textContent = 'Update your contact info and search preferences. Changes save on this device and refresh your matches instantly.';
+    btn.textContent = 'Save Profile \u2192';
+  } else {
+    title.innerHTML = '&#128269; Edit Search Filters';
+    sub.textContent = 'Adjust what you are looking for. Your matches refresh instantly. Name, email, and phone stay saved.';
+    btn.textContent = 'Apply Filters \u2192';
+  }
 }
 
 function closeEditFilters() {
@@ -914,17 +946,31 @@ function closeEditFilters() {
 
 function renderFilterForm() {
   var p = APP.profile || {};
+  var fieldIds = APP.editModalMode === 'profile' ? EDIT_PROFILE_IDS : EDIT_FILTER_IDS;
   var html = '';
-  EDIT_FILTER_IDS.forEach(function(fid) {
+  fieldIds.forEach(function(fid) {
     var step = getStepById(fid);
-    if (!step) return;
+    if (!step && EDIT_PERSONAL_IDS.indexOf(fid) < 0) return;
+    var lbl = step ? step.lbl : fid;
     html += '<div class="filter-group">';
-    html += '<div class="filter-group-lbl">' + step.lbl + '</div>';
+    html += '<div class="filter-group-lbl">' + lbl + '</div>';
     if (fid === 'movein') {
       var isoVal = (p.moveinIso || '').replace(/"/g, '&quot;');
       html += '<input class="filter-date" type="date" id="filter_movein" min="' + new Date().toISOString().slice(0, 10) + '" value="' + isoVal + '"/>';
-      html += '<p style="font-size:12px;color:#9ca3af;margin-top:6px">Current: ' + (p.movein || 'Not set') + '</p>';
-    } else if (step.opts) {
+      html += '<p style="font-size:14px;color:#9ca3af;margin-top:8px">Current: ' + (p.movein || 'Not set') + '</p>';
+    } else if (fid === 'state') {
+      html += '<select class="filter-select" id="filter_state">';
+      html += '<option value="">Select state</option>';
+      US_STATES.forEach(function(s) {
+        html += '<option value="' + s + '"' + (p.state === s ? ' selected' : '') + '>' + s + '</option>';
+      });
+      html += '</select>';
+    } else if (fid === 'name' || fid === 'email' || fid === 'phone' || fid === 'city') {
+      var val = (p[fid] || '').replace(/"/g, '&quot;');
+      var inputType = fid === 'email' ? 'email' : (fid === 'phone' ? 'tel' : 'text');
+      var ph = step && step.ph ? step.ph : '';
+      html += '<input class="filter-text" type="' + inputType + '" id="filter_' + fid + '" value="' + val + '" placeholder="' + ph + '"/>';
+    } else if (step && step.opts) {
       var cur = p[fid];
       var curArr = Array.isArray(cur) ? cur : (cur ? [cur] : []);
       html += '<div class="filter-chks" data-filter-id="' + fid + '">';
@@ -942,7 +988,21 @@ function renderFilterForm() {
 
 function applyFilters() {
   var p = Object.assign({}, APP.profile);
-  var personal = { name: p.name, email: p.email, phone: p.phone };
+  if (APP.editModalMode === 'profile') {
+    EDIT_PERSONAL_IDS.forEach(function(fid) {
+      var el = document.getElementById('filter_' + fid);
+      if (el) p[fid] = el.value.trim();
+    });
+    APP.name = p.name || '';
+    APP.email = p.email || '';
+    APP.phone = p.phone || '';
+  } else {
+    p.name = APP.profile.name;
+    p.email = APP.profile.email;
+    p.phone = APP.profile.phone;
+    if (APP.profile.state) p.state = APP.profile.state;
+    if (APP.profile.city) p.city = APP.profile.city;
+  }
   EDIT_FILTER_IDS.forEach(function(fid) {
     if (fid === 'movein') {
       var d = document.getElementById('filter_movein');
@@ -956,11 +1016,9 @@ function applyFilters() {
     document.querySelectorAll('.filter-cb[data-filter="' + fid + '"]:checked').forEach(function(cb) {
       selected.push(cb.value);
     });
-    p[fid] = selected.length ? selected : (p[fid] || ['No preference']);
+    if (selected.length) p[fid] = selected;
+    else if (APP.profile[fid]) p[fid] = APP.profile[fid];
   });
-  p.name = personal.name || p.name;
-  p.email = personal.email || p.email;
-  p.phone = personal.phone || p.phone;
   APP.profile = p;
   APP.quizAnswers = Object.assign({}, APP.quizAnswers, p);
   lsSaveFullProfile(p);
@@ -968,9 +1026,13 @@ function applyFilters() {
   refreshListingsFromProfile();
   closeEditFilters();
   showPage('dash-pg');
-  var matchTab = document.querySelector('.tab-btn');
-  if (matchTab) showTab('tab-matches', matchTab);
-  lsTrack('filters_applied');
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var returnTab = APP.returnTab || 'tab-matches';
+  tabBtns.forEach(function(b) {
+    var onclick = b.getAttribute('onclick') || '';
+    if (onclick.indexOf("'" + returnTab + "'") >= 0) showTab(returnTab, b);
+  });
+  lsTrack(APP.editModalMode === 'profile' ? 'profile_edited' : 'filters_applied');
 }
 
 function refreshListingsFromProfile() {
@@ -1886,7 +1948,7 @@ function renderProfile() {
   html += '<h3 style="font-weight:800;margin:24px 0 12px;font-size:16px">Feedback Submitted (' + (LS_STORE.feedback || []).length + ')</h3>';
   html += '<p style="color:#6b7280;font-size:13px">' + (LS_STORE.feedback || []).length + ' items stored locally for beta review export.</p>';
   html += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px">';
-  html += '<button class="green-btn" style="flex:1;min-width:200px" onclick="openEditFilters()">Edit Filters &rarr;</button>';
+  html += '<button class="green-btn" style="flex:1;min-width:200px" onclick="openEditProfile()">Edit Profile &rarr;</button>';
   html += '<button class="ghost-btn" style="flex:1;min-width:200px;padding:16px;font-size:15px;font-weight:700" onclick="startOver()">Start Over</button>';
   html += '</div>';
   html += '</div>';
@@ -2010,7 +2072,7 @@ function renderQAPanel() {
 function initLeaseSmart() {
   var bid = document.getElementById('lsBuildId');
   if (bid) bid.textContent = LS_BUILD;
-  document.title = 'LeaseSmart Beta v1.1.7 (' + LS_BUILD + ')';
+  document.title = 'LeaseSmart Beta v1.1.8 (' + LS_BUILD + ')';
 
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
     sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
@@ -2049,6 +2111,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-<div style="text-align:center; padding:20px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:40px;">LeaseSmart Beta v1.1.7</div>
+<div style="text-align:center; padding:20px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:40px;">LeaseSmart Beta v1.1.8</div>
 </body>
 </html>
