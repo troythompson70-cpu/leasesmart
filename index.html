@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<title>LeaseSmart Beta v1.1.9</title>
-<!-- BUILD_ID: 20260523-v1.1.9 — deploy this file to site root -->
+<title>LeaseSmart Beta v1.1.10</title>
+<!-- BUILD_ID: 20260523-v1.1.10 — deploy this file to site root -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f8fafb;color:#111827;min-height:100vh}
@@ -31,6 +31,8 @@ button,input,textarea,select{font-family:inherit}
 /* FEEDBACK MODAL */
 .fb-modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center}
 .fb-modal.open{display:flex}
+#majorChangeModal{z-index:1200}
+#fbPromptModal,#fbModal{z-index:1150}
 .fb-sheet{background:#fff;border-radius:20px 20px 0 0;padding:28px 24px 40px;width:100%;max-width:600px;max-height:80vh;overflow-y:auto}
 .fb-sheet h3{font-size:20px;font-weight:900;color:#111827;margin-bottom:16px}
 .fb-input{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;font-size:16px;color:#111827;outline:none;margin-bottom:12px;font-family:inherit}
@@ -204,6 +206,8 @@ button,input,textarea,select{font-family:inherit}
 .fav-btn{font-size:13px;padding:8px 14px;font-weight:700}
 .demo-results-notice{font-size:15px;padding:18px 22px}
 .demo-results-notice strong{font-size:16px}
+.fb-lbl{display:block;font-size:13px;font-weight:700;color:#374151;margin:12px 0 6px}
+.fb-lbl:first-of-type{margin-top:0}
 .card-flag{background:#fff7ed;border:1.5px solid #f5a62344;border-radius:6px;padding:6px 10px;font-size:11px;color:#d97706;margin-bottom:10px}
 .card-btns{display:flex;gap:7px;flex-wrap:wrap}
 .c-btn{font-size:12px;padding:6px 12px;border-radius:8px;background:#f4f7fa;color:#6b7280;text-decoration:none;font-weight:600;border:1.5px solid #e5e7eb;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
@@ -357,7 +361,7 @@ body { font-size: 16px !important; }
   <div class="beta-banner-inner">
     <span class="beta-banner-title">LeaseSmart Beta Testing Mode</span>
     <span class="beta-banner-text">You are testing the LeaseSmart experience with sample listings. Real verified apartment data is coming soon. Use Save, Favorites, Call Guide, and Feedback to help improve the app.</span>
-    <span class="beta-banner-build">LeaseSmart Beta v1.1.9 &mdash; Build <span id="lsBuildId">loading</span> &nbsp;|&nbsp; <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a></span>
+    <span class="beta-banner-build">LeaseSmart Beta v1.1.10 &mdash; Build <span id="lsBuildId">loading</span> &nbsp;|&nbsp; <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a></span>
   </div>
 </div>
 
@@ -394,20 +398,58 @@ body { font-size: 16px !important; }
   <div class="fb-sheet">
     <button class="fb-close" onclick="closeFeedback()">&#10005; Close</button>
     <h3>&#128172; Send Feedback to TGT</h3>
-    <p style="color:#6b7280;font-size:14px;margin-bottom:16px">Tell us what worked, what was confusing, or what you would improve. Every response goes directly to Tee Gates.</p>
-    <input class="fb-input" type="text" id="fbName" placeholder="Your name"/>
+    <p style="color:#6b7280;font-size:14px;margin-bottom:16px">Quick guided feedback — most testers finish in under 30 seconds.</p>
+    <label class="fb-lbl" for="fbName">Full Name</label>
+    <input class="fb-input" type="text" id="fbName" placeholder="Your full name"/>
+    <label class="fb-lbl" for="fbEmail">Email Address</label>
     <input class="fb-input" type="email" id="fbEmail" placeholder="your@email.com"/>
-    <select class="fb-input" id="fbType" style="-webkit-appearance:none">
-      <option value="">What type of feedback?</option>
-      <option>Something is broken or not working</option>
-      <option>Design is hard to read or use</option>
-      <option>Feature I would like to see</option>
-      <option>Something confused me</option>
-      <option>General feedback</option>
-      <option>Request a real live search setup</option>
+    <label class="fb-lbl" for="fbPhone">Phone <span style="font-weight:500;color:#9ca3af">(optional)</span></label>
+    <input class="fb-input" type="tel" id="fbPhone" placeholder="(XXX) XXX-XXXX"/>
+    <label class="fb-lbl" for="fbCategory">What part are you reviewing?</label>
+    <select class="fb-input" id="fbCategory" style="-webkit-appearance:none">
+      <option value="">Select one...</option>
+      <option>Apartment matches</option>
+      <option>Filters</option>
+      <option>Profile</option>
+      <option>Favorites / Saved listings</option>
+      <option>Call Guide</option>
+      <option>Map links</option>
+      <option>Design / layout</option>
+      <option>Something broken</option>
+      <option>Other</option>
     </select>
-    <textarea class="fb-textarea" id="fbMsg" placeholder="Tell us everything. The more specific, the better. What did you try? What happened? What did you expect?"></textarea>
-    <button class="green-btn" onclick="submitFeedback()">Submit Feedback &rarr;</button>
+    <label class="fb-lbl" for="fbType">What type of feedback is this?</label>
+    <select class="fb-input" id="fbType" style="-webkit-appearance:none">
+      <option value="">Select one...</option>
+      <option>Bug</option>
+      <option>Confusing</option>
+      <option>Looks good</option>
+      <option>Missing feature</option>
+      <option>Wrong information</option>
+      <option>Too many clicks</option>
+      <option>Design improvement</option>
+      <option>Other</option>
+    </select>
+    <label class="fb-lbl" for="fbSeverity">How serious is it?</label>
+    <select class="fb-input" id="fbSeverity" style="-webkit-appearance:none">
+      <option value="">Select one...</option>
+      <option>Low</option>
+      <option>Medium</option>
+      <option>High</option>
+      <option>Blocking issue</option>
+    </select>
+    <label class="fb-lbl" for="fbRating">Overall experience rating</label>
+    <select class="fb-input" id="fbRating" style="-webkit-appearance:none">
+      <option value="">Select one...</option>
+      <option>Excellent</option>
+      <option>Good</option>
+      <option>Okay</option>
+      <option>Confusing</option>
+      <option>Needs work</option>
+    </select>
+    <label class="fb-lbl" for="fbMsg">Your comments</label>
+    <textarea class="fb-textarea" id="fbMsg" placeholder="Tell us what happened or what you would improve."></textarea>
+    <button class="green-btn" id="fbSubmitBtn" onclick="submitFeedback()">Submit Feedback &rarr;</button>
     <div class="fb-sent" id="fbSent">
       <div style="font-size:36px;margin-bottom:8px">&#10003;</div>
       <div style="font-weight:800;color:#16a34a;font-size:18px;margin-bottom:6px">Feedback received!</div>
@@ -420,9 +462,22 @@ body { font-size: 16px !important; }
 <div class="fb-modal" id="fbPromptModal">
   <div class="fb-sheet" style="text-align:center">
     <h3 style="font-size:22px;font-weight:900;margin-bottom:12px">Help Improve LeaseSmart</h3>
-    <p style="color:#374151;font-size:16px;line-height:1.7;margin-bottom:24px">What worked?<br>What confused you?<br>What should we add next?</p>
+    <p style="color:#374151;font-size:16px;line-height:1.7;margin-bottom:8px">Your feedback helps shape the app.<br>Tell us what worked, what confused you, and what should be improved.</p>
+    <p style="color:#6b7280;font-size:14px;line-height:1.5;margin-bottom:24px">Best feedback may qualify for the beta tester reward.</p>
     <button class="green-btn" style="margin-bottom:10px" onclick="feedbackPromptGive()">Give Feedback</button>
     <button class="ghost-btn" type="button" style="width:100%;padding:14px;font-size:15px;font-weight:700" onclick="feedbackPromptLater()">Later</button>
+  </div>
+</div>
+
+<!-- MAJOR CHANGE WARNING -->
+<div class="fb-modal" id="majorChangeModal">
+  <div class="fb-sheet" style="text-align:center">
+    <h3 style="font-size:20px;font-weight:900;margin-bottom:10px">Update your search?</h3>
+    <p style="color:#374151;font-size:16px;line-height:1.6;margin-bottom:24px">Changing this may update your matches and search activity.</p>
+    <div class="filter-actions" style="justify-content:center">
+      <button class="green-btn" style="flex:1;min-width:140px" onclick="confirmMajorChange()">Continue</button>
+      <button class="ghost-btn" type="button" style="flex:1;min-width:140px" onclick="cancelMajorChange()">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -488,7 +543,7 @@ body { font-size: 16px !important; }
     <strong style="color:#16a34a">LeaseSmart by TGT Technologies Inc.</strong><br/>
     Tee Gates, Founder<br/>
     <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a> &bull; <a href="mailto:support@tgttechnologies.com">support@tgttechnologies.com</a><br/>
-    <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1.9</strong><br>Updated Today</div>
+    <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1.10</strong><br>Updated Today</div>
   </div>
 </div>
 </div>
@@ -510,7 +565,7 @@ body { font-size: 16px !important; }
       <div class="q-card" id="qCard"></div>
       <button class="back-link" id="backBtn" style="display:none" onclick="goBack()">&#8592; Back</button>
       <p class="privacy">&#128274; Your info is private. We never sell your data.</p>
-      <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.9</strong><br>Updated Today</div>
+      <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.10</strong><br>Updated Today</div>
     </div>
   </div>
 </div>
@@ -524,7 +579,7 @@ body { font-size: 16px !important; }
   <div class="search-stage" id="searchStage">Reading your profile&hellip;</div>
   <div class="search-bar"><div class="search-fill" id="searchFill"></div></div>
   <div class="search-pct" id="searchPct">0%</div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.9</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.10</strong><br>Updated Today</div>
 </div>
 </div>
 
@@ -562,7 +617,7 @@ body { font-size: 16px !important; }
     <div id="tab-verify" style="display:none"></div>
     <div id="tab-profile" style="display:none"></div>
   </div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.9</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.10</strong><br>Updated Today</div>
 </div>
 
 <!-- DETAIL PAGE -->
@@ -574,7 +629,7 @@ body { font-size: 16px !important; }
     </div>
   </header>
   <div class="det-wrap" id="detailContent"></div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.9</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.10</strong><br>Updated Today</div>
 </div>
 
 <!-- ADMIN PAGE -->
@@ -590,8 +645,8 @@ body { font-size: 16px !important; }
 </div>
 
 <script>
-// v1.1.9 localStorage polish — header, banner, favorites sync, status persistence, typography, feedback timing
-var LS_BUILD = '20260523-v1.1.9';
+// v1.1.10 Feedback flow + less clicking — guided feedback, lastAction, major change warnings
+var LS_BUILD = '20260523-v1.1.10';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 
 // ================================================================
@@ -608,8 +663,15 @@ var APP = {
   quizStep: 0,
   quizAnswers: {},
   multiSel: [],
-  customBudget: ''
+  customBudget: '',
+  currentTab: 'tab-matches',
+  lastAction: '',
+  lastFieldChanged: ''
 };
+
+var MAJOR_FIELDS = ['state', 'city', 'movein', 'budget', 'beds', 'baths', 'pets', 'park', 'commute'];
+var MAJOR_FIELD_LABELS = { state: 'State', city: 'City', movein: 'Move-in date', budget: 'Budget', beds: 'Bedrooms', baths: 'Bathrooms', pets: 'Pets', park: 'Parking', commute: 'Commute time' };
+var TAB_LABELS = { 'tab-matches': 'Matches', 'tab-favorites': 'Favorites', 'tab-guide': 'Call Guide', 'tab-verify': 'Verify Links', 'tab-profile': 'Profile' };
 
 var ADMIN_CODE = 'TGT2026';
 
@@ -800,8 +862,101 @@ function lsCanShowFeedbackPrompt() {
   return true;
 }
 
+function setLastAction(text) {
+  if (!text) return;
+  APP.lastAction = text;
+  APP.lastActionAt = Date.now();
+}
+
+function getCurrentPageId() {
+  var pg = document.querySelector('.pg.show');
+  return pg ? pg.id : 'unknown';
+}
+
+function getCurrentTabId() {
+  if (getCurrentPageId() !== 'dash-pg') return '';
+  return APP.currentTab || 'tab-matches';
+}
+
+function getSavedMajorFieldValue(fieldId) {
+  var p = lsLoadProfile() || {};
+  if (fieldId === 'movein') {
+    if (p.moveinIso) return p.moveinIso;
+    if (p.movein) return p.movein;
+    return null;
+  }
+  var v = p[fieldId];
+  if (v === undefined || v === null || v === '') return null;
+  if (Array.isArray(v) && !v.length) return null;
+  return v;
+}
+
+function fieldValuesEqual(fieldId, a, b) {
+  if (a == null && b == null) return true;
+  if (a == null || b == null) return false;
+  if (fieldId === 'movein') return String(a) === String(b);
+  var na = Array.isArray(a) ? a.slice().sort().join('|') : String(a);
+  var nb = Array.isArray(b) ? b.slice().sort().join('|') : String(b);
+  return na === nb;
+}
+
+function showMajorChangeWarning(onContinue) {
+  APP.majorChangeCallback = onContinue;
+  document.getElementById('majorChangeModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function confirmMajorChange() {
+  document.getElementById('majorChangeModal').classList.remove('open');
+  if (!document.getElementById('fbModal').classList.contains('open') && !document.getElementById('fbPromptModal').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+  if (APP.majorChangeCallback) APP.majorChangeCallback();
+  APP.majorChangeCallback = null;
+}
+
+function cancelMajorChange() {
+  document.getElementById('majorChangeModal').classList.remove('open');
+  if (!document.getElementById('fbModal').classList.contains('open') && !document.getElementById('fbPromptModal').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+  APP.majorChangeCallback = null;
+  APP.pendingAdvanceVal = null;
+}
+
+function getFilterFormValue(fid) {
+  if (fid === 'movein') {
+    var d = document.getElementById('filter_movein');
+    return d && d.value ? d.value : null;
+  }
+  if (fid === 'state' || fid === 'city') {
+    var el = document.getElementById('filter_' + fid);
+    return el ? el.value.trim() : null;
+  }
+  var selected = [];
+  document.querySelectorAll('.filter-cb[data-filter="' + fid + '"]:checked').forEach(function(cb) {
+    selected.push(cb.value);
+  });
+  return selected.length ? selected : null;
+}
+
+function getMajorChangesFromFilterForm() {
+  var changes = [];
+  var checkIds = APP.editModalMode === 'profile' ? EDIT_PROFILE_IDS : EDIT_FILTER_IDS;
+  checkIds.forEach(function(fid) {
+    if (MAJOR_FIELDS.indexOf(fid) < 0) return;
+    var saved = getSavedMajorFieldValue(fid);
+    if (saved == null) return;
+    var newVal = getFilterFormValue(fid);
+    if (newVal != null && !fieldValuesEqual(fid, saved, newVal)) changes.push(fid);
+  });
+  return changes;
+}
+
 function tryFeedbackPrompt(reason) {
   if (!lsCanShowFeedbackPrompt()) return;
+  var fb = document.getElementById('fbModal');
+  if (fb && fb.classList.contains('open')) return;
   var modal = document.getElementById('fbPromptModal');
   if (!modal || modal.classList.contains('open')) return;
   modal.classList.add('open');
@@ -813,11 +968,17 @@ function feedbackPromptLater() {
   LS_STORE.feedbackPromptDismissedUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   lsSave();
   document.getElementById('fbPromptModal').classList.remove('open');
-  document.body.style.overflow = '';
+  if (!document.getElementById('fbModal').classList.contains('open')) document.body.style.overflow = '';
+  if (APP.pendingStartOver) {
+    APP.pendingStartOver = false;
+    executeStartOver();
+  }
 }
 
 function feedbackPromptGive() {
   document.getElementById('fbPromptModal').classList.remove('open');
+  APP.deferStartOverAfterFeedback = !!APP.pendingStartOver;
+  APP.pendingStartOver = false;
   openFeedback();
 }
 
@@ -941,8 +1102,6 @@ function resumeSession() {
 // NAVIGATION
 // ================================================================
 function showPage(id) {
-  var prevPg = document.querySelector('.pg.show');
-  if (prevPg && prevPg.id === 'detail-pg' && id === 'dash-pg') tryFeedbackPrompt('exit_detail');
   document.querySelectorAll('.pg').forEach(function(p) { p.classList.remove('show'); });
   document.getElementById(id).classList.add('show');
   window.scrollTo(0, 0);
@@ -957,6 +1116,9 @@ function showTab(tabId, btn) {
   btn.classList.add('on');
   document.querySelectorAll('#dash-pg .tab-content > div').forEach(function(d) { d.style.display = 'none'; });
   document.getElementById(tabId).style.display = 'block';
+  APP.currentTab = tabId;
+  var tabName = TAB_LABELS[tabId] || tabId;
+  setLastAction('Viewed ' + tabName + ' tab');
   if (tabId === 'tab-favorites') tryFeedbackPrompt('favorites_tab');
 }
 
@@ -978,7 +1140,15 @@ function startQuiz() {
 }
 
 function startOver() {
-  tryFeedbackPrompt('start_over');
+  if (lsCanShowFeedbackPrompt()) {
+    APP.pendingStartOver = true;
+    tryFeedbackPrompt('start_over');
+    return;
+  }
+  executeStartOver();
+}
+
+function executeStartOver() {
   var prof = lsLoadProfile() || {};
   if (APP.profile && APP.profile.name) {
     prof = { name: APP.profile.name, email: APP.profile.email, phone: APP.profile.phone };
@@ -1086,6 +1256,15 @@ function renderFilterForm() {
 }
 
 function applyFilters() {
+  var majorChanges = getMajorChangesFromFilterForm();
+  if (majorChanges.length) {
+    showMajorChangeWarning(function() { applyFiltersConfirmed(majorChanges); });
+    return;
+  }
+  applyFiltersConfirmed([]);
+}
+
+function applyFiltersConfirmed(changedMajorFields) {
   var p = Object.assign({}, APP.profile);
   if (APP.editModalMode === 'profile') {
     EDIT_PERSONAL_IDS.forEach(function(fid) {
@@ -1118,6 +1297,10 @@ function applyFilters() {
     if (selected.length) p[fid] = selected;
     else if (APP.profile[fid]) p[fid] = APP.profile[fid];
   });
+  if (changedMajorFields && changedMajorFields.length) {
+    APP.lastFieldChanged = MAJOR_FIELD_LABELS[changedMajorFields[0]] || changedMajorFields[0];
+    setLastAction('Edited field: ' + APP.lastFieldChanged);
+  }
   APP.profile = p;
   APP.quizAnswers = Object.assign({}, APP.quizAnswers, p);
   lsSaveFullProfile(p);
@@ -1354,7 +1537,31 @@ function submitText() {
 
 function advance(val) {
   var step = STEPS[APP.quizStep];
+  var compareVal = val;
+  if (step.id === 'movein') compareVal = APP.quizAnswers.moveinIso || val;
+  if (MAJOR_FIELDS.indexOf(step.id) >= 0) {
+    var saved = getSavedMajorFieldValue(step.id);
+    if (saved != null && !fieldValuesEqual(step.id, saved, compareVal)) {
+      APP.pendingAdvanceVal = val;
+      showMajorChangeWarning(doPendingAdvance);
+      return;
+    }
+  }
+  doAdvance(val);
+}
+
+function doPendingAdvance() {
+  if (APP.pendingAdvanceVal == null) return;
+  var val = APP.pendingAdvanceVal;
+  APP.pendingAdvanceVal = null;
+  doAdvance(val);
+}
+
+function doAdvance(val) {
+  var step = STEPS[APP.quizStep];
   APP.quizAnswers[step.id] = val;
+  setLastAction('Completed step: ' + (step.lbl || step.id));
+  if (MAJOR_FIELD_LABELS[step.id]) APP.lastFieldChanged = MAJOR_FIELD_LABELS[step.id];
   lsSaveFullProfile(APP.quizAnswers);
   if (APP.quizStep < STEPS.length - 1) {
     APP.quizStep++;
@@ -1686,6 +1893,7 @@ function openDetail(id) {
   if (!APP.viewedListingIds) APP.viewedListingIds = {};
   APP.viewedListingIds[l.id] = true;
   if (Object.keys(APP.viewedListingIds).length >= 3) tryFeedbackPrompt('listing_views');
+  setLastAction('Viewed listing: ' + (l.complex || l.propertyName || 'Unknown'));
   APP.curDetail = l;
   APP.photoIdx = 0;
   APP.photos = (l.photos && l.photos.length) ? l.photos : [];
@@ -1925,6 +2133,7 @@ function updateStatus(id, status, btn) {
   var l = APP.listings.find(function(x) { return x.id === id; });
   if (l) l.status = status;
   lsSetListingStatus(id, status);
+  setLastAction('Changed listing status to ' + status);
   document.querySelectorAll('.st-btn').forEach(function(b) { b.classList.remove('on'); });
   btn.classList.add('on');
   var badge = document.getElementById('detStatus');
@@ -2124,37 +2333,88 @@ function adminAction(idx, status) {
 // FEEDBACK
 // ================================================================
 function openFeedback() {
+  var p = lsLoadProfile() || {};
+  var name = (p.name || APP.name || (APP.profile && APP.profile.name) || '').trim();
+  var email = (p.email || APP.email || (APP.profile && APP.profile.email) || '').trim();
+  var phone = (p.phone || APP.phone || (APP.profile && APP.profile.phone) || '').trim();
+  document.getElementById('fbName').value = name;
+  document.getElementById('fbEmail').value = email;
+  document.getElementById('fbPhone').value = phone;
+  document.getElementById('fbCategory').value = '';
+  document.getElementById('fbType').value = '';
+  document.getElementById('fbSeverity').value = '';
+  document.getElementById('fbRating').value = '';
+  document.getElementById('fbMsg').value = '';
+  document.getElementById('fbSent').style.display = 'none';
+  document.getElementById('fbSubmitBtn').style.display = 'block';
   document.getElementById('fbModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeFeedback() {
   document.getElementById('fbModal').classList.remove('open');
-  document.body.style.overflow = '';
+  if (!document.getElementById('fbPromptModal').classList.contains('open') && !document.getElementById('majorChangeModal').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
   document.getElementById('fbSent').style.display = 'none';
-  document.querySelector('.fb-sheet .green-btn').style.display = 'block';
+  document.getElementById('fbSubmitBtn').style.display = 'block';
+  if (APP.deferStartOverAfterFeedback) {
+    APP.deferStartOverAfterFeedback = false;
+    executeStartOver();
+  }
 }
 
 function submitFeedback() {
   var name = document.getElementById('fbName').value.trim();
   var email = document.getElementById('fbEmail').value.trim();
+  var phone = document.getElementById('fbPhone').value.trim();
+  var category = document.getElementById('fbCategory').value;
   var type = document.getElementById('fbType').value;
+  var severity = document.getElementById('fbSeverity').value;
+  var rating = document.getElementById('fbRating').value;
   var msg = document.getElementById('fbMsg').value.trim();
-  if (!name || !msg) { alert('Please enter your name and feedback before submitting.'); return; }
+  if (!name || !email) { alert('Please enter your full name and email before submitting.'); return; }
+  if (!category || !type || !severity || !rating) { alert('Please complete all feedback dropdowns before submitting.'); return; }
   LS_STORE.feedback.unshift({
-    id: 'FB-' + Date.now(), name: name, email: email, type: type || 'General',
-    message: msg, session: (APP.profile && APP.profile.city) ? APP.profile.city + ', ' + APP.profile.state : 'no_search',
+    id: 'FB-' + Date.now(),
+    fullName: name,
+    email: email,
+    phone: phone || '',
+    feedbackCategory: category,
+    feedbackType: type,
+    severity: severity,
+    rating: rating,
+    comment: msg,
+    currentPage: getCurrentPageId(),
+    currentTab: getCurrentTabId(),
+    selectedListing: APP.curDetail ? (APP.curDetail.complex || APP.curDetail.propertyName || '') : '',
+    lastAction: APP.lastAction || '',
+    fieldChanged: APP.lastFieldChanged || '',
+    buildVersion: LS_BUILD,
+    timestamp: new Date().toISOString(),
+    name: name,
+    type: type,
+    message: msg,
+    session: (APP.profile && APP.profile.city) ? APP.profile.city + ', ' + APP.profile.state : 'no_search',
     ts: new Date().toISOString()
   });
   lsSave();
-  lsTrack('feedback_submit', { type: type });
-  document.querySelector('.fb-sheet .green-btn').style.display = 'none';
+  lsTrack('feedback_submit', { type: type, category: category });
+  document.getElementById('fbSubmitBtn').style.display = 'none';
   document.getElementById('fbSent').style.display = 'block';
   setTimeout(function() {
     document.getElementById('fbName').value = '';
     document.getElementById('fbEmail').value = '';
+    document.getElementById('fbPhone').value = '';
+    document.getElementById('fbCategory').value = '';
     document.getElementById('fbType').value = '';
+    document.getElementById('fbSeverity').value = '';
+    document.getElementById('fbRating').value = '';
     document.getElementById('fbMsg').value = '';
+    if (APP.deferStartOverAfterFeedback) {
+      APP.deferStartOverAfterFeedback = false;
+      executeStartOver();
+    }
   }, 500);
 }
 
@@ -2183,7 +2443,7 @@ function renderQAPanel() {
 function initLeaseSmart() {
   var bid = document.getElementById('lsBuildId');
   if (bid) bid.textContent = LS_BUILD;
-  document.title = 'LeaseSmart Beta v1.1.9 (' + LS_BUILD + ')';
+  document.title = 'LeaseSmart Beta v1.1.10 (' + LS_BUILD + ')';
 
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
     sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
@@ -2222,6 +2482,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-<div style="text-align:center; padding:20px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:40px;">LeaseSmart Beta v1.1.9</div>
+<div style="text-align:center; padding:20px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:40px;">LeaseSmart Beta v1.1.10</div>
 </body>
 </html>
