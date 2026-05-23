@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<title>LeaseSmart Beta v1.1.6</title>
-<!-- BUILD_ID: 20260522-v1.1.6 — deploy this file to Netlify root -->
+<title>LeaseSmart Beta v1.1.7</title>
+<!-- BUILD_ID: 20260522-v1.1.7 — deploy this file to Netlify root -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f8fafb;color:#111827;min-height:100vh}
@@ -34,6 +34,25 @@ button,input,textarea,select{font-family:inherit}
 .fb-textarea{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;font-size:15px;color:#111827;outline:none;margin-bottom:12px;min-height:100px;resize:vertical;line-height:1.6;font-family:inherit}
 .fb-close{background:none;border:none;color:#9ca3af;font-size:14px;cursor:pointer;float:right;margin-top:-4px}
 .fb-sent{background:#f0fdf4;border:2px solid #22d98a33;border-radius:12px;padding:20px;text-align:center;display:none}
+/* EDIT FILTERS MODAL */
+.filter-modal{position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px}
+.filter-modal.open{display:flex}
+.filter-sheet{background:#fff;border-radius:16px;padding:24px 22px 28px;width:100%;max-width:720px;max-height:92vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.15)}
+.filter-sheet h3{font-size:22px;font-weight:900;color:#111827;margin-bottom:6px}
+.filter-sheet-sub{color:#6b7280;font-size:14px;margin-bottom:20px;line-height:1.5}
+.filter-group{margin-bottom:18px;padding-bottom:16px;border-bottom:1.5px solid #f3f4f6}
+.filter-group:last-of-type{border-bottom:none}
+.filter-group-lbl{font-weight:800;font-size:14px;margin-bottom:10px;color:#111827}
+.filter-chks{display:flex;flex-direction:column;gap:8px;max-height:150px;overflow-y:auto;padding-right:4px}
+.filter-chk{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:#374151;cursor:pointer}
+.filter-chk input{width:18px;height:18px;margin-top:2px;accent-color:#22d98a;flex-shrink:0}
+.filter-date{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:12px 14px;font-size:16px}
+.filter-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.filter-actions .green-btn{flex:1;min-width:160px}
+.filter-actions .ghost-btn{padding:14px 18px;font-size:14px;font-weight:700}
+.demo-results-notice{background:#fff7ed;border:2px solid #f5a62355;border-radius:14px;padding:16px 20px;margin-bottom:18px;font-size:14px;color:#374151;line-height:1.65}
+.demo-results-notice strong{color:#d97706;display:block;margin-bottom:4px;font-size:15px}
+.sample-card-badge{display:inline-block;background:#fff7ed;border:1.5px solid #f5a62366;color:#d97706;font-size:11px;font-weight:800;padding:4px 10px;border-radius:6px;margin-bottom:8px;letter-spacing:.3px}
 /* SCREENS */
 .pg{display:none;min-height:100vh}
 .pg.show{display:block}
@@ -320,8 +339,22 @@ body { font-size: 16px !important; }
 
 <!-- BETA DEMO BANNER - shows on all screens -->
 <div class="beta-banner" id="lsBuildBanner">
-  <strong>LeaseSmart Beta v1.1.6</strong> &mdash; Critical Bug Fix Build &mdash; Build <span id="lsBuildId">loading</span>
+  <strong>LeaseSmart Beta v1.1.7</strong> &mdash; Foundation Fix Build &mdash; Build <span id="lsBuildId">loading</span>
   &nbsp;|&nbsp; <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a>
+</div>
+
+<!-- EDIT FILTERS MODAL -->
+<div class="filter-modal" id="filterModal">
+  <div class="filter-sheet">
+    <button class="fb-close" onclick="closeEditFilters()">&#10005; Close</button>
+    <h3>&#128269; Edit Search Filters</h3>
+    <p class="filter-sheet-sub">Adjust what you are looking for. Your matches refresh instantly. Name, email, and phone stay saved.</p>
+    <div id="filterFormBody"></div>
+    <div class="filter-actions">
+      <button class="green-btn" onclick="applyFilters()">Apply Filters &rarr;</button>
+      <button class="ghost-btn" type="button" onclick="closeEditFilters()">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <!-- CALL GUIDE MODAL -->
@@ -427,7 +460,7 @@ body { font-size: 16px !important; }
     <strong style="color:#16a34a">LeaseSmart by TGT Technologies Inc.</strong><br/>
     Tee Gates, Founder<br/>
     <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a> &bull; <a href="mailto:support@tgttechnologies.com">support@tgttechnologies.com</a><br/>
-    <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1.6</strong><br>Updated Today</div>
+    <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1.7</strong><br>Updated Today</div>
   </div>
 </div>
 </div>
@@ -449,7 +482,7 @@ body { font-size: 16px !important; }
       <div class="q-card" id="qCard"></div>
       <button class="back-link" id="backBtn" style="display:none" onclick="goBack()">&#8592; Back</button>
       <p class="privacy">&#128274; Your info is private. We never sell your data.</p>
-      <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.6</strong><br>Updated Today</div>
+      <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.7</strong><br>Updated Today</div>
     </div>
   </div>
 </div>
@@ -463,7 +496,7 @@ body { font-size: 16px !important; }
   <div class="search-stage" id="searchStage">Reading your profile&hellip;</div>
   <div class="search-bar"><div class="search-fill" id="searchFill"></div></div>
   <div class="search-pct" id="searchPct">0%</div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.6</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.7</strong><br>Updated Today</div>
 </div>
 </div>
 
@@ -477,7 +510,8 @@ body { font-size: 16px !important; }
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <div class="pchip" id="profChip">Loading&hellip;</div>
-        <button class="ghost-btn" onclick="startNewSearch()">New Search</button>
+        <button class="ghost-btn" onclick="openEditFilters()">Edit Filters</button>
+        <button class="ghost-btn" onclick="startOver()">Start Over</button>
       </div>
     </div>
   </header>
@@ -499,7 +533,7 @@ body { font-size: 16px !important; }
     <div id="tab-verify" style="display:none"></div>
     <div id="tab-profile" style="display:none"></div>
   </div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.6</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.7</strong><br>Updated Today</div>
 </div>
 
 <!-- DETAIL PAGE -->
@@ -511,7 +545,7 @@ body { font-size: 16px !important; }
     </div>
   </header>
   <div class="det-wrap" id="detailContent"></div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.6</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.7</strong><br>Updated Today</div>
 </div>
 
 <!-- ADMIN PAGE -->
@@ -527,8 +561,8 @@ body { font-size: 16px !important; }
 </div>
 
 <script>
-// v1.1.6 Phase 1 UI polish and multi-select fixes — change this string on every deploy to bust cache
-var LS_BUILD = '20260522-v1.1.6';
+// v1.1.7 Foundation fixes — profile persistence, Edit Filters, sample labels
+var LS_BUILD = '20260522-v1.1.7';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 
 // ================================================================
@@ -598,6 +632,15 @@ var STEPS = [
   {id:'extras', type:'text', icon:'&#128172;', lbl:'Anything else?',    q:'Any special requests or things we should know?',     ph:'The more detail the better.', opt:true}
 ];
 
+var EDIT_FILTER_IDS = ['movein', 'budget', 'beds', 'baths', 'commute', 'amenities', 'laundry', 'pets', 'park', 'transit'];
+
+function getStepById(id) {
+  for (var i = 0; i < STEPS.length; i++) {
+    if (STEPS[i].id === id) return STEPS[i];
+  }
+  return null;
+}
+
 // ================================================================
 // LEASESMART PLATFORM CORE — Phase 1 Beta Foundation
 // Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
@@ -619,27 +662,37 @@ function lsLoadProfile() {
   } catch (e) { return null; }
 }
 
-function lsSaveProfile(name, email, phone) {
+function lsSaveFullProfile(partial) {
   try {
-    APP.name = name || '';
-    APP.email = email || '';
-    APP.phone = phone || '';
-    localStorage.setItem(LS_PROFILE_KEY, JSON.stringify({
-      name: APP.name,
-      email: APP.email,
-      phone: APP.phone
-    }));
+    var existing = lsLoadProfile() || {};
+    var merged = Object.assign({}, existing, partial || {});
+    localStorage.setItem(LS_PROFILE_KEY, JSON.stringify(merged));
+    if (merged.name != null) APP.name = merged.name;
+    if (merged.email != null) APP.email = merged.email;
+    if (merged.phone != null) APP.phone = merged.phone;
   } catch (e) { console.warn('LeaseSmart: profile save failed', e); }
 }
 
+function lsReplaceProfile(profile) {
+  try {
+    var data = profile || {};
+    localStorage.setItem(LS_PROFILE_KEY, JSON.stringify(data));
+    APP.name = data.name || '';
+    APP.email = data.email || '';
+    APP.phone = data.phone || '';
+  } catch (e) { console.warn('LeaseSmart: profile replace failed', e); }
+}
+
+function lsSaveProfile(name, email, phone) {
+  lsSaveFullProfile({ name: name || '', email: email || '', phone: phone || '' });
+}
+
 function lsSyncPersonalFromAnswers() {
-  var a = APP.quizAnswers;
-  if (a.name || a.email || a.phone) {
-    lsSaveProfile(a.name, a.email, a.phone);
-    APP.name = a.name;
-    APP.email = a.email;
-    APP.phone = a.phone;
-  }
+  lsSaveFullProfile({
+    name: APP.quizAnswers.name,
+    email: APP.quizAnswers.email,
+    phone: APP.quizAnswers.phone
+  });
 }
 
 function lsSave() {
@@ -682,7 +735,7 @@ function lsToggleFavorite(listing) {
 
 function normalizeListing(raw) {
   var l = raw || {};
-  var label = l.verificationLabel || (l.source === 'leasesmart_verified' ? 'Verified Listing' : (l.source === 'leasesmart_demo' ? 'Demo Listing' : 'Source Pending'));
+  var label = l.verificationLabel || (l.source === 'leasesmart_verified' ? 'Verified Listing' : (l.source === 'leasesmart_demo' ? 'Sample Listing — Not Real Availability' : 'Source Pending'));
   return Object.assign({
     propertyName: l.complex || l.propertyName || 'Unknown Property',
     address: l.address || '', city: l.city || l.town || '', state: l.state || '', zip: l.zip || '',
@@ -690,7 +743,7 @@ function normalizeListing(raw) {
     phone: l.phone || '', photos: l.photos || [], listingUrl: l.aptLink || l.listingUrl || null,
     propertyUrl: l.directLink || l.propertyUrl || null, source: l.source || 'source_pending',
     verificationLabel: label, verificationStatus: l.verificationStatus || 'PENDING',
-    confidenceScore: l.confidenceScore != null ? l.confidenceScore : (label === 'Verified Listing' ? 85 : label === 'Demo Listing' ? 15 : 0),
+    confidenceScore: l.confidenceScore != null ? l.confidenceScore : (label === 'Verified Listing' ? 85 : (label.indexOf('Sample') >= 0 ? 12 : 0)),
     lastUpdated: l.lastUpdated || new Date().toISOString().slice(0, 10),
     transitIntel: l.transitIntel || null, safety: l.safety || null, monthlyCost: l.monthlyCost || null,
     intelligenceScores: l.intelligenceScores || {}
@@ -755,7 +808,7 @@ function applyIntelligenceToListings(listings, profile) {
 function buildMonthlyCost(listing) {
   var rent = listing.rentLow || 1950;
   return {
-    rent: { amount: rent, label: 'Estimated', confidence: listing.verificationLabel === 'Demo Listing' ? 'demo' : 'estimated' },
+    rent: { amount: rent, label: 'Estimated', confidence: (listing.verificationLabel || '').indexOf('Sample') >= 0 ? 'demo' : 'estimated' },
     utilities: { electric: 95, gas: 45, water: 35, internet: 70, label: 'Estimated' },
     transportation: { transitPass: 110, fuel: 120, parking: 75, label: 'Estimated' },
     petFees: { amount: 35, label: 'Estimated' },
@@ -773,7 +826,8 @@ function confTag(kind) {
 function verificationBadgeHtml(l) {
   var label = l.verificationLabel || 'Source Pending';
   var st = { 'Verified Listing': 'background:#f0fdf4;color:#16a34a;border:1px solid #22d98a44',
-    'Demo Listing': 'background:#fef3c7;color:#d97706;border:1px solid #f5a62355',
+    'Sample Listing — Not Real Availability': 'background:#fff7ed;color:#d97706;border:1px solid #f5a62366',
+    'Demo Listing': 'background:#fff7ed;color:#d97706;border:1px solid #f5a62366',
     'Source Pending': 'background:#f4f7fa;color:#6b7280;border:1px solid #e5e7eb' };
   return '<span class="verify-badge" style="' + (st[label] || st['Source Pending']) + '">' + label + '</span>';
 }
@@ -812,9 +866,7 @@ function startQuiz() {
   APP.quizStep = 0;
   APP.quizAnswers = {};
   if (prof) {
-    APP.quizAnswers.name = prof.name || '';
-    APP.quizAnswers.email = prof.email || '';
-    APP.quizAnswers.phone = prof.phone || '';
+    APP.quizAnswers = Object.assign({}, prof);
     APP.name = prof.name;
     APP.email = prof.email;
     APP.phone = prof.phone;
@@ -823,28 +875,110 @@ function startQuiz() {
   renderStep();
 }
 
-function startNewSearch() {
+function startOver() {
   var prof = lsLoadProfile() || {};
   if (APP.profile && APP.profile.name) {
     prof = { name: APP.profile.name, email: APP.profile.email, phone: APP.profile.phone };
   }
-  lsSaveProfile(prof.name, prof.email, prof.phone);
-  APP.quizStep = 3;
+  var personal = { name: prof.name || '', email: prof.email || '', phone: prof.phone || '' };
+  lsReplaceProfile(personal);
+  APP.quizStep = 0;
   APP.quizAnswers = {
-    name: prof.name || '',
-    email: prof.email || '',
-    phone: prof.phone || ''
+    name: personal.name,
+    email: personal.email,
+    phone: personal.phone
   };
   APP.name = APP.quizAnswers.name;
   APP.email = APP.quizAnswers.email;
   APP.phone = APP.quizAnswers.phone;
+  APP.profile = {};
   APP.listings = [];
-  APP.profile = { name: APP.quizAnswers.name, email: APP.quizAnswers.email, phone: APP.quizAnswers.phone };
   APP.filter = 'all';
   LS_STORE.session = null;
   lsSave();
+  lsTrack('start_over');
   showPage('quiz-pg');
   renderStep();
+}
+
+function openEditFilters() {
+  renderFilterForm();
+  document.getElementById('filterModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditFilters() {
+  document.getElementById('filterModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderFilterForm() {
+  var p = APP.profile || {};
+  var html = '';
+  EDIT_FILTER_IDS.forEach(function(fid) {
+    var step = getStepById(fid);
+    if (!step) return;
+    html += '<div class="filter-group">';
+    html += '<div class="filter-group-lbl">' + step.lbl + '</div>';
+    if (fid === 'movein') {
+      var isoVal = (p.moveinIso || '').replace(/"/g, '&quot;');
+      html += '<input class="filter-date" type="date" id="filter_movein" min="' + new Date().toISOString().slice(0, 10) + '" value="' + isoVal + '"/>';
+      html += '<p style="font-size:12px;color:#9ca3af;margin-top:6px">Current: ' + (p.movein || 'Not set') + '</p>';
+    } else if (step.opts) {
+      var cur = p[fid];
+      var curArr = Array.isArray(cur) ? cur : (cur ? [cur] : []);
+      html += '<div class="filter-chks" data-filter-id="' + fid + '">';
+      step.opts.forEach(function(opt) {
+        var esc = opt.replace(/"/g, '&quot;');
+        var checked = curArr.indexOf(opt) >= 0 ? ' checked' : '';
+        html += '<label class="filter-chk"><input type="checkbox" class="filter-cb" data-filter="' + fid + '" value="' + esc + '"' + checked + '/><span>' + opt + '</span></label>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  document.getElementById('filterFormBody').innerHTML = html;
+}
+
+function applyFilters() {
+  var p = Object.assign({}, APP.profile);
+  var personal = { name: p.name, email: p.email, phone: p.phone };
+  EDIT_FILTER_IDS.forEach(function(fid) {
+    if (fid === 'movein') {
+      var d = document.getElementById('filter_movein');
+      if (d && d.value) {
+        p.moveinIso = d.value;
+        p.movein = formatCalendarDate(d.value);
+      }
+      return;
+    }
+    var selected = [];
+    document.querySelectorAll('.filter-cb[data-filter="' + fid + '"]:checked').forEach(function(cb) {
+      selected.push(cb.value);
+    });
+    p[fid] = selected.length ? selected : (p[fid] || ['No preference']);
+  });
+  p.name = personal.name || p.name;
+  p.email = personal.email || p.email;
+  p.phone = personal.phone || p.phone;
+  APP.profile = p;
+  APP.quizAnswers = Object.assign({}, APP.quizAnswers, p);
+  lsSaveFullProfile(p);
+  lsPersistProfile(APP.profile);
+  refreshListingsFromProfile();
+  closeEditFilters();
+  showPage('dash-pg');
+  var matchTab = document.querySelector('.tab-btn');
+  if (matchTab) showTab('tab-matches', matchTab);
+  lsTrack('filters_applied');
+}
+
+function refreshListingsFromProfile() {
+  APP.listings = applyIntelligenceToListings(getFallback(), APP.profile);
+  APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
+  LS_STORE.session = { profile: APP.profile, listings: APP.listings, savedAt: new Date().toISOString() };
+  lsSave();
+  buildDashboard();
 }
 
 function renderStep() {
@@ -913,8 +1047,9 @@ function buildStepHTML(step) {
     h += '<input class="state-search" id="stateSearch" type="text" placeholder="Search states..." autocomplete="off"/>';
     h += '<div class="state-list" id="stateList"></div>';
   } else if (step.type === 'calendar') {
+    var calVal = (APP.quizAnswers.moveinIso || '').replace(/"/g, '&quot;');
     h += '<p style="font-size:14px;color:#6b7280;margin-bottom:10px">Tap to open your device calendar (phone or desktop).</p>';
-    h += '<input class="q-input q-calendar" id="qCalendar" type="date" min="' + new Date().toISOString().slice(0, 10) + '"/>';
+    h += '<input class="q-input q-calendar" id="qCalendar" type="date" min="' + new Date().toISOString().slice(0, 10) + '" value="' + calVal + '"/>';
     h += '<button class="q-next" id="qNextBtn" type="button" disabled>Continue &rarr;</button>';
   }
 
@@ -943,6 +1078,9 @@ function wireStepEvents(step) {
     }
 
   } else if (step.type === 'multi') {
+    var saved = APP.quizAnswers[step.id];
+    var savedArr = Array.isArray(saved) ? saved : (saved ? [saved] : []);
+    APP.multiSel = savedArr.slice();
     function updateMultiPreview() {
       var prev = document.getElementById('multiSelPreview');
       if (prev) prev.textContent = APP.multiSel.length ? ('Selected: ' + APP.multiSel.join(' · ')) : 'Select one or more options';
@@ -969,6 +1107,13 @@ function wireStepEvents(step) {
         if (label && e.target.tagName !== 'INPUT') {
           var inp = label.querySelector('.multi-cb');
           if (inp) { inp.checked = !inp.checked; inp.dispatchEvent(new Event('change', { bubbles: true })); }
+        }
+      });
+      grid.querySelectorAll('.multi-cb').forEach(function(cb) {
+        if (savedArr.indexOf(cb.getAttribute('data-val')) >= 0) {
+          cb.checked = true;
+          var label = cb.closest('.opt-check');
+          if (label) label.classList.add('on');
         }
       });
     }
@@ -1010,6 +1155,7 @@ function wireStepEvents(step) {
     if (btn) {
       btn.addEventListener('click', function() {
         if (!cal || !isValidIsoDate(cal.value)) { if (cal) cal.focus(); return; }
+        APP.quizAnswers.moveinIso = cal.value;
         advance(formatCalendarDate(cal.value));
       });
     }
@@ -1048,9 +1194,7 @@ function submitText() {
 function advance(val) {
   var step = STEPS[APP.quizStep];
   APP.quizAnswers[step.id] = val;
-  if (step.id === 'name' || step.id === 'email' || step.id === 'phone') {
-    lsSyncPersonalFromAnswers();
-  }
+  lsSaveFullProfile(APP.quizAnswers);
   if (APP.quizStep < STEPS.length - 1) {
     APP.quizStep++;
     renderStep();
@@ -1061,7 +1205,7 @@ function advance(val) {
 
 function submitSteps() {
   APP.profile = Object.assign({}, APP.quizAnswers);
-  lsSyncPersonalFromAnswers();
+  lsSaveFullProfile(APP.profile);
   runSearch();
 }
 
@@ -1073,14 +1217,11 @@ function goBack() {
 // SEARCH
 // ================================================================
 function finishListingsFlow() {
-  var listings = getFallback();
-  APP.listings = listings.map(function(l, i) {
-    l.priority = i + 1;
-    if (l.score == null) l.score = Math.max(65, 92 - i * 2);
-    if (!l.scoreBreakdown) l.scoreBreakdown = { budget: 22, parking: 18, pets: 12, transit: 16, movein: 9, amenities: 4 };
-    return l;
-  });
+  APP.listings = applyIntelligenceToListings(getFallback(), APP.profile);
   APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
+  lsSaveFullProfile(APP.profile);
+  lsPersistProfile(APP.profile);
+  lsPersistSearch(APP.profile);
   buildDashboard();
   showPage('dash-pg');
 }
@@ -1169,7 +1310,7 @@ function getFallback() {
       amenities: amenities, deposit: '$1,000',
       aptLink: 'https://www.apartments.com/building/demo-' + id, directLink: 'https://www.example.com/property/' + id,
       listingUrl: 'https://www.apartments.com/building/demo-' + id, propertyUrl: 'https://www.example.com/property/' + id,
-      source: 'leasesmart_demo', verificationLabel: 'Demo Listing', verificationStatus: 'DEMO',
+      source: 'leasesmart_demo', verificationLabel: 'Sample Listing — Not Real Availability', verificationStatus: 'DEMO',
       confidenceScore: 12, lastUpdated: '2026-05-21',
       availability: 'available', status: 'NOT CALLED', whyItFits: why,
       notes: 'Illustrative demo property — not a verified real listing.', missingData: missing || ['Confirm overnight parking'],
@@ -1247,6 +1388,8 @@ function renderMatches() {
   var good = ls.filter(function(l) { return l.score >= 70 && l.score < 85; }).length;
   var rev = ls.filter(function(l) { return l.score < 70; }).length;
 
+  var demoNotice = '<div class="demo-results-notice"><strong>&#128311; Sample Listings — For Demo Only</strong>These are sample listings for testing the experience. They are not real apartment availability. Verified listings will be added in a future version.</div>';
+
   // Activity bar
   var statItems = [
     { icon: '&#128203;', name: 'NOT CALLED', status: 'NOT CALLED' },
@@ -1284,6 +1427,9 @@ function renderMatches() {
     cardsHTML += verificationBadgeHtml(l);
     if (l.intelligenceScores) cardsHTML += '<span class="badge" style="background:#eff6ff;color:#2563eb">Life ' + (l.intelligenceScores.lifestyle || '--') + '</span>';
     cardsHTML += '</div><span class="card-pri">#' + l.priority + '</span></div>';
+    if (l.source === 'leasesmart_demo' || (l.verificationLabel || '').indexOf('Sample') >= 0) {
+      cardsHTML += '<div class="sample-card-badge">&#128311; SAMPLE LISTING &mdash; For Demo Only</div>';
+    }
     cardsHTML += '<div class="card-name">' + l.complex + '</div>';
     cardsHTML += '<div class="card-addr">' + l.address + '</div>';
     cardsHTML += '<div class="card-rent-row"><span class="card-rent">' + l.rent + '</span><span class="card-sz">' + l.size + ' \u00b7 ' + l.bedrooms + 'BR/' + l.bathrooms + 'BA</span></div>';
@@ -1308,7 +1454,7 @@ function renderMatches() {
   });
   cardsHTML += '</div>';
 
-  document.getElementById('tab-matches').innerHTML = actHTML + filtHTML + cardsHTML;
+  document.getElementById('tab-matches').innerHTML = demoNotice + actHTML + filtHTML + cardsHTML;
 }
 
 function toggleFavorite(id, btn) {
@@ -1739,7 +1885,10 @@ function renderProfile() {
   });
   html += '<h3 style="font-weight:800;margin:24px 0 12px;font-size:16px">Feedback Submitted (' + (LS_STORE.feedback || []).length + ')</h3>';
   html += '<p style="color:#6b7280;font-size:13px">' + (LS_STORE.feedback || []).length + ' items stored locally for beta review export.</p>';
-  html += '<button class="green-btn" style="margin-top:24px" onclick="startNewSearch()">Start New Search &rarr;</button>';
+  html += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px">';
+  html += '<button class="green-btn" style="flex:1;min-width:200px" onclick="openEditFilters()">Edit Filters &rarr;</button>';
+  html += '<button class="ghost-btn" style="flex:1;min-width:200px;padding:16px;font-size:15px;font-weight:700" onclick="startOver()">Start Over</button>';
+  html += '</div>';
   html += '</div>';
   document.getElementById('tab-profile').innerHTML = html;
 }
@@ -1861,7 +2010,7 @@ function renderQAPanel() {
 function initLeaseSmart() {
   var bid = document.getElementById('lsBuildId');
   if (bid) bid.textContent = LS_BUILD;
-  document.title = 'LeaseSmart Beta v1.1.6 (' + LS_BUILD + ')';
+  document.title = 'LeaseSmart Beta v1.1.7 (' + LS_BUILD + ')';
 
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
     sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
@@ -1877,7 +2026,7 @@ function initLeaseSmart() {
     APP.email = prof.email;
     APP.phone = prof.phone;
   }
-  if (LS_STORE.session && LS_STORE.session.profile) {
+  if ((LS_STORE.session && LS_STORE.session.profile) || (prof && (prof.movein || prof.city || prof.state))) {
     var rb = document.getElementById('resumeBtn');
     if (rb) rb.style.display = 'block';
   }
@@ -1900,6 +2049,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-<div style="text-align:center; padding:20px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:40px;">LeaseSmart Beta v1.1.6</div>
+<div style="text-align:center; padding:20px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:40px;">LeaseSmart Beta v1.1.7</div>
 </body>
 </html>
