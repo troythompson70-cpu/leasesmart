@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<title>LeaseSmart Beta v1.1.5</title>
-<!-- BUILD_ID: 20260522-v1.1.5 — deploy this file to Netlify root -->
+<title>LeaseSmart Beta v1.1.6</title>
+<!-- BUILD_ID: 20260522-v1.1.6 — deploy this file to Netlify root -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f8fafb;color:#111827;min-height:100vh}
@@ -280,19 +280,12 @@ button,input,textarea,select{font-family:inherit}
   .qz-head{padding:20px 48px}
   .qz-body{padding:44px 48px 56px}
   .qz-dots{padding:14px 48px}
-  .qz-inner{max-width:860px}
-  .q-card{padding:40px 44px}
-  .feat-grid{gap:20px}
-  .home-footer{font-size:14px}
-  .home-footer strong{font-size:18px}
 }
 
 /* READABILITY IMPROVEMENTS */
 body { font-size: 16px !important; }
-.q-title { font-size: 22px !important; font-weight: 700 !important; }
+.q-title { font-size: 20px !important; font-weight: 700 !important; }
 .q-lbl { font-size: 14px !important; font-weight: 600 !important; }
-.qz-count-num { font-size: 17px !important; font-weight: 800 !important; }
-.qz-count-pct { font-size: 16px !important; font-weight: 800 !important; }
 .q-input, input[type="text"], input[type="email"], input[type="date"] { font-size: 16px !important; padding: 14px !important; }
 .opt { font-size: 15px !important; padding: 12px 16px !important; }
 .card-name { font-size: 18px !important; font-weight: 700 !important; }
@@ -327,7 +320,8 @@ body { font-size: 16px !important; }
 
 <!-- BETA DEMO BANNER - shows on all screens -->
 <div class="beta-banner" id="lsBuildBanner">
-  <strong>Beta Demo</strong> &mdash; Sample listings for testing &mdash; <a href="mailto:leasesmart@tgttechnologies.com">Send feedback</a> &mdash; v1.1.5
+  <strong>LeaseSmart Beta v1.1.6</strong> &mdash; Critical Bug Fix Build &mdash; Build <span id="lsBuildId">loading</span>
+  &nbsp;|&nbsp; <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a>
 </div>
 
 <!-- CALL GUIDE MODAL -->
@@ -430,10 +424,10 @@ body { font-size: 16px !important; }
     </div>
   </div>
   <div class="home-footer">
-    <strong style="color:#16a34a;font-size:18px;display:block;margin-bottom:6px">LeaseSmart by TGT Technologies Inc.</strong>
+    <strong style="color:#16a34a">LeaseSmart by TGT Technologies Inc.</strong><br/>
     Tee Gates, Founder<br/>
     <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a> &bull; <a href="mailto:support@tgttechnologies.com">support@tgttechnologies.com</a><br/>
-    <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1.5</strong><br>Updated Today</div>
+    <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1.6</strong><br>Updated Today</div>
   </div>
 </div>
 </div>
@@ -455,7 +449,7 @@ body { font-size: 16px !important; }
       <div class="q-card" id="qCard"></div>
       <button class="back-link" id="backBtn" style="display:none" onclick="goBack()">&#8592; Back</button>
       <p class="privacy">&#128274; Your info is private. We never sell your data.</p>
-      <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.5</strong><br>Updated Today</div>
+      <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.6</strong><br>Updated Today</div>
     </div>
   </div>
 </div>
@@ -469,7 +463,7 @@ body { font-size: 16px !important; }
   <div class="search-stage" id="searchStage">Reading your profile&hellip;</div>
   <div class="search-bar"><div class="search-fill" id="searchFill"></div></div>
   <div class="search-pct" id="searchPct">0%</div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.5</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.6</strong><br>Updated Today</div>
 </div>
 </div>
 
@@ -505,7 +499,7 @@ body { font-size: 16px !important; }
     <div id="tab-verify" style="display:none"></div>
     <div id="tab-profile" style="display:none"></div>
   </div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.5</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.6</strong><br>Updated Today</div>
 </div>
 
 <!-- DETAIL PAGE -->
@@ -517,7 +511,7 @@ body { font-size: 16px !important; }
     </div>
   </header>
   <div class="det-wrap" id="detailContent"></div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.5</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.6</strong><br>Updated Today</div>
 </div>
 
 <!-- ADMIN PAGE -->
@@ -533,8 +527,8 @@ body { font-size: 16px !important; }
 </div>
 
 <script>
-// v1.1.5 Critical Bug Fix Build — change this string on every deploy to bust cache
-var LS_BUILD = '20260522-v1.1.5';
+// v1.1.6 Phase 1 UI polish and multi-select fixes — change this string on every deploy to bust cache
+var LS_BUILD = '20260522-v1.1.6';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 
 // ================================================================
@@ -581,7 +575,7 @@ var STEPS = [
     opts:['Strict — nothing over my max','Show up to 10% over if worth it','Show up to 20% over for a great match','Show me everything — I will decide']},
   {id:'beds',   type:'multi',icon:'&#128719;', lbl:'Bedrooms',          q:'How many bedrooms? Select all you would consider.',
     opts:['Studio','1 Bedroom','2 Bedrooms','3 Bedrooms','4+ Bedrooms','Flexible']},
-  {id:'baths',  type:'single',icon:'&#128703;',lbl:'Bathrooms',         q:'Minimum bathrooms needed?',
+  {id:'baths',  type:'multi',icon:'&#128703;',lbl:'Bathrooms',         q:'Minimum bathrooms needed? Select all that apply.',
     opts:['1 Bathroom','1.5 Bathrooms','2 Bathrooms','2+ Bathrooms','No preference']},
   {id:'park',   type:'multi',icon:'&#128663;', lbl:'Parking',           q:'What parking do you need?',
     opts:['Assigned resident spot','Covered or garage parking','Surface resident lot','Permit parking','Street parking is fine','No car needed']},
@@ -589,7 +583,7 @@ var STEPS = [
     opts:['No pets','Small dog under 25 lbs','Medium dog 25-50 lbs','Large dog over 50 lbs','Cat','Multiple pets','ESA Animal','Service animal']},
   {id:'transit',type:'multi',icon:'&#128652;', lbl:'Transit',           q:'What public transportation do you need nearby?',
     opts:['Bus routes to downtown','Bus to major city','Commuter rail or train','Subway or metro','Highway access','No transit needed']},
-  {id:'commute',type:'single',icon:'&#9201;',lbl:'Commute time',      q:'How long are you willing to commute one-way?',
+  {id:'commute',type:'multi',icon:'&#9201;',lbl:'Commute time',      q:'How long are you willing to commute one-way? Select all that apply.',
     opts:['Under 15 min','15-25 min','25-35 min','35-45 min','45-60 min','Over an hour is fine','Remote — work from home']},
   {id:'laundry',type:'multi',icon:'&#128085;',lbl:'Laundry',           q:'Laundry preference? Select all that apply.',
     opts:['In-unit washer and dryer','Washer and dryer hookups','In-building laundry','Laundromat nearby','No preference']},
@@ -1867,7 +1861,7 @@ function renderQAPanel() {
 function initLeaseSmart() {
   var bid = document.getElementById('lsBuildId');
   if (bid) bid.textContent = LS_BUILD;
-  document.title = 'LeaseSmart Beta v1.1.5 (' + LS_BUILD + ')';
+  document.title = 'LeaseSmart Beta v1.1.6 (' + LS_BUILD + ')';
 
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
     sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
@@ -1906,6 +1900,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-<div style="text-align:center; padding:20px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:40px;">LeaseSmart Beta v1.1.5</div>
+<div style="text-align:center; padding:20px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:40px;">LeaseSmart Beta v1.1.6</div>
 </body>
 </html>
