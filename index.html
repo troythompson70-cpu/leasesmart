@@ -648,6 +648,9 @@ body { font-size: 16px !important; }
 // v1.1.10 Feedback flow + less clicking — guided feedback, lastAction, major change warnings
 var LS_BUILD = '20260523-v1.1.10';
 var LS_PROFILE_KEY = 'leasesmartProfile';
+var LS_STORE_KEY = 'leasesmart_store_v1';
+var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
+window.LS_BUILD = LS_BUILD;
 
 // ================================================================
 // STATE
@@ -739,13 +742,135 @@ function getStepById(id) {
 // Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
 // ================================================================
 var LS_VERSION = 'Beta v1.2 — Housing Intelligence Foundation';
-var LS_STORE = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, feedbackPromptDismissedUntil: null };
+var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, feedbackPromptDismissedUntil: null };
+var LS_STORE = Object.assign({}, LS_STORE_DEFAULTS);
+
+function lsNormalizeStore(data) {
+  var store = Object.assign({}, LS_STORE_DEFAULTS, data || {});
+  if (!Array.isArray(store.favorites)) store.favorites = store.favorites ? [].concat(store.favorites) : [];
+  if (!Array.isArray(store.searches)) store.searches = store.searches ? [].concat(store.searches) : [];
+  if (!Array.isArray(store.feedback)) store.feedback = store.feedback ? [].concat(store.feedback) : [];
+  if (!Array.isArray(store.analytics)) store.analytics = store.analytics ? [].concat(store.analytics) : [];
+  if (!store.listingStatuses || typeof store.listingStatuses !== 'object') store.listingStatuses = {};
+  return store;
+}
 
 function lsLoad() {
   try {
-    var raw = localStorage.getItem('leasesmart_store_v1');
-    if (raw) LS_STORE = Object.assign(LS_STORE, JSON.parse(raw));
+    var raw = localStorage.getItem(LS_STORE_KEY);
+    if (raw) LS_STORE = lsNormalizeStore(JSON.parse(raw));
   } catch (e) { console.warn('LeaseSmart: storage load failed', e); }
+}
+
+var LS_SELECTED_RESUME_SOURCE = '';
+
+function lsIsCompleteRecord(profile) {
+  if (!profile || typeof profile !== 'object') return false;
+  var hasIdentity = !!(String(profile.name || '').trim() || String(profile.email || '').trim());
+  var hasLocation = !!(String(profile.state || '').trim() || String(profile.city || '').trim());
+  var hasSearchField = !!(profile.movein || profile.moveinIso || profile.budget || profile.beds || profile.baths || profile.pets || profile.park || profile.commute || profile.amenities);
+  return hasIdentity && hasLocation && hasSearchField;
+}
+
+function lsPickCompleteResumeRecord() {
+  var candidates = [];
+  var priority = { session: 5, 'store.profile': 4, leasesmartProfile: 3, 'legacyStore.session': 2, 'legacyStore.profile': 1 };
+
+  function add(source, profile, savedAt) {
+    if (!lsIsCompleteRecord(profile)) return;
+    candidates.push({
+      source: source,
+      profile: JSON.parse(JSON.stringify(profile)),
+      ts: savedAt ? new Date(savedAt).getTime() : 0
+    });
+  }
+
+  if (LS_STORE.session && LS_STORE.session.profile) {
+    add('session', LS_STORE.session.profile, LS_STORE.session.savedAt);
+  }
+  if (LS_STORE.profile) {
+    var storeTs = (LS_STORE.session && LS_STORE.session.savedAt) || ((LS_STORE.searches || [])[0] || {}).savedAt;
+    add('store.profile', LS_STORE.profile, storeTs);
+  }
+  var prof = lsLoadProfile();
+  if (prof) {
+    add('leasesmartProfile', prof, ((LS_STORE.searches || [])[0] || {}).savedAt);
+  }
+  var legacyRaw = localStorage.getItem('leasesmartStore');
+  if (legacyRaw) {
+    try {
+      var leg = JSON.parse(legacyRaw);
+      if (leg.session && leg.session.profile) add('legacyStore.session', leg.session.profile, leg.session.savedAt);
+      if (leg.profile) add('legacyStore.profile', leg.profile, (leg.session && leg.session.savedAt) || null);
+    } catch (e) { /* skip bad legacy store */ }
+  }
+
+  if (!candidates.length) return null;
+  candidates.sort(function(a, b) {
+    if (b.ts !== a.ts) return b.ts - a.ts;
+    return (priority[b.source] || 0) - (priority[a.source] || 0);
+  });
+  return candidates[0];
+}
+
+function lsGetResumeProfile() {
+  var picked = lsPickCompleteResumeRecord();
+  if (!picked) {
+    LS_SELECTED_RESUME_SOURCE = '';
+    return null;
+  }
+  LS_SELECTED_RESUME_SOURCE = picked.source;
+  return picked.profile;
+}
+
+function lsWriteCompleteRecord(profile) {
+  var clean = JSON.parse(JSON.stringify(profile));
+  localStorage.setItem(LS_PROFILE_KEY, JSON.stringify(clean));
+  LS_STORE.profile = clean;
+  LS_STORE.session = {
+    profile: JSON.parse(JSON.stringify(clean)),
+    listings: (LS_STORE.session && LS_STORE.session.listings) || null,
+    savedAt: new Date().toISOString()
+  };
+}
+
+function lsMigrateIfNeeded() {
+  if (localStorage.getItem(LS_MIGRATION_FLAG) === 'true') return;
+  try {
+    lsLoad();
+    var legacyStore = localStorage.getItem('leasesmartStore');
+    if (legacyStore) {
+      var parsedLegacy = JSON.parse(legacyStore);
+      if (parsedLegacy.favorites && Array.isArray(parsedLegacy.favorites)) LS_STORE.favorites = parsedLegacy.favorites;
+      if (parsedLegacy.listingStatuses && typeof parsedLegacy.listingStatuses === 'object') {
+        LS_STORE.listingStatuses = Object.assign({}, LS_STORE.listingStatuses, parsedLegacy.listingStatuses);
+      }
+      if (parsedLegacy.feedback && Array.isArray(parsedLegacy.feedback)) {
+        LS_STORE.feedback = parsedLegacy.feedback.concat(LS_STORE.feedback || []);
+      }
+    }
+    var legacyFavorites = localStorage.getItem('leasesmartFavorites');
+    if (legacyFavorites) {
+      var favs = JSON.parse(legacyFavorites);
+      if (Array.isArray(favs) && favs.length) LS_STORE.favorites = favs;
+    }
+    var legacyStatuses = localStorage.getItem('leasesmartListingStatuses');
+    if (legacyStatuses) {
+      var statuses = JSON.parse(legacyStatuses);
+      if (statuses && typeof statuses === 'object') LS_STORE.listingStatuses = Object.assign({}, LS_STORE.listingStatuses, statuses);
+    }
+    var legacyFeedback = localStorage.getItem('leasesmartFeedback');
+    if (legacyFeedback) {
+      var fb = JSON.parse(legacyFeedback);
+      if (Array.isArray(fb) && fb.length) LS_STORE.feedback = fb.concat(LS_STORE.feedback || []);
+    }
+    var winner = lsPickCompleteResumeRecord();
+    if (winner) lsWriteCompleteRecord(winner.profile);
+    lsSave();
+    localStorage.setItem(LS_MIGRATION_FLAG, 'true');
+  } catch (e) {
+    console.warn('LeaseSmart: migration failed', e);
+  }
 }
 
 function lsLoadProfile() {
@@ -789,7 +914,10 @@ function lsSyncPersonalFromAnswers() {
 }
 
 function lsSave() {
-  try { localStorage.setItem('leasesmart_store_v1', JSON.stringify(LS_STORE)); } catch (e) { console.warn('LeaseSmart: storage save failed', e); }
+  try {
+    LS_STORE = lsNormalizeStore(LS_STORE);
+    localStorage.setItem(LS_STORE_KEY, JSON.stringify(LS_STORE));
+  } catch (e) { console.warn('LeaseSmart: storage save failed', e); }
 }
 
 function lsTrack(event, data) {
@@ -1089,10 +1217,24 @@ function verificationBadgeHtml(l) {
 }
 
 function resumeSession() {
-  if (!LS_STORE.session || !LS_STORE.session.profile) return;
-  APP.profile = LS_STORE.session.profile;
-  APP.listings = applyIntelligenceToListings(LS_STORE.session.listings || getFallback(), APP.profile);
+  var profile = lsGetResumeProfile();
+  if (!profile) {
+    console.warn('LeaseSmart: no saved search profile found for resume');
+    return;
+  }
+  APP.profile = profile;
+  APP.quizAnswers = Object.assign({}, profile);
+  APP.name = profile.name || APP.name || '';
+  APP.email = profile.email || APP.email || '';
+  APP.phone = profile.phone || APP.phone || '';
+  APP.listings = applyIntelligenceToListings(
+    (LS_STORE.session && LS_STORE.session.listings) || getFallback(),
+    APP.profile
+  );
   APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
+  if (!LS_STORE.session || !LS_STORE.session.profile) {
+    lsPersistProfile(APP.profile);
+  }
   buildDashboard();
   showPage('dash-pg');
   lsTrack('session_resume');
@@ -1167,6 +1309,7 @@ function executeStartOver() {
   APP.profile = {};
   APP.listings = [];
   APP.filter = 'all';
+  LS_STORE.profile = null;
   LS_STORE.session = null;
   lsSave();
   lsTrack('start_over');
@@ -2445,25 +2588,63 @@ function initLeaseSmart() {
   if (bid) bid.textContent = LS_BUILD;
   document.title = 'LeaseSmart Beta v1.1.10 (' + LS_BUILD + ')';
 
-  if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
-    sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
-    var sep = location.search ? '&' : '?';
-    location.replace(location.pathname + location.search + sep + 'v=' + encodeURIComponent(LS_BUILD) + location.hash);
-    return;
+  try {
+    lsLoad();
+    lsMigrateIfNeeded();
+  } catch (e) {
+    console.warn('LeaseSmart: init storage load failed', e);
   }
 
-  try { lsLoad(); } catch (e) { /* optional storage */ }
   var prof = lsLoadProfile();
   if (prof) {
     APP.name = prof.name;
     APP.email = prof.email;
     APP.phone = prof.phone;
   }
-  if ((LS_STORE.session && LS_STORE.session.profile) || (prof && (prof.movein || prof.city || prof.state))) {
+  if (lsGetResumeProfile()) {
     var rb = document.getElementById('resumeBtn');
     if (rb) rb.style.display = 'block';
   }
+
+  if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
+    sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
+    var sep = location.search ? '&' : '?';
+    location.replace(location.pathname + location.search + sep + 'v=' + encodeURIComponent(LS_BUILD) + location.hash);
+    return;
+  }
 }
+
+window.lsDebugStorage = function() {
+  var storeRaw = localStorage.getItem('leasesmart_store_v1');
+  var storeParsed = null;
+  try { storeParsed = storeRaw ? JSON.parse(storeRaw) : null; } catch (e) { storeParsed = 'PARSE_ERROR'; }
+  var selectedProfile = lsGetResumeProfile();
+
+  return {
+    build: window.LS_BUILD || LS_BUILD,
+    keys: Object.keys(localStorage).filter(function(k) {
+      return k.toLowerCase().includes('lease') ||
+        k.toLowerCase().includes('smart') ||
+        k.toLowerCase().includes('ls');
+    }),
+    selectedResumeSource: LS_SELECTED_RESUME_SOURCE || null,
+    selectedResumeProfile: selectedProfile,
+    currentProfile: localStorage.getItem('leasesmartProfile'),
+    currentStoreKey: 'leasesmart_store_v1',
+    currentStoreRaw: storeRaw,
+    currentStoreParsed: storeParsed,
+    currentStoreProfile: storeParsed && storeParsed.profile ? storeParsed.profile : null,
+    currentStoreSession: storeParsed && storeParsed.session ? storeParsed.session : null,
+    currentFavorites: storeParsed && storeParsed.favorites ? storeParsed.favorites : [],
+    currentListingStatuses: storeParsed && storeParsed.listingStatuses ? storeParsed.listingStatuses : {},
+    currentFeedback: storeParsed && storeParsed.feedback ? storeParsed.feedback : [],
+    legacyStore: localStorage.getItem('leasesmartStore'),
+    legacyFavorites: localStorage.getItem('leasesmartFavorites'),
+    legacyStatuses: localStorage.getItem('leasesmartListingStatuses'),
+    legacyFeedback: localStorage.getItem('leasesmartFeedback'),
+    migrated: localStorage.getItem('leasesmart_migrated_v1110')
+  };
+};
 
 // ================================================================
 // INIT
