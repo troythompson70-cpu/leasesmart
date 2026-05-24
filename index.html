@@ -217,66 +217,87 @@ button,input,textarea,select{font-family:inherit}
 /* DETAIL */
 .det-wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px}
 .photo-wrap{border-radius:16px;overflow:hidden;margin-bottom:20px;position:relative;background:#e5e7eb;height:240px}
+.photo-wrap.photo-empty{display:flex;align-items:center;justify-content:center;flex-direction:column;background:#f3f4f6}
 .photo-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-empty-state{text-align:center;padding:40px;color:#6b7280}
+.photo-empty-icon{font-size:48px;margin-bottom:8px;line-height:1}
+.photo-empty-title{font-weight:700;font-size:16px;color:#374151;margin-bottom:6px}
+.photo-empty-sub{font-size:14px;color:#6b7280;line-height:1.5}
 .photo-nav{position:absolute;top:12px;right:12px;display:flex;gap:6px}
 .photo-nav button{background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:6px;padding:5px 11px;font-size:15px;cursor:pointer}
 .photo-dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:5px}
 .ph-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);border:none;cursor:pointer;padding:0}
 .ph-dot.on{background:#fff}
-.photo-cnt{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.5);color:#fff;border-radius:6px;padding:4px 10px;font-size:11px}
+.photo-cnt{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.5);color:#fff;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600}
 .det-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.det-name{font-size:28px;font-weight:900;color:#111827;margin-bottom:4px}
-.det-addr{color:#6b7280;font-size:15px;margin-bottom:4px}
-.det-mgmt{color:#3b82f6;font-size:14px;margin-bottom:20px}
+.det-badges .badge{font-size:12px;font-weight:700;padding:5px 12px;border-radius:8px;letter-spacing:.2px;line-height:1.35}
+.det-name{font-size:22px;font-weight:900;color:#111827;margin-bottom:6px;letter-spacing:-.3px;line-height:1.2}
+.det-addr{color:#6b7280;font-size:14px;margin-bottom:6px;line-height:1.5}
+.det-mgmt{color:#2563eb;font-size:14px;font-weight:600;margin-bottom:8px;line-height:1.5}
+.det-meta{font-size:13px;color:#9ca3af;margin-bottom:14px;line-height:1.5}
 .map-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.map-btn{padding:10px 16px;background:#f0fdf4;border:1.5px solid #22d98a44;color:#16a34a;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.map-btn{padding:11px 16px;background:#f0fdf4;border:1.5px solid #22d98a44;color:#16a34a;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;line-height:1.35}
 .map-btn-blue{background:#eff6ff;border-color:#3b82f633;color:#2563eb}
-.why-card{background:#f0fdf4;border:2px solid #22d98a33;border-radius:14px;padding:18px;margin-bottom:16px}
-.why-lbl{color:#16a34a;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:8px}
-.why-txt{color:#374151;line-height:1.7;font-size:15px}
-.det-sec{background:#f8fafb;border:2px solid #e5e7eb;border-radius:14px;padding:18px;margin-bottom:14px}
-.det-sec-lbl{color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
-.score-row{margin-bottom:10px}
-.score-row-top{display:flex;justify-content:space-between;font-size:13px;color:#6b7280;margin-bottom:4px}
-.score-bg{height:6px;background:#e5e7eb;border-radius:4px;overflow:hidden}
+.why-card{background:#f0fdf4;border:2px solid #22d98a33;border-radius:14px;padding:20px;margin-bottom:16px}
+.why-lbl{color:#16a34a;font-size:13px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px}
+.why-txt{color:#374151;line-height:1.65;font-size:15px}
+.det-sec{background:#fff;border:1.5px solid #e5e7eb;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.det-sec-lbl{color:#111827;font-size:17px;font-weight:800;margin-bottom:14px;line-height:1.35;letter-spacing:-.2px;text-transform:none}
+.score-row{margin-bottom:12px}
+.score-row-top{display:flex;justify-content:space-between;font-size:14px;color:#374151;margin-bottom:6px;font-weight:600}
+.score-val{font-weight:800;font-size:14px}
+.score-bg{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden}
 .score-fill{height:100%;border-radius:4px;transition:width .5s}
-.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.fact{background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px}
-.fact-lbl{color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:.5px;margin-bottom:4px}
-.fact-val{font-size:14px;color:#111827}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fact{background:#f8fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px}
+.fact-lbl{color:#6b7280;font-size:12px;font-weight:700;letter-spacing:.3px;margin-bottom:6px;text-transform:uppercase}
+.fact-val{font-size:15px;color:#111827;font-weight:600;line-height:1.4}
 .fact-val-g{color:#16a34a;font-weight:800}
-.tr-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.tr-chip{background:#eff6ff;border:1.5px solid #3b82f633;border-radius:8px;padding:8px 12px;font-size:13px;color:#2563eb}
-.route-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.route-btn{padding:9px 14px;background:#eff6ff;border:1.5px solid #3b82f633;color:#2563eb;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
-.nj-bar{background:#f0fdf4;border:1.5px solid #22d98a33;border-radius:8px;padding:10px 14px;font-size:12px;color:#16a34a;display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;align-items:center}
-.nj-bar a{color:#16a34a;text-decoration:none;font-weight:600}
+.tr-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tr-chip{background:#eff6ff;border:1.5px solid #3b82f633;border-radius:8px;padding:9px 14px;font-size:14px;font-weight:600;color:#2563eb;line-height:1.35}
+.route-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.route-btn{padding:10px 14px;background:#eff6ff;border:1.5px solid #3b82f633;color:#2563eb;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;line-height:1.35}
+.nj-bar{background:#f0fdf4;border:1.5px solid #22d98a33;border-radius:8px;padding:11px 14px;font-size:13px;font-weight:600;color:#16a34a;display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;align-items:center;line-height:1.45}
+.nj-bar a{color:#16a34a;text-decoration:none;font-weight:700;font-size:13px}
+.drive-times{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.drive-time-pill{background:#f4f7fa;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;color:#6b7280;line-height:1.35}
+.drive-time-pill strong{color:#111827;font-weight:700}
 .nbr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
-.nbr-box{background:#f0fdf4;border:1.5px solid #22d98a22;border-radius:10px;padding:12px;text-align:center}
-.nbr-num{color:#16a34a;font-weight:900;font-size:20px}
-.nbr-lbl{color:#9ca3af;font-size:10px;margin-top:2px}
-.nbr-grp{margin-bottom:10px}
-.nbr-grp-lbl{color:#9ca3af;font-size:11px;font-weight:700;margin-bottom:6px}
+.nbr-box{background:#f0fdf4;border:1.5px solid #22d98a22;border-radius:10px;padding:14px 12px;text-align:center}
+.nbr-num{color:#16a34a;font-weight:900;font-size:22px;line-height:1.2}
+.nbr-num-sm{font-size:15px;font-weight:800}
+.nbr-lbl{color:#6b7280;font-size:12px;font-weight:700;margin-top:4px;line-height:1.3}
+.nbr-grp{margin-bottom:12px}
+.nbr-grp-lbl{color:#374151;font-size:13px;font-weight:700;margin-bottom:8px;line-height:1.4}
 .nbr-tags{display:flex;gap:6px;flex-wrap:wrap}
-.nbr-tag{background:#f4f7fa;border:1.5px solid #e5e7eb;border-radius:6px;padding:4px 10px;font-size:12px;color:#6b7280}
-.dual-card{background:#f0fdf4;border:2px solid #22d98a33;border-radius:14px;padding:18px;margin-bottom:14px}
-.dual-ttl{color:#16a34a;font-weight:800;font-size:15px;margin-bottom:8px}
-.dual-desc{color:#6b7280;font-size:13px;margin-bottom:14px;line-height:1.6}
+.nbr-tag{background:#f4f7fa;border:1.5px solid #e5e7eb;border-radius:6px;padding:5px 11px;font-size:13px;font-weight:500;color:#6b7280;line-height:1.35}
+.dual-card{background:#f0fdf4;border:2px solid #22d98a33;border-radius:16px;padding:20px;margin-bottom:14px}
+.dual-ttl{color:#111827;font-weight:800;font-size:17px;margin-bottom:10px;line-height:1.35;letter-spacing:-.2px}
+.dual-desc{color:#6b7280;font-size:14px;margin-bottom:14px;line-height:1.6}
+.dual-tip{color:#9ca3af;font-size:13px;margin-top:8px;line-height:1.5}
 .dual-links{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
-.dual-a{padding:10px 16px;background:#fff;border:1.5px solid #e5e7eb;color:#374151;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600}
-.dual-b{padding:10px 16px;background:#f0fdf4;border:1.5px solid #22d98a44;color:#16a34a;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600}
-.dual-miss{padding:10px 16px;background:#fff7ed;border:1.5px solid #f5a62333;color:#d97706;border-radius:8px;font-size:13px}
-.miss-card{background:#fff7ed;border:2px solid #f5a62344;border-radius:12px;padding:16px;margin-bottom:14px}
-.miss-ttl{color:#d97706;font-weight:700;margin-bottom:8px;font-size:14px}
-.miss-item{color:#6b7280;font-size:13px;margin-bottom:4px}
-.status-card{background:#f8fafb;border:2px solid #e5e7eb;border-radius:14px;padding:18px;margin-bottom:14px}
-.st-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.st-btn{padding:8px 13px;border:2px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:11px;font-weight:700;background:#fff;color:#6b7280;transition:all .15s}
+.dual-a{padding:11px 16px;background:#fff;border:1.5px solid #e5e7eb;color:#374151;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;line-height:1.35}
+.dual-b{padding:11px 16px;background:#f0fdf4;border:1.5px solid #22d98a44;color:#16a34a;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;line-height:1.35}
+.dual-miss{padding:11px 16px;background:#fff7ed;border:1.5px solid #f5a62333;color:#d97706;border-radius:8px;font-size:14px;font-weight:600;line-height:1.35}
+.miss-card{background:#fff7ed;border:2px solid #f5a62344;border-radius:12px;padding:18px;margin-bottom:14px}
+.miss-ttl{color:#d97706;font-weight:800;margin-bottom:10px;font-size:15px;line-height:1.35}
+.miss-item{color:#6b7280;font-size:14px;margin-bottom:6px;line-height:1.5}
+.status-card{background:#fff;border:1.5px solid #e5e7eb;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.st-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.st-btn{padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;background:#fff;color:#6b7280;transition:all .15s;line-height:1.3}
 .st-btn.on{background:#22d98a;border-color:#22d98a;color:#000}
-.notes-in{width:100%;background:#fff;border:2px solid #e5e7eb;border-radius:10px;padding:12px;color:#374151;font-size:14px;min-height:72px;outline:none;resize:vertical;line-height:1.5}
+.notes-in{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:10px;padding:14px;color:#374151;font-size:15px;min-height:80px;outline:none;resize:vertical;line-height:1.55;font-family:inherit}
+.truth-first{background:#fff7ed;border:1.5px solid #f5a62333;border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:14px;color:#d97706;line-height:1.6}
+.truth-first strong{font-weight:800;color:#d97706}
+.det-body{color:#374151;font-size:15px;line-height:1.65;margin-bottom:14px}
+.det-muted{font-size:13px;color:#9ca3af;line-height:1.5}
+.intel-score-big{font-size:26px;font-weight:900;color:#16a34a;margin-bottom:10px;line-height:1.2;letter-spacing:-.3px}
+.intel-subhead{font-weight:700;font-size:14px;color:#111827;margin-bottom:8px;line-height:1.4}
+.intel-subhead-spaced{margin:14px 0 8px}
 .det-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-.cta-a{flex:1;padding:16px;background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center}
-.cta-b{padding:16px 20px;background:#f4f7fa;color:#6b7280;border:1.5px solid #e5e7eb;border-radius:14px;cursor:pointer;font-size:16px}
+.cta-a{flex:1;padding:16px;background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;line-height:1.3}
+.cta-a.cta-secondary{background:#f4f7fa;color:#374151;border:1.5px solid #e5e7eb}
+.cta-b{padding:16px 20px;background:#f4f7fa;color:#6b7280;border:1.5px solid #e5e7eb;border-radius:14px;cursor:pointer;font-size:15px;font-weight:700;line-height:1.3}
 
 /* GUIDE */
 .guide-wrap{max-width:720px}
@@ -328,8 +349,6 @@ body { font-size: 16px !important; }
 .opt { font-size: 15px !important; padding: 12px 16px !important; }
 .card-name { font-size: 18px !important; font-weight: 700 !important; }
 .card-rent { font-size: 16px !important; font-weight: 700 !important; }
-.det-name { font-size: 24px !important; font-weight: 900 !important; }
-.det-sec-lbl { font-size: 15px !important; font-weight: 700 !important; }
 .facts { gap: 16px !important; }
 .green-btn { font-size: 16px !important; padding: 16px !important; }
 .verify-badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-right:6px;margin-bottom:4px}
@@ -338,8 +357,12 @@ body { font-size: 16px !important; }
 .conf-est{background:#eff6ff;color:#2563eb}
 .conf-verified{background:#f0fdf4;color:#16a34a}
 .conf-pending{background:#f4f7fa;color:#6b7280}
-.intel-card{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:12px}
-.intel-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid #f3f4f6}
+.intel-card{background:#f8fafb;border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:0}
+.intel-row{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px;padding:8px 0;border-bottom:1px solid #eef0f3;color:#374151;line-height:1.45}
+.intel-row span:first-child{color:#6b7280;font-weight:600}
+.intel-row strong{font-weight:800;color:#111827}
+.intel-row-total{font-weight:800;color:#111827;border-top:1.5px solid #e5e7eb;margin-top:4px;padding-top:12px;border-bottom:none}
+.intel-row-total span,.intel-row-total strong{color:#111827;font-weight:800}
 .intel-row:last-child{border-bottom:none}
 .fav-btn{background:#fff;border:2px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer}
 .fav-btn.on{background:#fef3c7;border-color:#f5a623;color:#d97706}
@@ -2050,27 +2073,25 @@ function renderDetail(l) {
   var html = '';
 
   // Photos — Truth First: no stock images presented as property photos
-  html += '<div class="photo-wrap" style="display:flex;align-items:center;justify-content:center;flex-direction:column;background:#f3f4f6">';
   if (APP.photos.length && l.photosConfidence === 'verified') {
-    html += '<img id="detPhoto" src="' + APP.photos[0] + '" alt="property photo"/>';
+    html += '<div class="photo-wrap"><img id="detPhoto" src="' + APP.photos[0] + '" alt="property photo"/></div>';
   } else {
-    html += '<div style="text-align:center;padding:40px;color:#6b7280"><div style="font-size:48px;margin-bottom:8px">&#128247;</div><div style="font-weight:700">No verified property photos</div><div style="font-size:13px;margin-top:6px">Demo listing — photos appear after source verification</div>' + confTag('demo') + '</div>';
+    html += '<div class="photo-wrap photo-empty"><div class="photo-empty-state"><div class="photo-empty-icon">&#128247;</div><div class="photo-empty-title">No verified property photos</div><div class="photo-empty-sub">Demo listing — photos appear after source verification</div>' + confTag('demo') + '</div></div>';
   }
-  html += '</div>';
 
   // Badges
   html += '<div class="det-badges">';
   html += verificationBadgeHtml(l);
-  html += '<span class="badge" style="background:#f4f7fa;color:#6b7280;font-size:12px">Source: ' + (l.source || 'pending') + ' &bull; Confidence ' + (l.confidenceScore || 0) + '%</span>';
-  html += '<span class="badge" style="background:' + sc + '20;color:' + sc + ';font-size:13px">' + scLabel(l.score) + ' \u00b7 ' + l.score + '/100</span>';
+  html += '<span class="badge" style="background:#f4f7fa;color:#6b7280">Source: ' + (l.source || 'pending') + ' &bull; Confidence ' + (l.confidenceScore || 0) + '%</span>';
+  html += '<span class="badge" style="background:' + sc + '20;color:' + sc + '">' + scLabel(l.score) + ' \u00b7 ' + l.score + '/100</span>';
   html += rankBadgeHtml(l.priority);
-  html += '<span class="badge" style="background:#f4f7fa;color:#6b7280;font-size:13px" id="detStatus">' + l.status + '</span>';
+  html += '<span class="badge" style="background:#f4f7fa;color:#6b7280" id="detStatus">' + l.status + '</span>';
   html += '</div>';
 
   html += '<div class="det-name">' + l.complex + '</div>';
   html += '<div class="det-addr">' + l.address + '</div>';
   html += '<div class="det-mgmt">' + l.phone + confTag(l.phoneConfidence || 'demo') + (l.managementCo ? ' \u00b7 ' + l.managementCo : '') + '</div>';
-  html += '<div style="font-size:12px;color:#9ca3af;margin-bottom:12px">Updated: ' + (l.lastUpdated || '--') + ' &bull; Zip: ' + (l.zip || '--') + '</div>';
+  html += '<div class="det-meta">Updated: ' + (l.lastUpdated || '--') + ' &bull; Zip: ' + (l.zip || '--') + '</div>';
 
   // --- Priority renter decision sections (reordered v1.1.10) ---
 
@@ -2104,15 +2125,15 @@ function renderDetail(l) {
   } else {
     html += '<div class="dual-miss">&#128260; ' + (l.verificationStatus || 'NEEDS DIRECT LINK') + '</div>';
   }
-  html += '</div><div style="color:#9ca3af;font-size:11px;margin-top:6px">Tip: If prices differ, call and ask which is correct for a ' + l.bedrooms + 'BR available ' + l.available + '.</div></div>';
+  html += '</div><div class="dual-tip">Tip: If prices differ, call and ask which is correct for a ' + l.bedrooms + 'BR available ' + l.available + '.</div></div>';
 
   // 4. Transit and Commute (Transportation Intelligence kept above Transit and Commute — related but not identical)
   if (l.transitIntel) {
     var ti = l.transitIntel;
     html += '<div class="det-sec"><div class="det-sec-lbl">Transportation Intelligence ' + confTag(ti.bus && ti.bus.confidence === 'demo' ? 'demo' : 'estimated') + '</div><div class="intel-card">';
-    if (ti.bus) html += '<div style="font-weight:700;margin-bottom:8px">Nearest Bus Stop ' + confTag('demo') + '</div><div class="intel-row"><span>Stop ID</span><span>' + ti.bus.stopId + '</span></div><div class="intel-row"><span>Route</span><span>' + ti.bus.route + '</span></div><div class="intel-row"><span>Walk</span><span>' + ti.bus.walkMinutes + ' min (~' + ti.bus.blocks + ' blocks)</span></div>';
-    if (ti.train) html += '<div style="font-weight:700;margin:12px 0 8px">Nearest Train ' + confTag('demo') + '</div><div class="intel-row"><span>Station</span><span>' + ti.train.station + '</span></div><div class="intel-row"><span>Line</span><span>' + ti.train.line + '</span></div><div class="intel-row"><span>Walk</span><span>' + ti.train.walkMinutes + ' min</span></div>';
-    if (ti.commute) html += '<div style="font-weight:700;margin:12px 0 8px">Commute to ' + ti.commute.destination + '</div><div class="intel-row"><span>Est. time</span><span>' + ti.commute.estimatedMinutes + ' min</span></div><div class="intel-row"><span>Monthly transit</span><span>$' + ti.commute.monthlyTransitCost + '</span></div>';
+    if (ti.bus) html += '<div class="intel-subhead">Nearest Bus Stop ' + confTag('demo') + '</div><div class="intel-row"><span>Stop ID</span><span>' + ti.bus.stopId + '</span></div><div class="intel-row"><span>Route</span><span>' + ti.bus.route + '</span></div><div class="intel-row"><span>Walk</span><span>' + ti.bus.walkMinutes + ' min (~' + ti.bus.blocks + ' blocks)</span></div>';
+    if (ti.train) html += '<div class="intel-subhead intel-subhead-spaced">Nearest Train ' + confTag('demo') + '</div><div class="intel-row"><span>Station</span><span>' + ti.train.station + '</span></div><div class="intel-row"><span>Line</span><span>' + ti.train.line + '</span></div><div class="intel-row"><span>Walk</span><span>' + ti.train.walkMinutes + ' min</span></div>';
+    if (ti.commute) html += '<div class="intel-subhead intel-subhead-spaced">Commute to ' + ti.commute.destination + '</div><div class="intel-row"><span>Est. time</span><span>' + ti.commute.estimatedMinutes + ' min</span></div><div class="intel-row"><span>Monthly transit</span><span>$' + ti.commute.monthlyTransitCost + '</span></div>';
     html += '</div></div>';
   }
   html += '<div class="det-sec"><div class="det-sec-lbl">Transit and Commute</div>';
@@ -2129,10 +2150,10 @@ function renderDetail(l) {
     html += '<div class="nj-bar">&#128646; NJ Transit: <a href="https://www.njtransit.com/schedule/bus" target="_blank">Bus Schedules &#8599;</a><a href="https://www.njtransit.com/schedule/rail" target="_blank">Train Schedules &#8599;</a><a href="https://www.njtransit.com/trip-planner" target="_blank">Trip Planner &#8599;</a></div>';
   }
   if (l.neighborhood && l.neighborhood.driveTimes) {
-    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">';
+    html += '<div class="drive-times">';
     Object.keys(l.neighborhood.driveTimes).forEach(function(k) {
       var label = k.replace(/([A-Z])/g, ' $1').trim();
-      html += '<div style="background:#f4f7fa;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:12px;color:#6b7280"><span>' + label + ': </span><strong style="color:#111827">' + l.neighborhood.driveTimes[k] + '</strong></div>';
+      html += '<div class="drive-time-pill"><span>' + label + ': </span><strong>' + l.neighborhood.driveTimes[k] + '</strong></div>';
     });
     html += '</div>';
   }
@@ -2141,9 +2162,9 @@ function renderDetail(l) {
   // 5. Crime / Safety (reorder only — same fields, no new data)
   if (l.safety) {
     html += '<div class="det-sec"><div class="det-sec-lbl">Crime &amp; Safety ' + confTag('demo') + '</div><div class="intel-card">';
-    html += '<div style="font-size:28px;font-weight:900;color:#16a34a;margin-bottom:8px">' + l.safety.score + '/100</div>';
-    html += '<p style="font-size:14px;color:#374151;line-height:1.6;margin-bottom:10px">' + l.safety.summary + '</p>';
-    html += '<div style="font-size:12px;color:#9ca3af">Source: ' + l.safety.source + ' &bull; As of ' + l.safety.asOf + ' &bull; Confidence: ' + l.safety.confidence + '</div></div></div>';
+    html += '<div class="intel-score-big">' + l.safety.score + '/100</div>';
+    html += '<p class="det-body">' + l.safety.summary + '</p>';
+    html += '<div class="det-muted">Source: ' + l.safety.source + ' &bull; As of ' + l.safety.asOf + ' &bull; Confidence: ' + l.safety.confidence + '</div></div></div>';
   }
 
   // 6. Match Score / Fit Score
@@ -2160,7 +2181,7 @@ function renderDetail(l) {
     var val = (l.scoreBreakdown || {})[f.key] || 0;
     var pct = Math.round((val / f.max) * 100);
     var bc = pct >= 80 ? '#16a34a' : pct >= 55 ? '#d97706' : '#dc2626';
-    html += '<div class="score-row"><div class="score-row-top"><span>' + f.label + '</span><span style="color:' + bc + ';font-weight:700">' + val + '/' + f.max + '</span></div>';
+    html += '<div class="score-row"><div class="score-row-top"><span>' + f.label + '</span><span class="score-val" style="color:' + bc + '">' + val + '/' + f.max + '</span></div>';
     html += '<div class="score-bg"><div class="score-fill" style="width:' + pct + '%;background:' + bc + '"></div></div></div>';
   });
   html += '</div>';
@@ -2169,7 +2190,7 @@ function renderDetail(l) {
 
   html += '<div class="why-card"><div class="why-lbl">WHY THIS MATCHES YOU</div><div class="why-txt">' + l.whyItFits + '</div></div>';
 
-  html += '<div style="background:#fff7ed;border:1.5px solid #f5a62333;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#d97706"><strong>Truth First:</strong> ' + (l.verificationLabel || 'Source Pending') + ' — verify rent, fees, parking, pets, and availability with the property before applying.</div>';
+  html += '<div class="truth-first"><strong>Truth First:</strong> ' + (l.verificationLabel || 'Source Pending') + ' — verify rent, fees, parking, pets, and availability with the property before applying.</div>';
 
   if (l.monthlyCost) {
     var mc = l.monthlyCost;
@@ -2178,7 +2199,7 @@ function renderDetail(l) {
     html += '<div class="intel-row"><span>Utilities (elec/gas/water/net)</span><strong>$' + (mc.utilities.electric + mc.utilities.gas + mc.utilities.water + mc.utilities.internet) + '</strong></div>';
     html += '<div class="intel-row"><span>Transportation</span><strong>$' + (mc.transportation.transitPass + mc.transportation.fuel + mc.transportation.parking) + '</strong></div>';
     html += '<div class="intel-row"><span>Pet + Insurance</span><strong>$' + (mc.petFees.amount + mc.insurance.amount) + '</strong></div>';
-    html += '<div class="intel-row" style="font-weight:800;color:#111827"><span>Estimated Total</span><strong>$' + mc.total + '/mo</strong></div></div></div>';
+    html += '<div class="intel-row intel-row-total"><span>Estimated Total</span><strong>$' + mc.total + '/mo</strong></div></div></div>';
   }
 
   html += '<div class="det-sec"><div class="det-sec-lbl">Apartment Details</div><div class="facts">';
@@ -2200,11 +2221,11 @@ function renderDetail(l) {
   if (l.neighborhood) {
     var nb = l.neighborhood;
     html += '<div class="det-sec"><div class="det-sec-lbl">Neighborhood Intel</div>';
-    if (nb.overview) html += '<p style="color:#374151;font-size:14px;line-height:1.7;margin-bottom:16px">' + nb.overview + '</p>';
+    if (nb.overview) html += '<p class="det-body">' + nb.overview + '</p>';
     html += '<div class="nbr-grid">';
     html += '<div class="nbr-box"><div class="nbr-num">' + (nb.walkScore || '--') + '</div><div class="nbr-lbl">Walk Score</div></div>';
     html += '<div class="nbr-box"><div class="nbr-num">' + (nb.transitScore || '--') + '</div><div class="nbr-lbl">Transit Score</div></div>';
-    html += '<div class="nbr-box"><div class="nbr-num" style="font-size:14px">' + (nb.safetyRating || '--') + '</div><div class="nbr-lbl">Safety</div></div>';
+    html += '<div class="nbr-box"><div class="nbr-num nbr-num-sm">' + (nb.safetyRating || '--') + '</div><div class="nbr-lbl">Safety</div></div>';
     html += '</div>';
     var nbrGroups = [
       { icon: '&#127979;', lbl: 'Schools', data: nb.nearbySchools },
@@ -2240,7 +2261,7 @@ function renderDetail(l) {
   html += '<div class="det-cta">';
   html += '<a class="cta-a" href="tel:' + l.phone + '">&#128222; Call Now</a>';
   if (l.aptLink) {
-    html += '<a class="cta-a" href="' + l.aptLink + '" target="_blank" rel="noreferrer" style="background:#f4f7fa;color:#374151;border:1.5px solid #e5e7eb">View Listing &#8599;</a>';
+    html += '<a class="cta-a cta-secondary" href="' + l.aptLink + '" target="_blank" rel="noreferrer">View Listing &#8599;</a>';
   }
   html += '<button type="button" class="cta-b" onclick="openCallGuide()">&#128222; Call Guide</button>';
   html += '<button type="button" class="cta-b" onclick="showPage(\'dash-pg\')">&#8592;</button>';
