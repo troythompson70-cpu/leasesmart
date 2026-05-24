@@ -287,6 +287,11 @@ button,input,textarea,select{font-family:inherit}
 .st-btn{padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;background:#fff;color:#6b7280;transition:all .15s;line-height:1.3}
 .st-btn.on{background:#22d98a;border-color:#22d98a;color:#000}
 .notes-in{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:10px;padding:14px;color:#374151;font-size:15px;min-height:80px;outline:none;resize:vertical;line-height:1.55;font-family:inherit}
+.notes-actions{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap}
+.notes-save-btn{padding:10px 16px;background:#f0fdf4;border:1.5px solid #22d98a44;color:#16a34a;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;line-height:1.35}
+.notes-save-btn:active{transform:scale(.98)}
+.note-saved-msg{font-size:13px;font-weight:700;color:#16a34a;display:none;line-height:1.4}
+.note-saved-msg.show{display:inline-block}
 .truth-first{background:#fff7ed;border:1.5px solid #f5a62333;border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:14px;color:#d97706;line-height:1.6}
 .truth-first strong{font-weight:800;color:#d97706}
 .det-body{color:#374151;font-size:15px;line-height:1.65;margin-bottom:14px}
@@ -999,11 +1004,52 @@ function lsSetListingNote(id, text) {
   if (val.trim()) LS_STORE.listingNotes[key] = val;
   else delete LS_STORE.listingNotes[key];
   lsSave();
+  return LS_STORE.listingNotes[key] || '';
 }
 
 function saveListingNotes(id, el) {
+  if (!el) el = document.getElementById('detNotes');
   if (!el) return;
   lsSetListingNote(id, el.value);
+}
+
+function saveListingNoteNow(id) {
+  var el = document.getElementById('detNotes');
+  if (!el) return;
+  lsSetListingNote(id, el.value);
+  showNoteSavedMessage();
+}
+
+function showNoteSavedMessage() {
+  var msg = document.getElementById('noteSavedMsg');
+  if (!msg) return;
+  msg.textContent = 'Note saved';
+  msg.classList.add('show');
+  clearTimeout(showNoteSavedMessage._timer);
+  showNoteSavedMessage._timer = setTimeout(function() {
+    msg.classList.remove('show');
+  }, 2500);
+}
+
+function flushDetailNotes() {
+  var ta = document.getElementById('detNotes');
+  var detailPg = document.getElementById('detail-pg');
+  if (!ta || !detailPg || !detailPg.classList.contains('show') || !APP.curDetail) return;
+  lsSetListingNote(APP.curDetail.id, ta.value);
+}
+
+function bindDetailNotes(id) {
+  var ta = document.getElementById('detNotes');
+  if (!ta) return;
+  ta.addEventListener('input', function() { lsSetListingNote(id, ta.value); });
+  ta.addEventListener('blur', function() { lsSetListingNote(id, ta.value); });
+  var btn = document.getElementById('saveNoteBtn');
+  if (btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      saveListingNoteNow(id);
+    });
+  }
 }
 
 function lsApplyListingStatuses(listings) {
@@ -1288,6 +1334,7 @@ function resumeSession() {
 // NAVIGATION
 // ================================================================
 function showPage(id) {
+  if (id !== 'detail-pg') flushDetailNotes();
   document.querySelectorAll('.pg').forEach(function(p) { p.classList.remove('show'); });
   document.getElementById(id).classList.add('show');
   window.scrollTo(0, 0);
@@ -2078,6 +2125,7 @@ function closeCallGuide() {
 // DETAIL
 // ================================================================
 function openDetail(id) {
+  lsLoad();
   var numId = typeof id === 'string' ? parseInt(id, 10) : id;
   var l = APP.listings.find(function(x) { return x.id == numId; });
   if (!l) return;
@@ -2136,7 +2184,8 @@ function renderDetail(l) {
   ['NOT CALLED', 'CALLED', 'FOLLOW UP', 'EMAIL SENT', 'TOUR SCHEDULED', 'NOT INTERESTED'].forEach(function(s) {
     html += '<button class="st-btn' + (l.status === s ? ' on' : '') + '" onclick="updateStatus(' + l.id + ',\'' + s + '\',this)">' + s + '</button>';
   });
-  html += '</div><textarea class="notes-in" id="detNotes" data-listing-id="' + l.id + '" placeholder="Your notes \u2014 what they said, tour details, pricing confirmed, red flags\u2026" oninput="saveListingNotes(' + l.id + ',this)" onblur="saveListingNotes(' + l.id + ',this)">' + escNotes(savedNote) + '</textarea></div>';
+  html += '</div><textarea class="notes-in" id="detNotes" data-listing-id="' + l.id + '" placeholder="Your notes \u2014 what they said, tour details, pricing confirmed, red flags\u2026">' + escNotes(savedNote) + '</textarea>';
+  html += '<div class="notes-actions"><button type="button" class="notes-save-btn" id="saveNoteBtn">Save Note</button><span class="note-saved-msg" id="noteSavedMsg">Note saved</span></div></div>';
 
   // 3. Dual-Link Verification
   html += '<div class="dual-card"><div class="dual-ttl">&#128269; Dual-Link Verification</div>';
@@ -2295,6 +2344,7 @@ function renderDetail(l) {
   html += '</div>';
 
   el.innerHTML = html;
+  bindDetailNotes(l.id);
 }
 
 function changePhoto(dir) {
@@ -2697,6 +2747,7 @@ window.lsDebugStorage = function() {
 // ================================================================
 document.addEventListener('DOMContentLoaded', function() {
   initLeaseSmart();
+  window.addEventListener('beforeunload', flushDetailNotes);
   document.getElementById('startBtn').addEventListener('click', startQuiz);
   document.getElementById('startBtn2').addEventListener('click', startQuiz);
 
