@@ -2072,6 +2072,9 @@ function renderDetail(l) {
   html += '<div class="det-mgmt">' + l.phone + confTag(l.phoneConfidence || 'demo') + (l.managementCo ? ' \u00b7 ' + l.managementCo : '') + '</div>';
   html += '<div style="font-size:12px;color:#9ca3af;margin-bottom:12px">Updated: ' + (l.lastUpdated || '--') + ' &bull; Zip: ' + (l.zip || '--') + '</div>';
 
+  // --- Priority renter decision sections (reordered v1.1.10) ---
+
+  // 1. Housing Intelligence / core listing intelligence
   if (l.intelligenceScores) {
     html += '<div class="det-sec"><div class="det-sec-lbl">Housing Intelligence Scores ' + confTag('estimated') + '</div><div class="nbr-grid">';
     [['Lifestyle', l.intelligenceScores.lifestyle], ['Transportation', l.intelligenceScores.transportation], ['Safety', l.intelligenceScores.safety], ['Family', l.intelligenceScores.family], ['Pet', l.intelligenceScores.pet]].forEach(function(row) {
@@ -2080,32 +2083,30 @@ function renderDetail(l) {
     html += '</div></div>';
   }
 
-  // Map buttons
-  html += '<div class="map-btns">';
-  html += '<button class="map-btn" onclick="openMap(\'' + escAddr(l.address) + '\')">&#128506; Open in Maps</button>';
-  if (APP.profile.work) {
-    html += '<button class="map-btn" onclick="openDirs(\'' + escAddr(l.address) + '\',\'' + escAddr(APP.profile.work) + '\')">&#129517; Directions to Work</button>';
+  // 2. Update Your Status
+  html += '<div class="status-card"><div class="det-sec-lbl">Update Your Status</div><div class="st-btns">';
+  ['NOT CALLED', 'CALLED', 'FOLLOW UP', 'EMAIL SENT', 'TOUR SCHEDULED', 'NOT INTERESTED'].forEach(function(s) {
+    html += '<button class="st-btn' + (l.status === s ? ' on' : '') + '" onclick="updateStatus(' + l.id + ',\'' + s + '\',this)">' + s + '</button>';
+  });
+  html += '</div><textarea class="notes-in" placeholder="Your notes \u2014 what they said, tour details, pricing confirmed, red flags\u2026"></textarea></div>';
+
+  // 3. Dual-Link Verification
+  html += '<div class="dual-card"><div class="dual-ttl">&#128269; Dual-Link Verification</div>';
+  html += '<div class="dual-desc">Compare the listing price vs the official property site. A $50 or more difference may mean bait-and-switch. Always confirm directly.</div>';
+  html += '<div class="dual-links">';
+  if (l.aptLink) {
+    html += '<a class="dual-a" href="' + l.aptLink + '" target="_blank" rel="noreferrer">&#128203; Apartments.com &#8599;</a>';
+  } else {
+    html += '<div class="dual-miss">No marketplace link</div>';
   }
-  html += '<button class="map-btn map-btn-blue" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.address) + '&layer=satellite\')">&#127920; Satellite View</button>';
-  html += '<a class="map-btn" href="tel:' + l.phone + '">&#128222; Call Now</a>';
-  html += '</div>';
-
-  // Why it fits
-  html += '<div class="why-card"><div class="why-lbl">WHY THIS MATCHES YOU</div><div class="why-txt">' + l.whyItFits + '</div></div>';
-
-  // Truth First disclaimer
-  html += '<div style="background:#fff7ed;border:1.5px solid #f5a62333;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#d97706"><strong>Truth First:</strong> ' + (l.verificationLabel || 'Source Pending') + ' — verify rent, fees, parking, pets, and availability with the property before applying.</div>';
-
-  if (l.monthlyCost) {
-    var mc = l.monthlyCost;
-    html += '<div class="det-sec"><div class="det-sec-lbl">True Monthly Cost Estimate ' + confTag('estimated') + '</div><div class="intel-card">';
-    html += '<div class="intel-row"><span>Rent</span><strong>$' + mc.rent.amount + '</strong></div>';
-    html += '<div class="intel-row"><span>Utilities (elec/gas/water/net)</span><strong>$' + (mc.utilities.electric + mc.utilities.gas + mc.utilities.water + mc.utilities.internet) + '</strong></div>';
-    html += '<div class="intel-row"><span>Transportation</span><strong>$' + (mc.transportation.transitPass + mc.transportation.fuel + mc.transportation.parking) + '</strong></div>';
-    html += '<div class="intel-row"><span>Pet + Insurance</span><strong>$' + (mc.petFees.amount + mc.insurance.amount) + '</strong></div>';
-    html += '<div class="intel-row" style="font-weight:800;color:#111827"><span>Estimated Total</span><strong>$' + mc.total + '/mo</strong></div></div></div>';
+  if (l.directLink) {
+    html += '<a class="dual-b" href="' + l.directLink + '" target="_blank" rel="noreferrer">&#127962; Official Property Site &#8599;</a>';
+  } else {
+    html += '<div class="dual-miss">&#128260; ' + (l.verificationStatus || 'NEEDS DIRECT LINK') + '</div>';
   }
+  html += '</div><div style="color:#9ca3af;font-size:11px;margin-top:6px">Tip: If prices differ, call and ask which is correct for a ' + l.bedrooms + 'BR available ' + l.available + '.</div></div>';
 
+  // 4. Transit and Commute (Transportation Intelligence kept above Transit and Commute — related but not identical)
   if (l.transitIntel) {
     var ti = l.transitIntel;
     html += '<div class="det-sec"><div class="det-sec-lbl">Transportation Intelligence ' + confTag(ti.bus && ti.bus.confidence === 'demo' ? 'demo' : 'estimated') + '</div><div class="intel-card">';
@@ -2114,51 +2115,6 @@ function renderDetail(l) {
     if (ti.commute) html += '<div style="font-weight:700;margin:12px 0 8px">Commute to ' + ti.commute.destination + '</div><div class="intel-row"><span>Est. time</span><span>' + ti.commute.estimatedMinutes + ' min</span></div><div class="intel-row"><span>Monthly transit</span><span>$' + ti.commute.monthlyTransitCost + '</span></div>';
     html += '</div></div>';
   }
-
-  if (l.safety) {
-    html += '<div class="det-sec"><div class="det-sec-lbl">Crime &amp; Safety ' + confTag('demo') + '</div><div class="intel-card">';
-    html += '<div style="font-size:28px;font-weight:900;color:#16a34a;margin-bottom:8px">' + l.safety.score + '/100</div>';
-    html += '<p style="font-size:14px;color:#374151;line-height:1.6;margin-bottom:10px">' + l.safety.summary + '</p>';
-    html += '<div style="font-size:12px;color:#9ca3af">Source: ' + l.safety.source + ' &bull; As of ' + l.safety.asOf + ' &bull; Confidence: ' + l.safety.confidence + '</div></div></div>';
-  }
-
-  // Score breakdown
-  html += '<div class="det-sec"><div class="det-sec-lbl">Match Score Breakdown</div>';
-  var scoreItems = [
-    { label: 'Budget fit', key: 'budget', max: 25 },
-    { label: 'Parking', key: 'parking', max: 20 },
-    { label: 'Pets / ESA', key: 'pets', max: 15 },
-    { label: 'Transit', key: 'transit', max: 18 },
-    { label: 'Move-in date', key: 'movein', max: 10 },
-    { label: 'Amenities', key: 'amenities', max: 12 }
-  ];
-  scoreItems.forEach(function(f) {
-    var val = (l.scoreBreakdown || {})[f.key] || 0;
-    var pct = Math.round((val / f.max) * 100);
-    var bc = pct >= 80 ? '#16a34a' : pct >= 55 ? '#d97706' : '#dc2626';
-    html += '<div class="score-row"><div class="score-row-top"><span>' + f.label + '</span><span style="color:' + bc + ';font-weight:700">' + val + '/' + f.max + '</span></div>';
-    html += '<div class="score-bg"><div class="score-fill" style="width:' + pct + '%;background:' + bc + '"></div></div></div>';
-  });
-  html += '</div>';
-
-  // Facts
-  html += '<div class="det-sec"><div class="det-sec-lbl">Apartment Details</div><div class="facts">';
-  var facts = [
-    { label: 'Rent', val: l.rent, green: true },
-    { label: 'Bedrooms', val: l.bedrooms },
-    { label: 'Bathrooms', val: l.bathrooms },
-    { label: 'Size', val: l.size },
-    { label: 'Available', val: l.available },
-    { label: 'Laundry', val: l.washerDryer },
-    { label: 'Deposit', val: l.deposit },
-    { label: 'Management', val: l.managementCo }
-  ];
-  facts.forEach(function(f) {
-    html += '<div class="fact"><div class="fact-lbl">' + f.label + '</div><div class="fact-val' + (f.green ? ' fact-val-g' : '') + '">' + (f.val || 'Not listed') + '</div></div>';
-  });
-  html += '</div></div>';
-
-  // Transit
   html += '<div class="det-sec"><div class="det-sec-lbl">Transit and Commute</div>';
   html += '<div class="tr-chips">';
   if (l.transit) html += '<div class="tr-chip">&#128652; ' + l.transit + '</div>';
@@ -2182,7 +2138,65 @@ function renderDetail(l) {
   }
   html += '</div>';
 
-  // Neighborhood
+  // 5. Crime / Safety (reorder only — same fields, no new data)
+  if (l.safety) {
+    html += '<div class="det-sec"><div class="det-sec-lbl">Crime &amp; Safety ' + confTag('demo') + '</div><div class="intel-card">';
+    html += '<div style="font-size:28px;font-weight:900;color:#16a34a;margin-bottom:8px">' + l.safety.score + '/100</div>';
+    html += '<p style="font-size:14px;color:#374151;line-height:1.6;margin-bottom:10px">' + l.safety.summary + '</p>';
+    html += '<div style="font-size:12px;color:#9ca3af">Source: ' + l.safety.source + ' &bull; As of ' + l.safety.asOf + ' &bull; Confidence: ' + l.safety.confidence + '</div></div></div>';
+  }
+
+  // 6. Match Score / Fit Score
+  html += '<div class="det-sec"><div class="det-sec-lbl">Match Score Breakdown</div>';
+  var scoreItems = [
+    { label: 'Budget fit', key: 'budget', max: 25 },
+    { label: 'Parking', key: 'parking', max: 20 },
+    { label: 'Pets / ESA', key: 'pets', max: 15 },
+    { label: 'Transit', key: 'transit', max: 18 },
+    { label: 'Move-in date', key: 'movein', max: 10 },
+    { label: 'Amenities', key: 'amenities', max: 12 }
+  ];
+  scoreItems.forEach(function(f) {
+    var val = (l.scoreBreakdown || {})[f.key] || 0;
+    var pct = Math.round((val / f.max) * 100);
+    var bc = pct >= 80 ? '#16a34a' : pct >= 55 ? '#d97706' : '#dc2626';
+    html += '<div class="score-row"><div class="score-row-top"><span>' + f.label + '</span><span style="color:' + bc + ';font-weight:700">' + val + '/' + f.max + '</span></div>';
+    html += '<div class="score-bg"><div class="score-fill" style="width:' + pct + '%;background:' + bc + '"></div></div></div>';
+  });
+  html += '</div>';
+
+  // --- Supporting sections ---
+
+  html += '<div class="why-card"><div class="why-lbl">WHY THIS MATCHES YOU</div><div class="why-txt">' + l.whyItFits + '</div></div>';
+
+  html += '<div style="background:#fff7ed;border:1.5px solid #f5a62333;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#d97706"><strong>Truth First:</strong> ' + (l.verificationLabel || 'Source Pending') + ' — verify rent, fees, parking, pets, and availability with the property before applying.</div>';
+
+  if (l.monthlyCost) {
+    var mc = l.monthlyCost;
+    html += '<div class="det-sec"><div class="det-sec-lbl">True Monthly Cost Estimate ' + confTag('estimated') + '</div><div class="intel-card">';
+    html += '<div class="intel-row"><span>Rent</span><strong>$' + mc.rent.amount + '</strong></div>';
+    html += '<div class="intel-row"><span>Utilities (elec/gas/water/net)</span><strong>$' + (mc.utilities.electric + mc.utilities.gas + mc.utilities.water + mc.utilities.internet) + '</strong></div>';
+    html += '<div class="intel-row"><span>Transportation</span><strong>$' + (mc.transportation.transitPass + mc.transportation.fuel + mc.transportation.parking) + '</strong></div>';
+    html += '<div class="intel-row"><span>Pet + Insurance</span><strong>$' + (mc.petFees.amount + mc.insurance.amount) + '</strong></div>';
+    html += '<div class="intel-row" style="font-weight:800;color:#111827"><span>Estimated Total</span><strong>$' + mc.total + '/mo</strong></div></div></div>';
+  }
+
+  html += '<div class="det-sec"><div class="det-sec-lbl">Apartment Details</div><div class="facts">';
+  var facts = [
+    { label: 'Rent', val: l.rent, green: true },
+    { label: 'Bedrooms', val: l.bedrooms },
+    { label: 'Bathrooms', val: l.bathrooms },
+    { label: 'Size', val: l.size },
+    { label: 'Available', val: l.available },
+    { label: 'Laundry', val: l.washerDryer },
+    { label: 'Deposit', val: l.deposit },
+    { label: 'Management', val: l.managementCo }
+  ];
+  facts.forEach(function(f) {
+    html += '<div class="fact"><div class="fact-lbl">' + f.label + '</div><div class="fact-val' + (f.green ? ' fact-val-g' : '') + '">' + (f.val || 'Not listed') + '</div></div>';
+  });
+  html += '</div></div>';
+
   if (l.neighborhood) {
     var nb = l.neighborhood;
     html += '<div class="det-sec"><div class="det-sec-lbl">Neighborhood Intel</div>';
@@ -2208,37 +2222,21 @@ function renderDetail(l) {
     html += '</div>';
   }
 
-  // Dual link
-  html += '<div class="dual-card"><div class="dual-ttl">&#128269; Dual-Link Verification</div>';
-  html += '<div class="dual-desc">Compare the listing price vs the official property site. A $50 or more difference may mean bait-and-switch. Always confirm directly.</div>';
-  html += '<div class="dual-links">';
-  if (l.aptLink) {
-    html += '<a class="dual-a" href="' + l.aptLink + '" target="_blank" rel="noreferrer">&#128203; Apartments.com &#8599;</a>';
-  } else {
-    html += '<div class="dual-miss">No marketplace link</div>';
-  }
-  if (l.directLink) {
-    html += '<a class="dual-b" href="' + l.directLink + '" target="_blank" rel="noreferrer">&#127962; Official Property Site &#8599;</a>';
-  } else {
-    html += '<div class="dual-miss">&#128260; ' + (l.verificationStatus || 'NEEDS DIRECT LINK') + '</div>';
-  }
-  html += '</div><div style="color:#9ca3af;font-size:11px;margin-top:6px">Tip: If prices differ, call and ask which is correct for a ' + l.bedrooms + 'BR available ' + l.available + '.</div></div>';
-
-  // Missing data
   if (l.missingData && l.missingData.length) {
     html += '<div class="miss-card"><div class="miss-ttl">&#9888;&#65039; Confirm Before Applying</div>';
     l.missingData.forEach(function(m) { html += '<div class="miss-item">\u2022 ' + m + '</div>'; });
     html += '</div>';
   }
 
-  // Status
-  html += '<div class="status-card"><div class="det-sec-lbl">Update Your Status</div><div class="st-btns">';
-  ['NOT CALLED', 'CALLED', 'FOLLOW UP', 'EMAIL SENT', 'TOUR SCHEDULED', 'NOT INTERESTED'].forEach(function(s) {
-    html += '<button class="st-btn' + (l.status === s ? ' on' : '') + '" onclick="updateStatus(' + l.id + ',\'' + s + '\',this)">' + s + '</button>';
-  });
-  html += '</div><textarea class="notes-in" placeholder="Your notes \u2014 what they said, tour details, pricing confirmed, red flags\u2026"></textarea></div>';
+  html += '<div class="map-btns">';
+  html += '<button class="map-btn" onclick="openMap(\'' + escAddr(l.address) + '\')">&#128506; Open in Maps</button>';
+  if (APP.profile.work) {
+    html += '<button class="map-btn" onclick="openDirs(\'' + escAddr(l.address) + '\',\'' + escAddr(APP.profile.work) + '\')">&#129517; Directions to Work</button>';
+  }
+  html += '<button class="map-btn map-btn-blue" onclick="window.open(\'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.address) + '&layer=satellite\')">&#127920; Satellite View</button>';
+  html += '<a class="map-btn" href="tel:' + l.phone + '">&#128222; Call Now</a>';
+  html += '</div>';
 
-  // CTA
   html += '<div class="det-cta">';
   html += '<a class="cta-a" href="tel:' + l.phone + '">&#128222; Call Now</a>';
   if (l.aptLink) {
