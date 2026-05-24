@@ -764,7 +764,7 @@ function getStepById(id) {
 // Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
 // ================================================================
 var LS_VERSION = 'Beta v1.2 — Housing Intelligence Foundation';
-var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, feedbackPromptDismissedUntil: null };
+var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null };
 var LS_STORE = Object.assign({}, LS_STORE_DEFAULTS);
 
 function lsNormalizeStore(data) {
@@ -774,6 +774,7 @@ function lsNormalizeStore(data) {
   if (!Array.isArray(store.feedback)) store.feedback = store.feedback ? [].concat(store.feedback) : [];
   if (!Array.isArray(store.analytics)) store.analytics = store.analytics ? [].concat(store.analytics) : [];
   if (!store.listingStatuses || typeof store.listingStatuses !== 'object') store.listingStatuses = {};
+  if (!store.listingNotes || typeof store.listingNotes !== 'object') store.listingNotes = {};
   return store;
 }
 
@@ -982,6 +983,27 @@ function lsSetListingStatus(id, status) {
   if (!LS_STORE.listingStatuses) LS_STORE.listingStatuses = {};
   LS_STORE.listingStatuses[String(id)] = status;
   lsSave();
+}
+
+function lsGetListingNotes() { return LS_STORE.listingNotes || {}; }
+
+function lsGetListingNote(id) {
+  var notes = lsGetListingNotes();
+  return notes[String(id)] || '';
+}
+
+function lsSetListingNote(id, text) {
+  if (!LS_STORE.listingNotes) LS_STORE.listingNotes = {};
+  var key = String(id);
+  var val = String(text || '');
+  if (val.trim()) LS_STORE.listingNotes[key] = val;
+  else delete LS_STORE.listingNotes[key];
+  lsSave();
+}
+
+function saveListingNotes(id, el) {
+  if (!el) return;
+  lsSetListingNote(id, el.value);
 }
 
 function lsApplyListingStatuses(listings) {
@@ -2032,6 +2054,10 @@ function escAddr(addr) {
   return String(addr || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
+function escNotes(text) {
+  return String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function openCallGuide() {
   renderGuide();
   var body = document.getElementById('callGuideModalBody');
@@ -2105,11 +2131,12 @@ function renderDetail(l) {
   }
 
   // 2. Update Your Status
+  var savedNote = lsGetListingNote(l.id);
   html += '<div class="status-card"><div class="det-sec-lbl">Update Your Status</div><div class="st-btns">';
   ['NOT CALLED', 'CALLED', 'FOLLOW UP', 'EMAIL SENT', 'TOUR SCHEDULED', 'NOT INTERESTED'].forEach(function(s) {
     html += '<button class="st-btn' + (l.status === s ? ' on' : '') + '" onclick="updateStatus(' + l.id + ',\'' + s + '\',this)">' + s + '</button>';
   });
-  html += '</div><textarea class="notes-in" placeholder="Your notes \u2014 what they said, tour details, pricing confirmed, red flags\u2026"></textarea></div>';
+  html += '</div><textarea class="notes-in" id="detNotes" data-listing-id="' + l.id + '" placeholder="Your notes \u2014 what they said, tour details, pricing confirmed, red flags\u2026" oninput="saveListingNotes(' + l.id + ',this)" onblur="saveListingNotes(' + l.id + ',this)">' + escNotes(savedNote) + '</textarea></div>';
 
   // 3. Dual-Link Verification
   html += '<div class="dual-card"><div class="dual-ttl">&#128269; Dual-Link Verification</div>';
@@ -2655,6 +2682,7 @@ window.lsDebugStorage = function() {
     currentStoreSession: storeParsed && storeParsed.session ? storeParsed.session : null,
     currentFavorites: storeParsed && storeParsed.favorites ? storeParsed.favorites : [],
     currentListingStatuses: storeParsed && storeParsed.listingStatuses ? storeParsed.listingStatuses : {},
+    listingNotes: storeParsed && storeParsed.listingNotes ? storeParsed.listingNotes : {},
     currentFeedback: storeParsed && storeParsed.feedback ? storeParsed.feedback : [],
     legacyStore: localStorage.getItem('leasesmartStore'),
     legacyFavorites: localStorage.getItem('leasesmartFavorites'),
