@@ -1,0 +1,48 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate config.js from repository secrets
+        run: |
+          if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
+            echo "SUPABASE_URL and SUPABASE_ANON_KEY secrets required for beta auth on GitHub Pages."
+            exit 1
+          fi
+          cat > config.js <<EOF
+          /**
+           * Generated at deploy — anon key only. Do not edit on Pages artifact.
+           */
+          window.LEASESMART_CONFIG = {
+            supabaseUrl: "${{ secrets.SUPABASE_URL }}",
+            supabaseAnonKey: "${{ secrets.SUPABASE_ANON_KEY }}"
+          };
+          EOF
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

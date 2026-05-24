@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<title>LeaseSmart Beta v1.1.10</title>
-<!-- BUILD_ID: 20260523-v1.1.10 — deploy this file to site root -->
+<title>LeaseSmart Beta v1.1.11</title>
+<!-- BUILD_ID: 20260524-v1.1.11 — deploy this file to site root -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f8fafb;color:#111827;min-height:100vh}
@@ -314,6 +314,8 @@ button,input,textarea,select{font-family:inherit}
 .beta-input:focus{border-color:#22d98a}
 .beta-error{background:#fef2f2;border:1.5px solid #fecaca;color:#dc2626;border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:14px;display:none}
 .beta-error.show{display:block}
+.beta-success{background:#f0fdf4;border:1.5px solid #bbf7d0;color:#166534;border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:14px;display:none}
+.beta-success.show{display:block}
 .beta-note{font-size:13px;color:#9ca3af;line-height:1.55;margin-top:14px}
 .beta-legal-box{background:#fff7ed;border:2px solid #f5a62355;border-radius:12px;padding:16px;margin-bottom:16px;max-height:220px;overflow-y:auto;font-size:14px;color:#374151;line-height:1.65}
 .beta-legal-warn{background:#fef2f2;border:1.5px solid #fecaca;color:#dc2626;border-radius:10px;padding:12px 14px;font-size:13px;font-weight:700;margin-bottom:14px}
@@ -407,7 +409,7 @@ body { font-size: 16px !important; }
   <div class="beta-banner-inner">
     <span class="beta-banner-title">LeaseSmart Beta Testing Mode</span>
     <span class="beta-banner-text">You are testing the LeaseSmart experience with sample listings. Real verified apartment data is coming soon. Use Save, Favorites, Call Guide, and Feedback to help improve the app.</span>
-    <span class="beta-banner-build">LeaseSmart Beta v1.1.10 &mdash; Build <span id="lsBuildId">loading</span> &nbsp;|&nbsp; <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a></span>
+    <span class="beta-banner-build">LeaseSmart Beta v1.1.11 &mdash; Build <span id="lsBuildId">loading</span> &nbsp;|&nbsp; <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a></span>
   </div>
 </div>
 
@@ -597,7 +599,7 @@ body { font-size: 16px !important; }
     <strong style="color:#16a34a">LeaseSmart by TGT Technologies Inc.</strong><br/>
     Tee Gates, Founder<br/>
     <a href="mailto:leasesmart@tgttechnologies.com">leasesmart@tgttechnologies.com</a> &bull; <a href="mailto:support@tgttechnologies.com">support@tgttechnologies.com</a><br/>
-    <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1.10</strong><br>Updated Today</div>
+    <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1.11</strong><br>Updated Today</div>
   </div>
 </div>
 </div>
@@ -609,17 +611,20 @@ body { font-size: 16px !important; }
       <div class="beta-title">Beta Tester Sign Up</div>
       <div class="beta-sub">Internal testing only. Supabase email/password account required before app access.</div>
       <div class="beta-error" id="betaSignupError"></div>
-      <label class="beta-lbl" for="betaSignupName">Full name</label>
-      <input class="beta-input" id="betaSignupName" type="text" autocomplete="name" placeholder="First and last name"/>
-      <label class="beta-lbl" for="betaSignupEmail">Email</label>
-      <input class="beta-input" id="betaSignupEmail" type="email" autocomplete="email" placeholder="your@email.com"/>
-      <label class="beta-lbl" for="betaSignupPhone">Phone</label>
-      <input class="beta-input" id="betaSignupPhone" type="tel" autocomplete="tel" placeholder="(555) 555-5555"/>
-      <label class="beta-lbl" for="betaSignupPassword">Password</label>
-      <input class="beta-input" id="betaSignupPassword" type="password" autocomplete="new-password" placeholder="Create password"/>
-      <label class="beta-lbl" for="betaSignupPassword2">Confirm password</label>
-      <input class="beta-input" id="betaSignupPassword2" type="password" autocomplete="new-password" placeholder="Confirm password"/>
-      <button type="button" class="green-btn" onclick="submitBetaSignup()">Create Beta Account</button>
+      <div class="beta-success" id="betaSignupSuccess"></div>
+      <form id="betaSignupForm" autocomplete="on" novalidate onsubmit="event.preventDefault(); submitBetaSignup();">
+        <label class="beta-lbl" for="betaSignupName">Full name</label>
+        <input class="beta-input" id="betaSignupName" name="name" type="text" autocomplete="name" placeholder="First and last name"/>
+        <label class="beta-lbl" for="betaSignupEmail">Email</label>
+        <input class="beta-input" id="betaSignupEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="your@email.com"/>
+        <label class="beta-lbl" for="betaSignupPhone">Phone</label>
+        <input class="beta-input" id="betaSignupPhone" name="tel" type="tel" autocomplete="tel" placeholder="(555) 555-5555"/>
+        <label class="beta-lbl" for="betaSignupPassword">Password</label>
+        <input class="beta-input" id="betaSignupPassword" name="new-password" type="password" autocomplete="new-password" placeholder="Create password"/>
+        <label class="beta-lbl" for="betaSignupPassword2">Confirm password</label>
+        <input class="beta-input" id="betaSignupPassword2" name="new-password-confirm" type="password" autocomplete="new-password" placeholder="Confirm password"/>
+        <button type="submit" class="green-btn">Create Beta Account</button>
+      </form>
       <div class="beta-actions" style="margin-top:14px">
         <button type="button" class="beta-link" onclick="showBetaLoginPage()">Already have a beta account? Log in</button>
         <button type="button" class="beta-link" onclick="showPage('home-pg')">Back to home</button>
@@ -635,11 +640,15 @@ body { font-size: 16px !important; }
       <div class="beta-title">Beta Tester Log In</div>
       <div class="beta-sub">Internal testing only. Legal agreement required before app access.</div>
       <div class="beta-error" id="betaLoginError"></div>
-      <label class="beta-lbl" for="betaLoginEmail">Email</label>
-      <input class="beta-input" id="betaLoginEmail" type="email" autocomplete="email" placeholder="your@email.com"/>
-      <label class="beta-lbl" for="betaLoginPassword">Password</label>
-      <input class="beta-input" id="betaLoginPassword" type="password" autocomplete="current-password" placeholder="Password"/>
-      <button type="button" class="green-btn" onclick="submitBetaLogin()">Log In</button>
+      <div class="beta-success" id="betaLoginSuccess"></div>
+      <form id="betaLoginForm" autocomplete="on" novalidate onsubmit="event.preventDefault(); submitBetaLogin();">
+        <label class="beta-lbl" for="betaLoginEmail">Email</label>
+        <input class="beta-input" id="betaLoginEmail" name="username" type="email" inputmode="email" autocomplete="username" placeholder="your@email.com"/>
+        <label class="beta-lbl" for="betaLoginPassword">Password</label>
+        <input class="beta-input" id="betaLoginPassword" name="password" type="password" autocomplete="current-password" placeholder="Password"/>
+        <button type="submit" class="green-btn">Log In</button>
+      </form>
+      <button type="button" class="ghost-btn" style="width:100%;margin-top:10px;padding:14px;font-size:15px;font-weight:700" onclick="submitBetaMagicLink()">Send Magic Link</button>
       <div class="beta-actions" style="margin-top:14px">
         <button type="button" class="beta-link" onclick="showBetaSignupPage()">Need an account? Sign up</button>
         <button type="button" class="beta-link" onclick="showPage('home-pg')">Back to home</button>
@@ -691,7 +700,7 @@ body { font-size: 16px !important; }
       <div class="q-card" id="qCard"></div>
       <button class="back-link" id="backBtn" style="display:none" onclick="goBack()">&#8592; Back</button>
       <p class="privacy">&#128274; Your info is private. We never sell your data.</p>
-      <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.10</strong><br>Updated Today</div>
+      <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.11</strong><br>Updated Today</div>
     </div>
   </div>
 </div>
@@ -705,7 +714,7 @@ body { font-size: 16px !important; }
   <div class="search-stage" id="searchStage">Reading your profile&hellip;</div>
   <div class="search-bar"><div class="search-fill" id="searchFill"></div></div>
   <div class="search-pct" id="searchPct">0%</div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.10</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.11</strong><br>Updated Today</div>
 </div>
 </div>
 
@@ -742,7 +751,7 @@ body { font-size: 16px !important; }
     <div id="tab-verify" style="display:none"></div>
     <div id="tab-profile" style="display:none"></div>
   </div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.10</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.11</strong><br>Updated Today</div>
 </div>
 
 <!-- DETAIL PAGE -->
@@ -754,7 +763,7 @@ body { font-size: 16px !important; }
     </div>
   </header>
   <div class="det-wrap" id="detailContent"></div>
-  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.10</strong><br>Updated Today</div>
+  <div class="ls-version-footer"><strong>LeaseSmart Beta v1.1.11</strong><br>Updated Today</div>
 </div>
 
 <!-- ADMIN PAGE -->
@@ -770,10 +779,11 @@ body { font-size: 16px !important; }
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>window.LEASESMART_CONFIG = window.LEASESMART_CONFIG || null;</script>
 <script src="config.js"></script>
 <script>
-// v1.1.10 Feedback flow + less clicking — guided feedback, lastAction, major change warnings
-var LS_BUILD = '20260523-v1.1.10';
+// v1.1.11 Beta auth config + magic link + password manager forms
+var LS_BUILD = '20260524-v1.1.11';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -815,14 +825,40 @@ var BETA_AGREEMENT_URL = 'https://leasesmart.internal/placeholder-beta-agreement
 var APP_SUPABASE = null;
 var BETA_SESSION = { authUserId: null, appUserId: null, email: '', fullName: '', phone: '', hasAgreement: false, legalScrolled: false };
 
+function lsGetSupabaseConfig() {
+  var cfg = window.LEASESMART_CONFIG || {};
+  return {
+    url: String(cfg.supabaseUrl || '').trim(),
+    anonKey: String(cfg.supabaseAnonKey || '').trim()
+  };
+}
+
 function lsSupabaseConfigured() {
-  return !!(window.LS_SUPABASE_URL && window.LS_SUPABASE_ANON_KEY && window.LS_SUPABASE_URL.indexOf('YOUR_') !== 0);
+  var c = lsGetSupabaseConfig();
+  return !!(c.url && c.anonKey && c.url.indexOf('YOUR_') < 0 && c.anonKey.indexOf('YOUR_') < 0);
+}
+
+function lsSupabaseConfigError() {
+  if (!window.LEASESMART_CONFIG) {
+    return 'Supabase is not configured. Copy config.example.js to config.js and add your project URL + anon key.';
+  }
+  var c = lsGetSupabaseConfig();
+  if (!c.url || c.url.indexOf('YOUR_') >= 0) return 'Supabase URL missing in config.js — replace YOUR_SUPABASE_URL with your project URL.';
+  if (!c.anonKey || c.anonKey.indexOf('YOUR_') >= 0) return 'Supabase anon key missing in config.js — replace YOUR_SUPABASE_ANON_KEY with your anon key only.';
+  return 'Supabase is not configured. Check config.js format and anon key.';
 }
 
 function initSupabaseClient() {
   if (!lsSupabaseConfigured() || typeof supabase === 'undefined') return null;
   if (!APP_SUPABASE) {
-    APP_SUPABASE = supabase.createClient(window.LS_SUPABASE_URL, window.LS_SUPABASE_ANON_KEY);
+    var c = lsGetSupabaseConfig();
+    APP_SUPABASE = supabase.createClient(c.url, c.anonKey, {
+      auth: {
+        detectSessionInUrl: true,
+        persistSession: true,
+        autoRefreshToken: true
+      }
+    });
   }
   return APP_SUPABASE;
 }
@@ -834,13 +870,25 @@ function showBetaError(elId, msg) {
   el.classList.toggle('show', !!msg);
 }
 
+function showBetaSuccess(elId, msg) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  el.textContent = msg || '';
+  el.classList.toggle('show', !!msg);
+}
+
+function clearBetaMessages(prefix) {
+  showBetaError(prefix + 'Error', '');
+  showBetaSuccess(prefix + 'Success', '');
+}
+
 function showBetaSignupPage() {
-  showBetaError('betaSignupError', '');
+  clearBetaMessages('betaSignup');
   showPage('beta-signup-pg');
 }
 
 function showBetaLoginPage() {
-  showBetaError('betaLoginError', '');
+  clearBetaMessages('betaLogin');
   showPage('beta-login-pg');
 }
 
@@ -933,9 +981,9 @@ async function routeAuthenticatedBetaUser() {
 }
 
 async function submitBetaSignup() {
-  showBetaError('betaSignupError', '');
+  clearBetaMessages('betaSignup');
   if (!lsSupabaseConfigured()) {
-    showBetaError('betaSignupError', 'Supabase is not configured. Copy config.example.js to config.js with your anon key.');
+    showBetaError('betaSignupError', lsSupabaseConfigError());
     return;
   }
   var name = (document.getElementById('betaSignupName').value || '').trim();
@@ -972,9 +1020,9 @@ async function submitBetaSignup() {
 }
 
 async function submitBetaLogin() {
-  showBetaError('betaLoginError', '');
+  clearBetaMessages('betaLogin');
   if (!lsSupabaseConfigured()) {
-    showBetaError('betaLoginError', 'Supabase is not configured. Copy config.example.js to config.js with your anon key.');
+    showBetaError('betaLoginError', lsSupabaseConfigError());
     return;
   }
   var email = (document.getElementById('betaLoginEmail').value || '').trim();
@@ -994,6 +1042,49 @@ async function submitBetaLogin() {
     await routeAuthenticatedBetaUser();
   } catch (e) {
     showBetaError('betaLoginError', (e && e.message) ? e.message : String(e));
+  }
+}
+
+async function submitBetaMagicLink() {
+  clearBetaMessages('betaLogin');
+  if (!lsSupabaseConfigured()) {
+    showBetaError('betaLoginError', lsSupabaseConfigError());
+    return;
+  }
+  var email = (document.getElementById('betaLoginEmail').value || '').trim();
+  if (!email) {
+    showBetaError('betaLoginError', 'Enter your email first, then tap Send Magic Link.');
+    return;
+  }
+  try {
+    var client = initSupabaseClient();
+    var redirectTo = window.location.origin + window.location.pathname + '?v=' + encodeURIComponent(LS_BUILD) + '&beta=magic';
+    var res = await client.auth.signInWithOtp({
+      email: email,
+      options: { emailRedirectTo: redirectTo }
+    });
+    if (res.error) throw res.error;
+    BETA_SESSION.email = email;
+    showBetaSuccess('betaLoginSuccess', 'Magic link sent. Check your email and open the link on this device to continue.');
+  } catch (e) {
+    showBetaError('betaLoginError', (e && e.message) ? e.message : String(e));
+  }
+}
+
+async function handleMagicLinkReturn() {
+  if (!lsSupabaseConfigured()) return false;
+  try {
+    var client = initSupabaseClient();
+    var sessionRes = await client.auth.getSession();
+    if (!sessionRes.data || !sessionRes.data.session || !sessionRes.data.session.user) return false;
+    BETA_SESSION.authUserId = sessionRes.data.session.user.id;
+    BETA_SESSION.email = sessionRes.data.session.user.email || BETA_SESSION.email;
+    await ensureAppUserRecord(sessionRes.data.session.user, sessionRes.data.session.user.user_metadata || {});
+    await routeAuthenticatedBetaUser();
+    return true;
+  } catch (e) {
+    console.warn('LeaseSmart: magic link session failed', e);
+    return false;
   }
 }
 
@@ -1044,6 +1135,20 @@ async function initBetaAuthSession() {
   if (!lsSupabaseConfigured()) return;
   try {
     var client = initSupabaseClient();
+    client.auth.onAuthStateChange(async function(event, session) {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && session.user) {
+        BETA_SESSION.authUserId = session.user.id;
+        BETA_SESSION.email = session.user.email || BETA_SESSION.email;
+        try {
+          await ensureAppUserRecord(session.user, session.user.user_metadata || {});
+          BETA_SESSION.hasAgreement = await hasBetaAgreement(BETA_SESSION.appUserId);
+        } catch (e) {
+          console.warn('LeaseSmart: beta auth state sync failed', e);
+        }
+      }
+    });
+    var handledMagic = await handleMagicLinkReturn();
+    if (handledMagic) return;
     var sessionRes = await client.auth.getSession();
     if (!sessionRes.data || !sessionRes.data.session || !sessionRes.data.session.user) return;
     BETA_SESSION.authUserId = sessionRes.data.session.user.id;
@@ -3030,7 +3135,7 @@ function renderQAPanel() {
 function initLeaseSmart() {
   var bid = document.getElementById('lsBuildId');
   if (bid) bid.textContent = LS_BUILD;
-  document.title = 'LeaseSmart Beta v1.1.10 (' + LS_BUILD + ')';
+  document.title = 'LeaseSmart Beta v1.1.11 (' + LS_BUILD + ')';
 
   try {
     lsLoad();
@@ -3113,6 +3218,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-<div style="text-align:center; padding:20px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:40px;">LeaseSmart Beta v1.1.10</div>
+<div style="text-align:center; padding:20px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:40px;">LeaseSmart Beta v1.1.11</div>
 </body>
 </html>
