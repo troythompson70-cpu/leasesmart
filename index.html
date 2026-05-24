@@ -304,6 +304,24 @@ button,input,textarea,select{font-family:inherit}
 .cta-a.cta-secondary{background:#f4f7fa;color:#374151;border:1.5px solid #e5e7eb}
 .cta-b{padding:16px 20px;background:#f4f7fa;color:#6b7280;border:1.5px solid #e5e7eb;border-radius:14px;cursor:pointer;font-size:15px;font-weight:700;line-height:1.3}
 
+/* BETA AUTH (Sprint A1 — internal testing only) */
+.beta-wrap{max-width:520px;margin:0 auto;padding:32px 20px 60px}
+.beta-card{background:#fff;border:2px solid #e5e7eb;border-radius:18px;padding:28px 24px;box-shadow:0 8px 28px rgba(0,0,0,.06)}
+.beta-title{font-size:24px;font-weight:900;color:#111827;margin-bottom:8px;letter-spacing:-.3px}
+.beta-sub{color:#6b7280;font-size:15px;line-height:1.6;margin-bottom:22px}
+.beta-lbl{display:block;font-weight:700;font-size:14px;color:#374151;margin-bottom:6px}
+.beta-input{width:100%;background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;font-size:16px;color:#111827;margin-bottom:14px;outline:none;font-family:inherit}
+.beta-input:focus{border-color:#22d98a}
+.beta-error{background:#fef2f2;border:1.5px solid #fecaca;color:#dc2626;border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:14px;display:none}
+.beta-error.show{display:block}
+.beta-note{font-size:13px;color:#9ca3af;line-height:1.55;margin-top:14px}
+.beta-legal-box{background:#fff7ed;border:2px solid #f5a62355;border-radius:12px;padding:16px;margin-bottom:16px;max-height:220px;overflow-y:auto;font-size:14px;color:#374151;line-height:1.65}
+.beta-legal-warn{background:#fef2f2;border:1.5px solid #fecaca;color:#dc2626;border-radius:10px;padding:12px 14px;font-size:13px;font-weight:700;margin-bottom:14px}
+.beta-check{display:flex;gap:10px;align-items:flex-start;margin:16px 0;font-size:14px;color:#374151;line-height:1.5}
+.beta-check input{width:18px;height:18px;margin-top:2px;accent-color:#22d98a;flex-shrink:0}
+.beta-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.beta-link{background:none;border:none;color:#2563eb;font-size:14px;font-weight:700;cursor:pointer;padding:0;text-decoration:underline}
+
 /* GUIDE */
 .guide-wrap{max-width:720px}
 .script-card{background:#f0fdf4;border:2px solid #22d98a33;border-radius:14px;padding:20px;margin-bottom:24px}
@@ -532,6 +550,14 @@ body { font-size: 16px !important; }
   </div>
   <button class="green-btn" id="startBtn">&#127968; Start Demo Search &rarr;</button>
   <button class="ghost-btn" id="resumeBtn" style="display:none;width:100%;margin-top:10px;padding:14px;font-size:15px;font-weight:700" onclick="resumeSession()">&#128260; Continue Last Search</button>
+  <div style="background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:20px;margin-top:18px">
+    <div style="font-weight:800;font-size:16px;color:#111827;margin-bottom:8px">Internal Beta Account (Sprint A1)</div>
+    <p style="color:#6b7280;font-size:14px;line-height:1.6;margin-bottom:14px">For internal Supabase auth testing only. Demo search above still works without an account.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button type="button" class="green-btn" style="flex:1;min-width:160px;font-size:15px;padding:14px" onclick="showBetaSignupPage()">Beta Sign Up</button>
+      <button type="button" class="ghost-btn" style="flex:1;min-width:160px;padding:14px;font-size:15px;font-weight:700" onclick="showBetaLoginPage()">Beta Log In</button>
+    </div>
+  </div>
   <p class="home-note">Saved on this device &bull; 3 minutes &bull; Works on any phone</p>
   <div class="trust-row">
     <span class="tag-green">&#128269; AI Search</span>
@@ -574,6 +600,78 @@ body { font-size: 16px !important; }
     <div class="ls-version-footer" style="margin-top:24px"><strong>LeaseSmart Beta v1.1.10</strong><br>Updated Today</div>
   </div>
 </div>
+</div>
+
+<!-- BETA SIGNUP (Sprint A1 — internal testing) -->
+<div id="beta-signup-pg" class="pg">
+  <div class="beta-wrap">
+    <div class="beta-card">
+      <div class="beta-title">Beta Tester Sign Up</div>
+      <div class="beta-sub">Internal testing only. Supabase email/password account required before app access.</div>
+      <div class="beta-error" id="betaSignupError"></div>
+      <label class="beta-lbl" for="betaSignupName">Full name</label>
+      <input class="beta-input" id="betaSignupName" type="text" autocomplete="name" placeholder="First and last name"/>
+      <label class="beta-lbl" for="betaSignupEmail">Email</label>
+      <input class="beta-input" id="betaSignupEmail" type="email" autocomplete="email" placeholder="your@email.com"/>
+      <label class="beta-lbl" for="betaSignupPhone">Phone</label>
+      <input class="beta-input" id="betaSignupPhone" type="tel" autocomplete="tel" placeholder="(555) 555-5555"/>
+      <label class="beta-lbl" for="betaSignupPassword">Password</label>
+      <input class="beta-input" id="betaSignupPassword" type="password" autocomplete="new-password" placeholder="Create password"/>
+      <label class="beta-lbl" for="betaSignupPassword2">Confirm password</label>
+      <input class="beta-input" id="betaSignupPassword2" type="password" autocomplete="new-password" placeholder="Confirm password"/>
+      <button type="button" class="green-btn" onclick="submitBetaSignup()">Create Beta Account</button>
+      <div class="beta-actions" style="margin-top:14px">
+        <button type="button" class="beta-link" onclick="showBetaLoginPage()">Already have a beta account? Log in</button>
+        <button type="button" class="beta-link" onclick="showPage('home-pg')">Back to home</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BETA LOGIN (Sprint A1 — internal testing) -->
+<div id="beta-login-pg" class="pg">
+  <div class="beta-wrap">
+    <div class="beta-card">
+      <div class="beta-title">Beta Tester Log In</div>
+      <div class="beta-sub">Internal testing only. Legal agreement required before app access.</div>
+      <div class="beta-error" id="betaLoginError"></div>
+      <label class="beta-lbl" for="betaLoginEmail">Email</label>
+      <input class="beta-input" id="betaLoginEmail" type="email" autocomplete="email" placeholder="your@email.com"/>
+      <label class="beta-lbl" for="betaLoginPassword">Password</label>
+      <input class="beta-input" id="betaLoginPassword" type="password" autocomplete="current-password" placeholder="Password"/>
+      <button type="button" class="green-btn" onclick="submitBetaLogin()">Log In</button>
+      <div class="beta-actions" style="margin-top:14px">
+        <button type="button" class="beta-link" onclick="showBetaSignupPage()">Need an account? Sign up</button>
+        <button type="button" class="beta-link" onclick="showPage('home-pg')">Back to home</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BETA LEGAL CLICKWRAP GATE (Sprint A1 — placeholder legal text) -->
+<div id="beta-legal-pg" class="pg">
+  <div class="beta-wrap">
+    <div class="beta-card">
+      <div class="beta-title">Beta Legal Agreement</div>
+      <div class="beta-legal-warn">PLACEHOLDER — ATTORNEY REVIEW REQUIRED BEFORE REAL TESTERS.</div>
+      <div class="beta-sub">You must read and accept the LeaseSmart Beta Tester NDA and Beta Terms before continuing.</div>
+      <div class="beta-legal-box" id="betaLegalScrollBox" onscroll="trackBetaLegalScroll()">
+        <p><strong>PLACEHOLDER — ATTORNEY REVIEW REQUIRED BEFORE REAL TESTERS.</strong></p>
+        <p>This placeholder agreement is for internal Sprint A1 testing only. It is not legal advice and is not approved for real beta testers.</p>
+        <p><strong>Beta Tester NDA (Placeholder)</strong></p>
+        <p>You agree to keep confidential all non-public LeaseSmart beta features, screenshots, workflows, and feedback mechanisms shared during internal testing.</p>
+        <p><strong>Beta Terms (Placeholder)</strong></p>
+        <p>LeaseSmart is provided as-is during beta testing. Sample listings may be used. You will verify all real listing details directly with properties before applying or signing a lease.</p>
+        <p>You agree to provide good-faith feedback and not misuse the beta platform. TGT Technologies may modify or revoke beta access at any time.</p>
+        <p><strong>Agreement URL (Placeholder):</strong> <a href="#" onclick="openBetaAgreementPlaceholder(); return false;">View placeholder agreement</a></p>
+        <p style="margin-top:16px">Scroll to the bottom to confirm you reviewed this placeholder text.</p>
+      </div>
+      <div class="beta-error" id="betaLegalError"></div>
+      <label class="beta-check"><input type="checkbox" id="betaLegalCheck"/> I have read and agree to the LeaseSmart Beta Tester NDA and Beta Terms.</label>
+      <button type="button" class="green-btn" id="betaLegalAcceptBtn" onclick="submitBetaLegalAccept()">Accept &amp; Continue</button>
+      <p class="beta-note">Acceptance is recorded in beta_agreements. ip_address is server-side only in future sprints.</p>
+    </div>
+  </div>
 </div>
 
 <!-- QUIZ PAGE -->
@@ -671,6 +769,8 @@ body { font-size: 16px !important; }
   <div class="tab-content"><div id="adminContent"></div></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <script>
 // v1.1.10 Feedback flow + less clicking — guided feedback, lastAction, major change warnings
 var LS_BUILD = '20260523-v1.1.10';
@@ -704,6 +804,255 @@ var MAJOR_FIELD_LABELS = { state: 'State', city: 'City', movein: 'Move-in date',
 var TAB_LABELS = { 'tab-matches': 'Matches', 'tab-favorites': 'Favorites', 'tab-guide': 'Call Guide', 'tab-verify': 'Verify Links', 'tab-profile': 'Profile' };
 
 var ADMIN_CODE = 'TGT2026';
+
+// ================================================================
+// BATCH 2 SPRINT A1 — Supabase Auth + Beta Legal Gate (internal only)
+// Anon key only. NEVER use service role key in frontend.
+// ================================================================
+var BETA_NDA_VERSION = 'placeholder-2026-05-23';
+var BETA_TERMS_VERSION = 'placeholder-2026-05-23';
+var BETA_AGREEMENT_URL = 'https://leasesmart.internal/placeholder-beta-agreement';
+var APP_SUPABASE = null;
+var BETA_SESSION = { authUserId: null, appUserId: null, email: '', fullName: '', phone: '', hasAgreement: false, legalScrolled: false };
+
+function lsSupabaseConfigured() {
+  return !!(window.LS_SUPABASE_URL && window.LS_SUPABASE_ANON_KEY && window.LS_SUPABASE_URL.indexOf('YOUR_') !== 0);
+}
+
+function initSupabaseClient() {
+  if (!lsSupabaseConfigured() || typeof supabase === 'undefined') return null;
+  if (!APP_SUPABASE) {
+    APP_SUPABASE = supabase.createClient(window.LS_SUPABASE_URL, window.LS_SUPABASE_ANON_KEY);
+  }
+  return APP_SUPABASE;
+}
+
+function showBetaError(elId, msg) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  el.textContent = msg || '';
+  el.classList.toggle('show', !!msg);
+}
+
+function showBetaSignupPage() {
+  showBetaError('betaSignupError', '');
+  showPage('beta-signup-pg');
+}
+
+function showBetaLoginPage() {
+  showBetaError('betaLoginError', '');
+  showPage('beta-login-pg');
+}
+
+function showBetaLegalPage() {
+  showBetaError('betaLegalError', '');
+  BETA_SESSION.legalScrolled = false;
+  var box = document.getElementById('betaLegalScrollBox');
+  if (box) box.scrollTop = 0;
+  var chk = document.getElementById('betaLegalCheck');
+  if (chk) chk.checked = false;
+  showPage('beta-legal-pg');
+}
+
+function trackBetaLegalScroll() {
+  var box = document.getElementById('betaLegalScrollBox');
+  if (!box) return;
+  if (box.scrollTop + box.clientHeight >= box.scrollHeight - 8) {
+    BETA_SESSION.legalScrolled = true;
+  }
+}
+
+function openBetaAgreementPlaceholder() {
+  BETA_SESSION.legalScrolled = true;
+  window.open(BETA_AGREEMENT_URL, '_blank', 'noopener,noreferrer');
+}
+
+async function ensureAppUserRecord(authUser, meta) {
+  var client = initSupabaseClient();
+  if (!client || !authUser) return null;
+  var email = authUser.email || (meta && meta.email) || '';
+  var fullName = (meta && meta.full_name) || BETA_SESSION.fullName || '';
+  var phone = (meta && meta.phone) || BETA_SESSION.phone || '';
+
+  var existing = await client.from('users').select('id,email,full_name,phone,is_beta,user_type').eq('auth_user_id', authUser.id).maybeSingle();
+  if (existing.error && existing.error.code !== 'PGRST116') throw existing.error;
+  if (existing.data) {
+    BETA_SESSION.appUserId = existing.data.id;
+    BETA_SESSION.email = existing.data.email || email;
+    BETA_SESSION.fullName = existing.data.full_name || fullName;
+    BETA_SESSION.phone = existing.data.phone || phone;
+    return existing.data;
+  }
+
+  var inserted = await client.from('users').insert({
+    auth_user_id: authUser.id,
+    email: email,
+    full_name: fullName,
+    phone: phone,
+    is_beta: true,
+    user_type: 'renter'
+  }).select('id,email,full_name,phone,is_beta,user_type').single();
+  if (inserted.error) throw inserted.error;
+  BETA_SESSION.appUserId = inserted.data.id;
+  BETA_SESSION.email = inserted.data.email;
+  BETA_SESSION.fullName = inserted.data.full_name || fullName;
+  BETA_SESSION.phone = inserted.data.phone || phone;
+  await ensureProfileShell(inserted.data.id);
+  return inserted.data;
+}
+
+async function ensureProfileShell(appUserId) {
+  var client = initSupabaseClient();
+  if (!client || !appUserId) return;
+  var existing = await client.from('profiles').select('id').eq('user_id', appUserId).maybeSingle();
+  if (existing.data) return existing.data;
+  var inserted = await client.from('profiles').insert({ user_id: appUserId }).select('id').single();
+  if (inserted.error && inserted.error.code !== '23505') throw inserted.error;
+  return inserted.data || null;
+}
+
+async function hasBetaAgreement(appUserId) {
+  var client = initSupabaseClient();
+  if (!client || !appUserId) return false;
+  var res = await client.from('beta_agreements').select('id,accepted').eq('user_id', appUserId).eq('accepted', true).limit(1);
+  if (res.error) throw res.error;
+  return !!(res.data && res.data.length);
+}
+
+async function routeAuthenticatedBetaUser() {
+  if (!BETA_SESSION.appUserId) {
+    showBetaLoginPage();
+    return;
+  }
+  BETA_SESSION.hasAgreement = await hasBetaAgreement(BETA_SESSION.appUserId);
+  if (!BETA_SESSION.hasAgreement) {
+    showBetaLegalPage();
+    return;
+  }
+  showPage('home-pg');
+}
+
+async function submitBetaSignup() {
+  showBetaError('betaSignupError', '');
+  if (!lsSupabaseConfigured()) {
+    showBetaError('betaSignupError', 'Supabase is not configured. Copy config.example.js to config.js with your anon key.');
+    return;
+  }
+  var name = (document.getElementById('betaSignupName').value || '').trim();
+  var email = (document.getElementById('betaSignupEmail').value || '').trim();
+  var phone = (document.getElementById('betaSignupPhone').value || '').trim();
+  var pw = document.getElementById('betaSignupPassword').value || '';
+  var pw2 = document.getElementById('betaSignupPassword2').value || '';
+  if (!name || !email || !pw) {
+    showBetaError('betaSignupError', 'Full name, email, and password are required.');
+    return;
+  }
+  if (pw !== pw2) {
+    showBetaError('betaSignupError', 'Passwords do not match.');
+    return;
+  }
+  BETA_SESSION.fullName = name;
+  BETA_SESSION.phone = phone;
+  BETA_SESSION.email = email;
+  try {
+    var client = initSupabaseClient();
+    var signUp = await client.auth.signUp({
+      email: email,
+      password: pw,
+      options: { data: { full_name: name, phone: phone } }
+    });
+    if (signUp.error) throw signUp.error;
+    if (!signUp.data || !signUp.data.user) throw new Error('Signup failed — no user returned.');
+    BETA_SESSION.authUserId = signUp.data.user.id;
+    await ensureAppUserRecord(signUp.data.user, { full_name: name, phone: phone, email: email });
+    await routeAuthenticatedBetaUser();
+  } catch (e) {
+    showBetaError('betaSignupError', (e && e.message) ? e.message : String(e));
+  }
+}
+
+async function submitBetaLogin() {
+  showBetaError('betaLoginError', '');
+  if (!lsSupabaseConfigured()) {
+    showBetaError('betaLoginError', 'Supabase is not configured. Copy config.example.js to config.js with your anon key.');
+    return;
+  }
+  var email = (document.getElementById('betaLoginEmail').value || '').trim();
+  var pw = document.getElementById('betaLoginPassword').value || '';
+  if (!email || !pw) {
+    showBetaError('betaLoginError', 'Email and password are required.');
+    return;
+  }
+  try {
+    var client = initSupabaseClient();
+    var signIn = await client.auth.signInWithPassword({ email: email, password: pw });
+    if (signIn.error) throw signIn.error;
+    if (!signIn.data || !signIn.data.user) throw new Error('Login failed — no user returned.');
+    BETA_SESSION.authUserId = signIn.data.user.id;
+    BETA_SESSION.email = email;
+    await ensureAppUserRecord(signIn.data.user, signIn.data.user.user_metadata || {});
+    await routeAuthenticatedBetaUser();
+  } catch (e) {
+    showBetaError('betaLoginError', (e && e.message) ? e.message : String(e));
+  }
+}
+
+async function submitBetaLegalAccept() {
+  showBetaError('betaLegalError', '');
+  var checked = document.getElementById('betaLegalCheck') && document.getElementById('betaLegalCheck').checked;
+  if (!checked) {
+    showBetaError('betaLegalError', 'You must check the agreement box to continue.');
+    return;
+  }
+  if (!BETA_SESSION.legalScrolled) {
+    showBetaError('betaLegalError', 'Please scroll through the agreement or open the placeholder agreement link.');
+    return;
+  }
+  if (!BETA_SESSION.appUserId) {
+    showBetaError('betaLegalError', 'Beta account not found. Please log in again.');
+    showBetaLoginPage();
+    return;
+  }
+  try {
+    var client = initSupabaseClient();
+    var payload = {
+      user_id: BETA_SESSION.appUserId,
+      full_name: BETA_SESSION.fullName,
+      email: BETA_SESSION.email,
+      phone: BETA_SESSION.phone || null,
+      nda_version: BETA_NDA_VERSION,
+      terms_version: BETA_TERMS_VERSION,
+      agreement_url: BETA_AGREEMENT_URL,
+      app_version: LS_BUILD,
+      accepted: true,
+      scroll_confirmed: true,
+      accepted_at: new Date().toISOString(),
+      user_agent: navigator.userAgent || null,
+      ip_address: null,
+      referral_code: null
+    };
+    var res = await client.from('beta_agreements').insert(payload).select('id').single();
+    if (res.error) throw res.error;
+    BETA_SESSION.hasAgreement = true;
+    showPage('home-pg');
+  } catch (e) {
+    showBetaError('betaLegalError', (e && e.message) ? e.message : String(e));
+  }
+}
+
+async function initBetaAuthSession() {
+  if (!lsSupabaseConfigured()) return;
+  try {
+    var client = initSupabaseClient();
+    var sessionRes = await client.auth.getSession();
+    if (!sessionRes.data || !sessionRes.data.session || !sessionRes.data.session.user) return;
+    BETA_SESSION.authUserId = sessionRes.data.session.user.id;
+    await ensureAppUserRecord(sessionRes.data.session.user, sessionRes.data.session.user.user_metadata || {});
+    BETA_SESSION.hasAgreement = await hasBetaAgreement(BETA_SESSION.appUserId);
+  } catch (e) {
+    console.warn('LeaseSmart: beta auth session check failed', e);
+  }
+}
 
 var US_STATES = [
   'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
@@ -2701,6 +3050,8 @@ function initLeaseSmart() {
     if (rb) rb.style.display = 'block';
   }
 
+  initBetaAuthSession();
+
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
     sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
     var sep = location.search ? '&' : '?';
@@ -2733,6 +3084,8 @@ window.lsDebugStorage = function() {
     currentFavorites: storeParsed && storeParsed.favorites ? storeParsed.favorites : [],
     currentListingStatuses: storeParsed && storeParsed.listingStatuses ? storeParsed.listingStatuses : {},
     listingNotes: storeParsed && storeParsed.listingNotes ? storeParsed.listingNotes : {},
+    betaSupabaseConfigured: lsSupabaseConfigured(),
+    betaSession: BETA_SESSION,
     currentFeedback: storeParsed && storeParsed.feedback ? storeParsed.feedback : [],
     legacyStore: localStorage.getItem('leasesmartStore'),
     legacyFavorites: localStorage.getItem('leasesmartFavorites'),

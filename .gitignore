@@ -1,0 +1,8 @@
+# Local secrets — never commit
+config.js
+.env
+.env.local
+.env.*.local
+
+# QA browser profiles
+_qa/.chrome-profile-*/
