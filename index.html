@@ -609,7 +609,7 @@ body { font-size: 16px !important; }
   <div class="beta-wrap">
     <div class="beta-card">
       <div class="beta-title">Beta Tester Sign Up</div>
-      <div class="beta-sub">Internal testing only. Supabase email/password account required before app access.</div>
+      <div class="beta-sub">Internal testing only. Magic link sign-in — no passwords.</div>
       <div class="beta-error" id="betaSignupError"></div>
       <div class="beta-success" id="betaSignupSuccess"></div>
       <form id="betaSignupForm" autocomplete="on" novalidate onsubmit="event.preventDefault(); submitBetaSignup();">
@@ -619,11 +619,7 @@ body { font-size: 16px !important; }
         <input class="beta-input" id="betaSignupEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="your@email.com"/>
         <label class="beta-lbl" for="betaSignupPhone">Phone</label>
         <input class="beta-input" id="betaSignupPhone" name="tel" type="tel" autocomplete="tel" placeholder="(555) 555-5555"/>
-        <label class="beta-lbl" for="betaSignupPassword">Password</label>
-        <input class="beta-input" id="betaSignupPassword" name="new-password" type="password" autocomplete="new-password" placeholder="Create password"/>
-        <label class="beta-lbl" for="betaSignupPassword2">Confirm password</label>
-        <input class="beta-input" id="betaSignupPassword2" name="new-password-confirm" type="password" autocomplete="new-password" placeholder="Confirm password"/>
-        <button type="submit" class="green-btn">Create Beta Account</button>
+        <button type="submit" class="green-btn">Send Magic Link to Sign Up</button>
       </form>
       <div class="beta-actions" style="margin-top:14px">
         <button type="button" class="beta-link" onclick="showBetaLoginPage()">Already have a beta account? Log in</button>
@@ -638,17 +634,14 @@ body { font-size: 16px !important; }
   <div class="beta-wrap">
     <div class="beta-card">
       <div class="beta-title">Beta Tester Log In</div>
-      <div class="beta-sub">Internal testing only. Legal agreement required before app access.</div>
+      <div class="beta-sub">Internal testing only. Enter your email — we send a magic link. No passwords.</div>
       <div class="beta-error" id="betaLoginError"></div>
       <div class="beta-success" id="betaLoginSuccess"></div>
-      <form id="betaLoginForm" autocomplete="on" novalidate onsubmit="event.preventDefault(); submitBetaLogin();">
+      <form id="betaLoginForm" autocomplete="on" novalidate onsubmit="event.preventDefault(); submitBetaMagicLink();">
         <label class="beta-lbl" for="betaLoginEmail">Email</label>
-        <input class="beta-input" id="betaLoginEmail" name="username" type="email" inputmode="email" autocomplete="username" placeholder="your@email.com"/>
-        <label class="beta-lbl" for="betaLoginPassword">Password</label>
-        <input class="beta-input" id="betaLoginPassword" name="password" type="password" autocomplete="current-password" placeholder="Password"/>
-        <button type="submit" class="green-btn">Log In</button>
+        <input class="beta-input" id="betaLoginEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="your@email.com"/>
+        <button type="submit" class="green-btn">Send Magic Link</button>
       </form>
-      <button type="button" class="ghost-btn" style="width:100%;margin-top:10px;padding:14px;font-size:15px;font-weight:700" onclick="submitBetaMagicLink()">Send Magic Link</button>
       <div class="beta-actions" style="margin-top:14px">
         <button type="button" class="beta-link" onclick="showBetaSignupPage()">Need an account? Sign up</button>
         <button type="button" class="beta-link" onclick="showPage('home-pg')">Back to home</button>
@@ -782,7 +775,7 @@ body { font-size: 16px !important; }
 <script>window.LEASESMART_CONFIG = window.LEASESMART_CONFIG || null;</script>
 <script src="config.js"></script>
 <script>
-// v1.1.11 Beta auth config + magic link + password manager forms
+// v1.1.11 Beta auth config — magic link only (no passwords)
 var LS_BUILD = '20260524-v1.1.11';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
@@ -980,80 +973,14 @@ async function routeAuthenticatedBetaUser() {
   showPage('home-pg');
 }
 
-async function submitBetaSignup() {
-  clearBetaMessages('betaSignup');
+async function sendBetaMagicLinkEmail(email, meta, uiPrefix) {
+  clearBetaMessages(uiPrefix);
   if (!lsSupabaseConfigured()) {
-    showBetaError('betaSignupError', lsSupabaseConfigError());
+    showBetaError(uiPrefix + 'Error', lsSupabaseConfigError());
     return;
   }
-  var name = (document.getElementById('betaSignupName').value || '').trim();
-  var email = (document.getElementById('betaSignupEmail').value || '').trim();
-  var phone = (document.getElementById('betaSignupPhone').value || '').trim();
-  var pw = document.getElementById('betaSignupPassword').value || '';
-  var pw2 = document.getElementById('betaSignupPassword2').value || '';
-  if (!name || !email || !pw) {
-    showBetaError('betaSignupError', 'Full name, email, and password are required.');
-    return;
-  }
-  if (pw !== pw2) {
-    showBetaError('betaSignupError', 'Passwords do not match.');
-    return;
-  }
-  BETA_SESSION.fullName = name;
-  BETA_SESSION.phone = phone;
-  BETA_SESSION.email = email;
-  try {
-    var client = initSupabaseClient();
-    var signUp = await client.auth.signUp({
-      email: email,
-      password: pw,
-      options: { data: { full_name: name, phone: phone } }
-    });
-    if (signUp.error) throw signUp.error;
-    if (!signUp.data || !signUp.data.user) throw new Error('Signup failed — no user returned.');
-    BETA_SESSION.authUserId = signUp.data.user.id;
-    await ensureAppUserRecord(signUp.data.user, { full_name: name, phone: phone, email: email });
-    await routeAuthenticatedBetaUser();
-  } catch (e) {
-    showBetaError('betaSignupError', (e && e.message) ? e.message : String(e));
-  }
-}
-
-async function submitBetaLogin() {
-  clearBetaMessages('betaLogin');
-  if (!lsSupabaseConfigured()) {
-    showBetaError('betaLoginError', lsSupabaseConfigError());
-    return;
-  }
-  var email = (document.getElementById('betaLoginEmail').value || '').trim();
-  var pw = document.getElementById('betaLoginPassword').value || '';
-  if (!email || !pw) {
-    showBetaError('betaLoginError', 'Email and password are required.');
-    return;
-  }
-  try {
-    var client = initSupabaseClient();
-    var signIn = await client.auth.signInWithPassword({ email: email, password: pw });
-    if (signIn.error) throw signIn.error;
-    if (!signIn.data || !signIn.data.user) throw new Error('Login failed — no user returned.');
-    BETA_SESSION.authUserId = signIn.data.user.id;
-    BETA_SESSION.email = email;
-    await ensureAppUserRecord(signIn.data.user, signIn.data.user.user_metadata || {});
-    await routeAuthenticatedBetaUser();
-  } catch (e) {
-    showBetaError('betaLoginError', (e && e.message) ? e.message : String(e));
-  }
-}
-
-async function submitBetaMagicLink() {
-  clearBetaMessages('betaLogin');
-  if (!lsSupabaseConfigured()) {
-    showBetaError('betaLoginError', lsSupabaseConfigError());
-    return;
-  }
-  var email = (document.getElementById('betaLoginEmail').value || '').trim();
   if (!email) {
-    showBetaError('betaLoginError', 'Enter your email first, then tap Send Magic Link.');
+    showBetaError(uiPrefix + 'Error', 'Enter your email to receive a magic link.');
     return;
   }
   try {
@@ -1061,14 +988,36 @@ async function submitBetaMagicLink() {
     var redirectTo = window.location.origin + window.location.pathname + '?v=' + encodeURIComponent(LS_BUILD) + '&beta=magic';
     var res = await client.auth.signInWithOtp({
       email: email,
-      options: { emailRedirectTo: redirectTo }
+      options: {
+        emailRedirectTo: redirectTo,
+        data: meta || {}
+      }
     });
     if (res.error) throw res.error;
     BETA_SESSION.email = email;
-    showBetaSuccess('betaLoginSuccess', 'Magic link sent. Check your email and open the link on this device to continue.');
+    showBetaSuccess(uiPrefix + 'Success', 'Magic link sent. Check your email and open the link on this device to continue.');
   } catch (e) {
-    showBetaError('betaLoginError', (e && e.message) ? e.message : String(e));
+    showBetaError(uiPrefix + 'Error', (e && e.message) ? e.message : String(e));
   }
+}
+
+async function submitBetaSignup() {
+  var name = (document.getElementById('betaSignupName').value || '').trim();
+  var email = (document.getElementById('betaSignupEmail').value || '').trim();
+  var phone = (document.getElementById('betaSignupPhone').value || '').trim();
+  if (!name || !email) {
+    showBetaError('betaSignupError', 'Full name and email are required.');
+    return;
+  }
+  BETA_SESSION.fullName = name;
+  BETA_SESSION.phone = phone;
+  BETA_SESSION.email = email;
+  await sendBetaMagicLinkEmail(email, { full_name: name, phone: phone }, 'betaSignup');
+}
+
+async function submitBetaMagicLink() {
+  var email = (document.getElementById('betaLoginEmail').value || '').trim();
+  await sendBetaMagicLinkEmail(email, {}, 'betaLogin');
 }
 
 async function handleMagicLinkReturn() {
