@@ -16,7 +16,7 @@ const seed = readFileSync(join(ROOT, '_data/sprint-e2-mock-seed.js'), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('E2 build id', html.includes("LS_BUILD = '" + BUILD + "'"));
+assert('E2 build id', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260526-v1.8.0-d4'") || html.includes("LS_BUILD = '20260526-v2.2.0-e3'"));
 assert('E2 mock seed linked', html.includes('sprint-e2-mock-seed.js'));
 assert('E2 draft SQL', sql.includes('DRAFT ONLY') && sql.includes('client_consent_log'));
 

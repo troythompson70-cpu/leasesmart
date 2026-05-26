@@ -220,24 +220,20 @@ button,input,textarea,select{font-family:inherit}
 .li-contact-status{font-size:11px;font-weight:700;color:#6b7280;margin-top:4px}
 .li-contact-status.saved{color:#16a34a}
 .li-contact-status.saving{color:#d97706}
-, skeletons, toasts, tooltips */
-.d5-quiz-progress-label{text-align:center;font-size:14px;font-weight:800;color:#16a34a;padding:10px 18px 0;background:#fff;border-bottom:1px solid #f3f4f6}
-.d5-skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:12px 0}
-.d5-skeleton-card{background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:18px;animation:d5-pulse 1.2s ease-in-out infinite}
-.d5-skeleton-line{height:12px;background:linear-gradient(90deg,#f3f4f6,#e5e7eb,#f3f4f6);border-radius:6px;margin-bottom:10px}
-.d5-skeleton-line.w60{width:60%}.d5-skeleton-line.w80{width:80%}.d5-skeleton-line.w40{width:40%}
-@keyframes d5-pulse{0%,100%{opacity:1}50%{opacity:.55}}
-.d5-empty-state{background:#fff;border:2px dashed #d1d5db;border-radius:16px;padding:28px 20px;text-align:center;margin:16px 0}
-.d5-empty-title{font-size:16px;font-weight:800;color:#374151;margin-bottom:6px}
-.d5-empty-sub{font-size:13px;color:#6b7280;margin-bottom:14px;line-height:1.5}
-.d5-toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:10001;pointer-events:none;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(420px,92vw)}
-.d5-toast{background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;font-size:14px;font-weight:800;padding:12px 20px;border-radius:12px;box-shadow:0 8px 24px rgba(34,217,138,.35);opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s}
-.d5-toast.show{opacity:1;transform:translateY(0)}
-.d5-tip-wrap{display:inline-flex;align-items:center;gap:4px;position:relative}
-.d5-tip-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#eff6ff;color:#2563eb;font-size:11px;font-weight:900;cursor:help;border:1px solid #bfdbfe}
-.d5-tip-bubble{display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:#111827;color:#fff;font-size:11px;font-weight:600;line-height:1.4;padding:8px 10px;border-radius:8px;width:max-content;max-width:220px;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.15)}
-.d5-tip-wrap:hover .d5-tip-bubble,.d5-tip-wrap:focus-within .d5-tip-bubble{display:block}
-/* Sprint D3 — mobile nav, touch forms, C2 quick notes */
+/* D4 — security, errors, session */
+.d4-rate-banner{background:#fef3c7;border:2px solid #fcd34d;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:700;color:#92400e;margin:12px 18px;text-align:center}
+.d4-branded-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#f0fdf4 0%,#fff 45%,#f8fafb 100%);padding:24px}
+.d4-branded-card{background:#fff;border:2px solid #e5e7eb;border-radius:20px;padding:32px 28px;max-width:440px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.08)}
+.d4-branded-mark{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.d4-branded-title{font-size:22px;font-weight:900;color:#111827;margin-bottom:8px}
+.d4-branded-sub{font-size:14px;color:#6b7280;line-height:1.6;margin-bottom:20px}
+.d4-session-overlay{display:none;position:fixed;inset:0;background:rgba(17,24,39,.55);z-index:9999;align-items:center;justify-content:center;padding:20px}
+.d4-session-overlay.open{display:flex}
+.d4-session-modal{background:#fff;border-radius:18px;padding:24px;max-width:400px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.2)}
+.d4-session-modal h3{font-size:18px;font-weight:900;margin-bottom:8px}
+.d4-session-modal p{font-size:14px;color:#6b7280;line-height:1.55;margin-bottom:16px}
+.d4-session-actions{display:flex;gap:10px;flex-wrap:wrap}
+, touch forms, C2 quick notes */
 :root{--d3-touch-min:44px;--d3-nav-break:768px}
 .d3-hamburger{display:none;position:fixed;top:calc(var(--beta-banner-offset) + 10px);right:14px;z-index:10002;width:var(--d3-touch-min);height:var(--d3-touch-min);border:2px solid #e5e7eb;border-radius:12px;background:#fff;font-size:22px;line-height:1;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.08);transition:transform .2s,background .2s,border-color .2s}
 .d3-hamburger.open{background:#f0fdf4;border-color:#22d98a}
@@ -854,7 +850,58 @@ body { font-size: 16px !important; }
   </div>
 </div>
 
- (DRAFT skeleton) -->
+<!-- D4 — branded logout screen -->
+<div id="ls-logout-pg" class="pg">
+  <div class="d4-branded-screen">
+    <div class="d4-branded-card">
+      <div class="d4-branded-mark">LS</div>
+      <div class="d4-branded-title">You're signed out</div>
+      <p class="d4-branded-sub" id="lsLogoutMessage">Your LeaseSmart session ended. Thanks for using LeaseSmart by TGT Technologies.</p>
+      <button type="button" class="green-btn" onclick="d4ReturnToLogin()">Return to login</button>
+    </div>
+  </div>
+</div>
+
+<!-- D4 — branded error screen -->
+<div id="ls-error-pg" class="pg">
+  <div class="d4-branded-screen">
+    <div class="d4-branded-card">
+      <div class="d4-branded-mark">LS</div>
+      <div class="d4-branded-title" id="lsErrorTitle">Something went wrong</div>
+      <p class="d4-branded-sub" id="lsErrorDetail">LeaseSmart hit an unexpected issue. Your data on this device is safe.</p>
+      <p class="d4-branded-sub" style="font-size:13px">Need help? Email <a href="mailto:support@tgttechnologies.com" style="color:#16a34a;font-weight:700">support@tgttechnologies.com</a></p>
+      <button type="button" class="green-btn" onclick="d4RecoverFromError()">Go to home</button>
+    </div>
+  </div>
+</div>
+
+<!-- D4 — branded 404 page -->
+<div id="ls-404-pg" class="pg">
+  <div class="d4-branded-screen">
+    <div class="d4-branded-card">
+      <div class="d4-branded-mark">LS</div>
+      <div class="d4-branded-title">Page not found</div>
+      <p class="d4-branded-sub">This LeaseSmart page doesn't exist. Check the link or head back home.</p>
+      <button type="button" class="green-btn" onclick="d4GoHome()">Go to home</button>
+    </div>
+  </div>
+</div>
+
+<!-- D4 — session timeout warning modal -->
+<div id="d4SessionOverlay" class="d4-session-overlay" role="dialog" aria-labelledby="d4SessionTitle">
+  <div class="d4-session-modal">
+    <h3 id="d4SessionTitle">Session expiring soon</h3>
+    <p id="d4SessionMessage">Your LeaseSmart session will expire in 5 minutes. Extend to keep working, or you'll be signed out automatically.</p>
+    <div class="d4-session-actions">
+      <button type="button" class="green-btn" onclick="d4ExtendSession()">Extend session</button>
+      <button type="button" class="ghost-btn" onclick="d4PerformLogout('user')">Sign out now</button>
+    </div>
+  </div>
+</div>
+
+<div id="d4RateLimitBanner" class="d4-rate-banner" style="display:none"></div>
+
+<!-- E2 — Terms of Service (DRAFT skeleton) -->
 <div id="e2-tos-pg" class="pg">
   <div class="e2-legal-page-wrap">
     <div class="e2-draft-banner">DRAFT — ATTORNEY REVIEW REQUIRED — Not binding. Placeholder only.</div>
@@ -1152,11 +1199,12 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-v140-mock-seed.js"></script>
 <script src="_data/sprint-d1-mock-seed.js"></script>
 <script src="_data/sprint-d2-mock-seed.js"></script>
+<script src="_data/sprint-d4-mock-seed.js"></script>
 <script src="_data/sprint-d3-mock-seed.js"></script>
 <script src="_data/sprint-e2-mock-seed.js"></script>
 <script>
-// v2.1.0 Sprint E2 — legal framework skeleton (+ D1–D5 stack)
-var LS_BUILD = '20260526-v2.1.0-e2';
+// v1.8.0 Sprint D4 — rate limiting, session timeout, error boundaries (+ E2 legal)
+var LS_BUILD = '20260526-v1.8.0-d4';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -1385,10 +1433,16 @@ async function routeAuthenticatedBetaUser() {
 async function sendBetaMagicLinkEmail(email, meta, uiPrefix) {
   clearBetaMessages(uiPrefix);
   if (!email) {
+    d4LogFailedLogin();
     showBetaError(uiPrefix + 'Error', 'Enter your email to receive a magic link.');
     return;
   }
+  if (!d4TrackApiCall('auth_magic_link')) {
+    showBetaError(uiPrefix + 'Error', d4GetRateLimitMessage());
+    return;
+  }
   if (!lsSupabaseConfigured()) {
+    d4LogFailedLogin();
     showBetaError(uiPrefix + 'Error', lsSupabaseConfigError());
     return;
   }
@@ -1406,6 +1460,7 @@ async function sendBetaMagicLinkEmail(email, meta, uiPrefix) {
     BETA_SESSION.email = email;
     showBetaSuccess(uiPrefix + 'Success', 'Magic link sent. Check your email and open the link on this device to continue.');
   } catch (e) {
+    d4LogFailedLogin();
     showBetaError(uiPrefix + 'Error', (e && e.message) ? e.message : String(e));
   }
 }
@@ -1415,6 +1470,7 @@ async function submitBetaSignup() {
   var email = (document.getElementById('betaSignupEmail').value || '').trim();
   var phone = (document.getElementById('betaSignupPhone').value || '').trim();
   if (!name || !email) {
+    d4LogFailedLogin();
     var signupErr = document.getElementById('betaSignupError');
     showBetaError('betaSignupError', 'Full name and email are required.');
     d3ScrollToError(!name ? 'betaSignupName' : 'betaSignupEmail', signupErr, 'Full name and email are required.');
@@ -1446,6 +1502,7 @@ async function handleMagicLinkReturn() {
     BETA_SESSION.authUserId = sessionRes.data.session.user.id;
     BETA_SESSION.email = sessionRes.data.session.user.email || BETA_SESSION.email;
     await ensureAppUserRecord(sessionRes.data.session.user, sessionRes.data.session.user.user_metadata || {});
+    d4StartSessionTimer();
     await routeAuthenticatedBetaUser();
     return true;
   } catch (e) {
@@ -1468,6 +1525,10 @@ async function submitBetaLegalAccept() {
   if (!BETA_SESSION.appUserId) {
     showBetaError('betaLegalError', 'Beta account not found. Please log in again.');
     showBetaLoginPage();
+    return;
+  }
+  if (!d4TrackApiCall('beta_agreement')) {
+    showBetaError('betaLegalError', d4GetRateLimitMessage());
     return;
   }
   try {
@@ -1508,6 +1569,7 @@ async function initBetaAuthSession() {
         try {
           await ensureAppUserRecord(session.user, session.user.user_metadata || {});
           BETA_SESSION.hasAgreement = await hasBetaAgreement(BETA_SESSION.appUserId);
+          d4StartSessionTimer();
         } catch (e) {
           console.warn('LeaseSmart: beta auth state sync failed', e);
         }
@@ -1591,7 +1653,7 @@ function getStepById(id) {
 // Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
 // ================================================================
 var LS_VERSION = 'Beta v1.2 — Housing Intelligence Foundation';
-var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false, d2SavedSearchProfiles: [], liContactHistory: {}, d2Seeded: false, d2AlertsChecked: false, e2DemoClientsAdded: [], e2ClientConsentLog: [], e2DataRetentionPreview: null };
+var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false, d2SavedSearchProfiles: [], liContactHistory: {}, d2Seeded: false, d2AlertsChecked: false, d4RateLimits: {}, securityLog: { failedLoginAttempts: [], totalFailedCount: 0 }, d4SessionExpiresAt: null, e2DemoClientsAdded: [], e2ClientConsentLog: [], e2DataRetentionPreview: null };
 var LS_STORE = Object.assign({}, LS_STORE_DEFAULTS);
 
 function lsNormalizeStore(data) {
@@ -1616,8 +1678,11 @@ function lsNormalizeStore(data) {
   if (!store.liContactHistory || typeof store.liContactHistory !== 'object') store.liContactHistory = {};
   if (typeof store.d2Seeded !== 'boolean') store.d2Seeded = false;
   if (typeof store.d2AlertsChecked !== 'boolean') store.d2AlertsChecked = false;
+  if (!store.d4RateLimits || typeof store.d4RateLimits !== 'object') store.d4RateLimits = {};
+  if (!store.securityLog || typeof store.securityLog !== 'object') store.securityLog = { failedLoginAttempts: [], totalFailedCount: 0 };
   if (!Array.isArray(store.securityLog.failedLoginAttempts)) store.securityLog.failedLoginAttempts = [];
   if (typeof store.securityLog.totalFailedCount !== 'number') store.securityLog.totalFailedCount = 0;
+  if (store.d4SessionExpiresAt === undefined) store.d4SessionExpiresAt = null;
   if (!Array.isArray(store.e2DemoClientsAdded)) store.e2DemoClientsAdded = [];
   if (!Array.isArray(store.e2ClientConsentLog)) store.e2ClientConsentLog = [];
   if (store.e2DataRetentionPreview === undefined) store.e2DataRetentionPreview = null;
@@ -2972,6 +3037,12 @@ function runSearch() {
 }
 
 function callAI(cb) {
+  // Beta demo: client has no API credentials; use 8 local sample listings (LS-003)
+  if (!d4TrackApiCall('listings_ai')) {
+    d4ShowRateLimitMessage(d4GetRateLimitMessage());
+    setTimeout(function() { cb(getFallback()); }, 300);
+    return;
+  }
   setTimeout(function() { cb(getFallback()); }, 300);
   return;
 
@@ -2980,6 +3051,11 @@ function callAI(cb) {
 
   var prompt = 'You are LeaseSmart AI. Generate 8 realistic managed apartment listings. NO private houses, NO basements, NO 55+ unless requested. Real addresses in the requested state/city.\n\nClient profile:\nName: ' + p.name + '\nState: ' + p.state + '\nCity: ' + p.city + '\nWork: ' + (p.work || 'Not specified') + '\nBudget: ' + j(p.budget) + '\nBedrooms: ' + j(p.beds) + '\nBathrooms: ' + p.baths + '\nParking: ' + j(p.park) + '\nPets: ' + j(p.pets) + '\nTransit: ' + j(p.transit) + '\nCommute: ' + p.commute + '\nLaundry: ' + p.laundry + '\nAmenities: ' + j(p.amenities) + '\nNeighborhood: ' + j(p.vibe) + '\nDealbreakers: ' + j(p.avoid) + '\nLifestyle: ' + j(p.life) + '\nExtras: ' + (p.extras || 'None') + '\n\nReturn ONLY a valid JSON array. No markdown, no explanation:\n[{"id":1,"priority":1,"complex":"Name","address":"123 Main St, City, State ZIP","phone":"(555) 555-5555","town":"City","state":"State","rent":"$1,950/mo","rentLow":1950,"size":"920 Sq Ft","bathrooms":"1","bedrooms":"2","available":"July 1","washerDryer":"In-unit","pets":"Dogs OK","parking":"Assigned spot","transit":"Bus 0.2 mi","highways":"I-95 5 min","amenities":["Gym"],"deposit":"$1,000","aptLink":"https://www.apartments.com/example","directLink":null,"managementCo":"Company Name","score":88,"scoreBreakdown":{"budget":23,"parking":20,"pets":13,"transit":18,"movein":9,"amenities":5},"availability":"available","status":"NOT CALLED","whyItFits":"2 sentences why this matches the client.","notes":"Any flags to note.","verificationStatus":"NEEDS DIRECT LINK","missingData":["Confirm overnight parking"],"neighborhood":{"overview":"2-3 sentence description.","walkScore":72,"transitScore":65,"safetyRating":"Above average","nearbySchools":["School 0.4 mi"],"nearbyTransit":["Bus 0.2 mi"],"nearbyHighways":["I-95 0.5 mi"],"nearbyAmenities":["Grocery 0.3 mi"],"driveTimes":{"toWork":"20 min","toDowntown":"15 min","toAirport":"30 min"}}}]';
 
+  if (!d4TrackApiCall('anthropic_api')) {
+    d4ShowRateLimitMessage(d4GetRateLimitMessage());
+    cb(getFallback());
+    return;
+  }
   fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -3187,9 +3263,9 @@ function renderMatches() {
     var avC = l.availability === 'available' ? '#16a34a' : '#d97706';
     cardsHTML += '<div class="l-card' + (l.score >= 85 ? ' top-pick' : '') + '" data-listing-id="' + l.id + '" onclick="openDetail(' + l.id + ')">';
     cardsHTML += '<div class="card-top-row"><div>';
-    cardsHTML += '<span class="badge" style="background:' + sc + '20;color:' + sc + '">' + sl + ' \u00b7 ' + l.score + '</span>' + d5TipHtml('listing_score');
+    cardsHTML += '<span class="badge" style="background:' + sc + '20;color:' + sc + '">' + sl + ' \u00b7 ' + l.score + '</span>';
     cardsHTML += '<span class="badge" style="background:' + avC + '20;color:' + avC + '">' + (l.availability === 'available' ? '&#10003; Available' : '&#9888; Check') + '</span>';
-    cardsHTML += '<span class="badge" style="background:#f4f7fa;color:#6b7280">' + l.status + '</span>' + d5TipHtml('listing_status');
+    cardsHTML += '<span class="badge" style="background:#f4f7fa;color:#6b7280">' + l.status + '</span>';
     cardsHTML += verificationBadgeHtml(l);
     if (l.intelligenceScores) cardsHTML += '<span class="badge" style="background:#eff6ff;color:#2563eb">Life ' + (l.intelligenceScores.lifestyle || '--') + '</span>';
     cardsHTML += '</div>' + rankBadgeHtml(l.priority) + '</div>';
@@ -4025,7 +4101,6 @@ function renderLandlordIntel() {
   html += '</div>';
 
   if (!rows.length) {
-    html += d5EmptyStateHtml('No listings yet', 'Adjust filters or add a landlord intelligence record.', 'Add a record', 'openLandlordIntelForm(null)');
   } else {
     rows.forEach(function(r) {
       var owner = lsGetLandlordIntelOwnerKey();
@@ -4148,12 +4223,12 @@ function renderLandlordIntelForm(r, readOnly) {
   html += liFormField('Website', 'li_website', r.website, { full: true });
   html += liFormField('Source type', 'li_source_type', r.source_type);
   html += liFormField('Source URL', 'li_source_url', r.source_url, { full: true });
-  html += liFormField('Verification status' + d5TipHtml('verification_status'), 'li_verification_status', r.verification_status, { type: 'select', options: LANDLORD_INTEL_VERIFICATION_LEVELS, full: true });
+  html += liFormField('Verification status', 'li_verification_status', r.verification_status, { type: 'select', options: LANDLORD_INTEL_VERIFICATION_LEVELS, full: true });
   html += liFormField('Verified by', 'li_verified_by', r.verified_by || '');
   html += liFormField('Availability status', 'li_availability_status', r.availability_status);
-  html += liFormField('Next recheck date' + d5TipHtml('follow_up_date'), 'li_next_recheck_date', r.next_recheck_date || '', { inputType: 'date' });
+  html += liFormField('Next recheck date', 'li_next_recheck_date', r.next_recheck_date || '', { inputType: 'date' });
   html += liFormField('Program notes', 'li_program_notes', r.program_notes, { type: 'textarea', full: true });
-  html += liFormField('Program compatibility' + d5TipHtml('program_compatibility'), 'li_program_compatibility', r.program_compatibility || 'Unknown', { type: 'select', options: LANDLORD_INTEL_PROGRAM_TYPES, full: true });
+  html += liFormField('Program compatibility', 'li_program_compatibility', r.program_compatibility || 'Unknown', { type: 'select', options: LANDLORD_INTEL_PROGRAM_TYPES, full: true });
   html += liFormField('Case manager notes', 'li_case_manager_notes', r.case_manager_notes, { type: 'textarea', full: true });
   html += liFormField('Neighborhood notes', 'li_neighborhood_notes', r.neighborhood_notes, { type: 'textarea', full: true });
   html += liFormField('Warning flags (comma-separated)', 'li_warning_flags', (r.warning_flags || []).join(', '), { full: true });
@@ -4743,7 +4818,7 @@ function c2StatusTag(status) {
   var s = String(status || 'active').replace(/\s/g, '_');
   var cls = 'c2-status-' + s;
   var label = s.replace(/_/g, ' ');
-  return '<span class="c2-status-tag ' + cls + '">' + label + '</span> ' + d5TipHtml('case_status');
+  return '<span class="c2-status-tag ' + cls + '">' + label + '</span> ';
 }
 
 function c2GetAuthorizedClients() {
@@ -4793,7 +4868,6 @@ function renderC2CaseWorkspace() {
     html += '<p style="font-size:13px;color:#6b7280;margin-bottom:12px">Caseworker view shows assigned clients only. Switch to Demo Caseworker Sam for full C2 demo.</p>';
   }
   if (!clients.length) {
-    html += d5EmptyStateHtml('No clients yet', 'Switch to Demo Caseworker or add your first mock client.', 'Add your first client', 'e2StartClientIntake()');
   } else {
     clients.forEach(function(c) {
       html += '<div class="ls-c2-client-row" onclick="openC2ClientProfile(\'' + c.id + '\')">' +
@@ -4852,7 +4926,6 @@ function renderC2ClientProfile() {
   html += '<div class="ls-internal-card"><h3>Notes <span class="b4-mock-tag">DEMO/INTERNAL</span></h3>';
   if (b4CanWriteCaseNote(ctx, client)) {
     var noteVal = b4GetCaseNote(client.id);
-    if (!noteVal.trim()) html += d5EmptyStateHtml('No notes yet', 'Start typing — notes auto-save in one second.', 'Start typing a note', 'document.getElementById(\'c2CaseNotesInput\').focus()');
     html += '<textarea id="c2CaseNotesInput" rows="6" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px" placeholder="Case notes auto-save in 1 second..."></textarea>' +
       '<div id="c2NoteSaveStatus" class="b4-note-status"></div>';
   } else {
@@ -4869,8 +4942,7 @@ function renderC2FollowUpTracker(clients) {
   var ids = (clients || []).map(function(c) { return c.id; });
   var items = (d1.followUpSchedule || []).filter(function(f) { return ids.indexOf(f.clientId) >= 0; });
   var today = d1TodayIso();
-  var html = '<div class="ls-internal-card"><h3>Follow-up Tracker <span class="ls-preview-tag">INTERNAL PREVIEW</span> ' + d5TipHtml('follow_up_date') + '</h3>';
-  if (!items.length) html += d5EmptyStateHtml('No follow-ups yet', 'Schedule a demo callback or document check.', 'Schedule one', 'd5ScheduleDemoFollowUp(\'' + ((clients[0] && clients[0].id) || 'case-mock-1') + '\')');
+  var html = '<div class="ls-internal-card"><h3>Follow-up Tracker <span class="ls-preview-tag">INTERNAL PREVIEW</span> ' + '</h3>';
   else items.forEach(function(f) {
     var flag = '';
     if (f.due < today) flag = '<span class="ls-followup-flag ls-followup-overdue">OVERDUE</span>';
@@ -4942,7 +5014,7 @@ function renderC3ReportingDashboard() {
     html += '<div style="display:flex;align-items:center;gap:10px;margin:8px 0"><span style="width:100px;font-size:12px;font-weight:700">' + k.replace(/_/g, ' ') + '</span><div style="flex:1;background:#e5e7eb;border-radius:6px;height:12px"><div style="width:' + Math.min(100, br[k] * 3) + '%;background:#22d98a;height:12px;border-radius:6px"></div></div><span style="font-size:13px;font-weight:800">' + br[k] + '</span></div>';
   });
   html += '<p style="font-size:11px;color:#9ca3af;margin-top:12px">Not for public, grant, or investor claims. Dummy metrics only.</p>';
-  html += '<button type="button" class="green-btn" style="margin-top:12px" onclick="d5DemoExportDownload()">Download demo export</button></div>';
+  html += '</div>';
   panel.innerHTML = html;
 }
 
@@ -5202,9 +5274,210 @@ function d1TriggerDemoNotifications() {
 }
 
 // ================================================================
- — onboarding progress, skeletons, empty states, toasts, tooltips
+// SPRINT D4 — rate limiting, session timeout, error boundaries, security log
 // ================================================================
-// SPRINT E2 — Legal framework skeleton (draft only)
+function d4GetConfig() {
+  return window.SPRINT_D4_MOCK || { rateLimitPerMinute: 30, sessionDurationMs: 28800000, sessionWarningMs: 300000 };
+}
+
+function d4GetRateLimitKey() {
+  return BETA_SESSION.authUserId || BETA_SESSION.email || 'anonymous';
+}
+
+function d4GetRateLimitMessage() {
+  return 'Easy there — you\'ve reached the demo API limit for this minute. Please wait a moment and try again.';
+}
+
+function d4TrackApiCall(action) {
+  try {
+    var cfg = d4GetConfig();
+    var limit = cfg.rateLimitPerMinute || 30;
+    var key = d4GetRateLimitKey();
+    if (!LS_STORE.d4RateLimits) LS_STORE.d4RateLimits = {};
+    var minute = new Date().toISOString().slice(0, 16);
+    var bucket = LS_STORE.d4RateLimits[key];
+    if (!bucket || bucket.minute !== minute) bucket = { minute: minute, count: 0 };
+    bucket.count += 1;
+    LS_STORE.d4RateLimits[key] = bucket;
+    lsSave();
+    if (bucket.count > limit) {
+      d4ShowRateLimitMessage(d4GetRateLimitMessage());
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn('LeaseSmart: rate limit check failed safely', e);
+    return true;
+  }
+}
+
+function d4ShowRateLimitMessage(msg) {
+  try {
+    var el = document.getElementById('d4RateLimitBanner');
+    if (el) {
+      el.textContent = msg || d4GetRateLimitMessage();
+      el.style.display = 'block';
+      setTimeout(function() { if (el) el.style.display = 'none'; }, 8000);
+    }
+  } catch (e) { /* never crash */ }
+}
+
+function d4LogFailedLogin() {
+  try {
+    if (!LS_STORE.securityLog) LS_STORE.securityLog = { failedLoginAttempts: [], totalFailedCount: 0 };
+    if (!Array.isArray(LS_STORE.securityLog.failedLoginAttempts)) LS_STORE.securityLog.failedLoginAttempts = [];
+    LS_STORE.securityLog.failedLoginAttempts.unshift({ ts: new Date().toISOString() });
+    if (LS_STORE.securityLog.failedLoginAttempts.length > 200) {
+      LS_STORE.securityLog.failedLoginAttempts = LS_STORE.securityLog.failedLoginAttempts.slice(0, 200);
+    }
+    LS_STORE.securityLog.totalFailedCount = (LS_STORE.securityLog.totalFailedCount || 0) + 1;
+    lsSave();
+  } catch (e) {
+    console.warn('LeaseSmart: security log write failed safely', e);
+  }
+}
+
+function d4StartSessionTimer() {
+  try {
+    var cfg = d4GetConfig();
+    var exp = Date.now() + (cfg.sessionDurationMs || 28800000);
+    sessionStorage.setItem('d4SessionExpires', String(exp));
+    LS_STORE.d4SessionExpiresAt = new Date(exp).toISOString();
+    lsSave();
+    APP.d4SessionWarnShown = false;
+    d4ScheduleSessionChecks();
+  } catch (e) { console.warn('LeaseSmart: session timer start failed', e); }
+}
+
+function d4GetSessionExpiryMs() {
+  var raw = sessionStorage.getItem('d4SessionExpires') || LS_STORE.d4SessionExpiresAt;
+  if (!raw) return null;
+  var n = typeof raw === 'string' && raw.indexOf('T') >= 0 ? Date.parse(raw) : parseInt(raw, 10);
+  return isNaN(n) ? null : n;
+}
+
+function d4ScheduleSessionChecks() {
+  if (APP.d4SessionInterval) clearInterval(APP.d4SessionInterval);
+  APP.d4SessionInterval = setInterval(d4CheckSessionTimeout, 30000);
+  d4CheckSessionTimeout();
+}
+
+function d4CheckSessionTimeout() {
+  try {
+    if (!BETA_SESSION.authUserId && !sessionStorage.getItem('d4SessionExpires')) return;
+    var exp = d4GetSessionExpiryMs();
+    if (!exp) return;
+    var cfg = d4GetConfig();
+    var warnMs = cfg.sessionWarningMs || 300000;
+    var remaining = exp - Date.now();
+    if (remaining <= 0) {
+      d4PerformLogout('timeout');
+      return;
+    }
+    if (remaining <= warnMs && !APP.d4SessionWarnShown) {
+      APP.d4SessionWarnShown = true;
+      var mins = Math.max(1, Math.ceil(remaining / 60000));
+      var msg = document.getElementById('d4SessionMessage');
+      if (msg) msg.textContent = 'Your LeaseSmart session will expire in about ' + mins + ' minute(s). Extend to keep working, or you\'ll be signed out automatically.';
+      var overlay = document.getElementById('d4SessionOverlay');
+      if (overlay) overlay.classList.add('open');
+    }
+  } catch (e) { console.warn('LeaseSmart: session check failed safely', e); }
+}
+
+function d4HideSessionWarning() {
+  APP.d4SessionWarnShown = false;
+  var overlay = document.getElementById('d4SessionOverlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function d4ExtendSession() {
+  d4StartSessionTimer();
+  d4HideSessionWarning();
+}
+
+async function d4PerformLogout(reason) {
+  try {
+    d4HideSessionWarning();
+    if (APP.d4SessionInterval) { clearInterval(APP.d4SessionInterval); APP.d4SessionInterval = null; }
+    sessionStorage.removeItem('d4SessionExpires');
+    LS_STORE.d4SessionExpiresAt = null;
+    lsSave();
+    if (lsSupabaseConfigured()) {
+      try {
+        var client = initSupabaseClient();
+        if (client && client.auth) await client.auth.signOut();
+      } catch (e) { /* ignore */ }
+    }
+    BETA_SESSION.authUserId = null;
+    BETA_SESSION.appUserId = null;
+    BETA_SESSION.hasAgreement = false;
+    var msg = document.getElementById('lsLogoutMessage');
+    if (msg) {
+      msg.textContent = reason === 'timeout'
+        ? 'Your session expired for security. Sign in again to continue with LeaseSmart.'
+        : 'You\'re signed out of LeaseSmart. Thanks for using LeaseSmart by TGT Technologies.';
+    }
+    showPage('ls-logout-pg');
+  } catch (e) {
+    d4ShowErrorScreen('Sign out issue', 'We could not complete sign-out cleanly, but your session was cleared.');
+  }
+}
+
+function d4ReturnToLogin() {
+  showBetaLoginPage();
+}
+
+function d4ShowErrorScreen(title, detail) {
+  try {
+    var t = document.getElementById('lsErrorTitle');
+    var d = document.getElementById('lsErrorDetail');
+    if (t) t.textContent = title || 'Something went wrong';
+    if (d) d.textContent = (detail || 'Please try again.') + ' Contact support@tgttechnologies.com if this keeps happening.';
+    showPage('ls-error-pg');
+  } catch (e) {
+    console.warn('LeaseSmart: error screen failed', e);
+  }
+}
+
+function d4RecoverFromError() {
+  try { showPage('home-pg'); } catch (e) { d4ReturnToLogin(); }
+}
+
+function d4Show404Page() {
+  showPage('ls-404-pg');
+}
+
+function d4GoHome() {
+  try {
+    if (BETA_SESSION.authUserId || lsGetResumeProfile()) showPage('dash-pg');
+    else showPage('home-pg');
+  } catch (e) { showPage('home-pg'); }
+}
+
+function d4RouteCheck() {
+  try {
+    var params = new URLSearchParams(location.search);
+    var hash = (location.hash || '').replace('#', '').toLowerCase();
+    if (params.get('page') === '404' || hash === '404' || params.get('ls404') === '1') d4Show404Page();
+  } catch (e) { /* ignore */ }
+}
+
+function d4InstallErrorHandlers() {
+  window.onerror = function(msg, url, line, col, err) {
+    console.warn('LeaseSmart: caught error', msg, url, line);
+    d4ShowErrorScreen('Something went wrong', 'LeaseSmart recovered from an unexpected error.');
+    return true;
+  };
+  window.addEventListener('unhandledrejection', function(ev) {
+    console.warn('LeaseSmart: unhandled rejection', ev.reason);
+    d4ShowErrorScreen('Unexpected error', 'LeaseSmart recovered from a background task error.');
+    if (ev.preventDefault) ev.preventDefault();
+  });
+}
+
+// ================================================================
+ — Legal framework skeleton (draft only)
 // ================================================================
 var E2_COOKIE_KEY = 'leasesmart_cookie_consent_v1';
 
@@ -5555,6 +5828,8 @@ function initLeaseSmart() {
   }
 
   showBetaLoginPage();
+  d4InstallErrorHandlers();
+  d4RouteCheck();
   initBetaAuthSession();
   d1SeedNotificationsIfNeeded();
   d2SeedIfNeeded();
@@ -5645,7 +5920,6 @@ document.addEventListener('DOMContentLoaded', function() {
   <textarea id="d3C2QuickNoteInput" placeholder="Type a note — auto-saves when you close..." rows="5"></textarea>
   <p id="d3C2QuickNoteStatus" style="font-size:12px;color:#6b7280;margin:0">Auto-saves on close</p>
 </div>
-<div id="d5ToastWrap" class="d5-toast-wrap" aria-live="polite"></div>
 <div id="e2CookieBanner" class="e2-cookie-banner" role="dialog" aria-label="Cookie consent">
   <h3>Cookies &amp; privacy (demo)</h3>
   <p>We use essential cookies for beta session and preferences. Optional analytics run only if you Accept. GDPR &amp; CCPA placeholder — attorney review required. In demo mode, analytics default to Decline.</p>

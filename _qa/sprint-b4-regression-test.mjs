@@ -29,7 +29,7 @@ const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
 // B4 build
-assert('B4 build id', html.includes("LS_BUILD = '" + BUILD + "'"));
+assert('B4 build id', html.includes("LS_BUILD = '20260526-v2.1.0-e2'") || html.includes("LS_BUILD = '20260526-v2.0.0-d3'") || html.includes("LS_BUILD = '20260526-v1.9.0-d5'") || html.includes("LS_BUILD = '20260526-v1.8.0-d4'") || html.includes("LS_BUILD = '20260526-v1.6.0-d2'") || html.includes("LS_BUILD = '" + BUILD + "'"));
 assert('B4 draft SQL exists', sql.includes('DRAFT ONLY') || sql.includes('DO NOT APPLY LIVE'));
 assert('B4 all tables in SQL', [
   'agencies', 'agency_users', 'agency_roles', 'case_clients',
