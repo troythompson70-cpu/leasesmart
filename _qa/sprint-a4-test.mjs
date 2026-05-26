@@ -7,7 +7,7 @@ const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('A4 build id', html.includes("LS_BUILD = '20260525-v1.1.12-a4'"));
+assert('A4 build id', html.includes("LS_BUILD = '20260526-v1.2.0-c1'"));
 assert('Select All button on multi only', html.includes('multi-select-all') && html.includes('multiSelectAllBtn'));
 assert('Select All not in single branch', !/type === 'single'[\s\S]{0,120}multi-select-all/.test(html));
 assert('No Save Note button', !html.includes('id="saveNoteBtn"') && !html.includes('Save Note</button>'));
