@@ -210,6 +210,45 @@ button,input,textarea,select{font-family:inherit}
 .li-input,.li-select,.li-textarea{width:100%;box-sizing:border-box;background:#f8fafb;border:2px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;color:#111827}
 .li-textarea{min-height:72px;resize:vertical}
 .li-notice{background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:12px 14px;font-size:12px;color:#9a3412;margin-bottom:14px;line-height:1.5}
+.li-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.li-filter-row label{font-size:11px;font-weight:800;color:#6b7280}
+.li-saved-search{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.li-saved-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #dcfce7;font-size:13px}
+.li-saved-item:last-child{border-bottom:none}
+.li-contact-log{margin-top:16px;padding-top:16px;border-top:2px solid #f3f4f6}
+.li-contact-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;padding:10px;background:#f8fafb;border-radius:10px;border:1px solid #e5e7eb}
+.li-contact-status{font-size:11px;font-weight:700;color:#6b7280;margin-top:4px}
+.li-contact-status.saved{color:#16a34a}
+.li-contact-status.saving{color:#d97706}
+, touch forms, C2 quick notes */
+:root{--d3-touch-min:44px;--d3-nav-break:768px}
+.d3-hamburger{display:none;position:fixed;top:calc(var(--beta-banner-offset) + 10px);right:14px;z-index:10002;width:var(--d3-touch-min);height:var(--d3-touch-min);border:2px solid #e5e7eb;border-radius:12px;background:#fff;font-size:22px;line-height:1;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.08);transition:transform .2s,background .2s,border-color .2s}
+.d3-hamburger.open{background:#f0fdf4;border-color:#22d98a}
+.d3-mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10003;opacity:0;visibility:hidden;transition:opacity .28s ease,visibility .28s}
+.d3-mobile-overlay.open{opacity:1;visibility:visible}
+.d3-mobile-drawer{position:fixed;top:0;right:0;height:100%;width:min(320px,88vw);background:#fff;z-index:10004;transform:translateX(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.12);display:flex;flex-direction:column;padding:20px 16px 32px;overflow-y:auto}
+.d3-mobile-drawer.open{transform:translateX(0)}
+.d3-mobile-nav-link{display:flex;align-items:center;gap:10px;width:100%;min-height:var(--d3-touch-min);padding:12px 14px;border:none;border-radius:12px;background:#f8fafb;color:#111827;font-size:16px;font-weight:700;text-align:left;cursor:pointer;margin-bottom:8px;font-family:inherit}
+.d3-mobile-nav-link:active{background:#f0fdf4}
+.d3-field-error{border-color:#ef4444!important;box-shadow:0 0 0 3px rgba(239,68,68,.2)!important}
+.d3-c2-fab{position:fixed;bottom:24px;right:20px;z-index:10000;width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;font-size:22px;font-weight:900;cursor:pointer;box-shadow:0 8px 24px rgba(34,217,138,.4);display:none;align-items:center;justify-content:center;transition:transform .2s}
+.d3-c2-fab.show{display:flex}
+.d3-c2-fab:active{transform:scale(.94)}
+.d3-c2-note-sheet{position:fixed;left:0;right:0;bottom:0;z-index:10005;background:#fff;border-radius:20px 20px 0 0;padding:20px 18px 28px;box-shadow:0 -8px 32px rgba(0,0,0,.15);transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);max-height:70vh;display:flex;flex-direction:column}
+.d3-c2-note-sheet.open{transform:translateY(0)}
+.d3-c2-note-sheet textarea{flex:1;min-height:120px;width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:12px;font-size:16px;margin:12px 0;font-family:inherit;resize:vertical}
+.d3-c2-note-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10004;opacity:0;visibility:hidden;transition:opacity .28s ease,visibility .28s}
+.d3-c2-note-backdrop.open{opacity:1;visibility:visible}
+@media(max-width:768px){
+  .d3-hamburger{display:flex}
+  #dash-pg .tabs{display:none!important}
+  .beta-input,.fb-input,.fb-textarea,.filter-text,.filter-select,.filter-date,select.beta-input{min-height:var(--d3-touch-min);font-size:16px}
+  .beta-lbl,.filter-group-lbl{display:block;margin-bottom:8px;position:relative;z-index:1}
+  .beta-input,.fb-input,.filter-text,.filter-select{margin-bottom:18px;position:relative;z-index:0}
+  .green-btn,.ghost-btn{min-height:var(--d3-touch-min)}
+  .fb-float{bottom:88px}
+  .d5-toast-wrap{bottom:96px}
+}
 .act-cnt{font-weight:900;font-size:20px;color:#111827;line-height:1}
 .act-lbl{color:#6b7280;font-size:10px;letter-spacing:.4px;font-weight:700;text-transform:uppercase}
 .filt-btn{background:#fff;border:2px solid #e5e7eb;border-radius:20px;padding:8px 16px;color:#6b7280;font-size:13px;font-weight:700;cursor:pointer}
@@ -528,6 +567,7 @@ body { font-size: 16px !important; }
     <h3 id="landlordIntelModalTitle">&#127970; Landlord Record</h3>
     <p class="filter-sheet-sub" id="landlordIntelModalSub">Add or update landlord intelligence. Saved locally in beta demo mode.</p>
     <div id="landlordIntelFormBody"></div>
+    <div id="liContactHistoryBody"></div>
     <div class="filter-actions">
       <button class="green-btn" id="landlordIntelSaveBtn" onclick="saveLandlordIntelForm()">Save Record &rarr;</button>
       <button class="ghost-btn" type="button" onclick="closeLandlordIntelForm()">Cancel</button>
@@ -767,7 +807,7 @@ body { font-size: 16px !important; }
   </div>
 </div>
 
-<!-- BETA WELCOME (Sprint A3 — after magic link login) -->
+
 <div id="beta-welcome-pg" class="pg">
   <div class="beta-wrap">
     <div class="beta-card">
@@ -853,7 +893,7 @@ body { font-size: 16px !important; }
       <div class="qz-mark">LS</div>
       <div><div class="qz-name">LeaseSmart</div><div class="qz-sub">TGT TECHNOLOGIES INC.</div></div>
     </div>
-    <div><div class="qz-count-num" id="stepNum">1 of 21</div><div class="qz-count-pct" id="stepPct">0%</div></div>
+    <div><div class="qz-count-num" id="stepNum">Step 1 of 21</div><div class="qz-count-pct" id="stepPct">0%</div></div>
   </div>
   <div class="qz-prog"><div class="qz-prog-fill" id="progFill"></div></div>
   <div class="qz-dots" id="stepDots"></div>
@@ -1009,9 +1049,10 @@ body { font-size: 16px !important; }
 <script src="_data/b4-case-mock-seed.js"></script>
 <script src="_data/sprint-v140-mock-seed.js"></script>
 <script src="_data/sprint-d1-mock-seed.js"></script>
+<script src="_data/sprint-d2-mock-seed.js"></script>
 <script>
-// v1.5.0 Sprint D1 — email + in-app notifications + follow-up reminders
-var LS_BUILD = '20260526-v1.5.0-d1';
+// v1.6.0 Sprint D2 — landlord filters, saved search alerts, contact history
+var LS_BUILD = '20260526-v1.6.0-d2';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -1049,6 +1090,8 @@ var LANDLORD_INTEL_VERIFICATION_LEVELS = [
   'Imported', 'Public Source Verified', 'Contact Verified', 'Recently Contacted',
   'Availability Confirmed', 'Needs Recheck', 'Inactive', 'Bad Lead'
 ];
+var LANDLORD_INTEL_AVAILABILITY_LEVELS = ['Units Available', 'Waitlist', 'Unknown', 'No Availability', 'Call for Availability'];
+var LANDLORD_INTEL_PROGRAM_TYPES = ['Section 8', 'Voucher Ready', 'Credit Flexible', 'Market Rate', 'Unknown'];
 
 var ADMIN_CODE = 'TGT2026';
 
@@ -1236,12 +1279,12 @@ async function routeAuthenticatedBetaUser() {
 
 async function sendBetaMagicLinkEmail(email, meta, uiPrefix) {
   clearBetaMessages(uiPrefix);
-  if (!lsSupabaseConfigured()) {
-    showBetaError(uiPrefix + 'Error', lsSupabaseConfigError());
-    return;
-  }
   if (!email) {
     showBetaError(uiPrefix + 'Error', 'Enter your email to receive a magic link.');
+    return;
+  }
+  if (!lsSupabaseConfigured()) {
+    showBetaError(uiPrefix + 'Error', lsSupabaseConfigError());
     return;
   }
   try {
@@ -1364,6 +1407,7 @@ async function initBetaAuthSession() {
     BETA_SESSION.authUserId = sessionRes.data.session.user.id;
     await ensureAppUserRecord(sessionRes.data.session.user, sessionRes.data.session.user.user_metadata || {});
     BETA_SESSION.hasAgreement = await hasBetaAgreement(BETA_SESSION.appUserId);
+    d4StartSessionTimer();
     routeOnboarding();
   } catch (e) {
     console.warn('LeaseSmart: beta auth session check failed', e);
@@ -1434,7 +1478,7 @@ function getStepById(id) {
 // Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
 // ================================================================
 var LS_VERSION = 'Beta v1.2 — Housing Intelligence Foundation';
-var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false };
+var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false, d2SavedSearchProfiles: [], liContactHistory: {}, d2Seeded: false, d2AlertsChecked: false };
 var LS_STORE = Object.assign({}, LS_STORE_DEFAULTS);
 
 function lsNormalizeStore(data) {
@@ -1455,6 +1499,12 @@ function lsNormalizeStore(data) {
   if (!Array.isArray(store.inAppNotifications)) store.inAppNotifications = store.inAppNotifications ? [].concat(store.inAppNotifications) : [];
   if (!Array.isArray(store.d1EmailOutbox)) store.d1EmailOutbox = store.d1EmailOutbox ? [].concat(store.d1EmailOutbox) : [];
   if (typeof store.d1Seeded !== 'boolean') store.d1Seeded = false;
+  if (!Array.isArray(store.d2SavedSearchProfiles)) store.d2SavedSearchProfiles = store.d2SavedSearchProfiles ? [].concat(store.d2SavedSearchProfiles) : [];
+  if (!store.liContactHistory || typeof store.liContactHistory !== 'object') store.liContactHistory = {};
+  if (typeof store.d2Seeded !== 'boolean') store.d2Seeded = false;
+  if (typeof store.d2AlertsChecked !== 'boolean') store.d2AlertsChecked = false;
+  if (!Array.isArray(store.securityLog.failedLoginAttempts)) store.securityLog.failedLoginAttempts = [];
+  if (typeof store.securityLog.totalFailedCount !== 'number') store.securityLog.totalFailedCount = 0;
   return store;
 }
 
@@ -2418,11 +2468,6 @@ function refreshListingsFromProfile() {
 function renderStep() {
   var step = STEPS[APP.quizStep];
   var total = STEPS.length;
-  var pct = Math.round((APP.quizStep / total) * 100);
-
-  document.getElementById('stepNum').textContent = (APP.quizStep + 1) + ' of ' + total;
-  document.getElementById('stepPct').textContent = pct + '% complete';
-  document.getElementById('progFill').style.width = pct + '%';
 
   // Dots
   var dotsEl = document.getElementById('stepDots');
@@ -2795,7 +2840,6 @@ function runSearch() {
 }
 
 function callAI(cb) {
-  // Beta demo: client has no API credentials; use 8 local sample listings (LS-003)
   setTimeout(function() { cb(getFallback()); }, 300);
   return;
 
@@ -2897,6 +2941,8 @@ function buildDashboard() {
   renderLandlordIntel();
   renderProfile();
   d1SeedNotificationsIfNeeded();
+  d2SeedIfNeeded();
+  d2CheckSavedSearchAlerts();
   d1RefreshFollowUpHeader('dashFollowUpBar');
   d1RefreshNotificationUI();
 }
@@ -2947,7 +2993,13 @@ function clearStatusFilter() {
 }
 
 function renderMatches() {
-  var ls = APP.listings;
+  var el = document.getElementById('tab-matches');
+  if (!el) return;
+  var ls = APP.listings || [];
+  if (!ls.length) {
+    el.innerHTML = d5EmptyStateHtml('No listings yet', 'Run a demo search or add a landlord record.', 'Add a record', 'showTab(\'tab-landlord-intel\',document.querySelector(\'.tab-btn[onclick*=landlord-intel]\'));renderLandlordIntel();');
+    return;
+  }
   var f = APP.filter;
   var shown = f === 'top' ? ls.filter(function(l) { return l.score >= 85; }) :
               f === 'good' ? ls.filter(function(l) { return l.score >= 70 && l.score < 85; }) :
@@ -3505,7 +3557,10 @@ function lsGetLandlordIntelOwnerKey() {
 
 function lsEnsureLandlordIntelSeed() {
   if (!LS_STORE.landlordIntel) LS_STORE.landlordIntel = [];
-  if (LS_STORE.landlordIntelSeeded && LS_STORE.landlordIntel.length >= 50) return;
+  if (LS_STORE.landlordIntelSeeded && LS_STORE.landlordIntel.length >= 50) {
+    d2EnsureProgramCompatibility();
+    return;
+  }
   var seed = (typeof window !== 'undefined' && window.LANDLORD_INTEL_DUMMY_NJ) ? window.LANDLORD_INTEL_DUMMY_NJ : [];
   if (!seed.length) return;
   var existingIds = {};
@@ -3514,7 +3569,236 @@ function lsEnsureLandlordIntelSeed() {
     if (!existingIds[r.id]) LS_STORE.landlordIntel.push(JSON.parse(JSON.stringify(r)));
   });
   LS_STORE.landlordIntelSeeded = true;
+  d2EnsureProgramCompatibility();
   lsSave();
+}
+
+function d2GetMock() {
+  return window.SPRINT_D2_MOCK || { programCompatibilityTypes: LANDLORD_INTEL_PROGRAM_TYPES, savedSearchProfiles: [], mockNewListingAlerts: [], contactHistorySeed: {} };
+}
+
+function d2EnsureProgramCompatibility() {
+  var programs = d2GetMock().programCompatibilityTypes || LANDLORD_INTEL_PROGRAM_TYPES;
+  (LS_STORE.landlordIntel || []).forEach(function(r, i) {
+    if (!r.program_compatibility) r.program_compatibility = programs[i % programs.length];
+  });
+}
+
+function d2SeedIfNeeded() {
+  if (LS_STORE.d2Seeded) return;
+  var mock = d2GetMock();
+  if (!LS_STORE.d2SavedSearchProfiles.length && mock.savedSearchProfiles) {
+    LS_STORE.d2SavedSearchProfiles = mock.savedSearchProfiles.map(function(p) {
+      return Object.assign({}, p, { lastCheckedAt: null });
+    });
+  }
+  if (mock.contactHistorySeed) {
+    Object.keys(mock.contactHistorySeed).forEach(function(lid) {
+      if (!LS_STORE.liContactHistory[lid]) {
+        LS_STORE.liContactHistory[lid] = mock.contactHistorySeed[lid].map(function(c) { return Object.assign({}, c); });
+      }
+    });
+  }
+  LS_STORE.d2Seeded = true;
+  lsSave();
+}
+
+function liGetActiveFilters() {
+  if (!APP.liFilters) APP.liFilters = {};
+  if (APP.liCountyFilter && !APP.liFilters.county) APP.liFilters.county = APP.liCountyFilter;
+  return APP.liFilters;
+}
+
+function liSetFilter(key, val) {
+  if (!APP.liFilters) APP.liFilters = {};
+  APP.liFilters[key] = val || '';
+  if (key === 'county') APP.liCountyFilter = val || '';
+  renderLandlordIntel();
+}
+
+function liApplyIntelFilters(rows) {
+  var f = liGetActiveFilters();
+  return (rows || []).filter(function(r) {
+    if (f.county && r.county !== f.county) return false;
+    if (f.verification && r.verification_status !== f.verification) return false;
+    if (f.availability && r.availability_status !== f.availability) return false;
+    if (f.program && r.program_compatibility !== f.program) return false;
+    return true;
+  });
+}
+
+function d2MatchLandlordsForProfile(profile) {
+  var rows = liApplyIntelFilters(lsGetVisibleLandlordIntel());
+  var seen = profile.seenIds || [];
+  var mock = d2GetMock();
+  var fromMock = (mock.mockNewListingAlerts || []).filter(function(a) {
+    return a.profileId === profile.id && seen.indexOf(a.landlordId) < 0;
+  }).map(function(a) {
+    return { landlordId: a.landlordId, title: a.title, message: a.message, isMock: true };
+  });
+  if (fromMock.length) return fromMock;
+  return rows.filter(function(r) { return seen.indexOf(r.id) < 0; }).slice(0, 2).map(function(r) {
+    return {
+      landlordId: r.id,
+      title: 'New landlord match',
+      message: 'Demo: ' + (r.property_name || r.landlord_name) + ' matches saved search (MOCK)',
+      isMock: true
+    };
+  });
+}
+
+function d2SaveSearchProfile() {
+  d2SeedIfNeeded();
+  var f = liGetActiveFilters();
+  var name = prompt('Name this saved search (demo):', (f.county || 'All counties') + ' landlord search');
+  if (!name) return;
+  var profile = {
+    id: 'd2-sp-' + Date.now(),
+    name: name,
+    filters: { county: f.county || '', verification: f.verification || '', availability: f.availability || '', program: f.program || '' },
+    seenIds: liApplyIntelFilters(lsGetVisibleLandlordIntel()).map(function(r) { return r.id; }),
+    lastCheckedAt: new Date().toISOString(),
+    isMock: true
+  };
+  LS_STORE.d2SavedSearchProfiles.unshift(profile);
+  if (LS_STORE.d2SavedSearchProfiles.length > 15) LS_STORE.d2SavedSearchProfiles = LS_STORE.d2SavedSearchProfiles.slice(0, 15);
+  lsSave();
+  renderLandlordIntel();
+  setLastAction('Saved search profile: ' + name);
+}
+
+function d2CheckSavedSearchAlerts(force) {
+  d2SeedIfNeeded();
+  if (LS_STORE.d2AlertsChecked && !force) return;
+  var profiles = LS_STORE.d2SavedSearchProfiles || [];
+  var alertCount = 0;
+  profiles.forEach(function(profile) {
+    var matches = d2MatchLandlordsForProfile(profile);
+    matches.forEach(function(m) {
+      d1AddInAppAlert(m.title, m.message + ' [' + profile.name + ']', 'saved_search_match');
+      if (!profile.seenIds) profile.seenIds = [];
+      profile.seenIds.push(m.landlordId);
+      alertCount++;
+    });
+    profile.lastCheckedAt = new Date().toISOString();
+  });
+  if (!force) LS_STORE.d2AlertsChecked = true;
+  lsSave();
+  if (alertCount) d1RefreshNotificationUI();
+}
+
+function liGetContactHistory(landlordId) {
+  return (LS_STORE.liContactHistory && LS_STORE.liContactHistory[String(landlordId)]) || [];
+}
+
+function liSetContactHistory(landlordId, entries) {
+  if (!LS_STORE.liContactHistory) LS_STORE.liContactHistory = {};
+  var key = String(landlordId);
+  if (!entries || !entries.length) delete LS_STORE.liContactHistory[key];
+  else LS_STORE.liContactHistory[key] = entries;
+  lsSave();
+}
+
+function liAddContactAttempt(landlordId) {
+  var entries = liGetContactHistory(landlordId);
+  entries.unshift({
+    id: 'ch-' + Date.now(),
+    contact_date: new Date().toISOString().slice(0, 10),
+    method: 'Phone',
+    outcome: 'No answer',
+    notes: '',
+    isMock: true
+  });
+  liSetContactHistory(landlordId, entries);
+  renderLiContactHistory(landlordId);
+}
+
+function flushLiContactHistory() {
+  if (APP.liContactDebounceTimer) {
+    clearTimeout(APP.liContactDebounceTimer);
+    APP.liContactDebounceTimer = null;
+  }
+  if (!APP.liContactLandlordId) return;
+  var entries = liGetContactHistory(APP.liContactLandlordId).map(function(e) {
+    var prefix = APP.liContactLandlordId + '-' + e.id + '-';
+    function val(suffix) { var el = document.getElementById(prefix + suffix); return el ? el.value.trim() : ''; }
+    return {
+      id: e.id,
+      contact_date: val('date') || e.contact_date,
+      method: val('method') || e.method,
+      outcome: val('outcome') || e.outcome,
+      notes: val('notes') || e.notes,
+      isMock: true
+    };
+  });
+  liSetContactHistory(APP.liContactLandlordId, entries);
+}
+
+function bindLiContactHistoryAutosave(landlordId) {
+  APP.liContactLandlordId = landlordId;
+  var entries = liGetContactHistory(landlordId);
+  entries.forEach(function(e) {
+    var prefix = landlordId + '-' + e.id + '-';
+    ['date', 'method', 'outcome', 'notes'].forEach(function(field) {
+      var el = document.getElementById(prefix + field);
+      if (!el) return;
+      if (APP.liContactHandlers && APP.liContactHandlers[prefix + field]) {
+        el.removeEventListener('input', APP.liContactHandlers[prefix + field]);
+        el.removeEventListener('change', APP.liContactHandlers[prefix + field]);
+      }
+      if (!APP.liContactHandlers) APP.liContactHandlers = {};
+      var handler = function() {
+        var status = document.getElementById('liContactSaveStatus');
+        if (status) { status.textContent = 'Saving...'; status.className = 'li-contact-status saving'; }
+        if (APP.liContactDebounceTimer) clearTimeout(APP.liContactDebounceTimer);
+        APP.liContactDebounceTimer = setTimeout(function() {
+          APP.liContactDebounceTimer = null;
+          flushLiContactHistory();
+          if (status) { status.textContent = 'Saved ✓'; status.className = 'li-contact-status saved'; }
+        }, 1000);
+      };
+      APP.liContactHandlers[prefix + field] = handler;
+      el.addEventListener('input', handler);
+      el.addEventListener('change', handler);
+    });
+  });
+}
+
+function renderLiContactHistory(landlordId, readOnly) {
+  var wrap = document.getElementById('liContactHistoryBody');
+  if (!wrap) return;
+  var entries = liGetContactHistory(landlordId);
+  var mock = d2GetMock();
+  var methods = mock.contactMethods || ['Phone', 'Email', 'In Person', 'Other'];
+  var outcomes = mock.contactOutcomes || ['No Answer', 'Left Message', 'Spoke With', 'Confirmed Available', 'Not Available', 'Bad Number'];
+  var html = '<div class="li-contact-log"><strong>Contact history</strong> <span class="b4-mock-tag">DEMO</span>';
+  html += '<p style="font-size:12px;color:#6b7280;margin:8px 0">Track every contact attempt on this landlord record. Auto-saves in 1 second.</p>';
+  if (!readOnly) {
+    html += '<button type="button" class="c-btn" onclick="liAddContactAttempt(\'' + landlordId + '\')">+ Log contact attempt</button>';
+    html += '<div id="liContactSaveStatus" class="li-contact-status"></div>';
+  }
+  if (!entries.length) {
+    html += '<p style="font-size:12px;color:#9ca3af;margin-top:10px">No contact attempts logged yet.</p>';
+  } else {
+    entries.forEach(function(e) {
+      var p = landlordId + '-' + e.id + '-';
+      html += '<div class="li-contact-row" style="grid-column:1/-1">';
+      if (readOnly) {
+        html += '<div><strong>' + (e.contact_date || '--') + '</strong> · ' + (e.method || '--') + ' · ' + (e.outcome || '--') + '<br/><span style="font-size:12px;color:#6b7280">' + (e.notes || '') + '</span></div>';
+      } else {
+        html += '<div class="li-form-grid" style="grid-column:1/-1;width:100%">';
+        html += liFormField('Date', p + 'date', e.contact_date, { inputType: 'date' });
+        html += liFormField('Method', p + 'method', e.method, { type: 'select', options: methods });
+        html += liFormField('Outcome', p + 'outcome', e.outcome, { type: 'select', options: outcomes });
+        html += liFormField('Notes', p + 'notes', e.notes, { type: 'textarea', full: true });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+  wrap.innerHTML = html;
+  if (!readOnly) bindLiContactHistoryAutosave(landlordId);
 }
 
 function lsGetVisibleLandlordIntel() {
@@ -3549,41 +3833,84 @@ function liVerificationClass(status) {
 
 function renderLandlordIntel() {
   lsEnsureLandlordIntelSeed();
+  d2SeedIfNeeded();
   var el = document.getElementById('tab-landlord-intel');
   if (!el) return;
-  var filterCounty = APP.liCountyFilter || '';
-  var rows = lsGetVisibleLandlordIntel();
-  if (filterCounty) rows = rows.filter(function(r) { return r.county === filterCounty; });
+  if (!APP._d5LiSkelDone) {
+    APP._d5LiSkelDone = true;
+    el.innerHTML = d5SkeletonCardsHtml(2);
+    setTimeout(renderLandlordIntel, 220);
+    return;
+  }
+  var f = liGetActiveFilters();
+  var rows = liApplyIntelFilters(lsGetVisibleLandlordIntel());
 
   var html = '<div style="max-width:920px">';
-  html += '<div class="li-notice"><strong>Demo data only.</strong> 50 sample NJ landlord records for Sprint C1. No real personal information. Draft Supabase schema not applied live.</div>';
+  html += '<div class="li-notice"><strong>Demo data only.</strong> Sprint C1 + D2 advanced filters. 50 sample NJ landlord records. No real personal information.</div>';
+
+  html += '<div class="li-saved-search"><strong>Saved search alerts</strong> <span class="b4-mock-tag">D2 DEMO</span>';
+  html += '<p style="font-size:12px;color:#6b7280;margin:6px 0 10px">Save filter profiles — app flags new matching listings in the notification bell (dummy logic).</p>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+  html += '<button class="green-btn" type="button" onclick="d2SaveSearchProfile()">Save current search</button>';
+  html += '<button class="c-btn" type="button" onclick="d2CheckSavedSearchAlerts(true);renderLandlordIntel();">Check for new matches</button>';
+  html += '</div>';
+  var profiles = LS_STORE.d2SavedSearchProfiles || [];
+  if (!profiles.length) html += '<p style="font-size:12px;color:#9ca3af">No saved search profiles yet.</p>';
+  else profiles.slice(0, 5).forEach(function(p) {
+    var pending = d2MatchLandlordsForProfile(p).length;
+    html += '<div class="li-saved-item"><span><strong>' + p.name + '</strong><br><span style="font-size:11px;color:#6b7280">' + JSON.stringify(p.filters).replace(/[{}"]/g, '') + '</span></span>';
+    html += '<span style="font-size:11px;font-weight:800;color:' + (pending ? '#dc2626' : '#16a34a') + '">' + (pending ? pending + ' new' : 'Up to date') + '</span></div>';
+  });
+  html += '</div>';
+
   html += '<div class="li-toolbar">';
   html += '<button class="green-btn" type="button" onclick="openLandlordIntelForm(null)">+ Add Record</button>';
-  html += '<select class="li-filter" onchange="APP.liCountyFilter=this.value;renderLandlordIntel();">';
-  html += '<option value="">All counties</option>';
-  ['Essex', 'Passaic', 'Hudson', 'Bergen', 'Union'].forEach(function(c) {
-    html += '<option value="' + c + '"' + (filterCounty === c ? ' selected' : '') + '>' + c + '</option>';
-  });
-  html += '</select>';
   html += '<span style="font-size:13px;color:#6b7280">' + rows.length + ' record(s)</span>';
   html += '</div>';
 
+  html += '<div class="li-filter-row">';
+  html += '<label>County</label><select class="li-filter" onchange="liSetFilter(\'county\',this.value)"><option value="">All</option>';
+  ['Essex', 'Passaic', 'Hudson', 'Bergen', 'Union'].forEach(function(c) {
+    html += '<option value="' + c + '"' + (f.county === c ? ' selected' : '') + '>' + c + '</option>';
+  });
+  html += '</select>';
+  html += '<label>Verification</label><select class="li-filter" onchange="liSetFilter(\'verification\',this.value)"><option value="">All</option>';
+  LANDLORD_INTEL_VERIFICATION_LEVELS.forEach(function(v) {
+    html += '<option value="' + v + '"' + (f.verification === v ? ' selected' : '') + '>' + v + '</option>';
+  });
+  html += '</select>';
+  html += '<label>Availability</label><select class="li-filter" onchange="liSetFilter(\'availability\',this.value)"><option value="">All</option>';
+  LANDLORD_INTEL_AVAILABILITY_LEVELS.forEach(function(a) {
+    html += '<option value="' + a + '"' + (f.availability === a ? ' selected' : '') + '>' + a + '</option>';
+  });
+  html += '</select>';
+  html += '<label>Program</label><select class="li-filter" onchange="liSetFilter(\'program\',this.value)"><option value="">All</option>';
+  LANDLORD_INTEL_PROGRAM_TYPES.forEach(function(p) {
+    html += '<option value="' + p + '"' + (f.program === p ? ' selected' : '') + '>' + p + '</option>';
+  });
+  html += '</select>';
+  html += '<button class="ghost-btn" type="button" style="padding:6px 12px;font-size:12px" onclick="APP.liFilters={};APP.liCountyFilter=\'\';renderLandlordIntel();">Clear all filters</button>';
+  html += '</div>';
+
   if (!rows.length) {
-    html += '<p style="color:#9ca3af;font-size:14px">No landlord records match this filter.</p>';
+    html += d5EmptyStateHtml('No listings yet', 'Adjust filters or add a landlord intelligence record.', 'Add a record', 'openLandlordIntelForm(null)');
   } else {
     rows.forEach(function(r) {
       var owner = lsGetLandlordIntelOwnerKey();
       var canEdit = r.owner_key === owner || (r.owner_key !== 'seed-demo' && !r.is_public);
+      var contacts = liGetContactHistory(r.id).length;
       html += '<div class="li-card">';
       html += '<div class="li-card-hdr"><div><div class="li-title">' + (r.property_name || r.landlord_name) + '</div>';
       html += '<div class="li-sub">' + (r.landlord_name || '') + ' &bull; ' + (r.city || '') + ', ' + (r.state || 'NJ') + ' &bull; ' + (r.county || '') + ' County</div></div>';
       html += '<div><span class="li-badge ' + (r.is_public ? 'li-badge-public' : 'li-badge-own') + '">' + (r.is_public ? 'Public' : 'Private') + '</span></div></div>';
       html += '<span class="li-badge" style="' + liVerificationClass(r.verification_status) + '">' + (r.verification_status || 'Imported') + '</span>';
+      html += ' <span class="li-badge" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe">' + (r.program_compatibility || 'Unknown') + '</span>';
       html += '<div class="li-meta">';
       html += (r.address || '--') + ', ' + (r.zip || '--') + '<br/>';
       html += 'Phone: ' + (r.phone || '--') + ' &bull; Email: ' + (r.email || '--') + '<br/>';
       html += 'Availability: ' + (r.availability_status || '--') + ' &bull; Next recheck: ' + (r.next_recheck_date || '--');
       if (r.program_notes) html += '<br/>Program: ' + r.program_notes;
+      if (contacts) html += '<br/>Contact attempts: ' + contacts + ' (demo log)';
       if (r.warning_flags && r.warning_flags.length) html += '<br/>Flags: ' + r.warning_flags.join(', ');
       html += '</div><div class="li-actions">';
       if (canEdit || r.owner_key === 'seed-demo') {
@@ -3626,6 +3953,7 @@ function openLandlordIntelForm(id, readOnly) {
       last_contacted_at: null,
       availability_status: 'Unknown',
       program_notes: '',
+      program_compatibility: 'Unknown',
       warning_flags: [],
       case_manager_notes: '',
       neighborhood_notes: '',
@@ -3636,11 +3964,17 @@ function openLandlordIntelForm(id, readOnly) {
   document.getElementById('landlordIntelModalTitle').textContent = readOnly ? 'View Landlord Record' : (id ? 'Edit Landlord Record' : 'Add Landlord Record');
   document.getElementById('landlordIntelModalSub').textContent = readOnly ? 'Public demo record — read only.' : 'Update verification status and notes. Saved on this device.';
   renderLandlordIntelForm(APP.liFormDraft, readOnly);
+  if (id) renderLiContactHistory(id, readOnly);
+  else {
+    var ch = document.getElementById('liContactHistoryBody');
+    if (ch) ch.innerHTML = '';
+  }
   document.getElementById('landlordIntelModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeLandlordIntelForm() {
+  flushLiContactHistory();
   document.getElementById('landlordIntelModal').classList.remove('open');
   if (!document.getElementById('fbModal').classList.contains('open') && !document.getElementById('filterModal').classList.contains('open')) {
     document.body.style.overflow = '';
@@ -3687,6 +4021,7 @@ function renderLandlordIntelForm(r, readOnly) {
   html += liFormField('Availability status', 'li_availability_status', r.availability_status);
   html += liFormField('Next recheck date', 'li_next_recheck_date', r.next_recheck_date || '', { inputType: 'date' });
   html += liFormField('Program notes', 'li_program_notes', r.program_notes, { type: 'textarea', full: true });
+  html += liFormField('Program compatibility', 'li_program_compatibility', r.program_compatibility || 'Unknown', { type: 'select', options: LANDLORD_INTEL_PROGRAM_TYPES, full: true });
   html += liFormField('Case manager notes', 'li_case_manager_notes', r.case_manager_notes, { type: 'textarea', full: true });
   html += liFormField('Neighborhood notes', 'li_neighborhood_notes', r.neighborhood_notes, { type: 'textarea', full: true });
   html += liFormField('Warning flags (comma-separated)', 'li_warning_flags', (r.warning_flags || []).join(', '), { full: true });
@@ -3720,6 +4055,7 @@ function saveLandlordIntelForm() {
   r.availability_status = val('li_availability_status');
   r.next_recheck_date = val('li_next_recheck_date');
   r.program_notes = val('li_program_notes');
+  r.program_compatibility = val('li_program_compatibility') || 'Unknown';
   r.case_manager_notes = val('li_case_manager_notes');
   r.neighborhood_notes = val('li_neighborhood_notes');
   r.warning_flags = val('li_warning_flags') ? val('li_warning_flags').split(',').map(function(s) { return s.trim(); }).filter(Boolean) : [];
@@ -4275,7 +4611,7 @@ function c2StatusTag(status) {
   var s = String(status || 'active').replace(/\s/g, '_');
   var cls = 'c2-status-' + s;
   var label = s.replace(/_/g, ' ');
-  return '<span class="c2-status-tag ' + cls + '">' + label + '</span>';
+  return '<span class="c2-status-tag ' + cls + '">' + label + '</span> ';
 }
 
 function c2GetAuthorizedClients() {
@@ -4323,7 +4659,7 @@ function renderC2CaseWorkspace() {
     html += '<p style="font-size:13px;color:#6b7280;margin-bottom:12px">Caseworker view shows assigned clients only. Switch to Demo Caseworker Sam for full C2 demo.</p>';
   }
   if (!clients.length) {
-    html += '<div class="ls-internal-card"><p>No authorized mock clients for this role.</p></div>';
+    html += d5EmptyStateHtml('No clients yet', 'Switch to Demo Caseworker or add your first mock client.', 'Add your first client', 'd5AddFirstDemoClient()');
   } else {
     clients.forEach(function(c) {
       html += '<div class="ls-c2-client-row" onclick="openC2ClientProfile(\'' + c.id + '\')">' +
@@ -4376,6 +4712,8 @@ function renderC2ClientProfile() {
     '<p style="font-size:13px"><strong>Demo calls logged:</strong> ' + calls + ' <span class="ls-demo-metric-tag">DEMO METRIC</span></p></div>';
   html += '<div class="ls-internal-card"><h3>Notes <span class="b4-mock-tag">DEMO/INTERNAL</span></h3>';
   if (b4CanWriteCaseNote(ctx, client)) {
+    var noteVal = b4GetCaseNote(client.id);
+    if (!noteVal.trim()) html += d5EmptyStateHtml('No notes yet', 'Start typing — notes auto-save in one second.', 'Start typing a note', 'document.getElementById(\'c2CaseNotesInput\').focus()');
     html += '<textarea id="c2CaseNotesInput" rows="6" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px" placeholder="Case notes auto-save in 1 second..."></textarea>' +
       '<div id="c2NoteSaveStatus" class="b4-note-status"></div>';
   } else {
@@ -4392,8 +4730,7 @@ function renderC2FollowUpTracker(clients) {
   var ids = (clients || []).map(function(c) { return c.id; });
   var items = (d1.followUpSchedule || []).filter(function(f) { return ids.indexOf(f.clientId) >= 0; });
   var today = d1TodayIso();
-  var html = '<div class="ls-internal-card"><h3>Follow-up Tracker <span class="ls-preview-tag">INTERNAL PREVIEW</span></h3>';
-  if (!items.length) html += '<p style="color:#6b7280;font-size:13px">No mock follow-ups due.</p>';
+  var html = '<div class="ls-internal-card"><h3>Follow-up Tracker <span class="ls-preview-tag">INTERNAL PREVIEW</span> ' + '</h3>';
   else items.forEach(function(f) {
     var flag = '';
     if (f.due < today) flag = '<span class="ls-followup-flag ls-followup-overdue">OVERDUE</span>';
@@ -4464,7 +4801,8 @@ function renderC3ReportingDashboard() {
   Object.keys(br).forEach(function(k) {
     html += '<div style="display:flex;align-items:center;gap:10px;margin:8px 0"><span style="width:100px;font-size:12px;font-weight:700">' + k.replace(/_/g, ' ') + '</span><div style="flex:1;background:#e5e7eb;border-radius:6px;height:12px"><div style="width:' + Math.min(100, br[k] * 3) + '%;background:#22d98a;height:12px;border-radius:6px"></div></div><span style="font-size:13px;font-weight:800">' + br[k] + '</span></div>';
   });
-  html += '<p style="font-size:11px;color:#9ca3af;margin-top:12px">Not for public, grant, or investor claims. Dummy metrics only.</p></div>';
+  html += '<p style="font-size:11px;color:#9ca3af;margin-top:12px">Not for public, grant, or investor claims. Dummy metrics only.</p>';
+  html += '</div>';
   panel.innerHTML = html;
 }
 
@@ -4723,6 +5061,53 @@ function d1TriggerDemoNotifications() {
   if (overdueClient) d1NotifyFollowUpOverdue(overdueClient, 'Demo document check');
 }
 
+// ================================================================
+ — onboarding progress, skeletons, empty states, toasts, tooltips
+// ================================================================
+function d5GetMock() {
+  return window.SPRINT_D5_MOCK || { tooltips: {}, toasts: {} };
+}
+
+function d5OnboardingStepLabel(step, total) {
+  return 'Step ' + step + ' of ' + total;
+}
+
+function d5UpdateOnboardingProgress(stepIndex, total) {
+  total = total || (typeof STEPS !== 'undefined' ? STEPS.length : 21);
+  var step = stepIndex + 1;
+  var pct = Math.round((stepIndex / total) * 100);
+  var label = d5OnboardingStepLabel(step, total);
+  var wrap = document.getElementById('d5QuizProgressWrap');
+  var stepNum = document.getElementById('stepNum');
+  var stepPct = document.getElementById('stepPct');
+  var fill = document.getElementById('progFill');
+  if (wrap) { wrap.style.display = 'block'; wrap.textContent = label; }
+  if (stepNum) stepNum.textContent = label;
+  if (stepPct) stepPct.textContent = pct + '% complete';
+  if (fill) fill.style.width = pct + '%';
+}
+
+function d5HideOnboardingProgress() {
+  var wrap = document.getElementById('d5QuizProgressWrap');
+  if (wrap) wrap.style.display = 'none';
+}
+
+function d5SkeletonCardsHtml(count) {
+  count = count || 3;
+  var h = '<div class="d5-skeleton-grid">';
+  for (var i = 0; i < count; i++) {
+    h += '<div class="d5-skeleton-card"><div class="d5-skeleton-line w80"></div><div class="d5-skeleton-line w60"></div><div class="d5-skeleton-line w40"></div></div>';
+  }
+  return h + '</div>';
+}
+
+function d5EmptyStateHtml(title, subtitle, btnLabel, onclick) {
+  var h = '<div class="d5-empty-state"><div class="d5-empty-title">' + title + '</div>';
+  if (subtitle) h += '<div class="d5-empty-sub">' + subtitle + '</div>';
+  if (btnLabel && onclick) h += '<button type="button" class="green-btn" onclick="' + onclick + '">' + btnLabel + '</button>';
+  return h + '</div>';
+}
+
 function initLeaseSmart() {
   var bid = document.getElementById('lsBuildId');
   if (bid) bid.textContent = LS_BUILD;
@@ -4748,8 +5133,11 @@ function initLeaseSmart() {
   }
 
   showBetaLoginPage();
+  d4InstallErrorHandlers();
+  d4RouteCheck();
   initBetaAuthSession();
   d1SeedNotificationsIfNeeded();
+  d2SeedIfNeeded();
   d1RefreshNotificationUI();
 
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {

@@ -20,7 +20,7 @@ import {
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const QA = join(ROOT, '_qa');
-const BUILD = '20260526-v1.5.0-d1';
+const BUILD = '20260526-v1.6.0-d2';
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const sql = readFileSync(join(ROOT, 'supabase/drafts/sprint_b4_foundation.sql'), 'utf8');
 const seed = readFileSync(join(ROOT, '_data/b4-case-mock-seed.js'), 'utf8');

@@ -8,13 +8,13 @@ import { fileURLToPath } from 'url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const QA = join(ROOT, '_qa');
-const BUILD = '20260526-v1.5.0-d1';
+const BUILD = '20260526-v1.6.0-d2';
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const seed = readFileSync(join(ROOT, '_data/sprint-v140-mock-seed.js'), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('v1.5.0 build id', html.includes("LS_BUILD = '" + BUILD + "'"));
+assert('v1.9.0 build id', html.includes("LS_BUILD = '" + BUILD + "'"));
 assert('v140 mock seed linked', html.includes('sprint-v140-mock-seed.js'));
 assert('Mock seed no real data', seed.includes('noRealClientData: true'));
 
