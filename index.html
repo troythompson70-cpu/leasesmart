@@ -178,6 +178,21 @@ button,input,textarea,select{font-family:inherit}
 .act-title{color:#6b7280;font-size:11px;font-weight:800;letter-spacing:1.2px;margin-bottom:12px;text-transform:uppercase}
 .act-row{display:flex;gap:10px;flex-wrap:wrap}
 .act-item{display:flex;align-items:center;gap:10px;background:#f8fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px}
+.act-item.clickable{cursor:pointer;transition:all .15s}
+.act-item.clickable:hover{border-color:#22d98a;background:#f0fdf4}
+.act-item.clickable.on{background:#22d98a;border-color:#22d98a;color:#000}
+.act-item.clickable.on .act-cnt,.act-item.clickable.on .act-lbl{color:inherit}
+.stat-box.clickable{cursor:pointer;border-radius:8px;transition:background .15s}
+.stat-box.clickable:hover{background:#f0fdf4}
+.stat-box.clickable.on{background:#f0fdf4;outline:2px solid #22d98a;outline-offset:-2px}
+.multi-select-all{display:inline-block;margin-bottom:12px;padding:10px 16px;background:#f4f7fa;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-weight:700;color:#374151;cursor:pointer;font-family:inherit}
+.multi-select-all:hover{border-color:#22d98a;color:#111827}
+.note-live-preview{font-size:13px;color:#6b7280;line-height:1.55;margin-top:8px;min-height:20px;white-space:pre-wrap;word-break:break-word}
+.note-status{font-size:13px;font-weight:700;line-height:1.4;color:#9ca3af}
+.note-status.saving{color:#d97706}
+.note-status.saved{color:#16a34a}
+.act-clear-btn{background:#fff;border:2px dashed #e5e7eb;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:800;color:#6b7280;cursor:pointer;font-family:inherit}
+.act-clear-btn:hover{border-color:#22d98a;color:#111827}
 .act-cnt{font-weight:900;font-size:20px;color:#111827;line-height:1}
 .act-lbl{color:#6b7280;font-size:10px;letter-spacing:.4px;font-weight:700;text-transform:uppercase}
 .filt-btn{background:#fff;border:2px solid #e5e7eb;border-radius:20px;padding:8px 16px;color:#6b7280;font-size:13px;font-weight:700;cursor:pointer}
@@ -804,8 +819,8 @@ body { font-size: 16px !important; }
 <script>window.LEASESMART_CONFIG = window.LEASESMART_CONFIG || null;</script>
 <script src="config.js"></script>
 <script>
-// v1.1.12 Sprint A3 — beta welcome screen after magic link login
-var LS_BUILD = '20260525-v1.1.12-a3';
+// v1.1.12 Sprint A4 — select all, auto-save notes, status filters, post-quiz feedback
+var LS_BUILD = '20260525-v1.1.12-a4';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -818,6 +833,7 @@ var APP = {
   listings: [],
   profile: {},
   filter: 'all',
+  statusFilter: null,
   photoIdx: 0,
   photos: [],
   adminList: [],
@@ -1446,12 +1462,18 @@ function lsGetListingNote(id) {
   return notes[String(id)] || '';
 }
 
-function lsSetListingNote(id, text) {
+function lsSetListingNote(id, text, opts) {
+  opts = opts || {};
   if (!LS_STORE.listingNotes) LS_STORE.listingNotes = {};
   var key = String(id);
   var val = String(text || '');
-  if (val.trim()) LS_STORE.listingNotes[key] = val;
-  else delete LS_STORE.listingNotes[key];
+  var existing = LS_STORE.listingNotes[key] || '';
+  if (!val.trim()) {
+    if (existing.trim() && !opts.allowBlankOverwrite) return existing;
+    delete LS_STORE.listingNotes[key];
+  } else {
+    LS_STORE.listingNotes[key] = val;
+  }
   lsSave();
   return LS_STORE.listingNotes[key] || '';
 }
@@ -1481,24 +1503,38 @@ function showNoteSavedMessage() {
 }
 
 function flushDetailNotes() {
+  if (APP.noteDebounceTimer) {
+    clearTimeout(APP.noteDebounceTimer);
+    APP.noteDebounceTimer = null;
+  }
   var ta = document.getElementById('detNotes');
   var detailPg = document.getElementById('detail-pg');
   if (!ta || !detailPg || !detailPg.classList.contains('show') || !APP.curDetail) return;
-  lsSetListingNote(APP.curDetail.id, ta.value);
+  lsSetListingNote(APP.curDetail.id, ta.value, { allowBlankOverwrite: false });
 }
 
 function bindDetailNotes(id) {
   var ta = document.getElementById('detNotes');
+  var status = document.getElementById('noteSaveStatus');
+  var preview = document.getElementById('noteLivePreview');
   if (!ta) return;
-  ta.addEventListener('input', function() { lsSetListingNote(id, ta.value); });
-  ta.addEventListener('blur', function() { lsSetListingNote(id, ta.value); });
-  var btn = document.getElementById('saveNoteBtn');
-  if (btn) {
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      saveListingNoteNow(id);
-    });
+  function updatePreview() {
+    if (preview) preview.textContent = ta.value.trim() ? ta.value : 'Your notes appear here as you type…';
   }
+  function runDebouncedSave() {
+    if (status) { status.textContent = 'Saving...'; status.className = 'note-status saving'; }
+    if (APP.noteDebounceTimer) clearTimeout(APP.noteDebounceTimer);
+    APP.noteDebounceTimer = setTimeout(function() {
+      APP.noteDebounceTimer = null;
+      lsSetListingNote(id, ta.value, { allowBlankOverwrite: false });
+      if (status) { status.textContent = 'Saved ✓'; status.className = 'note-status saved'; }
+    }, 1000);
+  }
+  ta.addEventListener('input', function() {
+    updatePreview();
+    runDebouncedSave();
+  });
+  updatePreview();
 }
 
 function lsApplyListingStatuses(listings) {
@@ -1523,9 +1559,19 @@ function rankBadgeHtml(priority) {
   return '<span class="card-pri">#' + priority + '</span>';
 }
 
+function lsIsBetaGatePageActive() {
+  var gateIds = ['beta-signup-pg', 'beta-login-pg', 'beta-welcome-pg', 'beta-legal-pg'];
+  for (var i = 0; i < gateIds.length; i++) {
+    var pg = document.getElementById(gateIds[i]);
+    if (pg && pg.classList.contains('show')) return true;
+  }
+  return false;
+}
+
 function lsCanShowFeedbackPrompt() {
   var until = LS_STORE.feedbackPromptDismissedUntil;
   if (until && new Date(until) > new Date()) return false;
+  if (lsIsBetaGatePageActive()) return false;
   return true;
 }
 
@@ -1649,11 +1695,16 @@ function feedbackPromptGive() {
   openFeedback();
 }
 
+function schedulePostQuizFeedbackPrompt() {
+  if (APP.feedbackQuizTimer) clearTimeout(APP.feedbackQuizTimer);
+  APP.feedbackQuizTimer = setTimeout(function() {
+    if (lsIsBetaGatePageActive()) return;
+    tryFeedbackPrompt('quiz_q21_complete');
+  }, 150000);
+}
+
 function scheduleDashboardFeedbackTimer() {
-  if (APP.feedbackTimeTimer) clearTimeout(APP.feedbackTimeTimer);
-  APP.feedbackTimeTimer = setTimeout(function() {
-    if (document.getElementById('dash-pg').classList.contains('show')) tryFeedbackPrompt('dashboard_2min');
-  }, 120000);
+  /* Sprint A4: feedback prompt moved to post-questionnaire only */
 }
 
 function normalizeListing(raw) {
@@ -1789,7 +1840,6 @@ function showPage(id) {
   window.scrollTo(0, 0);
   if (id === 'dash-pg') {
     APP.dashboardEnteredAt = Date.now();
-    scheduleDashboardFeedbackTimer();
   }
 }
 
@@ -1801,7 +1851,6 @@ function showTab(tabId, btn) {
   APP.currentTab = tabId;
   var tabName = TAB_LABELS[tabId] || tabId;
   setLastAction('Viewed ' + tabName + ' tab');
-  if (tabId === 'tab-favorites') tryFeedbackPrompt('favorites_tab');
 }
 
 // ================================================================
@@ -1822,11 +1871,6 @@ function startQuiz() {
 }
 
 function startOver() {
-  if (lsCanShowFeedbackPrompt()) {
-    APP.pendingStartOver = true;
-    tryFeedbackPrompt('start_over');
-    return;
-  }
   executeStartOver();
 }
 
@@ -1849,6 +1893,7 @@ function executeStartOver() {
   APP.profile = {};
   APP.listings = [];
   APP.filter = 'all';
+  APP.statusFilter = null;
   LS_STORE.profile = null;
   LS_STORE.session = null;
   lsSave();
@@ -2052,12 +2097,19 @@ function buildStepHTML(step) {
     h += '<input class="q-input" id="qInput" type="text" placeholder="' + (step.ph || '') + '" value="' + prevVal + '" autocomplete="off"/>';
     h += '<button class="q-next" id="qNextBtn">Continue &rarr;</button>';
   } else if (step.type === 'single') {
+    var savedSingle = APP.quizAnswers[step.id] || '';
     h += '<div class="opts" id="optsGrid">';
     step.opts.forEach(function(o) {
-      h += '<button class="opt" data-val="' + o + '">' + o + '</button>';
+      var esc = o.replace(/"/g, '&quot;');
+      var on = savedSingle === o ? ' on' : '';
+      h += '<button class="opt' + on + '" data-val="' + esc + '">' + o + '</button>';
     });
     h += '</div>';
+    if (step.id === 'flex') {
+      h += '<button class="q-next" id="qNextBtn">Continue &rarr;</button>';
+    }
   } else if (step.type === 'multi') {
+    h += '<button type="button" class="multi-select-all" id="multiSelectAllBtn">Select All</button>';
     h += '<div class="opts opts-check" id="optsGrid">';
     step.opts.forEach(function(o) {
       var esc = o.replace(/"/g, '&quot;');
@@ -2097,7 +2149,25 @@ function wireStepEvents(step) {
 
   } else if (step.type === 'single') {
     var grid = document.getElementById('optsGrid');
-    if (grid) {
+    if (step.id === 'flex') {
+      var selectedVal = APP.quizAnswers.flex || null;
+      if (grid) {
+        grid.addEventListener('click', function(e) {
+          var btn = e.target.closest('.opt');
+          if (!btn) return;
+          grid.querySelectorAll('.opt').forEach(function(b) { b.classList.remove('on'); });
+          btn.classList.add('on');
+          selectedVal = btn.getAttribute('data-val');
+        });
+      }
+      var nextBtn = document.getElementById('qNextBtn');
+      if (nextBtn) {
+        nextBtn.addEventListener('click', function() {
+          if (!selectedVal) return;
+          advance(selectedVal);
+        });
+      }
+    } else if (grid) {
       grid.addEventListener('click', function(e) {
         var btn = e.target.closest('.opt');
         if (btn) advance(btn.getAttribute('data-val'));
@@ -2128,6 +2198,7 @@ function wireStepEvents(step) {
           if (label) label.classList.remove('on');
         }
         updateMultiPreview();
+        syncSelectAllBtn();
       });
       grid.addEventListener('click', function(e) {
         var label = e.target.closest('.opt-check');
@@ -2145,6 +2216,40 @@ function wireStepEvents(step) {
       });
     }
     updateMultiPreview();
+    syncSelectAllBtn();
+    var selectAllBtn = document.getElementById('multiSelectAllBtn');
+    function syncSelectAllBtn() {
+      if (!selectAllBtn || !grid) return;
+      var total = grid.querySelectorAll('.multi-cb').length;
+      selectAllBtn.textContent = (total > 0 && APP.multiSel.length >= total) ? 'Clear All' : 'Select All';
+    }
+    if (selectAllBtn && grid) {
+      selectAllBtn.addEventListener('click', function() {
+        var allCbs = grid.querySelectorAll('.multi-cb');
+        var total = allCbs.length;
+        var allSelected = total > 0 && APP.multiSel.length >= total;
+        if (allSelected) {
+          APP.multiSel = [];
+          allCbs.forEach(function(cb) {
+            cb.checked = false;
+            var label = cb.closest('.opt-check');
+            if (label) label.classList.remove('on');
+          });
+        } else {
+          APP.multiSel = [];
+          allCbs.forEach(function(cb) {
+            var val = cb.getAttribute('data-val');
+            cb.checked = true;
+            if (APP.multiSel.indexOf(val) < 0) APP.multiSel.push(val);
+            var label = cb.closest('.opt-check');
+            if (label) label.classList.add('on');
+          });
+        }
+        updateMultiPreview();
+        syncSelectAllBtn();
+      });
+    }
+    syncSelectAllBtn();
     var nextBtn = document.getElementById('qNextBtn');
     if (nextBtn) {
       nextBtn.addEventListener('click', function() {
@@ -2158,8 +2263,10 @@ function wireStepEvents(step) {
     }
 
   } else if (step.type === 'state') {
-    renderStateList('');
+    var savedState = APP.quizAnswers.state || '';
     var search = document.getElementById('stateSearch');
+    if (search && savedState) search.value = savedState;
+    renderStateList(search ? search.value : '');
     if (search) {
       search.addEventListener('input', function() { renderStateList(this.value); });
     }
@@ -2199,11 +2306,13 @@ function renderStateList(filter) {
   var list = document.getElementById('stateList');
   if (!list) return;
   list.innerHTML = '';
+  var saved = APP.quizAnswers.state || '';
+  var q = (filter || '').toLowerCase();
   US_STATES.filter(function(s) {
-    return s.toLowerCase().indexOf(filter.toLowerCase()) >= 0;
+    return s.toLowerCase().indexOf(q) >= 0;
   }).forEach(function(s) {
     var btn = document.createElement('button');
-    btn.className = 'opt';
+    btn.className = 'opt' + (saved === s ? ' on' : '');
     btn.textContent = s;
     btn.addEventListener('click', function() { advance(s); });
     list.appendChild(btn);
@@ -2257,6 +2366,7 @@ function doAdvance(val) {
 function submitSteps() {
   APP.profile = Object.assign({}, APP.quizAnswers);
   lsSaveFullProfile(APP.profile);
+  schedulePostQuizFeedbackPrompt();
   runSearch();
 }
 
@@ -2408,18 +2518,23 @@ function join(v) { return Array.isArray(v) ? v.join(', ') : (v || ''); }
 
 function updateStats() {
   var ls = APP.listings;
+  var statusClick = { 'NOT CALLED': true, 'CALLED': true, 'FOLLOW UP': true };
   var items = [
     { v: ls.length, l: 'TOTAL', c: '#111827' },
     { v: ls.filter(function(l) { return l.score >= 85; }).length, l: 'TOP PICKS', c: '#16a34a' },
     { v: ls.filter(function(l) { return l.score >= 70 && l.score < 85; }).length, l: 'GOOD FIT', c: '#d97706' },
-    { v: ls.filter(function(l) { return l.status === 'NOT CALLED'; }).length, l: 'NOT CALLED', c: '#9ca3af' },
-    { v: ls.filter(function(l) { return l.status === 'CALLED'; }).length, l: 'CALLED', c: '#16a34a' },
-    { v: ls.filter(function(l) { return l.status === 'FOLLOW UP'; }).length, l: 'FOLLOW UP', c: '#d97706' },
+    { v: ls.filter(function(l) { return l.status === 'NOT CALLED'; }).length, l: 'NOT CALLED', c: '#9ca3af', status: 'NOT CALLED' },
+    { v: ls.filter(function(l) { return l.status === 'CALLED'; }).length, l: 'CALLED', c: '#16a34a', status: 'CALLED' },
+    { v: ls.filter(function(l) { return l.status === 'FOLLOW UP'; }).length, l: 'FOLLOW UP', c: '#d97706', status: 'FOLLOW UP' },
     { v: ls.filter(function(l) { return l.status === 'EMAIL SENT'; }).length, l: 'EMAILED', c: '#2563eb' },
     { v: ls.filter(function(l) { return l.status === 'TOUR SCHEDULED'; }).length, l: 'TOURS', c: '#7c3aed' },
     { v: ls.filter(function(l) { return l.status === 'NOT INTERESTED'; }).length, l: 'PASS', c: '#9ca3af' }
   ];
   document.getElementById('statsBar').innerHTML = items.map(function(s) {
+    if (s.status && statusClick[s.status]) {
+      var on = APP.statusFilter === s.status ? ' on' : '';
+      return '<button type="button" class="stat-box clickable' + on + '" onclick="setStatusFilter(\'' + s.status + '\')" style="border:none;font:inherit"><div class="stat-n" style="color:' + s.c + '">' + s.v + '</div><div class="stat-l">' + s.l + '</div></button>';
+    }
     return '<div class="stat-box"><div class="stat-n" style="color:' + s.c + '">' + s.v + '</div><div class="stat-l">' + s.l + '</div></div>';
   }).join('');
 }
@@ -2429,12 +2544,27 @@ function setFilter(f) {
   renderMatches();
 }
 
+function setStatusFilter(status) {
+  APP.statusFilter = status || null;
+  updateStats();
+  renderMatches();
+}
+
+function clearStatusFilter() {
+  APP.statusFilter = null;
+  updateStats();
+  renderMatches();
+}
+
 function renderMatches() {
   var ls = APP.listings;
   var f = APP.filter;
   var shown = f === 'top' ? ls.filter(function(l) { return l.score >= 85; }) :
               f === 'good' ? ls.filter(function(l) { return l.score >= 70 && l.score < 85; }) :
-              f === 'rev' ? ls.filter(function(l) { return l.score < 70; }) : ls;
+              f === 'rev' ? ls.filter(function(l) { return l.score < 70; }) : ls.slice();
+  if (APP.statusFilter) {
+    shown = shown.filter(function(l) { return l.status === APP.statusFilter; });
+  }
 
   var top = ls.filter(function(l) { return l.score >= 85; }).length;
   var good = ls.filter(function(l) { return l.score >= 70 && l.score < 85; }).length;
@@ -2454,13 +2584,22 @@ function renderMatches() {
   var actHTML = '<div class="act-bar"><div class="act-title">YOUR SEARCH ACTIVITY</div><div class="act-row">';
   statItems.forEach(function(si) {
     var count = ls.filter(function(l) { return l.status === si.status; }).length;
-    actHTML += '<div class="act-item"><span style="font-size:16px">' + si.icon + '</span><div><div class="act-cnt">' + count + '</div><div class="act-lbl">' + si.name + '</div></div></div>';
+    var isStatusFilter = (si.status === 'NOT CALLED' || si.status === 'CALLED' || si.status === 'FOLLOW UP');
+    if (isStatusFilter) {
+      var on = APP.statusFilter === si.status ? ' on' : '';
+      actHTML += '<button type="button" class="act-item clickable' + on + '" onclick="setStatusFilter(\'' + si.status + '\')"><span style="font-size:16px">' + si.icon + '</span><div><div class="act-cnt">' + count + '</div><div class="act-lbl">' + si.name + '</div></div></button>';
+    } else {
+      actHTML += '<div class="act-item"><span style="font-size:16px">' + si.icon + '</span><div><div class="act-cnt">' + count + '</div><div class="act-lbl">' + si.name + '</div></div></div>';
+    }
   });
+  if (APP.statusFilter) {
+    actHTML += '<button type="button" class="act-clear-btn" onclick="clearStatusFilter()">Clear Filter</button>';
+  }
   actHTML += '</div></div>';
 
   // Filters
   var filtHTML = '<div class="filt-row">' +
-    '<button class="filt-btn' + (f === 'all' ? ' on' : '') + '" onclick="setFilter(\'all\')">All (' + ls.length + ')</button>' +
+    '<button class="filt-btn' + (f === 'all' && !APP.statusFilter ? ' on' : '') + '" onclick="setFilter(\'all\');clearStatusFilter();">All (' + ls.length + ')</button>' +
     '<button class="filt-btn' + (f === 'top' ? ' on' : '') + '" onclick="setFilter(\'top\')">&#11088; Top (' + top + ')</button>' +
     '<button class="filt-btn' + (f === 'good' ? ' on' : '') + '" onclick="setFilter(\'good\')">&#10003; Good (' + good + ')</button>' +
     '<button class="filt-btn' + (f === 'rev' ? ' on' : '') + '" onclick="setFilter(\'rev\')">&#128064; Review (' + rev + ')</button>' +
@@ -2580,7 +2719,6 @@ function openDetail(id) {
   if (!l) return;
   if (!APP.viewedListingIds) APP.viewedListingIds = {};
   APP.viewedListingIds[l.id] = true;
-  if (Object.keys(APP.viewedListingIds).length >= 3) tryFeedbackPrompt('listing_views');
   setLastAction('Viewed listing: ' + (l.complex || l.propertyName || 'Unknown'));
   APP.curDetail = l;
   APP.photoIdx = 0;
@@ -2634,7 +2772,8 @@ function renderDetail(l) {
     html += '<button class="st-btn' + (l.status === s ? ' on' : '') + '" onclick="updateStatus(' + l.id + ',\'' + s + '\',this)">' + s + '</button>';
   });
   html += '</div><textarea class="notes-in" id="detNotes" data-listing-id="' + l.id + '" placeholder="Your notes \u2014 what they said, tour details, pricing confirmed, red flags\u2026">' + escNotes(savedNote) + '</textarea>';
-  html += '<div class="notes-actions"><button type="button" class="notes-save-btn" id="saveNoteBtn">Save Note</button><span class="note-saved-msg" id="noteSavedMsg">Note saved</span></div></div>';
+  html += '<div class="note-live-preview" id="noteLivePreview"></div>';
+  html += '<div class="notes-actions"><span class="note-status" id="noteSaveStatus"></span></div></div>';
 
   // 3. Dual-Link Verification
   html += '<div class="dual-card"><div class="dual-ttl">&#128269; Dual-Link Verification</div>';
