@@ -11,11 +11,16 @@ import {
   b4QueryAuthorizedClients,
   b4CanWriteCaseNote,
   b4NoCrossAgency,
+  b4CanAddUsers,
+  b4CanDeleteUsers,
+  b4AddAgencyUser,
+  b4DeleteAgencyUser,
+  B4_DEFAULT_USER_MGMT_PERMISSIONS,
 } from '../scripts/b4-role-permissions.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const QA = join(ROOT, '_qa');
-const BUILD = '20260526-v1.3.0-b4';
+const BUILD = '20260526-v1.4.0';
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const sql = readFileSync(join(ROOT, 'supabase/drafts/sprint_b4_foundation.sql'), 'utf8');
 const seed = readFileSync(join(ROOT, '_data/b4-case-mock-seed.js'), 'utf8');
@@ -29,8 +34,14 @@ assert('B4 draft SQL exists', sql.includes('DRAFT ONLY') || sql.includes('DO NOT
 assert('B4 all tables in SQL', [
   'agencies', 'agency_users', 'agency_roles', 'case_clients',
   'client_assignments', 'case_notes', 'case_status_history',
-  'case_reassignment_log', 'case_access_audit_log', 'supervisor_teams'
+  'case_reassignment_log', 'case_access_audit_log', 'supervisor_teams',
+  'user_management_permissions'
 ].every(t => sql.includes('public.' + t)));
+assert('User mgmt permissions table fields', ['can_add_users', 'can_delete_users', 'can_reassign_cases', 'customized_by'].every(f => sql.includes(f)));
+assert('RLS agency_users insert policy', sql.includes('agency_users_insert') && sql.includes('role_can_add_users'));
+assert('RLS agency_users delete policy', sql.includes('agency_users_delete') && sql.includes('role_can_delete_users'));
+assert('Seed default permissions fn', sql.includes('seed_default_user_management_permissions'));
+assert('Caseworker default false in SQL', sql.includes("p_agency_id, 'caseworker', false, false, false"));
 assert('B4 RLS enabled all tables', sql.includes('ENABLE ROW LEVEL SECURITY'));
 assert('B4 audit log table', sql.includes('case_access_audit_log'));
 assert('B4 no cross-agency helper', sql.includes('same_agency'));
@@ -61,6 +72,20 @@ assert('Layer3 query returns ids only', b4QueryAuthorizedClients(mockClients, cw
 assert('No cross-agency', !b4NoCrossAgency(cwCtx, 'other-agency'));
 assert('Can write note assigned client', b4CanWriteCaseNote(cwCtx, mockClients[0]));
 assert('Cannot write note unassigned', !b4CanWriteCaseNote(cwCtx, mockClients[1]));
+
+assert('Caseworker cannot add users L3', !b4CanAddUsers(cwCtx));
+assert('Caseworker cannot delete users L3', !b4CanDeleteUsers(cwCtx));
+assert('Supervisor can add users L3', b4CanAddUsers(supCtx));
+assert('Add user blocked for caseworker fn', !b4AddAgencyUser(cwCtx).ok);
+assert('Delete user blocked for caseworker fn', !b4DeleteAgencyUser(cwCtx).ok);
+assert('Caseworker defaults all false', !B4_DEFAULT_USER_MGMT_PERMISSIONS.caseworker.can_add_users && !B4_DEFAULT_USER_MGMT_PERMISSIONS.caseworker.can_delete_users);
+
+// Frontend layer 2
+assert('Frontend b4CanAddUsers', html.includes('function b4CanAddUsers'));
+assert('Frontend user mgmt panel', html.includes('renderB4UserManagementPanel'));
+assert('Add User button gated', html.includes('b4UiAddUser') && html.includes('Add User'));
+assert('Caseworker hidden message', html.includes('cannot add or delete users'));
+assert('Mock seed user permissions', seed.includes('userManagementPermissions'));
 
 // Mock seed — no real client data
 assert('Mock seed linked', html.includes('b4-case-mock-seed.js'));

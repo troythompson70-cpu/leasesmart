@@ -42,6 +42,15 @@ window.B4_MOCK_FOUNDATION = (function() {
     supervisorTeams: supervisorTeams,
     clients: clients,
     isMockDataOnly: true,
-    noRealClientData: true
+    noRealClientData: true,
+    userManagementPermissions: {
+      client: { can_add_users: false, can_delete_users: false, can_reassign_cases: false },
+      caseworker: { can_add_users: false, can_delete_users: false, can_reassign_cases: false },
+      supervisor: { can_add_users: true, can_delete_users: true, can_reassign_cases: true },
+      manager: { can_add_users: true, can_delete_users: true, can_reassign_cases: true },
+      director: { can_add_users: true, can_delete_users: true, can_reassign_cases: true },
+      agency_admin: { can_add_users: true, can_delete_users: true, can_reassign_cases: true },
+      platform_admin: { can_add_users: true, can_delete_users: true, can_reassign_cases: true }
+    }
   };
 })();

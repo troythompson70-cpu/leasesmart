@@ -1,7 +1,7 @@
 /**
  * LeaseSmart Sprint B4-Foundation — Role permission model (skeleton)
  * Mirrors supabase/drafts/sprint_b4_foundation.sql intent for frontend + tests.
- * Triple redundancy: RLS (SQL) + b4FilterClientsForRole + b4QueryAuthorizedClients
+ * Triple redundancy: RLS (SQL) + UI hide + query/function guards
  */
 
 export const B4_ROLES = [
@@ -13,6 +13,61 @@ export const B4_ROLES = [
   'agency_admin',
   'platform_admin',
 ];
+
+/** Default per agency — customizable later via user_management_permissions table */
+export const B4_DEFAULT_USER_MGMT_PERMISSIONS = {
+  client: { can_add_users: false, can_delete_users: false, can_reassign_cases: false },
+  caseworker: { can_add_users: false, can_delete_users: false, can_reassign_cases: false },
+  supervisor: { can_add_users: true, can_delete_users: true, can_reassign_cases: true },
+  manager: { can_add_users: true, can_delete_users: true, can_reassign_cases: true },
+  director: { can_add_users: true, can_delete_users: true, can_reassign_cases: true },
+  agency_admin: { can_add_users: true, can_delete_users: true, can_reassign_cases: true },
+  platform_admin: { can_add_users: true, can_delete_users: true, can_reassign_cases: true },
+};
+
+export function b4GetUserMgmtPermissions(ctx, agencyOverrides) {
+  const role = ctx && ctx.roleKey;
+  const base = B4_DEFAULT_USER_MGMT_PERMISSIONS[role] || {
+    can_add_users: false,
+    can_delete_users: false,
+    can_reassign_cases: false,
+  };
+  if (!agencyOverrides || !agencyOverrides[role]) return Object.assign({}, base);
+  return Object.assign({}, base, agencyOverrides[role]);
+}
+
+/** Layer 3 — query logic: caseworker cannot call user management */
+export function b4CanAddUsers(ctx, agencyOverrides) {
+  if (!ctx || !ctx.roleKey) return false;
+  if (ctx.roleKey === 'caseworker') return false;
+  return !!b4GetUserMgmtPermissions(ctx, agencyOverrides).can_add_users;
+}
+
+export function b4CanDeleteUsers(ctx, agencyOverrides) {
+  if (!ctx || !ctx.roleKey) return false;
+  if (ctx.roleKey === 'caseworker') return false;
+  return !!b4GetUserMgmtPermissions(ctx, agencyOverrides).can_delete_users;
+}
+
+export function b4CanReassignCases(ctx, agencyOverrides) {
+  if (!ctx || !ctx.roleKey) return false;
+  if (ctx.roleKey === 'caseworker') return false;
+  return !!b4GetUserMgmtPermissions(ctx, agencyOverrides).can_reassign_cases;
+}
+
+export function b4AddAgencyUser(ctx, agencyOverrides) {
+  if (!b4CanAddUsers(ctx, agencyOverrides)) {
+    return { ok: false, error: 'Unauthorized — role cannot add users' };
+  }
+  return { ok: true };
+}
+
+export function b4DeleteAgencyUser(ctx, agencyOverrides) {
+  if (!b4CanDeleteUsers(ctx, agencyOverrides)) {
+    return { ok: false, error: 'Unauthorized — role cannot delete users' };
+  }
+  return { ok: true };
+}
 
 export const B4_ROLE_RULES = {
   client: {

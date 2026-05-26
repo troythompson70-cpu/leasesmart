@@ -10,6 +10,7 @@
 --
 -- ROLES: client, caseworker, supervisor, manager, director, agency_admin, platform_admin
 -- RULE: No cross-agency access ever (except platform_admin read-only oversight).
+-- RULE: Caseworkers CANNOT add or delete users — ever (customizable per agency via user_management_permissions).
 -- ALL mutating actions → case_access_audit_log.
 -- =============================================================================
 
@@ -186,6 +187,100 @@ CREATE TABLE IF NOT EXISTS public.agency_users (
 COMMENT ON TABLE public.agency_users IS 'B4 draft — agency membership. No cross-agency membership in v1.';
 
 -- ---------------------------------------------------------------------------
+-- user_management_permissions — per-agency customizable role capabilities
+-- Caseworker default: cannot add/delete users or reassign cases.
+-- Supervisor+ default: true/true/true (agency may customize later).
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.user_management_permissions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  agency_id uuid NOT NULL REFERENCES public.agencies(id) ON DELETE CASCADE,
+  role text NOT NULL
+    CHECK (role IN (
+      'client', 'caseworker', 'supervisor', 'manager',
+      'director', 'agency_admin', 'platform_admin'
+    )),
+  can_add_users boolean NOT NULL DEFAULT false,
+  can_delete_users boolean NOT NULL DEFAULT false,
+  can_reassign_cases boolean NOT NULL DEFAULT false,
+  customized_by uuid REFERENCES public.users(id) ON DELETE SET NULL,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (agency_id, role)
+);
+
+COMMENT ON TABLE public.user_management_permissions IS
+  'B4 draft — per-agency user management permissions. Caseworker add/delete always false by default.';
+
+-- Lookup permission for role (defaults false if row missing — deny by default)
+CREATE OR REPLACE FUNCTION public.role_can_add_users(p_agency_id uuid, p_role text DEFAULT NULL)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE((
+    SELECT ump.can_add_users
+    FROM public.user_management_permissions ump
+    WHERE ump.agency_id = p_agency_id
+      AND ump.role = COALESCE(p_role, public.current_app_user_role_key())
+  ), false);
+$$;
+
+CREATE OR REPLACE FUNCTION public.role_can_delete_users(p_agency_id uuid, p_role text DEFAULT NULL)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE((
+    SELECT ump.can_delete_users
+    FROM public.user_management_permissions ump
+    WHERE ump.agency_id = p_agency_id
+      AND ump.role = COALESCE(p_role, public.current_app_user_role_key())
+  ), false);
+$$;
+
+CREATE OR REPLACE FUNCTION public.role_can_reassign_cases(p_agency_id uuid, p_role text DEFAULT NULL)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE((
+    SELECT ump.can_reassign_cases
+    FROM public.user_management_permissions ump
+    WHERE ump.agency_id = p_agency_id
+      AND ump.role = COALESCE(p_role, public.current_app_user_role_key())
+  ), false);
+$$;
+
+-- Seed defaults when agency is created (each agency may customize later)
+CREATE OR REPLACE FUNCTION public.seed_default_user_management_permissions(
+  p_agency_id uuid,
+  p_customized_by uuid DEFAULT NULL
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.user_management_permissions (agency_id, role, can_add_users, can_delete_users, can_reassign_cases, customized_by)
+  VALUES
+    (p_agency_id, 'client', false, false, false, p_customized_by),
+    (p_agency_id, 'caseworker', false, false, false, p_customized_by),
+    (p_agency_id, 'supervisor', true, true, true, p_customized_by),
+    (p_agency_id, 'manager', true, true, true, p_customized_by),
+    (p_agency_id, 'director', true, true, true, p_customized_by),
+    (p_agency_id, 'agency_admin', true, true, true, p_customized_by),
+    (p_agency_id, 'platform_admin', true, true, true, p_customized_by)
+  ON CONFLICT (agency_id, role) DO NOTHING;
+END;
+$$;
+
+-- ---------------------------------------------------------------------------
 -- supervisor_teams — supervisor → caseworker mapping within agency
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.supervisor_teams (
@@ -299,6 +394,7 @@ COMMENT ON TABLE public.case_access_audit_log IS 'B4 draft — immutable audit t
 -- ---------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_agency_users_agency ON public.agency_users(agency_id);
 CREATE INDEX IF NOT EXISTS idx_agency_users_user ON public.agency_users(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_mgmt_perm_agency ON public.user_management_permissions(agency_id, role);
 CREATE INDEX IF NOT EXISTS idx_supervisor_teams_supervisor ON public.supervisor_teams(supervisor_user_id);
 CREATE INDEX IF NOT EXISTS idx_supervisor_teams_member ON public.supervisor_teams(member_user_id);
 CREATE INDEX IF NOT EXISTS idx_case_clients_agency ON public.case_clients(agency_id);
@@ -323,6 +419,10 @@ DROP TRIGGER IF EXISTS trg_agency_users_updated_at ON public.agency_users;
 CREATE TRIGGER trg_agency_users_updated_at BEFORE UPDATE ON public.agency_users
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_user_mgmt_perm_updated_at ON public.user_management_permissions;
+CREATE TRIGGER trg_user_mgmt_perm_updated_at BEFORE UPDATE ON public.user_management_permissions
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
 DROP TRIGGER IF EXISTS trg_case_clients_updated_at ON public.case_clients;
 CREATE TRIGGER trg_case_clients_updated_at BEFORE UPDATE ON public.case_clients
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
@@ -338,6 +438,7 @@ CREATE TRIGGER trg_case_notes_updated_at BEFORE UPDATE ON public.case_notes
 ALTER TABLE public.agencies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agency_roles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agency_users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_management_permissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.supervisor_teams ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.case_clients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.client_assignments ENABLE ROW LEVEL SECURITY;
@@ -354,9 +455,57 @@ CREATE POLICY agencies_select ON public.agencies FOR SELECT TO authenticated
 CREATE POLICY agency_roles_select ON public.agency_roles FOR SELECT TO authenticated
   USING (public.is_platform_admin() OR public.same_agency(agency_id));
 
--- agency_users: same agency
+-- agency_users: same agency read; insert/delete require user_management_permissions
 CREATE POLICY agency_users_select ON public.agency_users FOR SELECT TO authenticated
   USING (public.is_platform_admin() OR public.same_agency(agency_id));
+
+-- Layer 1 DB: caseworker insert/delete blocked — role_can_add/delete_users false for caseworker
+CREATE POLICY agency_users_insert ON public.agency_users FOR INSERT TO authenticated
+  WITH CHECK (
+    public.same_agency(agency_id)
+    AND (
+      public.is_platform_admin()
+      OR public.role_can_add_users(agency_id, public.current_app_user_role_key())
+    )
+  );
+
+CREATE POLICY agency_users_delete ON public.agency_users FOR DELETE TO authenticated
+  USING (
+    public.same_agency(agency_id)
+    AND (
+      public.is_platform_admin()
+      OR public.role_can_delete_users(agency_id, public.current_app_user_role_key())
+    )
+  );
+
+CREATE POLICY agency_users_update ON public.agency_users FOR UPDATE TO authenticated
+  USING (
+    public.same_agency(agency_id)
+    AND (
+      public.is_platform_admin()
+      OR public.has_agency_level_access(agency_id)
+      OR public.role_can_add_users(agency_id, public.current_app_user_role_key())
+    )
+  )
+  WITH CHECK (public.same_agency(agency_id));
+
+-- user_management_permissions: agency admins+ read; customize requires agency_admin or platform_admin
+CREATE POLICY user_mgmt_perm_select ON public.user_management_permissions FOR SELECT TO authenticated
+  USING (
+    public.is_platform_admin()
+    OR public.same_agency(agency_id)
+  );
+
+CREATE POLICY user_mgmt_perm_update ON public.user_management_permissions FOR UPDATE TO authenticated
+  USING (
+    public.same_agency(agency_id)
+    AND (
+      public.is_platform_admin()
+      OR public.has_agency_level_access(agency_id)
+      OR public.current_app_user_role_key() = 'agency_admin'
+    )
+  )
+  WITH CHECK (public.same_agency(agency_id));
 
 -- supervisor_teams: same agency; supervisor sees own team; directors see agency
 CREATE POLICY supervisor_teams_select ON public.supervisor_teams FOR SELECT TO authenticated
@@ -401,8 +550,20 @@ CREATE POLICY client_assignments_select ON public.client_assignments FOR SELECT 
   );
 
 CREATE POLICY client_assignments_write ON public.client_assignments FOR ALL TO authenticated
-  USING (public.same_agency(agency_id) AND public.has_agency_level_access(agency_id))
-  WITH CHECK (public.same_agency(agency_id) AND public.has_agency_level_access(agency_id));
+  USING (
+    public.same_agency(agency_id)
+    AND (
+      public.has_agency_level_access(agency_id)
+      OR public.role_can_reassign_cases(agency_id, public.current_app_user_role_key())
+    )
+  )
+  WITH CHECK (
+    public.same_agency(agency_id)
+    AND (
+      public.has_agency_level_access(agency_id)
+      OR public.role_can_reassign_cases(agency_id, public.current_app_user_role_key())
+    )
+  );
 
 -- case_notes — author must be assigned caseworker OR agency-level; client read own
 CREATE POLICY case_notes_select ON public.case_notes FOR SELECT TO authenticated

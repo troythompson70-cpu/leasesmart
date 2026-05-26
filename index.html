@@ -394,6 +394,27 @@ button,input,textarea,select{font-family:inherit}
 .b4-note-status{font-size:12px;font-weight:700;margin-top:6px;color:#6b7280}
 .b4-note-status.saving{color:#d97706}
 .b4-note-status.saved{color:#16a34a}
+/* v1.4.0 INTERNAL SKELETONS — C2/C3/B5/B3 */
+.ls-internal-banner{background:linear-gradient(135deg,#7c2d12,#ea580c);color:#fff;padding:14px 18px;font-size:13px;font-weight:700;text-align:center;line-height:1.5}
+.ls-internal-head{background:#fff;border-bottom:2px solid #e5e7eb;padding:12px 18px}
+.ls-internal-panel{max-width:1200px;margin:0 auto;padding:20px 18px}
+.ls-internal-card{background:#fff;border:2px solid #e5e7eb;border-radius:14px;padding:16px;margin-bottom:12px}
+.ls-demo-metric-tag{display:inline-block;background:#fef3c7;color:#92400e;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;margin-left:6px;letter-spacing:.3px}
+.ls-preview-tag{display:inline-block;background:#ede9fe;color:#5b21b6;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;margin-left:6px}
+.ls-metric-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.ls-metric-box{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:14px;text-align:center}
+.ls-metric-n{font-size:28px;font-weight:900;color:#111827}
+.ls-metric-l{font-size:11px;font-weight:700;color:#6b7280;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.ls-c2-client-row{display:flex;justify-content:space-between;align-items:center;padding:14px;border:2px solid #e5e7eb;border-radius:12px;margin-bottom:8px;cursor:pointer;background:#fff}
+.ls-c2-client-row:hover{border-color:#22d98a88}
+.c2-status-tag{display:inline-block;font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;margin-right:6px;text-transform:uppercase}
+.c2-status-intake{background:#f3f4f6;color:#374151}
+.c2-status-active{background:#dbeafe;color:#1d4ed8}
+.c2-status-follow_up{background:#fef3c7;color:#92400e}
+.c2-status-placed{background:#dcfce7;color:#166534}
+.c2-status-on_hold{background:#fee2e2;color:#991b1b}
+.c2-status-closed{background:#e5e7eb;color:#6b7280}
+.ls-internal-nav{display:grid;gap:8px;margin-top:12px}
 .admin-head{background:#fff;border-bottom:2px solid #e5e7eb;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
 .admin-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
 .admin-stat{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:14px 20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)}
@@ -660,8 +681,14 @@ body { font-size: 16px !important; }
   </div>
   <div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:14px;padding:18px;margin-top:24px">
     <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#9a3412;text-transform:uppercase;margin-bottom:8px">Demo / Internal Only</div>
-    <p style="font-size:14px;color:#7c2d12;line-height:1.6;margin-bottom:12px">Agency case workspace skeleton with <strong>mock clients only</strong>. Not for production or real client data.</p>
-    <button type="button" class="ghost-btn" style="width:100%;padding:14px;font-weight:800;border-color:#fdba74;color:#9a3412" onclick="showB4Workspace()">&#128203; Internal Case Workspace (DEMO)</button>
+    <p style="font-size:14px;color:#7c2d12;line-height:1.6;margin-bottom:12px">Internal skeletons — <strong>mock data only</strong>. Not for production, grants, or investor claims.</p>
+    <div class="ls-internal-nav">
+      <button type="button" class="ghost-btn" style="width:100%;padding:14px;font-weight:800;border-color:#fdba74;color:#9a3412" onclick="showC2CaseWorkspace()">&#128203; C2 Case Management (DEMO/INTERNAL)</button>
+      <button type="button" class="ghost-btn" style="width:100%;padding:14px;font-weight:800;border-color:#c4b5fd;color:#5b21b6" onclick="showC3Reporting()">&#128202; C3 Reporting Dashboard (INTERNAL PREVIEW)</button>
+      <button type="button" class="ghost-btn" style="width:100%;padding:14px;font-weight:800;border-color:#93c5fd;color:#1d4ed8" onclick="showB3UserData()">&#128100; B3 User Data Dashboard (DEMO)</button>
+      <button type="button" class="ghost-btn" style="width:100%;padding:14px;font-weight:800;border-color:#fca5a5;color:#991b1b" onclick="showB5PlatformAdmin()">&#9881; B5 Platform Admin (Troy / Admin)</button>
+      <button type="button" class="ghost-btn" style="width:100%;padding:12px;font-weight:700;border-color:#fdba74;color:#9a3412;opacity:.85" onclick="showB4Workspace()">&#128203; B4 Foundation Workspace (legacy demo)</button>
+    </div>
   </div>
   <div class="admin-area">
     <button class="back-link" id="adminToggle">Admin Login &mdash; TGT Technologies</button>
@@ -919,14 +946,51 @@ body { font-size: 16px !important; }
   <div class="b4-panel" id="b4AuditPanel"></div>
 </div>
 
+<!-- C2 CASE MANAGEMENT (v1.4.0 skeleton) -->
+<div id="c2-case-pg" class="pg">
+  <div class="ls-internal-banner"><strong>&#9888; DEMO / INTERNAL — Case Management Skeleton</strong>Mock clients only. B4 permission model. No real clients. No cross-agency sharing.</div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:10px"><div class="dash-mark">LS</div><div><div class="dash-name">Case Management</div><div class="dash-sub">SPRINT C2 SKELETON</div></div></div><button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Back</button></div></div>
+  <div class="b4-role-bar" id="c2RoleBar"></div>
+  <div class="ls-internal-panel" id="c2CasePanel"></div>
+</div>
+
+<!-- C2 CLIENT PROFILE -->
+<div id="c2-client-pg" class="pg">
+  <div class="ls-internal-banner"><strong>&#9888; DEMO / INTERNAL — Client Profile</strong>Mock record only. No live consent workflow in skeleton.</div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><button class="ghost-btn" onclick="showC2CaseWorkspace()">&#8592; My Clients</button><button class="ghost-btn" onclick="showPage('home-pg')">Home</button></div></div>
+  <div class="ls-internal-panel" id="c2ClientPanel"></div>
+</div>
+
+<!-- C3 REPORTING DASHBOARD -->
+<div id="c3-reporting-pg" class="pg">
+  <div class="ls-internal-banner"><strong>&#9888; INTERNAL PREVIEW — Reporting Skeleton</strong>All metrics are DEMO METRIC or INTERNAL PREVIEW. Not for public, grant, or investor claims.</div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="dash-name">Reporting Dashboard</div><div class="dash-sub">SPRINT C3 SKELETON</div></div><button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Back</button></div></div>
+  <div class="ls-internal-panel" id="c3ReportingPanel"></div>
+</div>
+
+<!-- B3 USER DATA DASHBOARD -->
+<div id="b3-user-data-pg" class="pg">
+  <div class="ls-internal-banner"><strong>&#9888; DEMO DATA PREVIEW — User Data Skeleton</strong>Your device data only. Masked samples. Skeleton only.</div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="dash-name">User Data Dashboard</div><div class="dash-sub">SPRINT B3 SKELETON</div></div><button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Back</button></div></div>
+  <div class="ls-internal-panel" id="b3UserDataPanel"></div>
+</div>
+
+<!-- B5 PLATFORM ADMIN -->
+<div id="b5-platform-pg" class="pg">
+  <div class="ls-internal-banner"><strong>&#9888; TEST / DEMO — Platform Admin Skeleton</strong>Troy/platform admin preview. Mock counts only. No service role key in frontend.</div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="dash-name">Platform Admin</div><div class="dash-sub">SPRINT B5 SKELETON</div></div><button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Back</button></div></div>
+  <div class="ls-internal-panel" id="b5PlatformPanel"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>window.LEASESMART_CONFIG = window.LEASESMART_CONFIG || null;</script>
 <script src="config.js"></script>
 <script src="_data/landlord-intel-seed-nj.js"></script>
 <script src="_data/b4-case-mock-seed.js"></script>
+<script src="_data/sprint-v140-mock-seed.js"></script>
 <script>
-// v1.2.0 Sprint C1 — landlord intelligence UI + A6 onboarding
-var LS_BUILD = '20260526-v1.3.0-b4';
+// v1.4.0 Sprint C2/C3 + B5/B3 internal skeletons
+var LS_BUILD = '20260526-v1.4.0';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -954,6 +1018,7 @@ var APP = {
 };
 
 var ONBOARDING_PAGES = ['beta-signup-pg', 'beta-login-pg', 'beta-welcome-pg', 'beta-legal-pg', 'profile-create-pg', 'quiz-pg', 'search-pg'];
+var INTERNAL_DEMO_PAGES = ['admin-pg', 'b4-workspace-pg', 'c2-case-pg', 'c2-client-pg', 'c3-reporting-pg', 'b3-user-data-pg', 'b5-platform-pg'];
 var SEARCH_STATES = ['New Jersey', 'New York', 'Pennsylvania', 'Ohio', 'Other'];
 var PLACEMENT_TYPES = ['Individual', 'Family', 'Families'];
 var MAJOR_FIELDS = ['state', 'city', 'movein', 'budget', 'beds', 'baths', 'pets', 'park', 'commute', 'placementType'];
@@ -2064,8 +2129,9 @@ function resumeSession() {
 // ================================================================
 function showPage(id) {
   if (id !== 'detail-pg') flushDetailNotes();
-  if (id === 'b4-workspace-pg') flushB4CaseNotes();
-  if (requiresBetaOnboarding() && !isOnboardingComplete() && ONBOARDING_PAGES.indexOf(id) < 0 && id !== 'admin-pg' && id !== 'b4-workspace-pg') {
+  if (id === 'b4-workspace-pg' || id === 'c2-client-pg') flushB4CaseNotes();
+  if (id === 'c2-client-pg') flushC2CaseNotes();
+  if (requiresBetaOnboarding() && !isOnboardingComplete() && ONBOARDING_PAGES.indexOf(id) < 0 && INTERNAL_DEMO_PAGES.indexOf(id) < 0) {
     routeOnboarding();
     return;
   }
@@ -3871,6 +3937,83 @@ function b4CanWriteCaseNote(ctx, client) {
   return false;
 }
 
+function b4GetUserMgmtOverrides() {
+  var mock = b4GetMockFoundation();
+  return mock.userManagementPermissions || null;
+}
+
+function b4CanAddUsers(ctx) {
+  if (!ctx || ctx.roleKey === 'caseworker') return false;
+  var perms = b4GetUserMgmtOverrides();
+  var row = perms && perms[ctx.roleKey];
+  return !!(row && row.can_add_users);
+}
+
+function b4CanDeleteUsers(ctx) {
+  if (!ctx || ctx.roleKey === 'caseworker') return false;
+  var perms = b4GetUserMgmtOverrides();
+  var row = perms && perms[ctx.roleKey];
+  return !!(row && row.can_delete_users);
+}
+
+function b4CanReassignCases(ctx) {
+  if (!ctx || ctx.roleKey === 'caseworker') return false;
+  var perms = b4GetUserMgmtOverrides();
+  var row = perms && perms[ctx.roleKey];
+  return !!(row && row.can_reassign_cases);
+}
+
+function b4AddAgencyUserMock(displayName) {
+  var ctx = b4GetDemoContext();
+  if (!b4CanAddUsers(ctx)) {
+    b4RecordAudit('user_add_denied', 'agency_users', null, { roleKey: ctx.roleKey, mock: true });
+    return { ok: false, error: 'Caseworkers cannot add users.' };
+  }
+  b4RecordAudit('user_add_mock', 'agency_users', null, { name: displayName, mock: true });
+  return { ok: true };
+}
+
+function b4DeleteAgencyUserMock(userId) {
+  var ctx = b4GetDemoContext();
+  if (!b4CanDeleteUsers(ctx)) {
+    b4RecordAudit('user_delete_denied', 'agency_users', userId, { roleKey: ctx.roleKey, mock: true });
+    return { ok: false, error: 'Caseworkers cannot delete users.' };
+  }
+  b4RecordAudit('user_delete_mock', 'agency_users', userId, { mock: true });
+  return { ok: true };
+}
+
+function renderB4UserManagementPanel() {
+  var ctx = b4GetDemoContext();
+  var canAdd = b4CanAddUsers(ctx);
+  var canDel = b4CanDeleteUsers(ctx);
+  var html = '<div class="b4-card"><h3>User Management <span class="b4-mock-tag">DEMO/INTERNAL</span></h3>';
+  html += '<p style="font-size:12px;color:#6b7280;margin-bottom:10px">Caseworkers cannot add or delete users. Customizable per agency in draft SQL.</p>';
+  if (canAdd) {
+    html += '<button type="button" class="green-btn" style="width:auto;padding:12px 18px;margin-right:8px;margin-bottom:8px" onclick="b4UiAddUser()">Add User</button>';
+  }
+  if (canDel) {
+    html += '<button type="button" class="ghost-btn" style="padding:12px 18px;margin-bottom:8px;color:#991b1b;border-color:#fca5a5" onclick="b4UiDeleteUser()">Delete User</button>';
+  }
+  if (!canAdd && !canDel) {
+    html += '<p style="font-size:13px;color:#9ca3af">Add User and Delete User are hidden for <strong>' + ctx.roleKey + '</strong>.</p>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function b4UiAddUser() {
+  var r = b4AddAgencyUserMock('Demo New User');
+  alert(r.ok ? 'Mock user add logged (demo only).' : r.error);
+  renderB4Workspace();
+}
+
+function b4UiDeleteUser() {
+  var r = b4DeleteAgencyUserMock('u-cw-demo-2');
+  alert(r.ok ? 'Mock user delete logged (demo only).' : r.error);
+  renderB4Workspace();
+}
+
 function b4RecordAudit(action, resourceType, resourceId, metadata) {
   var ctx = b4GetDemoContext();
   if (!LS_STORE.b4AuditLog) LS_STORE.b4AuditLog = [];
@@ -4047,7 +4190,9 @@ function renderB4PanelContent() {
     return '<div class="b4-card"><h3>Agency Dashboard <span class="b4-mock-tag">MOCK</span></h3><p>' + mock.agency.name + '</p><p>Active mock cases: ' + authorized.length + ' / ' + allClients.length + '</p><p style="font-size:13px;color:#6b7280">Director sees agency-level only — same agency, no cross-agency.</p></div>';
   }
   if ((ctx.roleKey === 'director' || ctx.roleKey === 'manager' || ctx.roleKey === 'agency_admin') && sub === 'assign') {
-    return '<div class="b4-card"><h3>Assign / Reassign <span class="b4-mock-tag">DEMO SKELETON</span></h3><p>Mock reassignment UI placeholder. Writes to case_reassignment_log when live.</p>' +
+    var reassignNote = b4CanReassignCases(ctx) ? '' : '<p style="color:#d97706">Reassign disabled for this role in agency permissions.</p>';
+    return '<div class="b4-card"><h3>Assign / Reassign <span class="b4-mock-tag">DEMO SKELETON</span></h3>' + reassignNote +
+      '<p>Mock reassignment UI placeholder. Writes to case_reassignment_log when live.</p>' +
       renderB4ClientCards(authorized.slice(0, 3)) + '</div>';
   }
   if ((ctx.roleKey === 'director' || ctx.roleKey === 'manager' || ctx.roleKey === 'agency_admin') && sub === 'placements') {
@@ -4073,8 +4218,282 @@ function renderB4Workspace() {
   renderB4RoleBar();
   renderB4Subtabs();
   var panel = document.getElementById('b4Panel');
-  if (panel) panel.innerHTML = renderB4PanelContent();
+  if (panel) panel.innerHTML = renderB4PanelContent() + renderB4UserManagementPanel();
   renderB4AuditPanel();
+}
+
+// ================================================================
+// v1.4.0 — C2 Case Management, C3 Reporting, B5 Platform Admin, B3 User Data
+// Skeleton only. Dummy/test data. B4 permission model for C2.
+// ================================================================
+function v140GetMock() {
+  return window.SPRINT_V140_MOCK || { c2: {}, c3Metrics: {}, b5Admin: {}, b3UserDataCategories: [] };
+}
+
+function lsMaskEmail(email) {
+  if (!email) return '—';
+  var e = String(email);
+  if (e.indexOf('@') < 0) return '***@demo.invalid';
+  var p = e.split('@');
+  return (p[0].slice(0, 2) || 'xx') + '***@' + p[1];
+}
+
+function lsMaskPhone(phone) {
+  if (!phone) return '—';
+  var d = String(phone).replace(/\D/g, '');
+  return '(555) ***-' + (d.slice(-4) || '0000');
+}
+
+function c2StatusTag(status) {
+  var s = String(status || 'active').replace(/\s/g, '_');
+  var cls = 'c2-status-' + s;
+  var label = s.replace(/_/g, ' ');
+  return '<span class="c2-status-tag ' + cls + '">' + label + '</span>';
+}
+
+function c2GetAuthorizedClients() {
+  var ctx = b4GetDemoContext();
+  var mock = b4GetMockFoundation();
+  return b4FilterClientsForRole(mock.clients || [], ctx);
+}
+
+function showC2CaseWorkspace() {
+  var ctx = b4GetDemoContext();
+  if (ctx.roleKey !== 'caseworker' && ctx.roleKey !== 'supervisor' && ctx.roleKey !== 'agency_admin' && ctx.roleKey !== 'director' && ctx.roleKey !== 'manager') {
+    LS_STORE.b4DemoRole = 'caseworker';
+    LS_STORE.b4DemoUserId = 'u-cw-demo-1';
+    lsSave();
+  }
+  showPage('c2-case-pg');
+  b4RecordAudit('c2_workspace_open', 'case_clients', null, { mock: true });
+  renderC2CaseWorkspace();
+}
+
+function renderC2RoleBar() {
+  var el = document.getElementById('c2RoleBar');
+  if (!el) return;
+  var mock = b4GetMockFoundation();
+  var ctx = b4GetDemoContext();
+  el.innerHTML = '<span style="font-size:12px;font-weight:800;color:#9a3412;margin-right:8px">DEMO ROLE (C2):</span>' +
+    (mock.users || []).filter(function(u) { return u.roleKey === 'caseworker' || u.roleKey === 'supervisor' || u.roleKey === 'director'; }).map(function(u) {
+      var on = u.id === ctx.userId ? ' on' : '';
+      return '<button type="button" class="b4-subtab' + on + '" onclick="b4SetDemoRole(\'' + u.roleKey + '\',\'' + u.id + '\');renderC2CaseWorkspace();">' + u.name + '</button>';
+    }).join('');
+}
+
+function renderC2CaseWorkspace() {
+  renderC2RoleBar();
+  var panel = document.getElementById('c2CasePanel');
+  if (!panel) return;
+  var ctx = b4GetDemoContext();
+  var clients = c2GetAuthorizedClients();
+  b4RecordAudit('c2_query_clients', 'case_clients', null, { returned: clients.length, mock: true });
+  var html = '<h2 style="font-size:18px;margin-bottom:12px">My Clients <span class="b4-mock-tag">DEMO/INTERNAL</span></h2>';
+  if (ctx.roleKey !== 'caseworker') {
+    html += '<p style="font-size:13px;color:#6b7280;margin-bottom:12px">Caseworker view shows assigned clients only. Switch to Demo Caseworker Sam for full C2 demo.</p>';
+  }
+  if (!clients.length) {
+    html += '<div class="ls-internal-card"><p>No authorized mock clients for this role.</p></div>';
+  } else {
+    clients.forEach(function(c) {
+      html += '<div class="ls-c2-client-row" onclick="openC2ClientProfile(\'' + c.id + '\')">' +
+        '<div><strong>' + c.displayName + '</strong> <span class="b4-mock-tag">MOCK</span><br>' +
+        '<span style="font-size:12px;color:#6b7280">' + c.caseNumber + ' · ' + (c.county || '') + ' County</span></div>' +
+        '<div>' + c2StatusTag(c.status) + '</div></div>';
+    });
+  }
+  html += renderC2FollowUpTracker(clients);
+  if (b4CanAddUsers(ctx) || b4CanDeleteUsers(ctx)) {
+    html += renderB4UserManagementPanel();
+  } else if (ctx.roleKey === 'caseworker') {
+    html += '<div class="ls-internal-card"><p style="font-size:12px;color:#9ca3af">User management hidden — caseworkers cannot add or delete users.</p></div>';
+  }
+  panel.innerHTML = html;
+}
+
+function openC2ClientProfile(clientId) {
+  var ctx = b4GetDemoContext();
+  var mock = b4GetMockFoundation();
+  var client = (mock.clients || []).find(function(c) { return c.id === clientId; });
+  if (!client || !b4CanViewClient(ctx, client, b4GetTeamMemberIds(ctx))) {
+    alert('Not authorized to view this mock client.');
+    return;
+  }
+  APP.c2SelectedClientId = clientId;
+  showPage('c2-client-pg');
+  b4RecordAudit('c2_client_view', 'case_clients', clientId, { mock: true });
+  renderC2ClientProfile();
+}
+
+function renderC2ClientProfile() {
+  var panel = document.getElementById('c2ClientPanel');
+  if (!panel || !APP.c2SelectedClientId) return;
+  var ctx = b4GetDemoContext();
+  var mock = b4GetMockFoundation();
+  var v140 = v140GetMock();
+  var client = (mock.clients || []).find(function(c) { return c.id === APP.c2SelectedClientId; });
+  if (!client || !b4CanViewClient(ctx, client, b4GetTeamMemberIds(ctx))) {
+    panel.innerHTML = '<div class="ls-internal-card"><p>Unauthorized mock client.</p></div>';
+    return;
+  }
+  var calls = (v140.c2 && v140.c2.callsByClient && v140.c2.callsByClient[client.id]) || 0;
+  var html = '<div class="ls-internal-card"><h2 style="font-size:20px;margin-bottom:8px">' + client.displayName + ' <span class="b4-mock-tag">MOCK</span></h2>' +
+    '<p style="font-size:13px;color:#6b7280;margin-bottom:10px">' + client.caseNumber + ' · ' + client.placementType + '</p>' +
+    '<div style="margin-bottom:12px">' + c2StatusTag(client.status) + '</div>' +
+    '<p style="font-size:13px"><strong>Demo calls logged:</strong> ' + calls + ' <span class="ls-demo-metric-tag">DEMO METRIC</span></p></div>';
+  html += '<div class="ls-internal-card"><h3>Notes <span class="b4-mock-tag">DEMO/INTERNAL</span></h3>';
+  if (b4CanWriteCaseNote(ctx, client)) {
+    html += '<textarea id="c2CaseNotesInput" rows="6" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px" placeholder="Case notes auto-save in 1 second..."></textarea>' +
+      '<div id="c2NoteSaveStatus" class="b4-note-status"></div>';
+  } else {
+    html += '<p style="color:#6b7280">Notes read-only for this demo role.</p>';
+  }
+  html += '</div>';
+  html += renderC2FollowUpTracker([client]);
+  panel.innerHTML = html;
+  if (b4CanWriteCaseNote(ctx, client)) setTimeout(function() { bindC2CaseNotes(client.id); }, 0);
+}
+
+function renderC2FollowUpTracker(clients) {
+  var v140 = v140GetMock();
+  var ids = (clients || []).map(function(c) { return c.id; });
+  var items = ((v140.c2 && v140.c2.followUpItems) || []).filter(function(f) { return ids.indexOf(f.clientId) >= 0; });
+  var html = '<div class="ls-internal-card"><h3>Follow-up Tracker <span class="ls-preview-tag">INTERNAL PREVIEW</span></h3>';
+  if (!items.length) html += '<p style="color:#6b7280;font-size:13px">No mock follow-ups due.</p>';
+  else items.forEach(function(f) {
+    html += '<div style="padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><strong>' + f.due + '</strong> — ' + f.task + ' <span class="b4-mock-tag">MOCK</span></div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function flushC2CaseNotes() {
+  if (APP.c2NoteDebounceTimer) { clearTimeout(APP.c2NoteDebounceTimer); APP.c2NoteDebounceTimer = null; }
+  var ta = document.getElementById('c2CaseNotesInput');
+  if (!ta || !APP.c2SelectedClientId) return;
+  var ctx = b4GetDemoContext();
+  var mock = b4GetMockFoundation();
+  var client = (mock.clients || []).find(function(c) { return c.id === APP.c2SelectedClientId; });
+  if (!client || !b4CanWriteCaseNote(ctx, client)) return;
+  b4SetCaseNote(APP.c2SelectedClientId, ta.value);
+}
+
+function bindC2CaseNotes(clientId) {
+  APP.c2SelectedClientId = clientId;
+  var ta = document.getElementById('c2CaseNotesInput');
+  var status = document.getElementById('c2NoteSaveStatus');
+  if (!ta) return;
+  ta.value = b4GetCaseNote(clientId);
+  if (APP.c2NoteInputHandler) ta.removeEventListener('input', APP.c2NoteInputHandler);
+  APP.c2NoteInputHandler = function() {
+    var ctx = b4GetDemoContext();
+    var mock = b4GetMockFoundation();
+    var client = (mock.clients || []).find(function(c) { return c.id === clientId; });
+    if (!client || !b4CanWriteCaseNote(ctx, client)) return;
+    if (status) { status.textContent = 'Saving...'; status.className = 'b4-note-status saving'; }
+    if (APP.c2NoteDebounceTimer) clearTimeout(APP.c2NoteDebounceTimer);
+    APP.c2NoteDebounceTimer = setTimeout(function() {
+      APP.c2NoteDebounceTimer = null;
+      b4SetCaseNote(clientId, ta.value);
+      b4RecordAudit('c2_note_autosave', 'case_notes', clientId, { mock: true });
+      if (status) { status.textContent = 'Saved ✓'; status.className = 'b4-note-status saved'; }
+    }, 1000);
+  };
+  ta.addEventListener('input', APP.c2NoteInputHandler);
+}
+
+function showC3Reporting() {
+  showPage('c3-reporting-pg');
+  renderC3ReportingDashboard();
+}
+
+function renderC3ReportingDashboard() {
+  var panel = document.getElementById('c3ReportingPanel');
+  if (!panel) return;
+  var m = v140GetMock().c3Metrics || {};
+  var br = m.statusBreakdown || {};
+  var html = '<div class="ls-metric-grid">';
+  [
+    { n: m.placements, l: 'Placements', tag: 'DEMO METRIC' },
+    { n: m.callsMade, l: 'Calls made', tag: 'DEMO METRIC' },
+    { n: m.followUpsDue, l: 'Follow-ups due', tag: 'DEMO METRIC' },
+    { n: m.activeCases, l: 'Active cases', tag: 'INTERNAL PREVIEW' },
+    { n: m.timeSavedHours + 'h', l: 'Time saved estimate', tag: 'INTERNAL PREVIEW' }
+  ].forEach(function(x) {
+    html += '<div class="ls-metric-box"><div class="ls-metric-n">' + x.n + '</div><div class="ls-metric-l">' + x.l + '</div><span class="ls-demo-metric-tag">' + x.tag + '</span></div>';
+  });
+  html += '</div>';
+  html += '<div class="ls-internal-card"><h3>Case status breakdown <span class="ls-preview-tag">INTERNAL PREVIEW</span></h3>';
+  Object.keys(br).forEach(function(k) {
+    html += '<div style="display:flex;align-items:center;gap:10px;margin:8px 0"><span style="width:100px;font-size:12px;font-weight:700">' + k.replace(/_/g, ' ') + '</span><div style="flex:1;background:#e5e7eb;border-radius:6px;height:12px"><div style="width:' + Math.min(100, br[k] * 3) + '%;background:#22d98a;height:12px;border-radius:6px"></div></div><span style="font-size:13px;font-weight:800">' + br[k] + '</span></div>';
+  });
+  html += '<p style="font-size:11px;color:#9ca3af;margin-top:12px">Not for public, grant, or investor claims. Dummy metrics only.</p></div>';
+  panel.innerHTML = html;
+}
+
+function canAccessB5PlatformAdmin() {
+  if (APP.b5AdminUnlocked === true) return true;
+  var ctx = b4GetDemoContext();
+  return ctx.roleKey === 'platform_admin';
+}
+
+function showB5PlatformAdmin() {
+  if (!canAccessB5PlatformAdmin()) {
+    var code = prompt('Platform admin demo — enter admin code (same as TGT admin gate):');
+    if (code !== ADMIN_CODE) { alert('Access denied. Admin route does not bypass auth.'); return; }
+    APP.b5AdminUnlocked = true;
+  }
+  showPage('b5-platform-pg');
+  renderB5PlatformDashboard();
+}
+
+function renderB5PlatformDashboard() {
+  if (!canAccessB5PlatformAdmin()) { showPage('home-pg'); return; }
+  var panel = document.getElementById('b5PlatformPanel');
+  if (!panel) return;
+  var b = v140GetMock().b5Admin || {};
+  var fbCount = (LS_STORE.feedback || []).length;
+  var html = '<div class="ls-metric-grid">';
+  html += '<div class="ls-metric-box"><div class="ls-metric-n">' + (b.totalUsers || 0) + '</div><div class="ls-metric-l">Total users</div><span class="ls-demo-metric-tag">TEST DATA</span></div>';
+  html += '<div class="ls-metric-box"><div class="ls-metric-n">' + (b.activeSessions || 0) + '</div><div class="ls-metric-l">Active sessions</div><span class="ls-demo-metric-tag">PLACEHOLDER</span></div>';
+  html += '<div class="ls-metric-box"><div class="ls-metric-n">' + Math.max(fbCount, b.feedbackCount || 0) + '</div><div class="ls-metric-l">Feedback count</div><span class="ls-demo-metric-tag">DEMO METRIC</span></div>';
+  html += '</div>';
+  html += '<div class="ls-internal-card"><h3>Feature usage <span class="ls-demo-metric-tag">DEMO METRIC</span></h3>';
+  (b.featureUsage || []).forEach(function(f) {
+    html += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6"><span>' + f.name + '</span><strong>' + f.count + '</strong></div>';
+  });
+  html += '</div>';
+  html += '<div class="ls-internal-card"><h3>System health <span class="ls-demo-metric-tag">' + ((b.systemHealth && b.systemHealth.label) || 'TEST') + '</span></h3><p style="font-size:15px;font-weight:800;color:#16a34a">' + ((b.systemHealth && b.systemHealth.status) || 'OK') + ' · ' + ((b.systemHealth && b.systemHealth.uptime) || 'demo') + '</p></div>';
+  html += '<div class="ls-internal-card"><h3>Recent activity <span class="ls-preview-tag">INTERNAL PREVIEW</span></h3><div class="b4-audit-list">';
+  (b.recentActivity || []).forEach(function(a) {
+    html += '<div style="padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:12px">' + a.ts + ' · ' + a.action + ' · ' + (a.masked || '—') + '</div>';
+  });
+  html += '</div></div>';
+  html += renderB4UserManagementPanel();
+  panel.innerHTML = html;
+}
+
+function showB3UserData() {
+  showPage('b3-user-data-pg');
+  renderB3UserDataDashboard();
+}
+
+function renderB3UserDataDashboard() {
+  var panel = document.getElementById('b3UserDataPanel');
+  if (!panel) return;
+  var cats = v140GetMock().b3UserDataCategories || [];
+  var prof = lsLoadProfile() || LS_STORE.profile || {};
+  var html = '<div class="ls-internal-card"><h3>Your data on this device <span class="ls-demo-metric-tag">DEMO DATA PREVIEW</span></h3>' +
+    '<p style="font-size:13px;color:#6b7280;margin-bottom:12px">No production consent. Skeleton preview only. Emails and phones masked.</p>' +
+    '<p><strong>Name:</strong> ' + (prof.name || 'Demo User') + '</p>' +
+    '<p><strong>Email:</strong> ' + lsMaskEmail(prof.email || 'demo@leasesmart-demo.invalid') + '</p>' +
+    '<p><strong>Phone:</strong> ' + lsMaskPhone(prof.phone || '5550100') + '</p></div>';
+  cats.forEach(function(c) {
+    var count = c.id === 'favorites' ? lsGetFavorites().length : c.id === 'searches' ? (LS_STORE.searches || []).length : c.id === 'feedback' ? (LS_STORE.feedback || []).length : (prof.name ? 1 : 0);
+    html += '<div class="ls-internal-card"><h4>' + c.label + ' <span class="ls-preview-tag">DEMO</span></h4><p style="font-size:13px;color:#6b7280">' + c.desc + '</p><p style="font-size:12px;margin-top:8px"><strong>Records on device:</strong> ' + count + '</p></div>';
+  });
+  html += '<div class="ls-internal-card"><p style="font-size:12px;color:#9ca3af">Export/download placeholder — not enabled in skeleton. No real client data.</p></div>';
+  panel.innerHTML = html;
 }
 
 function initLeaseSmart() {
@@ -4154,6 +4573,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initLeaseSmart();
   window.addEventListener('beforeunload', flushDetailNotes);
   window.addEventListener('beforeunload', flushB4CaseNotes);
+  window.addEventListener('beforeunload', flushC2CaseNotes);
   populateSearchStateSelect(document.getElementById('createProfileState'), '');
 
   var toggle = document.getElementById('adminToggle');
