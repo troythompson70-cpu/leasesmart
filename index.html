@@ -233,7 +233,24 @@ button,input,textarea,select{font-family:inherit}
 .d4-session-modal h3{font-size:18px;font-weight:900;margin-bottom:8px}
 .d4-session-modal p{font-size:14px;color:#6b7280;line-height:1.55;margin-bottom:16px}
 .d4-session-actions{display:flex;gap:10px;flex-wrap:wrap}
-, touch forms, C2 quick notes */
+/* D5 — onboarding progress, skeletons, toasts, tooltips */
+.d5-quiz-progress-label{text-align:center;font-size:14px;font-weight:800;color:#16a34a;padding:10px 18px 0;background:#fff;border-bottom:1px solid #f3f4f6}
+.d5-skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:12px 0}
+.d5-skeleton-card{background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:18px;animation:d5-pulse 1.2s ease-in-out infinite}
+.d5-skeleton-line{height:12px;background:linear-gradient(90deg,#f3f4f6,#e5e7eb,#f3f4f6);border-radius:6px;margin-bottom:10px}
+.d5-skeleton-line.w60{width:60%}.d5-skeleton-line.w80{width:80%}.d5-skeleton-line.w40{width:40%}
+@keyframes d5-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.d5-empty-state{background:#fff;border:2px dashed #d1d5db;border-radius:16px;padding:28px 20px;text-align:center;margin:16px 0}
+.d5-empty-title{font-size:16px;font-weight:800;color:#374151;margin-bottom:6px}
+.d5-empty-sub{font-size:13px;color:#6b7280;margin-bottom:14px;line-height:1.5}
+.d5-toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:10001;pointer-events:none;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(420px,92vw)}
+.d5-toast{background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;font-size:14px;font-weight:800;padding:12px 20px;border-radius:12px;box-shadow:0 8px 24px rgba(34,217,138,.35);opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s}
+.d5-toast.show{opacity:1;transform:translateY(0)}
+.d5-tip-wrap{display:inline-flex;align-items:center;gap:4px;position:relative}
+.d5-tip-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#eff6ff;color:#2563eb;font-size:11px;font-weight:900;cursor:help;border:1px solid #bfdbfe}
+.d5-tip-bubble{display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:#111827;color:#fff;font-size:11px;font-weight:600;line-height:1.4;padding:8px 10px;border-radius:8px;width:max-content;max-width:220px;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.d5-tip-wrap:hover .d5-tip-bubble,.d5-tip-wrap:focus-within .d5-tip-bubble{display:block}
+/* Sprint D3 — mobile nav, touch forms, C2 quick notes */
 :root{--d3-touch-min:44px;--d3-nav-break:768px}
 .d3-hamburger{display:none;position:fixed;top:calc(var(--beta-banner-offset) + 10px);right:14px;z-index:10002;width:var(--d3-touch-min);height:var(--d3-touch-min);border:2px solid #e5e7eb;border-radius:12px;background:#fff;font-size:22px;line-height:1;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.08);transition:transform .2s,background .2s,border-color .2s}
 .d3-hamburger.open{background:#f0fdf4;border-color:#22d98a}
@@ -1044,6 +1061,7 @@ body { font-size: 16px !important; }
     </div>
     <div><div class="qz-count-num" id="stepNum">Step 1 of 21</div><div class="qz-count-pct" id="stepPct">0%</div></div>
   </div>
+  <div id="d5QuizProgressWrap" class="d5-quiz-progress-label">Step 1 of 21</div>
   <div class="qz-prog"><div class="qz-prog-fill" id="progFill"></div></div>
   <div class="qz-dots" id="stepDots"></div>
   <div class="qz-body">
@@ -1200,11 +1218,12 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-d1-mock-seed.js"></script>
 <script src="_data/sprint-d2-mock-seed.js"></script>
 <script src="_data/sprint-d4-mock-seed.js"></script>
+<script src="_data/sprint-d5-mock-seed.js"></script>
 <script src="_data/sprint-d3-mock-seed.js"></script>
 <script src="_data/sprint-e2-mock-seed.js"></script>
 <script>
-// v1.8.0 Sprint D4 — rate limiting, session timeout, error boundaries (+ E2 legal)
-var LS_BUILD = '20260526-v1.8.0-d4';
+// v1.9.0 Sprint D5 — onboarding progress, skeletons, empty states, toasts, tooltips (+ D4 + E2)
+var LS_BUILD = '20260526-v1.9.0-d5';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -2665,6 +2684,7 @@ function refreshListingsFromProfile() {
 function renderStep() {
   var step = STEPS[APP.quizStep];
   var total = STEPS.length;
+  d5UpdateOnboardingProgress(APP.quizStep, total);
 
   // Dots
   var dotsEl = document.getElementById('stepDots');
@@ -2972,6 +2992,7 @@ function doAdvance(val) {
 }
 
 function submitSteps() {
+  d5HideOnboardingProgress();
   APP.profile = Object.assign({}, APP.quizAnswers, {
     profileCreated: true,
     quizCompleted: true,
@@ -3186,6 +3207,7 @@ function updateStats() {
 function setFilter(f) {
   APP.filter = f;
   renderMatches();
+  d5ShowToast('filter_applied');
 }
 
 function setStatusFilter(status) {
@@ -3263,9 +3285,9 @@ function renderMatches() {
     var avC = l.availability === 'available' ? '#16a34a' : '#d97706';
     cardsHTML += '<div class="l-card' + (l.score >= 85 ? ' top-pick' : '') + '" data-listing-id="' + l.id + '" onclick="openDetail(' + l.id + ')">';
     cardsHTML += '<div class="card-top-row"><div>';
-    cardsHTML += '<span class="badge" style="background:' + sc + '20;color:' + sc + '">' + sl + ' \u00b7 ' + l.score + '</span>';
+    cardsHTML += '<span class="badge" style="background:' + sc + '20;color:' + sc + '">' + sl + ' \u00b7 ' + l.score + '</span>' + d5TipHtml('listing_score');
     cardsHTML += '<span class="badge" style="background:' + avC + '20;color:' + avC + '">' + (l.availability === 'available' ? '&#10003; Available' : '&#9888; Check') + '</span>';
-    cardsHTML += '<span class="badge" style="background:#f4f7fa;color:#6b7280">' + l.status + '</span>';
+    cardsHTML += '<span class="badge" style="background:#f4f7fa;color:#6b7280">' + l.status + '</span>' + d5TipHtml('listing_status');
     cardsHTML += verificationBadgeHtml(l);
     if (l.intelligenceScores) cardsHTML += '<span class="badge" style="background:#eff6ff;color:#2563eb">Life ' + (l.intelligenceScores.lifestyle || '--') + '</span>';
     cardsHTML += '</div>' + rankBadgeHtml(l.priority) + '</div>';
@@ -3610,6 +3632,7 @@ function updateStatus(id, status, btn) {
   if (l) l.status = status;
   lsSetListingStatus(id, status);
   setLastAction('Changed listing status to ' + status);
+  d5ShowToast('status_updated');
   document.querySelectorAll('.st-btn').forEach(function(b) { b.classList.remove('on'); });
   btn.classList.add('on');
   var badge = document.getElementById('detStatus');
@@ -3822,6 +3845,7 @@ function liSetFilter(key, val) {
   APP.liFilters[key] = val || '';
   if (key === 'county') APP.liCountyFilter = val || '';
   renderLandlordIntel();
+  if (val) d5ShowToast('filter_applied');
 }
 
 function liApplyIntelFilters(rows) {
@@ -4101,6 +4125,7 @@ function renderLandlordIntel() {
   html += '</div>';
 
   if (!rows.length) {
+    html += d5EmptyStateHtml('No listings yet', 'Adjust filters or add a landlord intelligence record.', 'Add a record', 'openLandlordIntelForm(null)');
   } else {
     rows.forEach(function(r) {
       var owner = lsGetLandlordIntelOwnerKey();
@@ -4223,12 +4248,12 @@ function renderLandlordIntelForm(r, readOnly) {
   html += liFormField('Website', 'li_website', r.website, { full: true });
   html += liFormField('Source type', 'li_source_type', r.source_type);
   html += liFormField('Source URL', 'li_source_url', r.source_url, { full: true });
-  html += liFormField('Verification status', 'li_verification_status', r.verification_status, { type: 'select', options: LANDLORD_INTEL_VERIFICATION_LEVELS, full: true });
+  html += liFormField('Verification status' + d5TipHtml('verification_status'), 'li_verification_status', r.verification_status, { type: 'select', options: LANDLORD_INTEL_VERIFICATION_LEVELS, full: true });
   html += liFormField('Verified by', 'li_verified_by', r.verified_by || '');
   html += liFormField('Availability status', 'li_availability_status', r.availability_status);
-  html += liFormField('Next recheck date', 'li_next_recheck_date', r.next_recheck_date || '', { inputType: 'date' });
+  html += liFormField('Next recheck date' + d5TipHtml('follow_up_date'), 'li_next_recheck_date', r.next_recheck_date || '', { inputType: 'date' });
   html += liFormField('Program notes', 'li_program_notes', r.program_notes, { type: 'textarea', full: true });
-  html += liFormField('Program compatibility', 'li_program_compatibility', r.program_compatibility || 'Unknown', { type: 'select', options: LANDLORD_INTEL_PROGRAM_TYPES, full: true });
+  html += liFormField('Program compatibility' + d5TipHtml('program_compatibility'), 'li_program_compatibility', r.program_compatibility || 'Unknown', { type: 'select', options: LANDLORD_INTEL_PROGRAM_TYPES, full: true });
   html += liFormField('Case manager notes', 'li_case_manager_notes', r.case_manager_notes, { type: 'textarea', full: true });
   html += liFormField('Neighborhood notes', 'li_neighborhood_notes', r.neighborhood_notes, { type: 'textarea', full: true });
   html += liFormField('Warning flags (comma-separated)', 'li_warning_flags', (r.warning_flags || []).join(', '), { full: true });
@@ -4273,6 +4298,7 @@ function saveLandlordIntelForm() {
   lsSaveLandlordIntelRecord(r);
   closeLandlordIntelForm();
   renderLandlordIntel();
+  d5ShowToast(APP.liEditingId ? 'record_added' : 'record_added');
   setLastAction('Saved landlord intelligence record: ' + r.landlord_name);
 }
 
@@ -4651,6 +4677,7 @@ function bindB4CaseNotes(clientId) {
       b4SetCaseNote(clientId, ta.value);
       b4RecordAudit('case_note_autosave', 'case_notes', clientId, { chars: ta.value.length, mock: true });
       if (status) { status.textContent = 'Saved ✓'; status.className = 'b4-note-status saved'; }
+      d5ShowToast('note_saved');
     }, 1000);
   };
   ta.addEventListener('input', APP.b4NoteInputHandler);
@@ -4818,7 +4845,7 @@ function c2StatusTag(status) {
   var s = String(status || 'active').replace(/\s/g, '_');
   var cls = 'c2-status-' + s;
   var label = s.replace(/_/g, ' ');
-  return '<span class="c2-status-tag ' + cls + '">' + label + '</span> ';
+  return '<span class="c2-status-tag ' + cls + '">' + label + '</span> ' + d5TipHtml('case_status');
 }
 
 function c2GetAuthorizedClients() {
@@ -4868,6 +4895,7 @@ function renderC2CaseWorkspace() {
     html += '<p style="font-size:13px;color:#6b7280;margin-bottom:12px">Caseworker view shows assigned clients only. Switch to Demo Caseworker Sam for full C2 demo.</p>';
   }
   if (!clients.length) {
+    html += d5EmptyStateHtml('No clients yet', 'Switch to Demo Caseworker or add your first mock client.', 'Add your first client', 'e2StartClientIntake()');
   } else {
     clients.forEach(function(c) {
       html += '<div class="ls-c2-client-row" onclick="openC2ClientProfile(\'' + c.id + '\')">' +
@@ -4926,6 +4954,7 @@ function renderC2ClientProfile() {
   html += '<div class="ls-internal-card"><h3>Notes <span class="b4-mock-tag">DEMO/INTERNAL</span></h3>';
   if (b4CanWriteCaseNote(ctx, client)) {
     var noteVal = b4GetCaseNote(client.id);
+    if (!noteVal.trim()) html += d5EmptyStateHtml('No notes yet', 'Start typing — notes auto-save in one second.', 'Start typing a note', 'document.getElementById(\'c2CaseNotesInput\').focus()');
     html += '<textarea id="c2CaseNotesInput" rows="6" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px" placeholder="Case notes auto-save in 1 second..."></textarea>' +
       '<div id="c2NoteSaveStatus" class="b4-note-status"></div>';
   } else {
@@ -4942,7 +4971,8 @@ function renderC2FollowUpTracker(clients) {
   var ids = (clients || []).map(function(c) { return c.id; });
   var items = (d1.followUpSchedule || []).filter(function(f) { return ids.indexOf(f.clientId) >= 0; });
   var today = d1TodayIso();
-  var html = '<div class="ls-internal-card"><h3>Follow-up Tracker <span class="ls-preview-tag">INTERNAL PREVIEW</span> ' + '</h3>';
+  var html = '<div class="ls-internal-card"><h3>Follow-up Tracker <span class="ls-preview-tag">INTERNAL PREVIEW</span> ' + d5TipHtml('follow_up_date') + '</h3>';
+  if (!items.length) html += d5EmptyStateHtml('No follow-ups yet', 'Schedule a demo callback or document check.', 'Schedule one', 'd5ScheduleDemoFollowUp(\'' + ((clients[0] && clients[0].id) || 'case-mock-1') + '\')');
   else items.forEach(function(f) {
     var flag = '';
     if (f.due < today) flag = '<span class="ls-followup-flag ls-followup-overdue">OVERDUE</span>';
@@ -4983,6 +5013,7 @@ function bindC2CaseNotes(clientId) {
       b4SetCaseNote(clientId, ta.value);
       b4RecordAudit('c2_note_autosave', 'case_notes', clientId, { mock: true });
       if (status) { status.textContent = 'Saved ✓'; status.className = 'b4-note-status saved'; }
+      d5ShowToast('note_saved');
     }, 1000);
   };
   ta.addEventListener('input', APP.c2NoteInputHandler);
@@ -5014,7 +5045,7 @@ function renderC3ReportingDashboard() {
     html += '<div style="display:flex;align-items:center;gap:10px;margin:8px 0"><span style="width:100px;font-size:12px;font-weight:700">' + k.replace(/_/g, ' ') + '</span><div style="flex:1;background:#e5e7eb;border-radius:6px;height:12px"><div style="width:' + Math.min(100, br[k] * 3) + '%;background:#22d98a;height:12px;border-radius:6px"></div></div><span style="font-size:13px;font-weight:800">' + br[k] + '</span></div>';
   });
   html += '<p style="font-size:11px;color:#9ca3af;margin-top:12px">Not for public, grant, or investor claims. Dummy metrics only.</p>';
-  html += '</div>';
+  html += '<button type="button" class="green-btn" style="margin-top:12px" onclick="d5DemoExportDownload()">Download demo export</button></div>';
   panel.innerHTML = html;
 }
 
@@ -5477,7 +5508,108 @@ function d4InstallErrorHandlers() {
 }
 
 // ================================================================
- — Legal framework skeleton (draft only)
+// SPRINT D5 — onboarding progress, skeletons, empty states, toasts, tooltips
+// ================================================================
+function d5GetMock() {
+  return window.SPRINT_D5_MOCK || { tooltips: {}, toasts: {} };
+}
+
+function d5OnboardingStepLabel(step, total) {
+  return 'Step ' + step + ' of ' + total;
+}
+
+function d5UpdateOnboardingProgress(stepIndex, total) {
+  total = total || (typeof STEPS !== 'undefined' ? STEPS.length : 21);
+  var step = stepIndex + 1;
+  var pct = Math.round((stepIndex / total) * 100);
+  var label = d5OnboardingStepLabel(step, total);
+  var wrap = document.getElementById('d5QuizProgressWrap');
+  var stepNum = document.getElementById('stepNum');
+  var stepPct = document.getElementById('stepPct');
+  var fill = document.getElementById('progFill');
+  if (wrap) { wrap.style.display = 'block'; wrap.textContent = label; }
+  if (stepNum) stepNum.textContent = label;
+  if (stepPct) stepPct.textContent = pct + '% complete';
+  if (fill) fill.style.width = pct + '%';
+}
+
+function d5HideOnboardingProgress() {
+  var wrap = document.getElementById('d5QuizProgressWrap');
+  if (wrap) wrap.style.display = 'none';
+}
+
+function d5SkeletonCardsHtml(count) {
+  count = count || 3;
+  var h = '<div class="d5-skeleton-grid">';
+  for (var i = 0; i < count; i++) {
+    h += '<div class="d5-skeleton-card"><div class="d5-skeleton-line w80"></div><div class="d5-skeleton-line w60"></div><div class="d5-skeleton-line w40"></div></div>';
+  }
+  return h + '</div>';
+}
+
+function d5EmptyStateHtml(title, subtitle, btnLabel, onclick) {
+  var h = '<div class="d5-empty-state"><div class="d5-empty-title">' + title + '</div>';
+  if (subtitle) h += '<div class="d5-empty-sub">' + subtitle + '</div>';
+  if (btnLabel && onclick) h += '<button type="button" class="green-btn" onclick="' + onclick + '">' + btnLabel + '</button>';
+  return h + '</div>';
+}
+
+function d5ShowToast(messageKey) {
+  try {
+    var mock = d5GetMock();
+    var msg = (mock.toasts && mock.toasts[messageKey]) || messageKey || 'Done';
+    var wrap = document.getElementById('d5ToastWrap');
+    if (!wrap) return;
+    var el = document.createElement('div');
+    el.className = 'd5-toast';
+    el.textContent = msg;
+    wrap.appendChild(el);
+    setTimeout(function() { el.classList.add('show'); }, 10);
+    setTimeout(function() {
+      el.classList.remove('show');
+      setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+    }, 3000);
+  } catch (e) { /* never block content */ }
+}
+
+function d5TipHtml(tipKey) {
+  var tips = d5GetMock().tooltips || {};
+  var text = tips[tipKey] || '';
+  if (!text) return '';
+  return '<span class="d5-tip-wrap"><span class="d5-tip-icon" tabindex="0" aria-label="Help">?</span><span class="d5-tip-bubble">' + text + '</span></span>';
+}
+
+function d5RenderWithSkeleton(containerId, renderFn, count) {
+  var el = document.getElementById(containerId);
+  if (!el) { renderFn(); return; }
+  if (!APP.d5SkeletonShown) APP.d5SkeletonShown = {};
+  if (APP.d5SkeletonShown[containerId]) { renderFn(); return; }
+  APP.d5SkeletonShown[containerId] = true;
+  el.innerHTML = d5SkeletonCardsHtml(count || 3);
+  setTimeout(renderFn, 200);
+}
+
+function d5ScheduleDemoFollowUp(clientId) {
+  clientId = clientId || (APP.c2SelectedClientId || 'case-mock-1');
+  d1AddInAppAlert('Follow-up scheduled', 'Demo follow-up added for client (MOCK)', 'follow_up_due');
+  d5ShowToast('follow_up_scheduled');
+  if (typeof renderC2CaseWorkspace === 'function' && document.getElementById('c2-case-pg') && document.getElementById('c2-case-pg').classList.contains('show')) {
+    renderC2CaseWorkspace();
+  } else if (typeof renderC2ClientProfile === 'function' && APP.c2SelectedClientId) {
+    renderC2ClientProfile();
+  }
+}
+
+function d5DemoExportDownload() {
+  d5ShowToast('export_downloaded');
+}
+
+function d5AddFirstDemoClient() {
+  e2StartClientIntake();
+}
+
+// ================================================================
+// SPRINT E2 — Legal framework skeleton (draft only)
 // ================================================================
 var E2_COOKIE_KEY = 'leasesmart_cookie_consent_v1';
 
@@ -5920,6 +6052,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <textarea id="d3C2QuickNoteInput" placeholder="Type a note — auto-saves when you close..." rows="5"></textarea>
   <p id="d3C2QuickNoteStatus" style="font-size:12px;color:#6b7280;margin:0">Auto-saves on close</p>
 </div>
+<div id="d5ToastWrap" class="d5-toast-wrap" aria-live="polite"></div>
 <div id="e2CookieBanner" class="e2-cookie-banner" role="dialog" aria-label="Cookie consent">
   <h3>Cookies &amp; privacy (demo)</h3>
   <p>We use essential cookies for beta session and preferences. Optional analytics run only if you Accept. GDPR &amp; CCPA placeholder — attorney review required. In demo mode, analytics default to Decline.</p>
