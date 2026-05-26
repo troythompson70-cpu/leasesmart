@@ -193,6 +193,23 @@ button,input,textarea,select{font-family:inherit}
 .note-status.saved{color:#16a34a}
 .act-clear-btn{background:#fff;border:2px dashed #e5e7eb;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:800;color:#6b7280;cursor:pointer;font-family:inherit}
 .act-clear-btn:hover{border-color:#22d98a;color:#111827}
+.li-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.li-filter{background:#fff;border:2px solid #e5e7eb;border-radius:10px;padding:8px 12px;font-size:13px;font-family:inherit}
+.li-card{background:#fff;border:2px solid #e5e7eb;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.li-card-hdr{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.li-title{font-weight:800;font-size:15px;color:#111827}
+.li-sub{color:#6b7280;font-size:12px;margin-top:2px}
+.li-badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.3px}
+.li-badge-public{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe}
+.li-badge-own{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+.li-meta{font-size:12px;color:#6b7280;line-height:1.55;margin-top:8px}
+.li-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.li-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.li-form-grid .full{grid-column:1/-1}
+.li-lbl{font-size:12px;font-weight:700;color:#6b7280;margin-bottom:4px}
+.li-input,.li-select,.li-textarea{width:100%;box-sizing:border-box;background:#f8fafb;border:2px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;color:#111827}
+.li-textarea{min-height:72px;resize:vertical}
+.li-notice{background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:12px 14px;font-size:12px;color:#9a3412;margin-bottom:14px;line-height:1.5}
 .act-cnt{font-weight:900;font-size:20px;color:#111827;line-height:1}
 .act-lbl{color:#6b7280;font-size:10px;letter-spacing:.4px;font-weight:700;text-transform:uppercase}
 .filt-btn{background:#fff;border:2px solid #e5e7eb;border-radius:20px;padding:8px 16px;color:#6b7280;font-size:13px;font-weight:700;cursor:pointer}
@@ -450,110 +467,8 @@ body { font-size: 16px !important; }
   </div>
 </div>
 
-<!-- CALL GUIDE MODAL -->
-<div class="fb-modal" id="callGuideModal">
-  <div class="fb-sheet" style="max-height:90vh">
-    <button class="fb-close" onclick="closeCallGuide()">&#10005; Close</button>
-    <div id="callGuideModalBody"></div>
-  </div>
-</div>
-
-<!-- QA PANEL (?qa=true) -->
-<div id="qaPanel"><div class="qa-inner" id="qaContent"></div></div>
-
-<!-- FLOATING FEEDBACK BUTTON -->
-<button class="fb-float" onclick="openFeedback()">&#128172; Send Feedback</button>
-
-<!-- FEEDBACK MODAL -->
-<div class="fb-modal" id="fbModal">
-  <div class="fb-sheet">
-    <button class="fb-close" onclick="closeFeedback()">&#10005; Close</button>
-    <h3>&#128172; Send Feedback to TGT</h3>
-    <p style="color:#6b7280;font-size:14px;margin-bottom:16px">Quick guided feedback — most testers finish in under 30 seconds.</p>
-    <label class="fb-lbl" for="fbName">Full Name</label>
-    <input class="fb-input" type="text" id="fbName" placeholder="Your full name"/>
-    <label class="fb-lbl" for="fbEmail">Email Address</label>
-    <input class="fb-input" type="email" id="fbEmail" placeholder="your@email.com"/>
-    <label class="fb-lbl" for="fbPhone">Phone <span style="font-weight:500;color:#9ca3af">(optional)</span></label>
-    <input class="fb-input" type="tel" id="fbPhone" placeholder="(XXX) XXX-XXXX"/>
-    <label class="fb-lbl" for="fbCategory">What part are you reviewing?</label>
-    <select class="fb-input" id="fbCategory" style="-webkit-appearance:none">
-      <option value="">Select one...</option>
-      <option>Apartment matches</option>
-      <option>Filters</option>
-      <option>Profile</option>
-      <option>Favorites / Saved listings</option>
-      <option>Call Guide</option>
-      <option>Map links</option>
-      <option>Design / layout</option>
-      <option>Something broken</option>
-      <option>Other</option>
-    </select>
-    <label class="fb-lbl" for="fbType">What type of feedback is this?</label>
-    <select class="fb-input" id="fbType" style="-webkit-appearance:none">
-      <option value="">Select one...</option>
-      <option>Bug</option>
-      <option>Confusing</option>
-      <option>Looks good</option>
-      <option>Missing feature</option>
-      <option>Wrong information</option>
-      <option>Too many clicks</option>
-      <option>Design improvement</option>
-      <option>Other</option>
-    </select>
-    <label class="fb-lbl" for="fbSeverity">How serious is it?</label>
-    <select class="fb-input" id="fbSeverity" style="-webkit-appearance:none">
-      <option value="">Select one...</option>
-      <option>Low</option>
-      <option>Medium</option>
-      <option>High</option>
-      <option>Blocking issue</option>
-    </select>
-    <label class="fb-lbl" for="fbRating">Overall experience rating</label>
-    <select class="fb-input" id="fbRating" style="-webkit-appearance:none">
-      <option value="">Select one...</option>
-      <option>Excellent</option>
-      <option>Good</option>
-      <option>Okay</option>
-      <option>Confusing</option>
-      <option>Needs work</option>
-    </select>
-    <label class="fb-lbl" for="fbMsg">Your comments</label>
-    <textarea class="fb-textarea" id="fbMsg" placeholder="Tell us what happened or what you would improve."></textarea>
-    <button class="green-btn" id="fbSubmitBtn" onclick="submitFeedback()">Submit Feedback &rarr;</button>
-    <div class="fb-sent" id="fbSent">
-      <div style="font-size:36px;margin-bottom:8px">&#10003;</div>
-      <div style="font-weight:800;color:#16a34a;font-size:18px;margin-bottom:6px">Feedback received!</div>
-      <div style="color:#6b7280;font-size:14px">Thank you. Tee Gates and the TGT team will review this personally.<br/>leasesmart@tgttechnologies.com</div>
-    </div>
-  </div>
-</div>
-
-<!-- FEEDBACK PROMPT (timed) -->
-<div class="fb-modal" id="fbPromptModal">
-  <div class="fb-sheet" style="text-align:center">
-    <h3 style="font-size:22px;font-weight:900;margin-bottom:12px">Help Improve LeaseSmart</h3>
-    <p style="color:#374151;font-size:16px;line-height:1.7;margin-bottom:8px">Your feedback helps shape the app.<br>Tell us what worked, what confused you, and what should be improved.</p>
-    <p style="color:#6b7280;font-size:14px;line-height:1.5;margin-bottom:24px">Best feedback may qualify for the beta tester reward.</p>
-    <button class="green-btn" style="margin-bottom:10px" onclick="feedbackPromptGive()">Give Feedback</button>
-    <button class="ghost-btn" type="button" style="width:100%;padding:14px;font-size:15px;font-weight:700" onclick="feedbackPromptLater()">Later</button>
-  </div>
-</div>
-
-<!-- MAJOR CHANGE WARNING -->
-<div class="fb-modal" id="majorChangeModal">
-  <div class="fb-sheet" style="text-align:center">
-    <h3 style="font-size:20px;font-weight:900;margin-bottom:10px">Update your search?</h3>
-    <p style="color:#374151;font-size:16px;line-height:1.6;margin-bottom:24px">Changing this may update your matches and search activity.</p>
-    <div class="filter-actions" style="justify-content:center">
-      <button class="green-btn" style="flex:1;min-width:140px" onclick="confirmMajorChange()">Continue</button>
-      <button class="ghost-btn" type="button" style="flex:1;min-width:140px" onclick="cancelMajorChange()">Cancel</button>
-    </div>
-  </div>
-</div>
-
 <!-- HOME PAGE -->
-<div id="home-pg" class="pg show">
+<div id="home-pg" class="pg">
 <div class="home-wrap">
   <div class="brand">
     <div class="brand-mark">LS</div>
@@ -573,11 +488,11 @@ body { font-size: 16px !important; }
   <div class="disclaimer">
     <strong>&#128274; Beta Demo Notice:</strong> This is a test version for feedback purposes. Sample listings are used in demo mode. Verified listing data will be reviewed by TGT Technologies before being shown to real customers. All real listing details &mdash; pricing, availability, parking, pet rules, and fees &mdash; must be verified directly with the property before applying or signing a lease.
   </div>
-  <button class="green-btn" id="startBtn">&#127968; Start Demo Search &rarr;</button>
+  <button class="green-btn" id="startBtn" style="display:none">&#127968; Start Demo Search &rarr;</button>
   <button class="ghost-btn" id="resumeBtn" style="display:none;width:100%;margin-top:10px;padding:14px;font-size:15px;font-weight:700" onclick="resumeSession()">&#128260; Continue Last Search</button>
   <div style="background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:20px;margin-top:18px">
-    <div style="font-weight:800;font-size:16px;color:#111827;margin-bottom:8px">Internal Beta Account (Sprint A1)</div>
-    <p style="color:#6b7280;font-size:14px;line-height:1.6;margin-bottom:14px">For internal Supabase auth testing only. Demo search above still works without an account.</p>
+    <div style="font-weight:800;font-size:16px;color:#111827;margin-bottom:8px">Beta Account Required</div>
+    <p style="color:#6b7280;font-size:14px;line-height:1.6;margin-bottom:14px">Sign up or log in with a magic link to begin. No shortcuts — verify, create your profile, then complete all 21 questions.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button type="button" class="green-btn" style="flex:1;min-width:160px;font-size:15px;padding:14px" onclick="showBetaSignupPage()">Beta Sign Up</button>
       <button type="button" class="ghost-btn" style="flex:1;min-width:160px;padding:14px;font-size:15px;font-weight:700" onclick="showBetaLoginPage()">Beta Log In</button>
@@ -600,7 +515,7 @@ body { font-size: 16px !important; }
     <div class="feat-card"><div class="feat-icon">&#128222;</div><div class="feat-title">Personalized Call Guide</div><div class="feat-desc">Your name, move-in date, pet, and parking need pre-filled into a real call script for every leasing office.</div></div>
     <div class="feat-card"><div class="feat-icon">&#9888;</div><div class="feat-title">Missing Data Flags</div><div class="feat-desc">Orange warnings tell you exactly what to confirm before applying &mdash; parking, pets, deposit amounts.</div></div>
   </div>
-  <button class="green-btn" id="startBtn2">Try the Demo &rarr;</button>
+  <button class="green-btn" id="startBtn2" style="display:none">Try the Demo &rarr;</button>
 
   <div style="background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:24px;margin-top:40px;box-shadow:0 2px 8px rgba(0,0,0,.05)">
     <div style="color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">For Beta Testers</div>
@@ -646,7 +561,6 @@ body { font-size: 16px !important; }
       </form>
       <div class="beta-actions" style="margin-top:14px">
         <button type="button" class="beta-link" onclick="showBetaLoginPage()">Already have a beta account? Log in</button>
-        <button type="button" class="beta-link" onclick="showPage('home-pg')">Back to home</button>
       </div>
     </div>
   </div>
@@ -667,7 +581,6 @@ body { font-size: 16px !important; }
       </form>
       <div class="beta-actions" style="margin-top:14px">
         <button type="button" class="beta-link" onclick="showBetaSignupPage()">Need an account? Sign up</button>
-        <button type="button" class="beta-link" onclick="showPage('home-pg')">Back to home</button>
       </div>
     </div>
   </div>
@@ -688,7 +601,7 @@ body { font-size: 16px !important; }
         <li><strong>Tell us what's clear and what's confusing</strong> — you're testing the experience, not your tech skills.</li>
         <li><strong>Verify everything with the property</strong> — before you apply or sign, confirm rent, fees, pets, and parking directly with the leasing office.</li>
       </ul>
-      <p class="beta-note" style="margin-bottom:18px">One quick agreement screen is next. Then you're in.</p>
+      <p class="beta-note" style="margin-bottom:18px">Next: legal agreement, then create your profile and complete 21 housing questions.</p>
       <button type="button" class="green-btn" onclick="continueFromBetaWelcome()">Continue &rarr;</button>
     </div>
   </div>
@@ -716,6 +629,37 @@ body { font-size: 16px !important; }
       <label class="beta-check"><input type="checkbox" id="betaLegalCheck"/> I have read and agree to the LeaseSmart Beta Tester NDA and Beta Terms.</label>
       <button type="button" class="green-btn" id="betaLegalAcceptBtn" onclick="submitBetaLegalAccept()">Accept &amp; Continue</button>
       <p class="beta-note">Acceptance is recorded in beta_agreements. ip_address is server-side only in future sprints.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE PROFILE (Sprint A6 — after verify + legal) -->
+<div id="profile-create-pg" class="pg">
+  <div class="beta-wrap">
+    <div class="beta-card">
+      <div class="beta-title">Create Your Profile</div>
+      <div class="beta-sub">Step 3 of 5 — Magic link verified and legal agreement accepted. Tell us who you are before the 21-question search.</div>
+      <div class="beta-error" id="profileCreateError"></div>
+      <label class="beta-lbl" for="createProfileName">Full name</label>
+      <input class="beta-input" id="createProfileName" type="text" autocomplete="name" placeholder="First and last name"/>
+      <label class="beta-lbl" for="createProfileEmail">Email</label>
+      <input class="beta-input" id="createProfileEmail" type="email" autocomplete="email" placeholder="your@email.com"/>
+      <label class="beta-lbl" for="createProfilePhone">Phone</label>
+      <input class="beta-input" id="createProfilePhone" type="tel" autocomplete="tel" placeholder="(555) 555-5555"/>
+      <label class="beta-lbl" for="createProfileState">Search state</label>
+      <select class="beta-input" id="createProfileState">
+        <option value="">Select state</option>
+      </select>
+      <label class="beta-lbl" for="createProfileCity">City or area</label>
+      <input class="beta-input" id="createProfileCity" type="text" placeholder="e.g. Newark NJ or 07102"/>
+      <label class="beta-lbl" for="createProfilePlacement">Placement type</label>
+      <select class="beta-input" id="createProfilePlacement">
+        <option value="">Select placement type</option>
+        <option value="Individual">Individual</option>
+        <option value="Family">Family</option>
+        <option value="Families">Families</option>
+      </select>
+      <button type="button" class="green-btn" onclick="submitCreateProfile()">Continue to 21 Questions &rarr;</button>
     </div>
   </div>
 </div>
@@ -819,8 +763,8 @@ body { font-size: 16px !important; }
 <script>window.LEASESMART_CONFIG = window.LEASESMART_CONFIG || null;</script>
 <script src="config.js"></script>
 <script>
-// v1.1.12 Sprint A4 — select all, auto-save notes, status filters, post-quiz feedback
-var LS_BUILD = '20260525-v1.1.12-a4';
+// v1.1.13 Sprint A6 — forced onboarding
+var LS_BUILD = '20260526-v1.1.13-a6';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -847,8 +791,11 @@ var APP = {
   lastFieldChanged: ''
 };
 
-var MAJOR_FIELDS = ['state', 'city', 'movein', 'budget', 'beds', 'baths', 'pets', 'park', 'commute'];
-var MAJOR_FIELD_LABELS = { state: 'State', city: 'City', movein: 'Move-in date', budget: 'Budget', beds: 'Bedrooms', baths: 'Bathrooms', pets: 'Pets', park: 'Parking', commute: 'Commute time' };
+var ONBOARDING_PAGES = ['beta-signup-pg', 'beta-login-pg', 'beta-welcome-pg', 'beta-legal-pg', 'profile-create-pg', 'quiz-pg', 'search-pg'];
+var SEARCH_STATES = ['New Jersey', 'New York', 'Pennsylvania', 'Ohio', 'Other'];
+var PLACEMENT_TYPES = ['Individual', 'Family', 'Families'];
+var MAJOR_FIELDS = ['state', 'city', 'movein', 'budget', 'beds', 'baths', 'pets', 'park', 'commute', 'placementType'];
+var MAJOR_FIELD_LABELS = { state: 'State', city: 'City', movein: 'Move-in date', budget: 'Budget', beds: 'Bedrooms', baths: 'Bathrooms', pets: 'Pets', park: 'Parking', commute: 'Commute time', placementType: 'Placement type' };
 var TAB_LABELS = { 'tab-matches': 'Matches', 'tab-favorites': 'Favorites', 'tab-guide': 'Call Guide', 'tab-verify': 'Verify Links', 'tab-profile': 'Profile' };
 
 var ADMIN_CODE = 'TGT2026';
@@ -1032,7 +979,7 @@ async function routeAuthenticatedBetaUser() {
     showBetaWelcomePage();
     return;
   }
-  showPage('home-pg');
+  routeOnboarding();
 }
 
 async function sendBetaMagicLinkEmail(email, meta, uiPrefix) {
@@ -1136,7 +1083,7 @@ async function submitBetaLegalAccept() {
     var res = await client.from('beta_agreements').insert(payload).select('id').single();
     if (res.error) throw res.error;
     BETA_SESSION.hasAgreement = true;
-    showPage('home-pg');
+    routeOnboarding();
   } catch (e) {
     showBetaError('betaLegalError', (e && e.message) ? e.message : String(e));
   }
@@ -1165,6 +1112,7 @@ async function initBetaAuthSession() {
     BETA_SESSION.authUserId = sessionRes.data.session.user.id;
     await ensureAppUserRecord(sessionRes.data.session.user, sessionRes.data.session.user.user_metadata || {});
     BETA_SESSION.hasAgreement = await hasBetaAgreement(BETA_SESSION.appUserId);
+    routeOnboarding();
   } catch (e) {
     console.warn('LeaseSmart: beta auth session check failed', e);
   }
@@ -1214,11 +1162,11 @@ var STEPS = [
   {id:'avoid',  type:'multi',icon:'&#128683;', lbl:'Hard NO list',      q:'What would make you reject a listing immediately?',
     opts:['Private house or basement','Street parking only','No overnight parking','55 plus senior communities','No pets allowed','Over my max budget','No transit access','High crime area']},
   {id:'life',   type:'multi',icon:'&#127775;', lbl:'About you',         q:'Tell us more so we match better.',
-    opts:['First-time renter','Moving from another state','Relocating for work','Single parent','Retiree or senior','Student','Young professional','Growing family','Remote worker','Military or veteran']},
+    opts:['First-time renter','Moving from another state','Relocating for work','Single parent','Family','Families','Retiree or senior','Student','Young professional','Growing family','Remote worker','Military or veteran']},
   {id:'extras', type:'text', icon:'&#128172;', lbl:'Anything else?',    q:'Any special requests or things we should know?',     ph:'The more detail the better.', opt:true}
 ];
 
-var EDIT_FILTER_IDS = ['movein', 'budget', 'beds', 'baths', 'commute', 'amenities', 'laundry', 'pets', 'park', 'transit'];
+var EDIT_FILTER_IDS = ['movein', 'budget', 'beds', 'baths', 'commute', 'amenities', 'laundry', 'pets', 'park', 'transit', 'vibe', 'avoid', 'life', 'extras', 'placementType'];
 var EDIT_PERSONAL_IDS = ['name', 'email', 'phone', 'state', 'city'];
 var EDIT_PROFILE_IDS = EDIT_PERSONAL_IDS.concat(EDIT_FILTER_IDS);
 
@@ -1259,10 +1207,118 @@ var LS_SELECTED_RESUME_SOURCE = '';
 
 function lsIsCompleteRecord(profile) {
   if (!profile || typeof profile !== 'object') return false;
+  if (profile.quizCompleted === true) return true;
   var hasIdentity = !!(String(profile.name || '').trim() || String(profile.email || '').trim());
   var hasLocation = !!(String(profile.state || '').trim() || String(profile.city || '').trim());
   var hasSearchField = !!(profile.movein || profile.moveinIso || profile.budget || profile.beds || profile.baths || profile.pets || profile.park || profile.commute || profile.amenities);
-  return hasIdentity && hasLocation && hasSearchField;
+  return hasIdentity && hasLocation && hasSearchField && profile.profileCreated === true;
+}
+
+function isProfileCreated(profile) {
+  profile = profile || lsLoadProfile() || {};
+  return profile.profileCreated === true && !!(String(profile.name || '').trim() && String(profile.email || '').trim());
+}
+
+function isOnboardingComplete(profile) {
+  profile = profile || lsLoadProfile() || {};
+  return profile.quizCompleted === true;
+}
+
+function requiresBetaOnboarding() {
+  return lsSupabaseConfigured() && !!BETA_SESSION.authUserId;
+}
+
+function populateSearchStateSelect(selectEl, selected) {
+  if (!selectEl) return;
+  selectEl.innerHTML = '<option value="">Select state</option>';
+  SEARCH_STATES.forEach(function(s) {
+    var opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s;
+    if (selected === s) opt.selected = true;
+    selectEl.appendChild(opt);
+  });
+}
+
+function prefillCreateProfileForm() {
+  var prof = lsLoadProfile() || {};
+  var nameEl = document.getElementById('createProfileName');
+  var emailEl = document.getElementById('createProfileEmail');
+  var phoneEl = document.getElementById('createProfilePhone');
+  var stateEl = document.getElementById('createProfileState');
+  var cityEl = document.getElementById('createProfileCity');
+  var placementEl = document.getElementById('createProfilePlacement');
+  if (nameEl) nameEl.value = prof.name || BETA_SESSION.fullName || '';
+  if (emailEl) emailEl.value = prof.email || BETA_SESSION.email || '';
+  if (phoneEl) phoneEl.value = prof.phone || BETA_SESSION.phone || '';
+  populateSearchStateSelect(stateEl, prof.state || '');
+  if (cityEl) cityEl.value = prof.city || '';
+  if (placementEl) placementEl.value = prof.placementType || '';
+}
+
+function submitCreateProfile() {
+  var errEl = document.getElementById('profileCreateError');
+  if (errEl) errEl.textContent = '';
+  var name = (document.getElementById('createProfileName').value || '').trim();
+  var email = (document.getElementById('createProfileEmail').value || '').trim();
+  var phone = (document.getElementById('createProfilePhone').value || '').trim();
+  var state = (document.getElementById('createProfileState').value || '').trim();
+  var city = (document.getElementById('createProfileCity').value || '').trim();
+  var placementType = (document.getElementById('createProfilePlacement').value || '').trim();
+  if (!name || !email || !state || !city || !placementType) {
+    if (errEl) errEl.textContent = 'Name, email, state, city, and placement type are required.';
+    return;
+  }
+  var payload = {
+    name: name,
+    email: email,
+    phone: phone,
+    state: state,
+    city: city,
+    placementType: placementType,
+    profileCreated: true,
+    quizCompleted: false,
+    quizStep: 0
+  };
+  lsSaveFullProfile(payload);
+  APP.name = name;
+  APP.email = email;
+  APP.phone = phone;
+  APP.quizAnswers = Object.assign({}, lsLoadProfile() || {}, payload);
+  beginQuestionnaire();
+}
+
+function routeOnboarding() {
+  if (!BETA_SESSION.authUserId) {
+    showBetaLoginPage();
+    return;
+  }
+  if (!BETA_SESSION.hasAgreement) {
+    showBetaWelcomePage();
+    return;
+  }
+  var prof = lsLoadProfile() || {};
+  if (!isProfileCreated(prof)) {
+    prefillCreateProfileForm();
+    showPage('profile-create-pg');
+    return;
+  }
+  if (!isOnboardingComplete(prof)) {
+    beginQuestionnaire();
+    return;
+  }
+  APP.profile = prof;
+  APP.quizAnswers = Object.assign({}, prof);
+  APP.name = prof.name || APP.name || '';
+  APP.email = prof.email || APP.email || '';
+  APP.phone = prof.phone || APP.phone || '';
+  APP.listings = applyIntelligenceToListings(
+    (LS_STORE.session && LS_STORE.session.listings) || getFallback(),
+    APP.profile
+  );
+  APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
+  buildDashboard();
+  showPage('dash-pg');
 }
 
 function lsPickCompleteResumeRecord() {
@@ -1560,7 +1616,7 @@ function rankBadgeHtml(priority) {
 }
 
 function lsIsBetaGatePageActive() {
-  var gateIds = ['beta-signup-pg', 'beta-login-pg', 'beta-welcome-pg', 'beta-legal-pg'];
+  var gateIds = ['beta-signup-pg', 'beta-login-pg', 'beta-welcome-pg', 'beta-legal-pg', 'profile-create-pg'];
   for (var i = 0; i < gateIds.length; i++) {
     var pg = document.getElementById(gateIds[i]);
     if (pg && pg.classList.contains('show')) return true;
@@ -1751,14 +1807,14 @@ function scoreListing(profile, listing) {
   if (ti.train && ti.train.walkMinutes <= 12) transitPts += 4;
   if (join(p.transit).indexOf('No transit') >= 0) transitPts = 18;
   transitPts = Math.min(18, transitPts);
-  var life = (join(p.life) + join(p.vibe)).toLowerCase();
+  var life = (join(p.life) + join(p.vibe) + (p.placementType || '')).toLowerCase();
   var lifestylePts = 50;
   if (life.indexOf('walkable') >= 0 && (listing.neighborhood || {}).walkScore >= 80) lifestylePts += 15;
   if (life.indexOf('family') >= 0 && (listing.neighborhood || {}).nearbySchools) lifestylePts += 12;
   if (life.indexOf('safe') >= 0 && listing.safety) lifestylePts += (listing.safety.score || 50) * 0.2;
   lifestylePts = Math.min(100, Math.round(lifestylePts));
   var safetyPts = listing.safety ? listing.safety.score : 70;
-  var familyPts = life.indexOf('family') >= 0 || life.indexOf('school') >= 0 ? Math.min(100, safetyPts + 10) : 60;
+  var familyPts = life.indexOf('family') >= 0 || life.indexOf('famil') >= 0 || life.indexOf('school') >= 0 ? Math.min(100, safetyPts + 10) : 60;
   var petScore = petPts * 6;
   var transportScore = Math.min(100, Math.round(((ti.bus ? 40 : 0) + (ti.train ? 35 : 0) + transitPts * 1.5)));
   var amenPts = Math.min(12, ((listing.amenities || []).length * 2));
@@ -1808,8 +1864,8 @@ function verificationBadgeHtml(l) {
 
 function resumeSession() {
   var profile = lsGetResumeProfile();
-  if (!profile) {
-    console.warn('LeaseSmart: no saved search profile found for resume');
+  if (!profile || !isOnboardingComplete(profile)) {
+    routeOnboarding();
     return;
   }
   APP.profile = profile;
@@ -1835,6 +1891,10 @@ function resumeSession() {
 // ================================================================
 function showPage(id) {
   if (id !== 'detail-pg') flushDetailNotes();
+  if (requiresBetaOnboarding() && !isOnboardingComplete() && ONBOARDING_PAGES.indexOf(id) < 0 && id !== 'admin-pg') {
+    routeOnboarding();
+    return;
+  }
   document.querySelectorAll('.pg').forEach(function(p) { p.classList.remove('show'); });
   document.getElementById(id).classList.add('show');
   window.scrollTo(0, 0);
@@ -1856,18 +1916,32 @@ function showTab(tabId, btn) {
 // ================================================================
 // QUIZ
 // ================================================================
-function startQuiz() {
-  var prof = lsLoadProfile();
-  APP.quizStep = 0;
-  APP.quizAnswers = {};
-  if (prof) {
-    APP.quizAnswers = Object.assign({}, prof);
-    APP.name = prof.name;
-    APP.email = prof.email;
-    APP.phone = prof.phone;
+function beginQuestionnaire() {
+  var prof = lsLoadProfile() || {};
+  if (isOnboardingComplete(prof)) {
+    routeOnboarding();
+    return;
   }
+  if (!isProfileCreated(prof)) {
+    prefillCreateProfileForm();
+    showPage('profile-create-pg');
+    return;
+  }
+  APP.quizAnswers = Object.assign({}, prof);
+  APP.quizStep = typeof prof.quizStep === 'number' ? Math.max(0, Math.min(prof.quizStep, STEPS.length - 1)) : 0;
+  APP.name = prof.name || APP.name || '';
+  APP.email = prof.email || APP.email || '';
+  APP.phone = prof.phone || APP.phone || '';
   showPage('quiz-pg');
   renderStep();
+}
+
+function startQuiz() {
+  if (requiresBetaOnboarding()) {
+    routeOnboarding();
+    return;
+  }
+  beginQuestionnaire();
 }
 
 function startOver() {
@@ -1877,19 +1951,25 @@ function startOver() {
 function executeStartOver() {
   var prof = lsLoadProfile() || {};
   if (APP.profile && APP.profile.name) {
-    prof = { name: APP.profile.name, email: APP.profile.email, phone: APP.profile.phone };
+    prof = { name: APP.profile.name, email: APP.profile.email, phone: APP.profile.phone, state: APP.profile.state, city: APP.profile.city, placementType: APP.profile.placementType };
   }
-  var personal = { name: prof.name || '', email: prof.email || '', phone: prof.phone || '' };
+  var personal = {
+    name: prof.name || '',
+    email: prof.email || '',
+    phone: prof.phone || '',
+    state: prof.state || '',
+    city: prof.city || '',
+    placementType: prof.placementType || '',
+    profileCreated: !!(prof.name && prof.email),
+    quizCompleted: false,
+    quizStep: 0
+  };
   lsReplaceProfile(personal);
   APP.quizStep = 0;
-  APP.quizAnswers = {
-    name: personal.name,
-    email: personal.email,
-    phone: personal.phone
-  };
-  APP.name = APP.quizAnswers.name;
-  APP.email = APP.quizAnswers.email;
-  APP.phone = APP.quizAnswers.phone;
+  APP.quizAnswers = Object.assign({}, personal);
+  APP.name = personal.name;
+  APP.email = personal.email;
+  APP.phone = personal.phone;
   APP.profile = {};
   APP.listings = [];
   APP.filter = 'all';
@@ -1898,8 +1978,7 @@ function executeStartOver() {
   LS_STORE.session = null;
   lsSave();
   lsTrack('start_over');
-  showPage('quiz-pg');
-  renderStep();
+  beginQuestionnaire();
 }
 
 function openEditFilters() {
@@ -1927,7 +2006,7 @@ function setEditModalHeader(mode) {
   if (!title || !sub || !btn) return;
   if (mode === 'profile') {
     title.innerHTML = '&#128100; Edit Profile';
-    sub.textContent = 'Update your contact info and search preferences. Changes save on this device and refresh your matches instantly.';
+    sub.textContent = 'Update your contact info and housing preferences anytime. Your preferences are saved but you can update them anytime in your profile.';
     btn.textContent = 'Save Profile \u2192';
   } else {
     title.innerHTML = '&#128269; Edit Search Filters';
@@ -1948,7 +2027,7 @@ function renderFilterForm() {
   fieldIds.forEach(function(fid) {
     var step = getStepById(fid);
     if (!step && EDIT_PERSONAL_IDS.indexOf(fid) < 0) return;
-    var lbl = step ? step.lbl : fid;
+    var lbl = step ? step.lbl : (fid === 'placementType' ? 'Placement type' : fid);
     html += '<div class="filter-group">';
     html += '<div class="filter-group-lbl">' + lbl + '</div>';
     if (fid === 'movein') {
@@ -1958,11 +2037,18 @@ function renderFilterForm() {
     } else if (fid === 'state') {
       html += '<select class="filter-select" id="filter_state">';
       html += '<option value="">Select state</option>';
-      US_STATES.forEach(function(s) {
+      SEARCH_STATES.forEach(function(s) {
         html += '<option value="' + s + '"' + (p.state === s ? ' selected' : '') + '>' + s + '</option>';
       });
       html += '</select>';
-    } else if (fid === 'name' || fid === 'email' || fid === 'phone' || fid === 'city') {
+    } else if (fid === 'placementType') {
+      html += '<select class="filter-select" id="filter_placementType">';
+      html += '<option value="">Select placement type</option>';
+      PLACEMENT_TYPES.forEach(function(t) {
+        html += '<option value="' + t + '"' + (p.placementType === t ? ' selected' : '') + '>' + t + '</option>';
+      });
+      html += '</select>';
+    } else if (fid === 'name' || fid === 'email' || fid === 'phone' || fid === 'city' || fid === 'extras') {
       var val = (p[fid] || '').replace(/"/g, '&quot;');
       var inputType = fid === 'email' ? 'email' : (fid === 'phone' ? 'tel' : 'text');
       var ph = step && step.ph ? step.ph : '';
@@ -2010,6 +2096,16 @@ function applyFiltersConfirmed(changedMajorFields) {
     if (APP.profile.city) p.city = APP.profile.city;
   }
   EDIT_FILTER_IDS.forEach(function(fid) {
+    if (fid === 'placementType') {
+      var placementEl = document.getElementById('filter_placementType');
+      if (placementEl && placementEl.value) p.placementType = placementEl.value;
+      return;
+    }
+    if (fid === 'extras') {
+      var extrasEl = document.getElementById('filter_extras');
+      if (extrasEl) p.extras = extrasEl.value.trim();
+      return;
+    }
     if (fid === 'movein') {
       var d = document.getElementById('filter_movein');
       if (d && d.value) {
@@ -2035,6 +2131,7 @@ function applyFiltersConfirmed(changedMajorFields) {
   lsPersistProfile(APP.profile);
   refreshListingsFromProfile();
   closeEditFilters();
+  if (APP.editModalMode === 'profile') APP.profilePrefsSaved = true;
   showPage('dash-pg');
   var tabBtns = document.querySelectorAll('.tab-btn');
   var returnTab = APP.returnTab || 'tab-matches';
@@ -2042,6 +2139,7 @@ function applyFiltersConfirmed(changedMajorFields) {
     var onclick = b.getAttribute('onclick') || '';
     if (onclick.indexOf("'" + returnTab + "'") >= 0) showTab(returnTab, b);
   });
+  if (APP.editModalMode === 'profile') renderProfile();
   lsTrack(APP.editModalMode === 'profile' ? 'profile_edited' : 'filters_applied');
 }
 
@@ -2308,7 +2406,7 @@ function renderStateList(filter) {
   list.innerHTML = '';
   var saved = APP.quizAnswers.state || '';
   var q = (filter || '').toLowerCase();
-  US_STATES.filter(function(s) {
+  SEARCH_STATES.filter(function(s) {
     return s.toLowerCase().indexOf(q) >= 0;
   }).forEach(function(s) {
     var btn = document.createElement('button');
@@ -2352,26 +2450,42 @@ function doPendingAdvance() {
 function doAdvance(val) {
   var step = STEPS[APP.quizStep];
   APP.quizAnswers[step.id] = val;
+  APP.quizAnswers.profileCreated = true;
+  APP.quizAnswers.quizCompleted = false;
   setLastAction('Completed step: ' + (step.lbl || step.id));
   if (MAJOR_FIELD_LABELS[step.id]) APP.lastFieldChanged = MAJOR_FIELD_LABELS[step.id];
-  lsSaveFullProfile(APP.quizAnswers);
   if (APP.quizStep < STEPS.length - 1) {
+    APP.quizAnswers.quizStep = APP.quizStep + 1;
+    lsSaveFullProfile(APP.quizAnswers);
     APP.quizStep++;
     renderStep();
   } else {
+    lsSaveFullProfile(APP.quizAnswers);
     submitSteps();
   }
 }
 
 function submitSteps() {
-  APP.profile = Object.assign({}, APP.quizAnswers);
+  APP.profile = Object.assign({}, APP.quizAnswers, {
+    profileCreated: true,
+    quizCompleted: true,
+    quizCompletedAt: new Date().toISOString(),
+    quizStep: STEPS.length
+  });
+  APP.quizAnswers = Object.assign({}, APP.profile);
   lsSaveFullProfile(APP.profile);
+  lsWriteCompleteRecord(APP.profile);
   schedulePostQuizFeedbackPrompt();
   runSearch();
 }
 
 function goBack() {
-  if (APP.quizStep > 0) { APP.quizStep--; renderStep(); }
+  if (APP.quizStep > 0) {
+    APP.quizStep--;
+    APP.quizAnswers.quizStep = APP.quizStep;
+    lsSaveFullProfile(APP.quizAnswers);
+    renderStep();
+  }
 }
 
 // ================================================================
@@ -2446,9 +2560,17 @@ function callAI(cb) {
     .catch(function() { cb(getFallback()); });
 }
 
+function profileStateAbbr(state) {
+  var map = { 'New Jersey': 'NJ', 'New York': 'NY', 'Pennsylvania': 'PA', 'Ohio': 'OH', 'Other': 'NJ' };
+  if (!state) return 'NJ';
+  if (map[state]) return map[state];
+  if (String(state).length === 2) return String(state).toUpperCase();
+  return 'NJ';
+}
+
 function getFallback() {
   var c = APP.profile.city || 'Your City';
-  var s = APP.profile.state || 'NJ';
+  var s = profileStateAbbr(APP.profile.state);
   var zip = '07102';
   function demoTransit(busRoute, busMin, trainLine, trainMin) {
     return {
@@ -3076,10 +3198,15 @@ function renderProfile() {
   var p = APP.profile;
   var html = '<div style="max-width:720px">';
   html += '<h2 style="color:#111827;font-weight:900;margin-bottom:8px;font-size:22px">&#128100; Your Search Profile</h2>';
-  html += '<p style="color:#6b7280;font-size:14px;margin-bottom:16px">Saved on this device via localStorage. ' + LS_VERSION + '</p>';
+  html += '<p style="color:#6b7280;font-size:14px;margin-bottom:10px;line-height:1.6">Your preferences are saved but you can update them anytime in your profile.</p>';
+  if (APP.profilePrefsSaved) {
+    html += '<div style="background:#f0fdf4;border:2px solid #22d98a;border-radius:12px;padding:12px 14px;margin-bottom:16px;color:#166534;font-size:14px;font-weight:700">&#10003; Preferences saved</div>';
+    APP.profilePrefsSaved = false;
+  }
+  html += '<p style="color:#9ca3af;font-size:13px;margin-bottom:16px">Saved on this device via localStorage. ' + LS_VERSION + '</p>';
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
   Object.keys(p).forEach(function(k) {
-    if (k === 'commuteDestinations') return;
+    if (k === 'commuteDestinations' || k === 'quizCompleted' || k === 'quizStep' || k === 'quizCompletedAt' || k === 'profileCreated') return;
     var v = p[k];
     var label = k.replace(/([A-Z])/g, ' $1').toUpperCase();
     var display = Array.isArray(v) ? v.join(', ') : (v || '--');
@@ -3101,6 +3228,7 @@ function renderProfile() {
   document.getElementById('tab-profile').innerHTML = html;
 }
 
+// ================================================================
 // ================================================================
 // ADMIN
 // ================================================================
@@ -3266,6 +3394,7 @@ function renderQAPanel() {
   el.innerHTML = html;
 }
 
+// ================================================================
 function initLeaseSmart() {
   var bid = document.getElementById('lsBuildId');
   if (bid) bid.textContent = LS_BUILD;
@@ -3284,11 +3413,13 @@ function initLeaseSmart() {
     APP.email = prof.email;
     APP.phone = prof.phone;
   }
-  if (lsGetResumeProfile()) {
+  var resumeProf = lsGetResumeProfile();
+  if (resumeProf && isOnboardingComplete(resumeProf)) {
     var rb = document.getElementById('resumeBtn');
     if (rb) rb.style.display = 'block';
   }
 
+  showBetaLoginPage();
   initBetaAuthSession();
 
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
@@ -3340,8 +3471,7 @@ window.lsDebugStorage = function() {
 document.addEventListener('DOMContentLoaded', function() {
   initLeaseSmart();
   window.addEventListener('beforeunload', flushDetailNotes);
-  document.getElementById('startBtn').addEventListener('click', startQuiz);
-  document.getElementById('startBtn2').addEventListener('click', startQuiz);
+  populateSearchStateSelect(document.getElementById('createProfileState'), '');
 
   var toggle = document.getElementById('adminToggle');
   var box = document.getElementById('adminBox');
