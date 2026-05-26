@@ -52,3 +52,49 @@ Built 10-table draft schema, 7-role permission model, DEMO/INTERNAL workspace UI
 Architecture skeleton only. Draft SQL not applied. Waiting for Troy commit phrase.
 
 ---
+## 2026-05-26 22:04 UTC — C2-C3-B5-B3 — Sprint Command
+
+**Build ID:** 20260526-v1.4.0
+
+Sprint v1.4.0 — C2 case mgmt, C3 reporting, B5 platform admin, B3 user data
+
+---
+## 2026-05-26 22:04 UTC — C2-C3-B5-B3 — Cursor Report
+
+**Build ID:** 20260526-v1.4.0
+
+Built internal skeletons at build 20260526-v1.4.0. C2 uses B4 permissions. All dummy data. Regression PASS 48/48.
+
+---
+## 2026-05-26 22:04 UTC — C2-C3-B5-B3 — GO / NO-GO Decision
+
+**Build ID:** 20260526-v1.4.0
+
+**Verdict:** NO-GO
+
+Skeleton only. Not committed. Waiting for Troy commit phrase.
+
+---
+## 2026-05-26 22:17 UTC — D1 — Sprint Command
+
+**Build ID:** 20260526-v1.5.0-d1
+
+Sprint D1 — email notifications, follow-up reminders, in-app panel
+
+---
+## 2026-05-26 22:17 UTC — D1 — Cursor Report
+
+**Build ID:** 20260526-v1.5.0-d1
+
+Built D1 at 20260526-v1.5.0-d1. Draft SQL for notification_outbox. Email placeholder until Supabase live. Regression PASS 41/41, all nested suites PASS.
+
+---
+## 2026-05-26 22:17 UTC — D1 — GO / NO-GO Decision
+
+**Build ID:** 20260526-v1.5.0-d1
+
+**Verdict:** NO-GO
+
+Not committed — waiting for Troy commit phrase.
+
+---

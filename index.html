@@ -415,6 +415,23 @@ button,input,textarea,select{font-family:inherit}
 .c2-status-on_hold{background:#fee2e2;color:#991b1b}
 .c2-status-closed{background:#e5e7eb;color:#6b7280}
 .ls-internal-nav{display:grid;gap:8px;margin-top:12px}
+/* D1 — notifications + follow-up reminders */
+.ls-notif-wrap{position:relative;display:inline-block}
+.ls-notif-bell{background:#fff;border:2px solid #e5e7eb;border-radius:10px;padding:8px 12px;font-size:18px;cursor:pointer;position:relative;line-height:1}
+.ls-notif-badge{position:absolute;top:-6px;right:-6px;background:#d97706;color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.ls-notif-badge-overdue{background:#dc2626}
+.ls-notif-dropdown{display:none;position:absolute;right:0;top:calc(100% + 8px);width:320px;max-width:90vw;background:#fff;border:2px solid #e5e7eb;border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.12);z-index:200;max-height:360px;overflow:hidden}
+.ls-notif-dropdown.open{display:block}
+.ls-notif-head{padding:12px 14px;border-bottom:1.5px solid #f3f4f6;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px}
+.ls-notif-list{max-height:240px;overflow-y:auto}
+.ls-notif-item{padding:12px 14px;border-bottom:1px solid #f3f4f6;font-size:13px;cursor:pointer}
+.ls-notif-item.unread{background:#f0fdf4}
+.ls-notif-item.read{opacity:.75}
+.ls-followup-bar{background:#fff7ed;border-bottom:1.5px solid #fed7aa;padding:8px 18px;font-size:13px;font-weight:700;color:#9a3412;text-align:center}
+.ls-followup-bar span{margin:0 10px}
+.ls-followup-flag{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;margin-left:6px}
+.ls-followup-today{background:#fef3c7;color:#92400e}
+.ls-followup-overdue{background:#fee2e2;color:#991b1b}
 .admin-head{background:#fff;border-bottom:2px solid #e5e7eb;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
 .admin-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
 .admin-stat{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:14px 20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)}
@@ -872,6 +889,8 @@ body { font-size: 16px !important; }
         <div><div class="dash-name">LeaseSmart</div><div class="dash-sub">YOUR MATCHES</div></div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div id="dashFollowUpBar" class="ls-followup-bar" style="display:none;margin:0;border-radius:8px;padding:6px 12px;font-size:12px"></div>
+        <div id="dashNotifBell"></div>
         <div class="pchip" id="profChip">Loading&hellip;</div>
         <button class="ghost-btn" onclick="openEditFilters()">Edit Filters</button>
       </div>
@@ -949,7 +968,8 @@ body { font-size: 16px !important; }
 <!-- C2 CASE MANAGEMENT (v1.4.0 skeleton) -->
 <div id="c2-case-pg" class="pg">
   <div class="ls-internal-banner"><strong>&#9888; DEMO / INTERNAL — Case Management Skeleton</strong>Mock clients only. B4 permission model. No real clients. No cross-agency sharing.</div>
-  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:10px"><div class="dash-mark">LS</div><div><div class="dash-name">Case Management</div><div class="dash-sub">SPRINT C2 SKELETON</div></div></div><button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Back</button></div></div>
+  <div id="c2FollowUpHeader" class="ls-followup-bar" style="display:none"></div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;width:100%"><div style="display:flex;align-items:center;gap:10px"><div class="dash-mark">LS</div><div><div class="dash-name">Case Management</div><div class="dash-sub">SPRINT C2 + D1</div></div></div><div style="display:flex;gap:8px;align-items:center"><div id="c2NotifBell"></div><button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Back</button></div></div></div>
   <div class="b4-role-bar" id="c2RoleBar"></div>
   <div class="ls-internal-panel" id="c2CasePanel"></div>
 </div>
@@ -988,9 +1008,10 @@ body { font-size: 16px !important; }
 <script src="_data/landlord-intel-seed-nj.js"></script>
 <script src="_data/b4-case-mock-seed.js"></script>
 <script src="_data/sprint-v140-mock-seed.js"></script>
+<script src="_data/sprint-d1-mock-seed.js"></script>
 <script>
-// v1.4.0 Sprint C2/C3 + B5/B3 internal skeletons
-var LS_BUILD = '20260526-v1.4.0';
+// v1.5.0 Sprint D1 — email + in-app notifications + follow-up reminders
+var LS_BUILD = '20260526-v1.5.0-d1';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -1413,7 +1434,7 @@ function getStepById(id) {
 // Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
 // ================================================================
 var LS_VERSION = 'Beta v1.2 — Housing Intelligence Foundation';
-var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients' };
+var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false };
 var LS_STORE = Object.assign({}, LS_STORE_DEFAULTS);
 
 function lsNormalizeStore(data) {
@@ -1431,6 +1452,9 @@ function lsNormalizeStore(data) {
   if (!store.b4DemoRole) store.b4DemoRole = 'caseworker';
   if (!store.b4DemoUserId) store.b4DemoUserId = 'u-cw-demo-1';
   if (!store.b4Subtab) store.b4Subtab = 'clients';
+  if (!Array.isArray(store.inAppNotifications)) store.inAppNotifications = store.inAppNotifications ? [].concat(store.inAppNotifications) : [];
+  if (!Array.isArray(store.d1EmailOutbox)) store.d1EmailOutbox = store.d1EmailOutbox ? [].concat(store.d1EmailOutbox) : [];
+  if (typeof store.d1Seeded !== 'boolean') store.d1Seeded = false;
   return store;
 }
 
@@ -2872,6 +2896,9 @@ function buildDashboard() {
   renderVerify();
   renderLandlordIntel();
   renderProfile();
+  d1SeedNotificationsIfNeeded();
+  d1RefreshFollowUpHeader('dashFollowUpBar');
+  d1RefreshNotificationUI();
 }
 
 function scColor(s) { return s >= 85 ? '#16a34a' : s >= 70 ? '#d97706' : '#dc2626'; }
@@ -4265,8 +4292,11 @@ function showC2CaseWorkspace() {
     lsSave();
   }
   showPage('c2-case-pg');
+  d1SeedNotificationsIfNeeded();
+  d1TriggerDemoNotifications();
   b4RecordAudit('c2_workspace_open', 'case_clients', null, { mock: true });
   renderC2CaseWorkspace();
+  d1RefreshNotificationUI();
 }
 
 function renderC2RoleBar() {
@@ -4309,6 +4339,9 @@ function renderC2CaseWorkspace() {
     html += '<div class="ls-internal-card"><p style="font-size:12px;color:#9ca3af">User management hidden — caseworkers cannot add or delete users.</p></div>';
   }
   panel.innerHTML = html;
+  var clientIds = clients.map(function(c) { return c.id; });
+  d1RefreshFollowUpHeader('c2FollowUpHeader', clientIds);
+  d1RefreshNotificationUI({ c2ClientIds: clientIds });
 }
 
 function openC2ClientProfile(clientId) {
@@ -4355,13 +4388,17 @@ function renderC2ClientProfile() {
 }
 
 function renderC2FollowUpTracker(clients) {
-  var v140 = v140GetMock();
+  var d1 = d1GetMock();
   var ids = (clients || []).map(function(c) { return c.id; });
-  var items = ((v140.c2 && v140.c2.followUpItems) || []).filter(function(f) { return ids.indexOf(f.clientId) >= 0; });
+  var items = (d1.followUpSchedule || []).filter(function(f) { return ids.indexOf(f.clientId) >= 0; });
+  var today = d1TodayIso();
   var html = '<div class="ls-internal-card"><h3>Follow-up Tracker <span class="ls-preview-tag">INTERNAL PREVIEW</span></h3>';
   if (!items.length) html += '<p style="color:#6b7280;font-size:13px">No mock follow-ups due.</p>';
   else items.forEach(function(f) {
-    html += '<div style="padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><strong>' + f.due + '</strong> — ' + f.task + ' <span class="b4-mock-tag">MOCK</span></div>';
+    var flag = '';
+    if (f.due < today) flag = '<span class="ls-followup-flag ls-followup-overdue">OVERDUE</span>';
+    else if (f.due === today) flag = '<span class="ls-followup-flag ls-followup-today">DUE TODAY</span>';
+    html += '<div style="padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><strong>' + f.due + '</strong> — ' + f.task + flag + ' <span class="b4-mock-tag">MOCK</span></div>';
   });
   html += '</div>';
   return html;
@@ -4496,6 +4533,196 @@ function renderB3UserDataDashboard() {
   panel.innerHTML = html;
 }
 
+// ================================================================
+// SPRINT D1 — Email notifications, follow-up reminders, in-app panel
+// Draft email until Supabase email live. Dummy notifications only.
+// ================================================================
+function d1GetMock() {
+  return window.SPRINT_D1_MOCK || { dummyNotifications: [], followUpSchedule: [] };
+}
+
+function d1TodayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function d1IsEmailLive() {
+  try {
+    if (window.LEASESMART_CONFIG && window.LEASESMART_CONFIG.emailNotificationsEnabled === true) return true;
+  } catch (e) { /* ignore */ }
+  return false;
+}
+
+function d1QueueEmail(type, data) {
+  data = data || {};
+  var live = d1IsEmailLive();
+  var subjects = {
+    caseworker_assigned: '[LeaseSmart Demo] New client assigned',
+    case_status_changed: '[LeaseSmart Demo] Case status updated',
+    follow_up_overdue: '[LeaseSmart Demo] Follow-up overdue'
+  };
+  var entry = {
+    notification_type: type,
+    subject: subjects[type] || '[LeaseSmart Demo] Notification',
+    body_text: data.message || 'Demo notification',
+    status: live ? 'queued' : 'skipped_no_email_service',
+    is_mock: true,
+    payload: data,
+    ts: new Date().toISOString()
+  };
+  if (!LS_STORE.d1EmailOutbox) LS_STORE.d1EmailOutbox = [];
+  LS_STORE.d1EmailOutbox.unshift(entry);
+  if (LS_STORE.d1EmailOutbox.length > 100) LS_STORE.d1EmailOutbox = LS_STORE.d1EmailOutbox.slice(0, 100);
+  lsSave();
+  return entry;
+}
+
+function d1NotifyCaseworkerAssigned(client, caseworker) {
+  d1QueueEmail('caseworker_assigned', { clientName: client.displayName, caseworkerId: caseworker && caseworker.id, message: 'Assigned mock client ' + client.displayName });
+  d1AddInAppAlert('Case assigned', 'Demo: ' + client.displayName + ' assigned (MOCK)', 'case_assigned');
+}
+
+function d1NotifyUserStatusChange(client, oldStatus, newStatus) {
+  d1QueueEmail('case_status_changed', { caseNumber: client.caseNumber, oldStatus: oldStatus, newStatus: newStatus, message: 'Status ' + oldStatus + ' → ' + newStatus });
+  d1AddInAppAlert('Case status changed', client.displayName + ': ' + oldStatus + ' → ' + newStatus + ' (MOCK)', 'status_changed');
+}
+
+function d1NotifyFollowUpOverdue(client, taskLabel) {
+  d1QueueEmail('follow_up_overdue', { caseNumber: client.caseNumber, clientName: client.displayName, message: 'Follow-up overdue for ' + client.caseNumber });
+  d1AddInAppAlert('Follow-up overdue', (taskLabel || 'Demo task') + ' — ' + client.caseNumber + ' (MOCK)', 'overdue_follow_up');
+}
+
+function d1AddInAppAlert(title, message, alertType) {
+  if (!LS_STORE.inAppNotifications) LS_STORE.inAppNotifications = [];
+  LS_STORE.inAppNotifications.unshift({
+    id: 'd1-live-' + Date.now(),
+    title: title,
+    message: message,
+    alert_type: alertType || 'info',
+    is_read: false,
+    isMock: true,
+    ts: new Date().toISOString()
+  });
+  if (LS_STORE.inAppNotifications.length > 50) LS_STORE.inAppNotifications = LS_STORE.inAppNotifications.slice(0, 50);
+  lsSave();
+  d1RefreshNotificationUI();
+}
+
+function d1SeedNotificationsIfNeeded() {
+  if (LS_STORE.d1Seeded) return;
+  var seed = d1GetMock().dummyNotifications || [];
+  LS_STORE.inAppNotifications = seed.map(function(n) { return Object.assign({}, n, { ts: new Date().toISOString() }); });
+  LS_STORE.d1Seeded = true;
+  lsSave();
+}
+
+function d1GetFollowUpCounts(clientIds) {
+  var schedule = d1GetMock().followUpSchedule || [];
+  var today = d1TodayIso();
+  var dueToday = 0;
+  var overdue = 0;
+  schedule.forEach(function(f) {
+    if (clientIds && clientIds.length && clientIds.indexOf(f.clientId) < 0) return;
+    if (f.due === today) dueToday++;
+    else if (f.due < today) overdue++;
+  });
+  return { dueToday: dueToday, overdue: overdue, total: dueToday + overdue };
+}
+
+function d1RefreshFollowUpHeader(containerId, clientIds) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  var c = d1GetFollowUpCounts(clientIds);
+  if (!c.total) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = '&#128276; Follow-ups: <span class="ls-followup-flag ls-followup-today">' + c.dueToday + ' due today</span> <span class="ls-followup-flag ls-followup-overdue">' + c.overdue + ' overdue</span> <span class="b4-mock-tag">DEMO</span>';
+}
+
+function d1UnreadCount() {
+  return (LS_STORE.inAppNotifications || []).filter(function(n) { return !n.is_read; }).length;
+}
+
+function d1NotificationBellHtml(targetId, clientIds) {
+  var fu = d1GetFollowUpCounts(clientIds);
+  var badgeCount = fu.total || d1UnreadCount();
+  var badgeClass = fu.overdue > 0 ? ' ls-notif-badge-overdue' : '';
+  return '<div class="ls-notif-wrap" id="' + targetId + 'Wrap">' +
+    '<button type="button" class="ls-notif-bell" onclick="d1ToggleNotificationPanel(\'' + targetId + '\')" aria-label="Notifications">&#128276;' +
+    (badgeCount ? '<span class="ls-notif-badge' + badgeClass + '" title="Follow-ups due/overdue">' + badgeCount + '</span>' : '') + '</button>' +
+    '<div class="ls-notif-dropdown" id="' + targetId + 'Dropdown">' +
+    '<div class="ls-notif-head"><span>Alerts <span class="b4-mock-tag">DEMO</span></span>' +
+    '<span><button type="button" class="ghost-btn" style="padding:4px 8px;font-size:11px" onclick="d1ClearAllNotifications(\'' + targetId + '\')">Clear all</button></span></div>' +
+    '<div class="ls-notif-list" id="' + targetId + 'List"></div></div></div>';
+}
+
+function d1RenderNotificationList(targetId) {
+  var list = document.getElementById(targetId + 'List');
+  if (!list) return;
+  var items = LS_STORE.inAppNotifications || [];
+  if (!items.length) {
+    list.innerHTML = '<div style="padding:16px;color:#9ca3af;font-size:13px;text-align:center">No demo alerts</div>';
+    return;
+  }
+  list.innerHTML = items.slice(0, 12).map(function(n) {
+    var cls = n.is_read ? 'read' : 'unread';
+    return '<div class="ls-notif-item ' + cls + '" onclick="d1MarkNotificationRead(\'' + n.id + '\',\'' + targetId + '\')"><strong>' + n.title + '</strong><br><span style="font-size:12px;color:#6b7280">' + n.message + '</span></div>';
+  }).join('');
+}
+
+function d1RefreshNotificationUI(opts) {
+  opts = opts || {};
+  var c2Ids = opts.c2ClientIds;
+  if (c2Ids === undefined && typeof c2GetAuthorizedClients === 'function') {
+    try { c2Ids = c2GetAuthorizedClients().map(function(c) { return c.id; }); } catch (e) { c2Ids = null; }
+  }
+  var map = { dash: null, c2: c2Ids };
+  ['dash', 'c2'].forEach(function(prefix) {
+    var bell = document.getElementById(prefix + 'NotifBell');
+    if (bell) {
+      bell.innerHTML = d1NotificationBellHtml(prefix, map[prefix]);
+      d1RenderNotificationList(prefix);
+    }
+  });
+}
+
+function d1ToggleNotificationPanel(targetId) {
+  var dd = document.getElementById(targetId + 'Dropdown');
+  if (!dd) return;
+  var open = dd.classList.contains('open');
+  document.querySelectorAll('.ls-notif-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+  if (!open) {
+    dd.classList.add('open');
+    d1RenderNotificationList(targetId);
+  }
+}
+
+function d1MarkNotificationRead(id, targetId) {
+  (LS_STORE.inAppNotifications || []).forEach(function(n) {
+    if (n.id === id) n.is_read = true;
+  });
+  lsSave();
+  d1RefreshNotificationUI();
+  if (targetId) d1RenderNotificationList(targetId);
+}
+
+function d1ClearAllNotifications(targetId) {
+  LS_STORE.inAppNotifications = [];
+  lsSave();
+  d1RefreshNotificationUI();
+  if (targetId) d1RenderNotificationList(targetId);
+}
+
+function d1TriggerDemoNotifications() {
+  if (APP.d1DemoTriggered) return;
+  APP.d1DemoTriggered = true;
+  var mock = b4GetMockFoundation();
+  var client = (mock.clients || [])[0];
+  var overdueClient = (mock.clients || []).find(function(c) { return c.id === 'case-mock-2'; }) || client;
+  var cw = (mock.users || []).find(function(u) { return u.roleKey === 'caseworker'; });
+  if (client && cw) d1NotifyCaseworkerAssigned(client, cw);
+  if (client) d1NotifyUserStatusChange(client, 'intake', 'active');
+  if (overdueClient) d1NotifyFollowUpOverdue(overdueClient, 'Demo document check');
+}
+
 function initLeaseSmart() {
   var bid = document.getElementById('lsBuildId');
   if (bid) bid.textContent = LS_BUILD;
@@ -4522,6 +4749,8 @@ function initLeaseSmart() {
 
   showBetaLoginPage();
   initBetaAuthSession();
+  d1SeedNotificationsIfNeeded();
+  d1RefreshNotificationUI();
 
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
     sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
