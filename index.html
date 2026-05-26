@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<title>LeaseSmart Beta v1.1.11</title>
-<!-- BUILD_ID: 20260524-v1.1.11 — deploy this file to site root -->
+<title>LeaseSmart Beta v1.1.12</title>
+<!-- BUILD_ID: 20260525-v1.1.12-a3 — Sprint A3 beta welcome screen -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f8fafb;color:#111827;min-height:100vh}
@@ -323,6 +323,14 @@ button,input,textarea,select{font-family:inherit}
 .beta-check input{width:18px;height:18px;margin-top:2px;accent-color:#22d98a;flex-shrink:0}
 .beta-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 .beta-link{background:none;border:none;color:#2563eb;font-size:14px;font-weight:700;cursor:pointer;padding:0;text-decoration:underline}
+.beta-welcome-hero{text-align:center;margin-bottom:22px}
+.beta-welcome-icon{font-size:52px;margin-bottom:10px;line-height:1}
+.beta-welcome-name{font-size:22px;font-weight:900;color:#111827;margin-bottom:6px}
+.beta-welcome-lead{color:#374151;font-size:16px;line-height:1.65;margin-bottom:18px}
+.beta-welcome-list{background:#f0fdf4;border:2px solid #22d98a33;border-radius:14px;padding:18px 20px;margin-bottom:20px}
+.beta-welcome-list li{color:#374151;font-size:15px;line-height:1.65;margin-bottom:10px;padding-left:4px}
+.beta-welcome-list li:last-child{margin-bottom:0}
+.beta-welcome-tag{display:inline-block;background:#eff6ff;color:#2563eb;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:999px;margin-bottom:14px}
 
 /* GUIDE */
 .guide-wrap{max-width:720px}
@@ -650,6 +658,27 @@ body { font-size: 16px !important; }
   </div>
 </div>
 
+<!-- BETA WELCOME (Sprint A3 — after magic link login) -->
+<div id="beta-welcome-pg" class="pg">
+  <div class="beta-wrap">
+    <div class="beta-card">
+      <div class="beta-welcome-hero">
+        <div class="beta-welcome-tag">Early Access Beta</div>
+        <div class="beta-welcome-icon">&#127968;</div>
+        <div class="beta-welcome-name" id="betaWelcomeName">Welcome to LeaseSmart Beta</div>
+        <p class="beta-welcome-lead" id="betaWelcomeLead">You're signed in securely with a magic link — no password needed. Thanks for helping us build a better way to find your next home.</p>
+      </div>
+      <ul class="beta-welcome-list">
+        <li><strong>Try the demo search</strong> — sample listings, real workflow, your feedback shapes the product.</li>
+        <li><strong>Tell us what's clear and what's confusing</strong> — you're testing the experience, not your tech skills.</li>
+        <li><strong>Verify everything with the property</strong> — before you apply or sign, confirm rent, fees, pets, and parking directly with the leasing office.</li>
+      </ul>
+      <p class="beta-note" style="margin-bottom:18px">One quick agreement screen is next. Then you're in.</p>
+      <button type="button" class="green-btn" onclick="continueFromBetaWelcome()">Continue &rarr;</button>
+    </div>
+  </div>
+</div>
+
 <!-- BETA LEGAL CLICKWRAP GATE (Sprint A1 — placeholder legal text) -->
 <div id="beta-legal-pg" class="pg">
   <div class="beta-wrap">
@@ -775,8 +804,8 @@ body { font-size: 16px !important; }
 <script>window.LEASESMART_CONFIG = window.LEASESMART_CONFIG || null;</script>
 <script src="config.js"></script>
 <script>
-// v1.1.11 Beta auth config — magic link only (no passwords)
-var LS_BUILD = '20260524-v1.1.11';
+// v1.1.12 Sprint A3 — beta welcome screen after magic link login
+var LS_BUILD = '20260525-v1.1.12-a3';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -885,6 +914,23 @@ function showBetaLoginPage() {
   showPage('beta-login-pg');
 }
 
+function showBetaWelcomePage() {
+  var nameEl = document.getElementById('betaWelcomeName');
+  var leadEl = document.getElementById('betaWelcomeLead');
+  var name = (BETA_SESSION.fullName || '').trim();
+  if (nameEl) {
+    nameEl.textContent = name ? ('Welcome, ' + name.split(' ')[0] + '!') : 'Welcome to LeaseSmart Beta';
+  }
+  if (leadEl && name) {
+    leadEl.textContent = "You're signed in securely with a magic link — no password needed. Thanks for helping us test LeaseSmart, " + name.split(' ')[0] + '.';
+  }
+  showPage('beta-welcome-pg');
+}
+
+function continueFromBetaWelcome() {
+  showBetaLegalPage();
+}
+
 function showBetaLegalPage() {
   showBetaError('betaLegalError', '');
   BETA_SESSION.legalScrolled = false;
@@ -967,7 +1013,7 @@ async function routeAuthenticatedBetaUser() {
   }
   BETA_SESSION.hasAgreement = await hasBetaAgreement(BETA_SESSION.appUserId);
   if (!BETA_SESSION.hasAgreement) {
-    showBetaLegalPage();
+    showBetaWelcomePage();
     return;
   }
   showPage('home-pg');
