@@ -220,7 +220,24 @@ button,input,textarea,select{font-family:inherit}
 .li-contact-status{font-size:11px;font-weight:700;color:#6b7280;margin-top:4px}
 .li-contact-status.saved{color:#16a34a}
 .li-contact-status.saving{color:#d97706}
-, touch forms, C2 quick notes */
+, skeletons, toasts, tooltips */
+.d5-quiz-progress-label{text-align:center;font-size:14px;font-weight:800;color:#16a34a;padding:10px 18px 0;background:#fff;border-bottom:1px solid #f3f4f6}
+.d5-skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:12px 0}
+.d5-skeleton-card{background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:18px;animation:d5-pulse 1.2s ease-in-out infinite}
+.d5-skeleton-line{height:12px;background:linear-gradient(90deg,#f3f4f6,#e5e7eb,#f3f4f6);border-radius:6px;margin-bottom:10px}
+.d5-skeleton-line.w60{width:60%}.d5-skeleton-line.w80{width:80%}.d5-skeleton-line.w40{width:40%}
+@keyframes d5-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.d5-empty-state{background:#fff;border:2px dashed #d1d5db;border-radius:16px;padding:28px 20px;text-align:center;margin:16px 0}
+.d5-empty-title{font-size:16px;font-weight:800;color:#374151;margin-bottom:6px}
+.d5-empty-sub{font-size:13px;color:#6b7280;margin-bottom:14px;line-height:1.5}
+.d5-toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:10001;pointer-events:none;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(420px,92vw)}
+.d5-toast{background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;font-size:14px;font-weight:800;padding:12px 20px;border-radius:12px;box-shadow:0 8px 24px rgba(34,217,138,.35);opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s}
+.d5-toast.show{opacity:1;transform:translateY(0)}
+.d5-tip-wrap{display:inline-flex;align-items:center;gap:4px;position:relative}
+.d5-tip-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#eff6ff;color:#2563eb;font-size:11px;font-weight:900;cursor:help;border:1px solid #bfdbfe}
+.d5-tip-bubble{display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:#111827;color:#fff;font-size:11px;font-weight:600;line-height:1.4;padding:8px 10px;border-radius:8px;width:max-content;max-width:220px;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.d5-tip-wrap:hover .d5-tip-bubble,.d5-tip-wrap:focus-within .d5-tip-bubble{display:block}
+/* Sprint D3 — mobile nav, touch forms, C2 quick notes */
 :root{--d3-touch-min:44px;--d3-nav-break:768px}
 .d3-hamburger{display:none;position:fixed;top:calc(var(--beta-banner-offset) + 10px);right:14px;z-index:10002;width:var(--d3-touch-min);height:var(--d3-touch-min);border:2px solid #e5e7eb;border-radius:12px;background:#fff;font-size:22px;line-height:1;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.08);transition:transform .2s,background .2s,border-color .2s}
 .d3-hamburger.open{background:#f0fdf4;border-color:#22d98a}
@@ -1050,9 +1067,10 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-v140-mock-seed.js"></script>
 <script src="_data/sprint-d1-mock-seed.js"></script>
 <script src="_data/sprint-d2-mock-seed.js"></script>
+<script src="_data/sprint-d3-mock-seed.js"></script>
 <script>
-// v1.6.0 Sprint D2 — landlord filters, saved search alerts, contact history
-var LS_BUILD = '20260526-v1.6.0-d2';
+// v2.0.0 Sprint D3 — mobile nav, touch forms, C2 quick notes
+var LS_BUILD = '20260526-v2.0.0-d3';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -1310,7 +1328,9 @@ async function submitBetaSignup() {
   var email = (document.getElementById('betaSignupEmail').value || '').trim();
   var phone = (document.getElementById('betaSignupPhone').value || '').trim();
   if (!name || !email) {
+    var signupErr = document.getElementById('betaSignupError');
     showBetaError('betaSignupError', 'Full name and email are required.');
+    d3ScrollToError(!name ? 'betaSignupName' : 'betaSignupEmail', signupErr, 'Full name and email are required.');
     return;
   }
   BETA_SESSION.fullName = name;
@@ -1321,6 +1341,12 @@ async function submitBetaSignup() {
 
 async function submitBetaMagicLink() {
   var email = (document.getElementById('betaLoginEmail').value || '').trim();
+  if (!email) {
+    var loginErr = document.getElementById('betaLoginError');
+    showBetaError('betaLoginError', 'Email is required.');
+    d3ScrollToError('betaLoginEmail', loginErr, 'Email is required.');
+    return;
+  }
   await sendBetaMagicLinkEmail(email, {}, 'betaLogin');
 }
 
@@ -1577,9 +1603,21 @@ function submitCreateProfile() {
   var state = (document.getElementById('createProfileState').value || '').trim();
   var city = (document.getElementById('createProfileCity').value || '').trim();
   var placementType = (document.getElementById('createProfilePlacement').value || '').trim();
-  if (!name || !email || !state || !city || !placementType) {
-    if (errEl) errEl.textContent = 'Name, email, state, city, and placement type are required.';
-    return;
+  var required = [
+    { id: 'createProfileName', label: 'Name' },
+    { id: 'createProfileEmail', label: 'Email' },
+    { id: 'createProfileState', label: 'State' },
+    { id: 'createProfileCity', label: 'City' },
+    { id: 'createProfilePlacement', label: 'Placement type' }
+  ];
+  for (var ri = 0; ri < required.length; ri++) {
+    var fieldEl = document.getElementById(required[ri].id);
+    var fieldVal = fieldEl ? String(fieldEl.value || '').trim() : '';
+    if (!fieldVal) {
+      if (errEl) errEl.textContent = 'Name, email, state, city, and placement type are required.';
+      d3ScrollToError(required[ri].id, errEl, required[ri].label + ' is required.');
+      return;
+    }
   }
   var payload = {
     name: name,
@@ -2212,6 +2250,8 @@ function showPage(id) {
   document.querySelectorAll('.pg').forEach(function(p) { p.classList.remove('show'); });
   document.getElementById(id).classList.add('show');
   window.scrollTo(0, 0);
+  if (typeof d3UpdateMobileChrome === 'function') d3UpdateMobileChrome(id);
+  if (id !== 'c2-case-pg' && id !== 'c2-client-pg' && typeof d3CloseC2QuickNote === 'function') d3CloseC2QuickNote(true);
   if (id === 'dash-pg') {
     APP.dashboardEnteredAt = Date.now();
   }
@@ -2225,6 +2265,7 @@ function showTab(tabId, btn) {
   APP.currentTab = tabId;
   var tabName = TAB_LABELS[tabId] || tabId;
   setLastAction('Viewed ' + tabName + ' tab');
+  if (typeof d3CloseMobileNav === 'function') d3CloseMobileNav();
 }
 
 // ================================================================
@@ -5064,48 +5105,159 @@ function d1TriggerDemoNotifications() {
 // ================================================================
  — onboarding progress, skeletons, empty states, toasts, tooltips
 // ================================================================
-function d5GetMock() {
-  return window.SPRINT_D5_MOCK || { tooltips: {}, toasts: {} };
+// SPRINT D3 — Mobile nav, touch forms, C2 quick notes
+// ================================================================
+var D3_TOUCH_MIN = 44;
+var D3_MOBILE_BREAK = 768;
+
+function d3IsMobileViewport() {
+  return window.matchMedia('(max-width: ' + D3_MOBILE_BREAK + 'px)').matches;
 }
 
-function d5OnboardingStepLabel(step, total) {
-  return 'Step ' + step + ' of ' + total;
+function d3ToggleMobileNav() {
+  var drawer = document.getElementById('d3MobileDrawer');
+  if (drawer && drawer.classList.contains('open')) d3CloseMobileNav();
+  else d3OpenMobileNav();
 }
 
-function d5UpdateOnboardingProgress(stepIndex, total) {
-  total = total || (typeof STEPS !== 'undefined' ? STEPS.length : 21);
-  var step = stepIndex + 1;
-  var pct = Math.round((stepIndex / total) * 100);
-  var label = d5OnboardingStepLabel(step, total);
-  var wrap = document.getElementById('d5QuizProgressWrap');
-  var stepNum = document.getElementById('stepNum');
-  var stepPct = document.getElementById('stepPct');
-  var fill = document.getElementById('progFill');
-  if (wrap) { wrap.style.display = 'block'; wrap.textContent = label; }
-  if (stepNum) stepNum.textContent = label;
-  if (stepPct) stepPct.textContent = pct + '% complete';
-  if (fill) fill.style.width = pct + '%';
+function d3OpenMobileNav() {
+  var drawer = document.getElementById('d3MobileDrawer');
+  var overlay = document.getElementById('d3MobileOverlay');
+  var btn = document.getElementById('d3HamburgerBtn');
+  if (!drawer || !overlay) return;
+  d3RefreshMobileNavLinks();
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+  if (btn) { btn.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+  drawer.setAttribute('aria-hidden', 'false');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
 }
 
-function d5HideOnboardingProgress() {
-  var wrap = document.getElementById('d5QuizProgressWrap');
-  if (wrap) wrap.style.display = 'none';
+function d3CloseMobileNav() {
+  var drawer = document.getElementById('d3MobileDrawer');
+  var overlay = document.getElementById('d3MobileOverlay');
+  var btn = document.getElementById('d3HamburgerBtn');
+  if (!drawer || !overlay) return;
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+  if (btn) { btn.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+  drawer.setAttribute('aria-hidden', 'true');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
 }
 
-function d5SkeletonCardsHtml(count) {
-  count = count || 3;
-  var h = '<div class="d5-skeleton-grid">';
-  for (var i = 0; i < count; i++) {
-    h += '<div class="d5-skeleton-card"><div class="d5-skeleton-line w80"></div><div class="d5-skeleton-line w60"></div><div class="d5-skeleton-line w40"></div></div>';
+function d3RefreshMobileNavLinks() {
+  var wrap = document.getElementById('d3MobileNavLinks');
+  if (!wrap) return;
+  var items = [];
+  var visiblePg = document.querySelector('.pg.show');
+  var pageId = visiblePg ? visiblePg.id : 'home-pg';
+
+  if (pageId === 'dash-pg') {
+    document.querySelectorAll('#dash-pg .tab-btn').forEach(function(btn) {
+      var onclick = btn.getAttribute('onclick') || '';
+      var m = onclick.match(/showTab\('([^']+)'/);
+      if (!m) return;
+      var label = (btn.textContent || '').replace(/\s+/g, ' ').trim();
+      items.push({ label: label, tabId: m[1], type: 'tab' });
+    });
+  } else if (pageId === 'c2-case-pg' || pageId === 'c2-client-pg') {
+    items.push({ label: 'My Clients', type: 'fn', fn: 'c2' });
+    items.push({ label: 'Home', type: 'page', page: 'home-pg' });
+  } else {
+    items.push({ label: 'Home', type: 'page', page: 'home-pg' });
+    if (typeof showC2CaseWorkspace === 'function') items.push({ label: 'Case Management (C2)', type: 'fn', fn: 'c2' });
+    if (typeof showC3Reporting === 'function') items.push({ label: 'Reporting (C3)', type: 'fn', fn: 'c3' });
   }
-  return h + '</div>';
+
+  var html = '';
+  items.forEach(function(it, idx) {
+    html += '<button type="button" class="d3-mobile-nav-link" data-d3-idx="' + idx + '">' + it.label + '</button>';
+  });
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('.d3-mobile-nav-link').forEach(function(link) {
+    link.addEventListener('click', function() {
+      var idx = parseInt(link.getAttribute('data-d3-idx'), 10);
+      var it = items[idx];
+      if (!it) return;
+      d3CloseMobileNav();
+      if (it.type === 'tab') {
+        var tabBtn = document.querySelector('#dash-pg .tab-btn[onclick*="' + it.tabId + '"]');
+        if (tabBtn) showTab(it.tabId, tabBtn);
+      } else if (it.type === 'page') {
+        showPage(it.page);
+      } else if (it.fn === 'c2') {
+        showC2CaseWorkspace();
+      } else if (it.fn === 'c3') {
+        showC3Reporting();
+      }
+    });
+  });
 }
 
-function d5EmptyStateHtml(title, subtitle, btnLabel, onclick) {
-  var h = '<div class="d5-empty-state"><div class="d5-empty-title">' + title + '</div>';
-  if (subtitle) h += '<div class="d5-empty-sub">' + subtitle + '</div>';
-  if (btnLabel && onclick) h += '<button type="button" class="green-btn" onclick="' + onclick + '">' + btnLabel + '</button>';
-  return h + '</div>';
+function d3UpdateMobileChrome(pageId) {
+  var hamb = document.getElementById('d3HamburgerBtn');
+  var fab = document.getElementById('d3C2NoteFab');
+  var navPages = ['dash-pg', 'home-pg', 'c2-case-pg', 'c2-client-pg', 'detail-pg'];
+  if (hamb) hamb.style.display = (d3IsMobileViewport() && navPages.indexOf(pageId) >= 0) ? 'flex' : 'none';
+  if (fab) fab.classList.toggle('show', (pageId === 'c2-case-pg' || pageId === 'c2-client-pg') && d3IsMobileViewport());
+}
+
+function d3ScrollToError(fieldId, errEl, message) {
+  if (errEl && message) errEl.textContent = message;
+  document.querySelectorAll('.d3-field-error').forEach(function(el) { el.classList.remove('d3-field-error'); });
+  var el = document.getElementById(fieldId);
+  if (!el) return;
+  el.classList.add('d3-field-error');
+  setTimeout(function() {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+  }, 50);
+}
+
+function d3GetC2QuickNoteClientId() {
+  if (APP.c2SelectedClientId) return APP.c2SelectedClientId;
+  var ctx = b4GetDemoContext();
+  var mock = b4GetMockFoundation();
+  var clients = (mock.clients || []).filter(function(c) { return b4CanWriteCaseNote(ctx, c); });
+  return clients.length ? clients[0].id : null;
+}
+
+function d3OpenC2QuickNote() {
+  var clientId = d3GetC2QuickNoteClientId();
+  if (!clientId) return;
+  APP.d3QuickNoteClientId = clientId;
+  var ta = document.getElementById('d3C2QuickNoteInput');
+  var sheet = document.getElementById('d3C2NoteSheet');
+  var backdrop = document.getElementById('d3C2NoteBackdrop');
+  if (ta) ta.value = b4GetCaseNote(clientId) || '';
+  if (sheet) sheet.classList.add('open');
+  if (backdrop) backdrop.classList.add('open');
+  setTimeout(function() { if (ta) ta.focus(); }, 320);
+}
+
+function d3CloseC2QuickNote(skipSave) {
+  var sheet = document.getElementById('d3C2NoteSheet');
+  var backdrop = document.getElementById('d3C2NoteBackdrop');
+  var ta = document.getElementById('d3C2QuickNoteInput');
+  var clientId = APP.d3QuickNoteClientId || d3GetC2QuickNoteClientId();
+  if (!skipSave && ta && clientId) {
+    b4SetCaseNote(clientId, ta.value);
+    b4RecordAudit('d3_quick_note_autosave', 'case_notes', clientId, { mock: true });
+    if (typeof d5ShowToast === 'function') d5ShowToast('note_saved');
+    var mainTa = document.getElementById('c2CaseNotesInput');
+    if (mainTa && APP.c2SelectedClientId === clientId) mainTa.value = ta.value;
+  }
+  if (sheet) sheet.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
+}
+
+function d3InitMobile() {
+  window.addEventListener('resize', function() {
+    var visiblePg = document.querySelector('.pg.show');
+    if (visiblePg) d3UpdateMobileChrome(visiblePg.id);
+  });
 }
 
 function initLeaseSmart() {
@@ -5133,12 +5285,12 @@ function initLeaseSmart() {
   }
 
   showBetaLoginPage();
-  d4InstallErrorHandlers();
-  d4RouteCheck();
   initBetaAuthSession();
   d1SeedNotificationsIfNeeded();
   d2SeedIfNeeded();
   d1RefreshNotificationUI();
+  if (typeof d3SeedIfNeeded === 'function') d3SeedIfNeeded();
+  d3InitMobile();
 
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
     sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
@@ -5202,6 +5354,25 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+<button type="button" id="d3HamburgerBtn" class="d3-hamburger" aria-label="Open navigation menu" aria-expanded="false" onclick="d3ToggleMobileNav()" style="display:none">&#9776;</button>
+<div id="d3MobileOverlay" class="d3-mobile-overlay" onclick="d3CloseMobileNav()" aria-hidden="true"></div>
+<nav id="d3MobileDrawer" class="d3-mobile-drawer" aria-label="Mobile navigation" aria-hidden="true">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px">
+    <strong style="font-size:18px">Menu</strong>
+    <button type="button" class="ghost-btn" style="min-height:44px;min-width:44px;padding:10px 14px" onclick="d3CloseMobileNav()" aria-label="Close menu">&#10005;</button>
+  </div>
+  <div id="d3MobileNavLinks"></div>
+</nav>
+<button type="button" id="d3C2NoteFab" class="d3-c2-fab" aria-label="Quick case note" onclick="d3OpenC2QuickNote()">&#9998;</button>
+<div id="d3C2NoteBackdrop" class="d3-c2-note-backdrop" onclick="d3CloseC2QuickNote()"></div>
+<div id="d3C2NoteSheet" class="d3-c2-note-sheet" role="dialog" aria-labelledby="d3C2NoteTitle">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+    <strong id="d3C2NoteTitle">Quick case note</strong>
+    <button type="button" class="ghost-btn" style="min-height:44px;padding:10px 16px" onclick="d3CloseC2QuickNote()">Done</button>
+  </div>
+  <textarea id="d3C2QuickNoteInput" placeholder="Type a note — auto-saves when you close..." rows="5"></textarea>
+  <p id="d3C2QuickNoteStatus" style="font-size:12px;color:#6b7280;margin:0">Auto-saves on close</p>
+</div>
 <div style="text-align:center; padding:20px; color:#9ca3af; font-size:11px; border-top:1px solid #e5e7eb; margin-top:40px;">LeaseSmart Beta v1.1.11</div>
 </body>
 </html>

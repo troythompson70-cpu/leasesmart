@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const QA = join(ROOT, '_qa');
-const BUILD = '20260526-v1.6.0-d2';
+const BUILD = '20260526-v2.0.0-d3';
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const seed = readFileSync(join(ROOT, '_data/sprint-v140-mock-seed.js'), 'utf8');
 const tests = [];
