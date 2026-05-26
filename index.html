@@ -378,6 +378,22 @@ button,input,textarea,select{font-family:inherit}
 .who-tip{color:#6b7280;font-size:13px}
 
 /* ADMIN */
+/* B4 FOUNDATION — DEMO/INTERNAL workspace */
+.b4-demo-banner{background:linear-gradient(135deg,#7c2d12,#ea580c);color:#fff;padding:14px 18px;font-size:13px;font-weight:700;text-align:center;line-height:1.5}
+.b4-demo-banner strong{display:block;font-size:15px;margin-bottom:4px}
+.b4-workspace-head{background:#fff;border-bottom:2px solid #e5e7eb;padding:12px 18px}
+.b4-role-bar{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;background:#fff7ed;border-bottom:1.5px solid #fed7aa}
+.b4-subtabs{display:flex;gap:6px;flex-wrap:wrap;padding:10px 18px;background:#fff;border-bottom:1.5px solid #e5e7eb}
+.b4-subtab{background:#f3f4f6;border:none;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:700;color:#374151;cursor:pointer}
+.b4-subtab.on{background:#111827;color:#fff}
+.b4-panel{max-width:1200px;margin:0 auto;padding:20px 18px}
+.b4-card{background:#fff;border:2px solid #e5e7eb;border-radius:14px;padding:16px;margin-bottom:12px}
+.b4-card h3{font-size:15px;margin-bottom:8px}
+.b4-mock-tag{display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px;margin-left:8px}
+.b4-audit-list{font-size:12px;color:#6b7280;max-height:160px;overflow:auto}
+.b4-note-status{font-size:12px;font-weight:700;margin-top:6px;color:#6b7280}
+.b4-note-status.saving{color:#d97706}
+.b4-note-status.saved{color:#16a34a}
 .admin-head{background:#fff;border-bottom:2px solid #e5e7eb;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
 .admin-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
 .admin-stat{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:14px 20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)}
@@ -642,6 +658,11 @@ body { font-size: 16px !important; }
       Contact: <a href="mailto:leasesmart@tgttechnologies.com" style="color:#22d98a;font-weight:600">leasesmart@tgttechnologies.com</a> &bull; <a href="mailto:support@tgttechnologies.com" style="color:#22d98a;font-weight:600">support@tgttechnologies.com</a>
     </div>
   </div>
+  <div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:14px;padding:18px;margin-top:24px">
+    <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#9a3412;text-transform:uppercase;margin-bottom:8px">Demo / Internal Only</div>
+    <p style="font-size:14px;color:#7c2d12;line-height:1.6;margin-bottom:12px">Agency case workspace skeleton with <strong>mock clients only</strong>. Not for production or real client data.</p>
+    <button type="button" class="ghost-btn" style="width:100%;padding:14px;font-weight:800;border-color:#fdba74;color:#9a3412" onclick="showB4Workspace()">&#128203; Internal Case Workspace (DEMO)</button>
+  </div>
   <div class="admin-area">
     <button class="back-link" id="adminToggle">Admin Login &mdash; TGT Technologies</button>
     <div id="adminBox" style="display:none;margin-top:12px">
@@ -877,13 +898,35 @@ body { font-size: 16px !important; }
   <div class="tab-content"><div id="adminContent"></div></div>
 </div>
 
+<!-- B4 FOUNDATION — DEMO/INTERNAL CASE WORKSPACE -->
+<div id="b4-workspace-pg" class="pg">
+  <div class="b4-demo-banner">
+    <strong>&#9888; DEMO / INTERNAL — Mock Data Only</strong>
+    Architecture skeleton. No real client records. Not connected to live Supabase B4 tables.
+  </div>
+  <div class="b4-workspace-head">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="dash-mark">LS</div>
+        <div><div class="dash-name">Case Workspace</div><div class="dash-sub">B4 FOUNDATION SKELETON</div></div>
+      </div>
+      <button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Back</button>
+    </div>
+  </div>
+  <div class="b4-role-bar" id="b4RoleBar"></div>
+  <div class="b4-subtabs" id="b4Subtabs"></div>
+  <div class="b4-panel" id="b4Panel"></div>
+  <div class="b4-panel" id="b4AuditPanel"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>window.LEASESMART_CONFIG = window.LEASESMART_CONFIG || null;</script>
 <script src="config.js"></script>
 <script src="_data/landlord-intel-seed-nj.js"></script>
+<script src="_data/b4-case-mock-seed.js"></script>
 <script>
 // v1.2.0 Sprint C1 — landlord intelligence UI + A6 onboarding
-var LS_BUILD = '20260526-v1.2.0-c1';
+var LS_BUILD = '20260526-v1.3.0-b4';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -1305,7 +1348,7 @@ function getStepById(id) {
 // Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
 // ================================================================
 var LS_VERSION = 'Beta v1.2 — Housing Intelligence Foundation';
-var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false };
+var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients' };
 var LS_STORE = Object.assign({}, LS_STORE_DEFAULTS);
 
 function lsNormalizeStore(data) {
@@ -1318,6 +1361,11 @@ function lsNormalizeStore(data) {
   if (!store.listingNotes || typeof store.listingNotes !== 'object') store.listingNotes = {};
   if (!Array.isArray(store.landlordIntel)) store.landlordIntel = store.landlordIntel ? [].concat(store.landlordIntel) : [];
   if (typeof store.landlordIntelSeeded !== 'boolean') store.landlordIntelSeeded = false;
+  if (!store.b4CaseNotes || typeof store.b4CaseNotes !== 'object') store.b4CaseNotes = {};
+  if (!Array.isArray(store.b4AuditLog)) store.b4AuditLog = store.b4AuditLog ? [].concat(store.b4AuditLog) : [];
+  if (!store.b4DemoRole) store.b4DemoRole = 'caseworker';
+  if (!store.b4DemoUserId) store.b4DemoUserId = 'u-cw-demo-1';
+  if (!store.b4Subtab) store.b4Subtab = 'clients';
   return store;
 }
 
@@ -2016,7 +2064,8 @@ function resumeSession() {
 // ================================================================
 function showPage(id) {
   if (id !== 'detail-pg') flushDetailNotes();
-  if (requiresBetaOnboarding() && !isOnboardingComplete() && ONBOARDING_PAGES.indexOf(id) < 0 && id !== 'admin-pg') {
+  if (id === 'b4-workspace-pg') flushB4CaseNotes();
+  if (requiresBetaOnboarding() && !isOnboardingComplete() && ONBOARDING_PAGES.indexOf(id) < 0 && id !== 'admin-pg' && id !== 'b4-workspace-pg') {
     routeOnboarding();
     return;
   }
@@ -3757,6 +3806,277 @@ function renderQAPanel() {
 }
 
 // ================================================================
+// SPRINT B4-FOUNDATION — Role workspace (DEMO/INTERNAL, mock data only)
+// Triple redundancy: SQL RLS draft + b4FilterClientsForRole + b4QueryAuthorizedClients
+// ================================================================
+var B4_ROLE_KEYS = ['client', 'caseworker', 'supervisor', 'manager', 'director', 'agency_admin', 'platform_admin'];
+var B4_SUBTABS = {
+  client: [{ id: 'profile', label: 'Profile' }],
+  caseworker: [{ id: 'clients', label: 'My Clients' }, { id: 'profile', label: 'Profile' }, { id: 'notes', label: 'Notes' }, { id: 'status', label: 'Status' }],
+  supervisor: [{ id: 'team', label: 'Team Clients' }, { id: 'workload', label: 'Workload' }, { id: 'followups', label: 'Follow-ups Due' }],
+  manager: [{ id: 'dashboard', label: 'Agency Dashboard' }, { id: 'assign', label: 'Assign/Reassign' }, { id: 'placements', label: 'Placements' }],
+  director: [{ id: 'dashboard', label: 'Agency Dashboard' }, { id: 'assign', label: 'Assign/Reassign' }, { id: 'placements', label: 'Placements' }],
+  agency_admin: [{ id: 'dashboard', label: 'Agency Dashboard' }, { id: 'assign', label: 'Assign/Reassign' }, { id: 'placements', label: 'Placements' }],
+  platform_admin: [{ id: 'dashboard', label: 'Agency Dashboard' }]
+};
+
+function b4GetMockFoundation() {
+  return window.B4_MOCK_FOUNDATION || { agency: {}, users: [], clients: [], supervisorTeams: [], isMockDataOnly: true };
+}
+
+function b4GetDemoContext() {
+  var mock = b4GetMockFoundation();
+  var roleKey = LS_STORE.b4DemoRole || 'caseworker';
+  var userId = LS_STORE.b4DemoUserId || 'u-cw-demo-1';
+  var user = (mock.users || []).find(function(u) { return u.id === userId; }) || { id: userId, roleKey: roleKey, agencyId: mock.agency.id };
+  return {
+    roleKey: user.roleKey || roleKey,
+    userId: user.id,
+    agencyId: mock.agency.id,
+    userName: user.name || 'Demo User'
+  };
+}
+
+function b4GetTeamMemberIds(ctx) {
+  var mock = b4GetMockFoundation();
+  return (mock.supervisorTeams || [])
+    .filter(function(t) { return t.supervisorUserId === ctx.userId; })
+    .map(function(t) { return t.memberUserId; });
+}
+
+function b4CanViewClient(ctx, client, teamMemberIds) {
+  if (!client || !client.isMock) return false;
+  if (ctx.roleKey !== 'platform_admin' && client.agencyId !== ctx.agencyId) return false;
+  if (ctx.roleKey === 'client') return client.clientUserId === ctx.userId;
+  if (ctx.roleKey === 'caseworker') return client.assignedCaseworkerId === ctx.userId;
+  if (ctx.roleKey === 'supervisor') return (teamMemberIds || []).indexOf(client.assignedCaseworkerId) >= 0;
+  if (ctx.roleKey === 'manager' || ctx.roleKey === 'director' || ctx.roleKey === 'agency_admin') return client.agencyId === ctx.agencyId;
+  if (ctx.roleKey === 'platform_admin') return true;
+  return false;
+}
+
+function b4FilterClientsForRole(clients, ctx) {
+  var team = b4GetTeamMemberIds(ctx);
+  return (clients || []).filter(function(c) { return b4CanViewClient(ctx, c, team); });
+}
+
+function b4QueryAuthorizedClients(clients, ctx) {
+  return b4FilterClientsForRole(clients, ctx).map(function(c) { return c.id; });
+}
+
+function b4CanWriteCaseNote(ctx, client) {
+  if (!client || !client.isMock) return false;
+  if (ctx.roleKey === 'caseworker') return client.assignedCaseworkerId === ctx.userId && client.agencyId === ctx.agencyId;
+  if (ctx.roleKey === 'agency_admin') return client.agencyId === ctx.agencyId;
+  return false;
+}
+
+function b4RecordAudit(action, resourceType, resourceId, metadata) {
+  var ctx = b4GetDemoContext();
+  if (!LS_STORE.b4AuditLog) LS_STORE.b4AuditLog = [];
+  LS_STORE.b4AuditLog.unshift({
+    action: action,
+    resourceType: resourceType,
+    resourceId: resourceId || null,
+    metadata: metadata || {},
+    actorUserId: ctx.userId,
+    roleKey: ctx.roleKey,
+    agencyId: ctx.agencyId,
+    isMock: true,
+    ts: new Date().toISOString()
+  });
+  if (LS_STORE.b4AuditLog.length > 200) LS_STORE.b4AuditLog = LS_STORE.b4AuditLog.slice(0, 200);
+  lsSave();
+}
+
+function b4GetCaseNote(clientId) {
+  return (LS_STORE.b4CaseNotes && LS_STORE.b4CaseNotes[String(clientId)]) || '';
+}
+
+function b4SetCaseNote(clientId, text) {
+  if (!LS_STORE.b4CaseNotes) LS_STORE.b4CaseNotes = {};
+  var key = String(clientId);
+  var val = String(text || '');
+  if (!val.trim()) delete LS_STORE.b4CaseNotes[key];
+  else LS_STORE.b4CaseNotes[key] = val;
+  lsSave();
+}
+
+function flushB4CaseNotes() {
+  if (APP.b4NoteDebounceTimer) {
+    clearTimeout(APP.b4NoteDebounceTimer);
+    APP.b4NoteDebounceTimer = null;
+  }
+  var ta = document.getElementById('b4CaseNotesInput');
+  if (!ta || !APP.b4NoteClientId) return;
+  var ctx = b4GetDemoContext();
+  var mock = b4GetMockFoundation();
+  var client = (mock.clients || []).find(function(c) { return c.id === APP.b4NoteClientId; });
+  if (!client || !b4CanWriteCaseNote(ctx, client)) return;
+  b4SetCaseNote(APP.b4NoteClientId, ta.value);
+}
+
+function bindB4CaseNotes(clientId) {
+  APP.b4NoteClientId = clientId;
+  var ta = document.getElementById('b4CaseNotesInput');
+  var status = document.getElementById('b4NoteSaveStatus');
+  if (!ta) return;
+  ta.value = b4GetCaseNote(clientId);
+  if (APP.b4NoteInputHandler) ta.removeEventListener('input', APP.b4NoteInputHandler);
+  APP.b4NoteInputHandler = function() {
+    var ctx = b4GetDemoContext();
+    var mock = b4GetMockFoundation();
+    var client = (mock.clients || []).find(function(c) { return c.id === clientId; });
+    if (!client || !b4CanWriteCaseNote(ctx, client)) {
+      if (status) { status.textContent = 'Not authorized for this client'; status.className = 'b4-note-status'; }
+      return;
+    }
+    if (status) { status.textContent = 'Saving...'; status.className = 'b4-note-status saving'; }
+    if (APP.b4NoteDebounceTimer) clearTimeout(APP.b4NoteDebounceTimer);
+    APP.b4NoteDebounceTimer = setTimeout(function() {
+      APP.b4NoteDebounceTimer = null;
+      b4SetCaseNote(clientId, ta.value);
+      b4RecordAudit('case_note_autosave', 'case_notes', clientId, { chars: ta.value.length, mock: true });
+      if (status) { status.textContent = 'Saved ✓'; status.className = 'b4-note-status saved'; }
+    }, 1000);
+  };
+  ta.addEventListener('input', APP.b4NoteInputHandler);
+  b4RecordAudit('case_note_view', 'case_notes', clientId, { mock: true });
+}
+
+function b4SetDemoRole(roleKey, userId) {
+  LS_STORE.b4DemoRole = roleKey;
+  LS_STORE.b4DemoUserId = userId;
+  LS_STORE.b4Subtab = (B4_SUBTABS[roleKey] && B4_SUBTABS[roleKey][0]) ? B4_SUBTABS[roleKey][0].id : 'clients';
+  lsSave();
+  b4RecordAudit('role_switch', 'agency_users', userId, { roleKey: roleKey, mock: true });
+  renderB4Workspace();
+}
+
+function b4SetSubtab(subId) {
+  LS_STORE.b4Subtab = subId;
+  lsSave();
+  renderB4Workspace();
+}
+
+function showB4Workspace() {
+  showPage('b4-workspace-pg');
+  b4RecordAudit('workspace_open', 'agencies', b4GetMockFoundation().agency.id, { mock: true });
+  renderB4Workspace();
+}
+
+function renderB4RoleBar() {
+  var mock = b4GetMockFoundation();
+  var ctx = b4GetDemoContext();
+  var el = document.getElementById('b4RoleBar');
+  if (!el) return;
+  el.innerHTML = '<span style="font-size:12px;font-weight:800;color:#9a3412;margin-right:8px">DEMO ROLE:</span>' +
+    (mock.users || []).map(function(u) {
+      var on = u.id === ctx.userId ? ' on' : '';
+      return '<button type="button" class="b4-subtab' + on + '" onclick="b4SetDemoRole(\'' + u.roleKey + '\',\'' + u.id + '\')">' + u.name + ' (' + u.roleKey + ')</button>';
+    }).join('');
+}
+
+function renderB4Subtabs() {
+  var ctx = b4GetDemoContext();
+  var tabs = B4_SUBTABS[ctx.roleKey] || B4_SUBTABS.caseworker;
+  var sub = LS_STORE.b4Subtab || tabs[0].id;
+  if (!tabs.some(function(t) { return t.id === sub; })) sub = tabs[0].id;
+  LS_STORE.b4Subtab = sub;
+  var el = document.getElementById('b4Subtabs');
+  if (!el) return;
+  el.innerHTML = tabs.map(function(t) {
+    return '<button type="button" class="b4-subtab' + (t.id === sub ? ' on' : '') + '" onclick="b4SetSubtab(\'' + t.id + '\')">' + t.label + '</button>';
+  }).join('');
+}
+
+function renderB4ClientCards(clients, emptyMsg) {
+  if (!clients.length) return '<div class="b4-card"><p style="color:#6b7280">' + (emptyMsg || 'No authorized mock clients for this role.') + '</p></div>';
+  return clients.map(function(c) {
+    return '<div class="b4-card"><h3>' + c.displayName + ' <span class="b4-mock-tag">MOCK</span></h3>' +
+      '<p style="font-size:13px;color:#6b7280">Case ' + c.caseNumber + ' · ' + c.status + ' · ' + (c.county || '') + '</p></div>';
+  }).join('');
+}
+
+function renderB4PanelContent() {
+  var mock = b4GetMockFoundation();
+  var ctx = b4GetDemoContext();
+  var sub = LS_STORE.b4Subtab;
+  var allClients = mock.clients || [];
+  var authorized = b4FilterClientsForRole(allClients, ctx);
+  var authorizedIds = b4QueryAuthorizedClients(allClients, ctx);
+  b4RecordAudit('query_authorized_clients', 'case_clients', null, { requested: allClients.length, returned: authorizedIds.length, mock: true });
+
+  if (ctx.roleKey === 'client' && sub === 'profile') {
+    var own = authorized[0];
+    return '<div class="b4-card"><h3>My Profile <span class="b4-mock-tag">MOCK</span></h3><p>' + (own ? own.displayName : ctx.userName) + '</p><p style="font-size:13px;color:#6b7280">Clients see only their own profile — no other case records.</p></div>';
+  }
+  if (ctx.roleKey === 'caseworker' && sub === 'clients') {
+    return '<h2 style="font-size:18px;margin-bottom:12px">My Clients <span class="b4-mock-tag">DEMO/INTERNAL</span></h2>' + renderB4ClientCards(authorized, 'No assigned mock clients.');
+  }
+  if (ctx.roleKey === 'caseworker' && sub === 'profile') {
+    return '<div class="b4-card"><h3>Caseworker Profile <span class="b4-mock-tag">MOCK</span></h3><p>' + ctx.userName + '</p></div>';
+  }
+  if (ctx.roleKey === 'caseworker' && sub === 'notes') {
+    var noteClient = authorized[0];
+    if (!noteClient) return '<div class="b4-card"><p>No assigned client for notes.</p></div>';
+    if (!b4CanWriteCaseNote(ctx, noteClient)) return '<div class="b4-card"><p>Not authorized to write notes for this client.</p></div>';
+    setTimeout(function() { bindB4CaseNotes(noteClient.id); }, 0);
+    return '<div class="b4-card"><h3>Case Notes — ' + noteClient.displayName + ' <span class="b4-mock-tag">MOCK</span></h3>' +
+      '<textarea id="b4CaseNotesInput" rows="6" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px" placeholder="Type case notes (auto-saves in 1 second)..."></textarea>' +
+      '<div id="b4NoteSaveStatus" class="b4-note-status"></div>' +
+      '<p style="font-size:12px;color:#9ca3af;margin-top:8px">Notes tied to assigned client only. Dummy data — not synced to Supabase.</p></div>';
+  }
+  if (ctx.roleKey === 'caseworker' && sub === 'status') {
+    return '<h2 style="font-size:18px;margin-bottom:12px">Client Status <span class="b4-mock-tag">DEMO/INTERNAL</span></h2>' +
+      renderB4ClientCards(authorized) +
+      '<p style="font-size:12px;color:#9ca3af">Status changes will write to case_status_history when live.</p>';
+  }
+  if (ctx.roleKey === 'supervisor' && sub === 'team') {
+    return '<h2 style="font-size:18px;margin-bottom:12px">Team Clients <span class="b4-mock-tag">DEMO/INTERNAL</span></h2>' + renderB4ClientCards(authorized, 'No team clients visible.');
+  }
+  if (ctx.roleKey === 'supervisor' && sub === 'workload') {
+    var team = b4GetTeamMemberIds(ctx);
+    return '<div class="b4-card"><h3>Team Workload <span class="b4-mock-tag">MOCK</span></h3><p>Caseworkers on team: ' + team.length + '</p><p>Authorized clients: ' + authorized.length + '</p></div>';
+  }
+  if (ctx.roleKey === 'supervisor' && sub === 'followups') {
+    var due = authorized.filter(function(c) { return c.followUpDue; });
+    return '<h2 style="font-size:18px;margin-bottom:12px">Follow-ups Due <span class="b4-mock-tag">DEMO/INTERNAL</span></h2>' + renderB4ClientCards(due, 'No follow-ups due in mock data.');
+  }
+  if ((ctx.roleKey === 'director' || ctx.roleKey === 'manager' || ctx.roleKey === 'agency_admin') && sub === 'dashboard') {
+    return '<div class="b4-card"><h3>Agency Dashboard <span class="b4-mock-tag">MOCK</span></h3><p>' + mock.agency.name + '</p><p>Active mock cases: ' + authorized.length + ' / ' + allClients.length + '</p><p style="font-size:13px;color:#6b7280">Director sees agency-level only — same agency, no cross-agency.</p></div>';
+  }
+  if ((ctx.roleKey === 'director' || ctx.roleKey === 'manager' || ctx.roleKey === 'agency_admin') && sub === 'assign') {
+    return '<div class="b4-card"><h3>Assign / Reassign <span class="b4-mock-tag">DEMO SKELETON</span></h3><p>Mock reassignment UI placeholder. Writes to case_reassignment_log when live.</p>' +
+      renderB4ClientCards(authorized.slice(0, 3)) + '</div>';
+  }
+  if ((ctx.roleKey === 'director' || ctx.roleKey === 'manager' || ctx.roleKey === 'agency_admin') && sub === 'placements') {
+    var placed = authorized.filter(function(c) { return c.status === 'placed'; });
+    return '<h2 style="font-size:18px;margin-bottom:12px">Placements <span class="b4-mock-tag">DEMO/INTERNAL</span></h2>' + renderB4ClientCards(placed, 'No placed mock clients yet.');
+  }
+  return '<div class="b4-card"><p>Select a tab above. All views use mock data only.</p></div>';
+}
+
+function renderB4AuditPanel() {
+  var el = document.getElementById('b4AuditPanel');
+  if (!el) return;
+  var rows = (LS_STORE.b4AuditLog || []).slice(0, 12);
+  el.innerHTML = '<div class="b4-card"><h3>Mock Audit Log <span class="b4-mock-tag">DEMO</span></h3>' +
+    '<div class="b4-audit-list">' +
+    (rows.length ? rows.map(function(r) {
+      return '<div style="padding:4px 0;border-bottom:1px solid #f3f4f6">' + r.ts + ' · ' + r.action + ' · ' + r.resourceType + (r.resourceId ? ' #' + r.resourceId : '') + '</div>';
+    }).join('') : '<p>No mock audit entries yet.</p>') +
+    '</div><p style="font-size:11px;color:#9ca3af;margin-top:8px">Mirrors case_access_audit_log — mock actions only.</p></div>';
+}
+
+function renderB4Workspace() {
+  renderB4RoleBar();
+  renderB4Subtabs();
+  var panel = document.getElementById('b4Panel');
+  if (panel) panel.innerHTML = renderB4PanelContent();
+  renderB4AuditPanel();
+}
+
 function initLeaseSmart() {
   var bid = document.getElementById('lsBuildId');
   if (bid) bid.textContent = LS_BUILD;
@@ -3833,6 +4153,7 @@ window.lsDebugStorage = function() {
 document.addEventListener('DOMContentLoaded', function() {
   initLeaseSmart();
   window.addEventListener('beforeunload', flushDetailNotes);
+  window.addEventListener('beforeunload', flushB4CaseNotes);
   populateSearchStateSelect(document.getElementById('createProfileState'), '');
 
   var toggle = document.getElementById('adminToggle');
