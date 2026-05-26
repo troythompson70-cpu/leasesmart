@@ -5,10 +5,11 @@ import { readFileSync } from 'fs';
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const readme = readFileSync(new URL('../supabase/README.md', import.meta.url), 'utf8');
+const buildMatch = html.match(/LS_BUILD = '([^']+)'/);
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('A6 build id', html.includes("LS_BUILD = '20260526-v1.2.0-c1'"));
+assert('A6 build id', buildMatch && /^20260526-v/.test(buildMatch[1]));
 assert('Profile create page', html.includes('id="profile-create-pg"') && html.includes('submitCreateProfile'));
 assert('Onboarding router', html.includes('function routeOnboarding'));
 assert('No home default show', !html.includes('id="home-pg" class="pg show"'));

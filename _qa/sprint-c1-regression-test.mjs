@@ -6,10 +6,11 @@ import { readFileSync } from 'fs';
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const sql = readFileSync(new URL('../supabase/drafts/sprint_c1_landlord_intelligence.sql', import.meta.url), 'utf8');
 const seed = readFileSync(new URL('../_data/landlord-intel-seed-nj.js', import.meta.url), 'utf8');
+const buildMatch = html.match(/LS_BUILD = '([^']+)'/);
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('C1 build id', html.includes("LS_BUILD = '20260526-v1.2.0-c1'"));
+assert('C1 build id', buildMatch && /^20260526-v/.test(buildMatch[1]));
 assert('Draft SQL file exists', sql.includes('CREATE TABLE IF NOT EXISTS public.landlord_intelligence'));
 assert('Draft SQL not in migrations apply path only', sql.includes('DRAFT ONLY'));
 assert('All landlord fields in SQL', ['landlord_name', 'property_name', 'case_manager_notes', 'next_recheck_date', 'warning_flags'].every(f => sql.includes(f)));

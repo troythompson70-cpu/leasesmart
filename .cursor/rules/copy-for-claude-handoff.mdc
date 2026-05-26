@@ -1,0 +1,49 @@
+---
+description: Copy for Claude handoff — Troy format + one-click button
+alwaysApply: true
+---
+
+When you finish a build, sprint report, or anything Troy must give Claude for review:
+
+1. End the response with a **Copy for Claude** section.
+2. Include the handoff block between markers:
+   --- CLAUDE HANDOFF START ---
+   ...content...
+   --- CLAUDE HANDOFF END ---
+3. **Always** append the one-click copy button HTML immediately after the handoff block (required on every future report):
+
+```html
+<style>
+.ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}
+.ls-copy-for-claude-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35)}
+.ls-copy-for-claude-status{display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#16a34a;min-height:20px}
+</style>
+<div class="ls-handoff-wrap">
+  <pre class="ls-handoff-pre" id="lsHandoffBlock">PASTE HANDOFF BLOCK TEXT HERE</pre>
+  <button type="button" class="ls-copy-for-claude-btn" data-handoff-target="lsHandoffBlock" onclick="lsCopyHandoffForClaude(this)">Copy for Claude</button>
+  <span class="ls-copy-for-claude-status" aria-live="polite"></span>
+</div>
+<script>
+function lsCopyHandoffForClaude(btn){var id=btn.getAttribute("data-handoff-target");var el=document.getElementById(id);var status=btn.parentElement.querySelector(".ls-copy-for-claude-status");if(!el){if(status)status.textContent="Handoff block not found.";return;}var text=el.textContent||"";function ok(){if(status){status.textContent="Copied! Paste into Claude.";setTimeout(function(){status.textContent="";},3000);}}function fail(){if(status){status.textContent="Copy failed — select the block manually.";}}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(ok).catch(fail);}else{try{var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);ok();}catch(e){fail();}}}
+</script>
+```
+
+Replace `PASTE HANDOFF BLOCK TEXT HERE` with the exact handoff content (including START/END markers).
+
+**Button rules:**
+- Label must be exactly: **Copy for Claude**
+- Button must be large and visible on Mac (20px font, 18px+ padding)
+- One click copies the **entire** handoff block to clipboard
+
+**Handoff block fields:**
+- Project: LeaseSmart
+- Sprint: [name]
+- Build ID: [id or N/A]
+- Status: [COMMITTED / NOT COMMITTED]
+- What was built, Files changed, Test results (pass/fail counts)
+- What Claude needs to check
+
+**Security:** Never include API keys, tokens, or secrets.
+
+**Repo utility:** `scripts/handoff-copy-lib.mjs` generates the same button for `master-vault/morning/HANDOFF-latest.html`.
