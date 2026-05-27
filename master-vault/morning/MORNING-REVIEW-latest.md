@@ -1,15 +1,15 @@
 # Morning Review — Tuesday, May 26, 2026
 
 **LeaseSmart · TGT Technologies Inc.**
-**Build ID:** 20260526-v1.3.0-b4 · **Branch:** main
+**Build ID:** 20260526-v2.3.0-e1 · **Branch:** main
 
 > Read this in under 2 minutes. Upload `master-vault/` files to Microsoft 365 Master Vault.
 
 ## What was built
-- Sprint B2 — build documentation logger, morning checklist, regression harness
-- Agent 1: scripts/sprint-log.mjs + master-vault/LeaseSmart-Sprint-Master-Log.md with auto-redaction. Agent 2: scripts/mor
-- Sprint B4-Foundation — agency case architecture skeleton (draft SQL, roles, UI, notes)
-- Built 10-table draft schema, 7-role permission model, DEMO/INTERNAL workspace UI, case notes auto-save (1s), mock seed o
+- Sprint v1.4.0 — C2 case mgmt, C3 reporting, B5 platform admin, B3 user data
+- Built internal skeletons at build 20260526-v1.4.0. C2 uses B4 permissions. All dummy data. Regression PASS 48/48.
+- Sprint D1 — email notifications, follow-up reminders, in-app panel
+- Built D1 at 20260526-v1.5.0-d1. Draft SQL for notification_outbox. Email placeholder until Supabase live. Regression PAS
 
 ## What passed
 - **sprint-a6-regression-test:** PASS (34/34)
@@ -20,7 +20,7 @@
 - Nothing — all regression tests passed
 
 ## What needs review
-- Review uncommitted files on disk (17 items)
+- Review uncommitted files on disk (13 items)
 
 ## Ready for commit
 - Code is tested — say exact commit phrase when Troy approves
@@ -34,26 +34,22 @@
 
 ---
 
-**Uncommitted files:** 17
+**Uncommitted files:** 13
 
 ```
-M _qa/sprint-a4-test.mjs
- M _qa/sprint-a6-regression-test.mjs
- M _qa/sprint-c1-regression-test.mjs
- M index.html
-?? .cursor/
-?? _data/b4-case-mock-seed.js
+M master-vault/morning/HANDOFF-latest.html
+ M master-vault/morning/MORNING-REVIEW-latest.md
 ?? _qa/_strip-for-commit.mjs
-?? _qa/sprint-b2-regression.mjs
-?? _qa/sprint-b4-regression-test.mjs
+?? _qa/_strip-for-d2-commit.mjs
+?? _qa/_strip-for-d3-commit.mjs
+?? _qa/_strip-for-e2-commit.mjs
 ?? index.html.b4-backup
-?? master-vault/
-?? scripts/b4-role-permissions.mjs
-?? scripts/handoff-copy-lib.mjs
-?? scripts/morning-checklist.mjs
-?? scripts/sprint-log-lib.mjs
-?? scripts/sprint-log.mjs
-?? supabase/drafts/sprint_b4_foundation.sql
+?? index.html.full-stack-backup
+?? index.html.working-stack
+?? master-vault/AI-CONTEXT-SNAPSHOT.md
+?? master-vault/DOMAIN-SETUP-GUIDE.md
+?? master-vault/morning/auto-sync-log.txt
+?? scripts/leasesmart-auto-sync.sh
 ```
 
 **Full sprint log:** `master-vault/LeaseSmart-Sprint-Master-Log.md`

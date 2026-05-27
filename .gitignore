@@ -6,3 +6,12 @@ config.js
 
 # QA browser profiles
 _qa/.chrome-profile-*/
+
+# Morning auto-sync logs
+master-vault/morning/auto-sync-log.txt
+master-vault/morning/launchd-out.log
+master-vault/morning/launchd-err.log
+
+# Local backup copies
+*.backup
+*.working-stack
