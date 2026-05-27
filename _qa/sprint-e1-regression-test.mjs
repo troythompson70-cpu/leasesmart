@@ -46,13 +46,14 @@ assert('E1 FMR cache table', sql.includes('e1_hud_fmr_cache'));
 
 // Agent 1 — NYC Open Data HPD API
 assert('HPD API module', existsSync(join(ROOT, 'scripts/e1-hpd-api.mjs')));
-assert('HPD official API URL', E1_HPD_API_URL.includes('data.cityofnewyork.us') && E1_HPD_API_URL.includes('tesw-yqq4'));
+assert('HPD official API URL', E1_HPD_API_URL.includes('data.cityofnewyork.us') && E1_HPD_API_URL.includes('tesw-yqqr'));
 assert('HPD source label', E1_HPD_SOURCE_LABEL === 'Public Source — HPD Registry');
 assert('HPD map function', e1MapHpdToLandlordIntel({ boro: 'Manhattan' }, 0).source_label === E1_HPD_SOURCE_LABEL);
 assert('HPD no scraping flag', pubSeed.includes('noScraping: true') && pubSeed.includes('officialApiOnly: true'));
 assert('HPD seed records', pubSeed.includes('e1-hpd-10001') && pubSeed.includes('e1-hpd-10002'));
 assert('HPD no PII validate', e1ValidateRecordNoPii(e1MapHpdToLandlordIntel({}, 0)));
 assert('e1SeedPublicSourcesIfNeeded', html.includes('function e1SeedPublicSourcesIfNeeded'));
+assert('E1 live import script', existsSync(join(ROOT, 'scripts/e1-live-import.mjs')));
 assert('e1InitPublicSources', html.includes('function e1InitPublicSources'));
 
 // Agent 2 — NJ HRC

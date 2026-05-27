@@ -5,7 +5,7 @@
 window.SPRINT_E1_PUBLIC_SOURCES = {
   officialApiOnly: true,
   noScraping: true,
-  hpdApiUrl: 'https://data.cityofnewyork.us/resource/tesw-yqq4.json',
+  hpdApiUrl: 'https://data.cityofnewyork.us/resource/tesw-yqqr.json',
   njHrcUrl: 'https://www.nj.gov/dca/hmfa/',
   records: [
     { id: 'e1-hpd-10001', is_public: true, owner_key: 'e1-public-seed', landlord_name: 'NYC HPD Registrant Demo A', property_name: 'Rent Stabilized — Manhattan', address: '123 Public Registry Ln', city: 'Manhattan', state: 'NY', zip: '10001', county: 'Manhattan', source_type: 'public_record', source_label: 'Public Source — HPD Registry', source_url: 'https://data.cityofnewyork.us', verification_status: 'Public Source Only', availability_status: 'Unknown', program_compatibility: 'Section 8', program_notes: 'HPD registration — public source only.', warning_flags: ['public_source_only', 'not_verified_claim'], phone: '', email: '' },
