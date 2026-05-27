@@ -475,6 +475,13 @@ body.e2-has-cookie{padding-bottom:140px}
 .beta-check input{width:18px;height:18px;margin-top:2px;accent-color:#22d98a;flex-shrink:0}
 .beta-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
 .beta-link{background:none;border:none;color:#2563eb;font-size:14px;font-weight:700;cursor:pointer;padding:0;text-decoration:underline}
+.a7-auth-card{background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:20px;margin-top:18px}
+.a7-auth-card-title{font-weight:800;font-size:16px;color:#111827;margin-bottom:8px}
+.a7-resend-link{background:none;border:none;color:#6b7280;font-size:13px;font-weight:600;cursor:pointer;padding:0;margin-top:10px;text-decoration:underline}
+.a7-support-block{margin-top:18px;padding-top:16px;border-top:1px solid #e5e7eb;text-align:center}
+.a7-support-text{font-size:13px;color:#6b7280;margin-bottom:8px}
+.a7-help-btn{background:#f8fafb;border:2px solid #e5e7eb;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;color:#374151;cursor:pointer;font-family:inherit}
+.a7-help-btn:hover{border-color:#22d98a;color:#111827}
 .beta-welcome-hero{text-align:center;margin-bottom:22px}
 .beta-welcome-icon{font-size:52px;margin-bottom:10px;line-height:1}
 .beta-welcome-name{font-size:22px;font-weight:900;color:#111827;margin-bottom:6px}
@@ -781,12 +788,12 @@ body { font-size: 16px !important; }
   </div>
   <button class="green-btn" id="startBtn" style="display:none">&#127968; Start Demo Search &rarr;</button>
   <button class="ghost-btn" id="resumeBtn" style="display:none;width:100%;margin-top:10px;padding:14px;font-size:15px;font-weight:700" onclick="resumeSession()">&#128260; Continue Last Search</button>
-  <div style="background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:20px;margin-top:18px">
-    <div style="font-weight:800;font-size:16px;color:#111827;margin-bottom:8px">Beta Account Required</div>
-    <p style="color:#6b7280;font-size:14px;line-height:1.6;margin-bottom:14px">Sign up or log in with a magic link to begin. No shortcuts — verify, create your profile, then complete all 21 questions.</p>
+  <div class="a7-auth-card">
+    <div class="a7-auth-card-title">Beta Account Required</div>
+    <p style="color:#6b7280;font-size:14px;line-height:1.6;margin-bottom:14px">Sign up or log in with a magic link. No passwords — verify your email, create your profile, then complete all 21 questions.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button type="button" class="green-btn" style="flex:1;min-width:160px;font-size:15px;padding:14px" onclick="showBetaSignupPage()">Beta Sign Up</button>
-      <button type="button" class="ghost-btn" style="flex:1;min-width:160px;padding:14px;font-size:15px;font-weight:700" onclick="showBetaLoginPage()">Beta Log In</button>
+      <button type="button" class="green-btn" style="flex:1;min-width:160px;font-size:15px;padding:14px" onclick="showBetaSignupPage()">Sign Up</button>
+      <button type="button" class="ghost-btn" style="flex:1;min-width:160px;padding:14px;font-size:15px;font-weight:700" onclick="showBetaLoginPage()">Log In</button>
     </div>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
@@ -848,12 +855,12 @@ body { font-size: 16px !important; }
 </div>
 </div>
 
-<!-- BETA SIGNUP (Sprint A1 — internal testing) -->
+<!-- BETA SIGNUP (Sprint A7 — magic link sign up) -->
 <div id="beta-signup-pg" class="pg">
   <div class="beta-wrap">
     <div class="beta-card">
-      <div class="beta-title">Beta Tester Sign Up</div>
-      <div class="beta-sub">Internal testing only. Magic link sign-in — no passwords.</div>
+      <div class="beta-title">Sign Up</div>
+      <div class="beta-sub">Create your LeaseSmart Beta account. Magic link only — no passwords.</div>
       <div class="beta-error" id="betaSignupError"></div>
       <div class="beta-success" id="betaSignupSuccess"></div>
       <form id="betaSignupForm" autocomplete="on" novalidate onsubmit="event.preventDefault(); submitBetaSignup();">
@@ -863,30 +870,39 @@ body { font-size: 16px !important; }
         <input class="beta-input" id="betaSignupEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="your@email.com"/>
         <label class="beta-lbl" for="betaSignupPhone">Phone</label>
         <input class="beta-input" id="betaSignupPhone" name="tel" type="tel" autocomplete="tel" placeholder="(555) 555-5555"/>
-        <button type="submit" class="green-btn">Send Magic Link to Sign Up</button>
+        <button type="submit" class="green-btn">Create Account — Get Magic Link</button>
       </form>
       <div class="beta-actions" style="margin-top:14px">
-        <button type="button" class="beta-link" onclick="showBetaLoginPage()">Already have a beta account? Log in</button>
+        <button type="button" class="beta-link" onclick="showBetaLoginPage()">Already have an account? Log in</button>
+      </div>
+      <div class="a7-support-block">
+        <div class="a7-support-text">Having trouble signing in?</div>
+        <button type="button" class="a7-help-btn" onclick="a7OpenBetaLoginHelp()">Get Help</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- BETA LOGIN (Sprint A1 — internal testing) -->
+<!-- BETA LOGIN (Sprint A7 — magic link log in) -->
 <div id="beta-login-pg" class="pg">
   <div class="beta-wrap">
     <div class="beta-card">
-      <div class="beta-title">Beta Tester Log In</div>
-      <div class="beta-sub">Internal testing only. Enter your email — we send a magic link. No passwords.</div>
+      <div class="beta-title">Log In</div>
+      <div class="beta-sub">Returning beta tester? Enter your email — we send a magic link. No passwords.</div>
       <div class="beta-error" id="betaLoginError"></div>
       <div class="beta-success" id="betaLoginSuccess"></div>
       <form id="betaLoginForm" autocomplete="on" novalidate onsubmit="event.preventDefault(); submitBetaMagicLink();">
         <label class="beta-lbl" for="betaLoginEmail">Email</label>
         <input class="beta-input" id="betaLoginEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="your@email.com"/>
-        <button type="submit" class="green-btn">Send Magic Link</button>
+        <button type="submit" class="green-btn">Log In — Send Magic Link</button>
+        <button type="button" class="a7-resend-link" onclick="a7ResendMagicLink()">Resend magic link</button>
       </form>
       <div class="beta-actions" style="margin-top:14px">
         <button type="button" class="beta-link" onclick="showBetaSignupPage()">Need an account? Sign up</button>
+      </div>
+      <div class="a7-support-block">
+        <div class="a7-support-text">Having trouble signing in?</div>
+        <button type="button" class="a7-help-btn" onclick="a7OpenBetaLoginHelp()">Get Help</button>
       </div>
     </div>
   </div>
@@ -1298,8 +1314,8 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-e1-public-source-seed.js"></script>
 <script src="_data/sprint-e1-mock-seed.js"></script>
 <script>
-// v2.3.0 Sprint E1 — public source imports (+ E3 + D5 + D4 + E2)
-var LS_BUILD = '20260526-v2.3.0-e1';
+// v2.4.0 Sprint A7 — magic-link auth polish (+ E1 + E3 + D5 + D4 + E2)
+var LS_BUILD = '20260527-v2.4.0-a7';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -1526,8 +1542,38 @@ async function routeAuthenticatedBetaUser() {
   routeOnboarding();
 }
 
+var A7_LAST_MAGIC_EMAIL = '';
+var A7_LAST_MAGIC_META = {};
+var A7_LAST_MAGIC_PREFIX = 'betaLogin';
+var A7_SUPPORT_EMAIL = 'leasesmart@tgttechnologies.com';
+var A7_SUPPORT_SUBJECT = 'LeaseSmart Beta Login Help';
+
+function a7OpenBetaLoginHelp() {
+  window.location.href = 'mailto:' + A7_SUPPORT_EMAIL + '?subject=' + encodeURIComponent(A7_SUPPORT_SUBJECT);
+}
+
+async function a7ResendMagicLink() {
+  var prefix = A7_LAST_MAGIC_PREFIX || 'betaLogin';
+  var email = A7_LAST_MAGIC_EMAIL;
+  if (!email && document.getElementById('betaLoginEmail')) {
+    email = (document.getElementById('betaLoginEmail').value || '').trim();
+  }
+  if (!email && document.getElementById('betaSignupEmail')) {
+    email = (document.getElementById('betaSignupEmail').value || '').trim();
+    prefix = 'betaSignup';
+  }
+  if (!email) {
+    showBetaError(prefix + 'Error', 'Enter your email first, then tap Resend magic link.');
+    return;
+  }
+  await sendBetaMagicLinkEmail(email, A7_LAST_MAGIC_META || {}, prefix);
+}
+
 async function sendBetaMagicLinkEmail(email, meta, uiPrefix) {
   clearBetaMessages(uiPrefix);
+  A7_LAST_MAGIC_EMAIL = email;
+  A7_LAST_MAGIC_META = meta || {};
+  A7_LAST_MAGIC_PREFIX = uiPrefix || 'betaLogin';
   if (!email) {
     d4LogFailedLogin();
     showBetaError(uiPrefix + 'Error', 'Enter your email to receive a magic link.');
