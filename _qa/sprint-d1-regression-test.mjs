@@ -21,7 +21,7 @@ const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
 const buildMatch = html.match(/LS_BUILD = '([^']+)'/);
-assert('D1 build id preserved or superseded', buildMatch && /^20260526-v1\.(5\.0-d1|6\.0-d2|8\.0-d4|9\.0-d5)$|^20260526-v2\.(0\.0-d3|1\.0-e2)$/.test(buildMatch[1]));
+assert('D1 build id preserved or superseded', buildMatch && /^20260526-v1\.(5\.0-d1|6\.0-d2|8\.0-d4|9\.0-d5)$|^20260526-v2\.(0\.0-d3|1\.0-e2|2\.0-e3)$/.test(buildMatch[1]));
 assert('D1 mock seed linked', html.includes('sprint-d1-mock-seed.js'));
 assert('D1 draft SQL', sql.includes('DRAFT ONLY') || sql.includes('notification_outbox'));
 assert('D1 outbox table', sql.includes('notification_outbox'));

@@ -299,6 +299,20 @@ button,input,textarea,select{font-family:inherit}
 .e2-consent-chk input{width:22px;height:22px;margin-top:2px;accent-color:#22d98a;flex-shrink:0}
 body.e2-has-footer{padding-bottom:52px}
 body.e2-has-cookie{padding-bottom:140px}
+/* Sprint E3 — billing skeleton (TEST MODE) */
+.e3-test-banner{background:#eff6ff;border:2px solid #93c5fd;color:#1e40af;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:800;text-align:center;margin-bottom:16px;letter-spacing:.2px}
+.e3-pricing-wrap{max-width:1100px;margin:0 auto;padding:24px 18px 100px}
+.e3-pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:16px}
+.e3-plan-card{background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:20px;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.e3-plan-card.featured{border-color:#22d98a;box-shadow:0 4px 16px rgba(34,217,138,.12)}
+.e3-plan-name{font-size:16px;font-weight:900;margin-bottom:4px}
+.e3-plan-price{font-size:28px;font-weight:900;color:#16a34a;margin:8px 0}
+.e3-plan-features{font-size:13px;color:#6b7280;line-height:1.55;margin:12px 0;flex:1}
+.e3-plan-features li{margin-bottom:4px;margin-left:18px}
+.e3-coming-btn{width:100%;min-height:44px;border:2px solid #d1d5db;border-radius:10px;background:#f8fafb;color:#6b7280;font-size:14px;font-weight:800;cursor:not-allowed;font-family:inherit}
+.e3-billing-panel{max-width:720px;margin:0 auto;padding:24px 18px 100px}
+.e3-billing-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f3f4f6;font-size:14px}
+.e3-invoice-row{background:#f8fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px;font-size:13px}
 @media(max-width:768px){
   .d3-hamburger{display:flex}
   #dash-pg .tabs{display:none!important}
@@ -768,6 +782,10 @@ body { font-size: 16px !important; }
       <button type="button" class="ghost-btn" style="flex:1;min-width:160px;padding:14px;font-size:15px;font-weight:700" onclick="showBetaLoginPage()">Beta Log In</button>
     </div>
   </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+    <button type="button" class="ghost-btn" style="flex:1;min-width:140px;padding:12px;font-weight:700" data-e3-pricing onclick="e3OpenPricingPage();return false;">Pricing</button>
+    <button type="button" class="ghost-btn" style="flex:1;min-width:140px;padding:12px;font-weight:700" data-e3-billing onclick="e3OpenBillingDashboard();return false;">Billing</button>
+  </div>
   <p class="home-note">Saved on this device &bull; 3 minutes &bull; Works on any phone</p>
   <div class="trust-row">
     <span class="tag-green">&#128269; AI Search</span>
@@ -958,6 +976,53 @@ body { font-size: 16px !important; }
   </div>
 </div>
 
+</div>
+
+<!-- E3 — Pricing (TEST MODE skeleton) -->
+<div id="e3-pricing-pg" class="pg">
+  <div class="e3-pricing-wrap">
+    <div class="e3-test-banner">TEST MODE — No real charges.</div>
+    <h1 style="font-size:26px;font-weight:900;margin-bottom:6px">Pricing</h1>
+    <p style="color:#6b7280;font-size:14px;margin-bottom:8px">Plans: Free, Standard, Premium, Social Worker, Agency, Enterprise, and Government — Stripe skeleton. All buttons Coming Soon until live billing is approved.</p>
+    <div id="e3PricingGrid" class="e3-pricing-grid"></div>
+    <button type="button" class="ghost-btn" style="margin-top:20px;min-height:44px" onclick="e3BillingBack()">&#8592; Back</button>
+  </div>
+</div>
+
+<!-- E3 — Checkout skeleton -->
+<div id="e3-checkout-pg" class="pg">
+  <div class="e3-billing-panel">
+    <div class="e3-test-banner">TEST MODE — No real charges.</div>
+    <h1 style="font-size:22px;font-weight:900">Checkout skeleton</h1>
+    <p id="e3CheckoutPlanLabel" style="color:#6b7280;margin:12px 0"></p>
+    <p style="font-size:13px;color:#9ca3af;margin-bottom:16px">Mock checkout — no real charge will be made.</p>
+    <button type="button" class="green-btn" style="width:100%;min-height:44px" onclick="e3SimulateCheckout()">Complete test checkout (demo)</button>
+    <button type="button" class="ghost-btn" style="width:100%;min-height:44px;margin-top:10px" onclick="e3OpenPricingPage()">&#8592; Back to pricing</button>
+  </div>
+</div>
+
+<!-- E3 — Subscription management skeleton -->
+<div id="e3-manage-pg" class="pg">
+  <div class="e3-billing-panel">
+    <div class="e3-test-banner">TEST MODE — No real charges.</div>
+    <h1 style="font-size:22px;font-weight:900">Subscription management</h1>
+    <div id="e3ManageContent" style="margin:16px 0"></div>
+    <button type="button" class="ghost-btn" style="min-height:44px" onclick="e3SimulateCancel()">Cancel subscription (demo)</button>
+    <button type="button" class="green-btn" style="min-height:44px;margin-left:8px" onclick="e3SimulateUpgrade()">Upgrade plan (demo)</button>
+    <button type="button" class="ghost-btn" style="width:100%;min-height:44px;margin-top:12px" onclick="e3OpenBillingDashboard()">Billing dashboard</button>
+  </div>
+</div>
+
+<!-- E3 — Billing dashboard -->
+<div id="e3-billing-pg" class="pg">
+  <div class="e3-billing-panel">
+    <div class="e3-test-banner">TEST MODE — No real charges.</div>
+    <h1 style="font-size:22px;font-weight:900">Billing dashboard</h1>
+    <div id="e3BillingDashboard"></div>
+    <button type="button" class="ghost-btn" style="margin-top:16px;min-height:44px" onclick="e3BillingBack()">&#8592; Back</button>
+  </div>
+</div>
+
 <!-- E2 — C2 client intake consent modal -->
 <div id="e2ClientConsentModal" class="e2-consent-modal" role="dialog" aria-labelledby="e2ConsentTitle" aria-modal="true">
   <div class="e2-consent-sheet">
@@ -1099,6 +1164,7 @@ body { font-size: 16px !important; }
         <div id="dashFollowUpBar" class="ls-followup-bar" style="display:none;margin:0;border-radius:8px;padding:6px 12px;font-size:12px"></div>
         <div id="dashNotifBell"></div>
         <div class="pchip" id="profChip">Loading&hellip;</div>
+        <button class="ghost-btn" onclick="e3OpenPricingPage()">Pricing</button>
         <button class="ghost-btn" onclick="openEditFilters()">Edit Filters</button>
       </div>
     </div>
@@ -1221,9 +1287,10 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-d5-mock-seed.js"></script>
 <script src="_data/sprint-d3-mock-seed.js"></script>
 <script src="_data/sprint-e2-mock-seed.js"></script>
+<script src="_data/sprint-e3-mock-seed.js"></script>
 <script>
-// v1.9.0 Sprint D5 — onboarding progress, skeletons, empty states, toasts, tooltips (+ D4 + E2)
-var LS_BUILD = '20260526-v1.9.0-d5';
+// v2.2.0 Sprint E3 — Stripe billing skeleton (+ D5 + D4 + E2)
+var LS_BUILD = '20260526-v2.2.0-e3';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -1252,6 +1319,7 @@ var APP = {
 
 var ONBOARDING_PAGES = ['beta-signup-pg', 'beta-login-pg', 'beta-welcome-pg', 'beta-legal-pg', 'profile-create-pg', 'quiz-pg', 'search-pg'];
 var E2_LEGAL_PAGES = ['e2-tos-pg', 'e2-privacy-pg'];
+var E3_BILLING_PAGES = ['e3-pricing-pg', 'e3-checkout-pg', 'e3-manage-pg', 'e3-billing-pg'];
 var INTERNAL_DEMO_PAGES = ['admin-pg', 'b4-workspace-pg', 'c2-case-pg', 'c2-client-pg', 'c3-reporting-pg', 'b3-user-data-pg', 'b5-platform-pg'];
 var SEARCH_STATES = ['New Jersey', 'New York', 'Pennsylvania', 'Ohio', 'Other'];
 var PLACEMENT_TYPES = ['Individual', 'Family', 'Families'];
@@ -2418,7 +2486,7 @@ function showPage(id) {
   if (id !== 'detail-pg') flushDetailNotes();
   if (id === 'b4-workspace-pg' || id === 'c2-client-pg') flushB4CaseNotes();
   if (id === 'c2-client-pg') flushC2CaseNotes();
-  if (requiresBetaOnboarding() && !isOnboardingComplete() && ONBOARDING_PAGES.indexOf(id) < 0 && INTERNAL_DEMO_PAGES.indexOf(id) < 0 && E2_LEGAL_PAGES.indexOf(id) < 0) {
+  if (requiresBetaOnboarding() && !isOnboardingComplete() && ONBOARDING_PAGES.indexOf(id) < 0 && INTERNAL_DEMO_PAGES.indexOf(id) < 0 && E2_LEGAL_PAGES.indexOf(id) < 0 && E3_BILLING_PAGES.indexOf(id) < 0) {
     routeOnboarding();
     return;
   }
@@ -5609,6 +5677,147 @@ function d5AddFirstDemoClient() {
 }
 
 // ================================================================
+// SPRINT E3 — Stripe billing skeleton (TEST MODE only)
+// ================================================================
+function e3GetMock() {
+  return window.SPRINT_E3_MOCK || { testMode: true, stripePlans: [], demoInvoices: [] };
+}
+
+function e3GetStripePublishableKey() {
+  var c = window.LEASESMART_CONFIG || {};
+  var key = c.stripeTestPublishableKey || '';
+  if (!key || key.indexOf('YOUR_') >= 0) return null;
+  if (key.indexOf('pk_' + 'live_') === 0) return null;
+  if (key.indexOf('pk_test_') !== 0) return null;
+  return key;
+}
+
+function e3IsStripeConfigured() {
+  return !!e3GetStripePublishableKey();
+}
+
+function e3BillingBack() {
+  if (APP.e3BillingReturnPage) {
+    showPage(APP.e3BillingReturnPage);
+    APP.e3BillingReturnPage = null;
+  } else if (BETA_SESSION.authUserId || lsGetResumeProfile()) {
+    showPage('dash-pg');
+  } else {
+    showPage('home-pg');
+  }
+}
+
+function e3OpenBillingPage(pageId) {
+  var visible = document.querySelector('.pg.show');
+  APP.e3BillingReturnPage = visible ? visible.id : 'home-pg';
+  showPage(pageId);
+}
+
+function e3OpenPricingPage() {
+  e3RenderPricingGrid();
+  e3OpenBillingPage('e3-pricing-pg');
+}
+
+function e3OpenBillingDashboard() {
+  e3RenderBillingDashboard();
+  e3OpenBillingPage('e3-billing-pg');
+}
+
+function e3PricingComingSoon(planId) {
+  if (typeof d5ShowToast === 'function') d5ShowToast('filter_applied');
+  return false;
+}
+
+function e3RenderPricingGrid() {
+  var grid = document.getElementById('e3PricingGrid');
+  if (!grid) return;
+  var plans = e3GetMock().stripePlans || [];
+  var html = '';
+  plans.forEach(function(p, i) {
+    html += '<div class="e3-plan-card' + (i === 2 ? ' featured' : '') + '">';
+    html += '<div class="e3-plan-name">' + p.name + '</div>';
+    html += '<div class="e3-plan-price">' + p.priceLabel + '<span style="font-size:14px;color:#6b7280">' + (p.period || '') + '</span></div>';
+    html += '<ul class="e3-plan-features">';
+    (p.features || []).forEach(function(f) { html += '<li>' + f + '</li>'; });
+    html += '</ul>';
+    html += '<button type="button" class="e3-coming-btn" onclick="e3PricingComingSoon(\'' + p.id + '\')">Coming Soon</button>';
+    html += '</div>';
+  });
+  grid.innerHTML = html;
+}
+
+function e3OpenCheckout(planId) {
+  APP.e3CheckoutPlanId = planId;
+  var plans = e3GetMock().stripePlans || [];
+  var plan = plans.find(function(p) { return p.id === planId || p.stripePlanId === planId; });
+  var el = document.getElementById('e3CheckoutPlanLabel');
+  if (el) el.textContent = plan ? (plan.name + ' — ' + plan.priceLabel + (plan.period || '') + ' (demo)') : planId;
+  e3OpenBillingPage('e3-checkout-pg');
+}
+
+function e3SimulateCheckout() {
+  if (!LS_STORE.e3BillingMock) LS_STORE.e3BillingMock = {};
+  LS_STORE.e3BillingMock.lastCheckout = { ts: new Date().toISOString(), planId: APP.e3CheckoutPlanId, testMode: true, noRealCharge: true };
+  lsSave();
+  if (typeof d5ShowToast === 'function') d5ShowToast('record_added');
+  e3OpenBillingPage('e3-manage-pg');
+  e3RenderManagePage();
+}
+
+function e3RenderManagePage() {
+  var el = document.getElementById('e3ManageContent');
+  if (!el) return;
+  var mock = e3GetMock();
+  el.innerHTML = '<p><strong>Current plan (demo):</strong> ' + mock.currentPlanId + '</p>' +
+    '<p style="color:#6b7280;font-size:13px;margin-top:8px">Stripe test key configured: ' + (e3IsStripeConfigured() ? 'Yes (pk_test_* from config.js)' : 'No — set stripeTestPublishableKey in local config.js') + '</p>' +
+    '<p style="color:#6b7280;font-size:13px;margin-top:8px">TEST MODE — No real charges.</p>';
+}
+
+function e3SimulateCancel() {
+  if (!LS_STORE.e3BillingMock) LS_STORE.e3BillingMock = {};
+  LS_STORE.e3BillingMock.cancelRequested = { ts: new Date().toISOString(), testMode: true, noRealCharge: true };
+  lsSave();
+  if (typeof d5ShowToast === 'function') d5ShowToast('status_updated');
+  alert('DEMO: Cancel subscription skeleton — no real charge.');
+}
+
+function e3SimulateUpgrade() {
+  e3OpenCheckout('individual_premium');
+}
+
+function e3RenderBillingDashboard() {
+  var el = document.getElementById('e3BillingDashboard');
+  if (!el) return;
+  var mock = e3GetMock();
+  var inv = mock.demoInvoices || [];
+  var html = '';
+  html += '<div class="e3-billing-row"><span>Current plan</span><strong id="e3BillingCurrentPlan">' + mock.currentPlanId + '</strong></div>';
+  html += '<div class="e3-billing-row"><span>Next billing date</span><span id="e3BillingNextDate">' + mock.nextBillingDate + ' (placeholder)</span></div>';
+  html += '<div class="e3-billing-row"><span>Payment method</span><span id="e3BillingPaymentMethod">' + mock.paymentMethodBrand + ' •••• ' + mock.paymentMethodLast4 + ' (demo)</span></div>';
+  html += '<h3 style="font-weight:800;margin:20px 0 10px;font-size:15px">Invoice history (demo)</h3>';
+  html += '<div id="e3BillingInvoices">';
+  inv.forEach(function(i) {
+    html += '<div class="e3-invoice-row"><strong>' + i.date + '</strong> — ' + i.amount + ' · ' + i.description + ' <span style="color:#16a34a">(' + i.status + ')</span></div>';
+  });
+  html += '</div>';
+  html += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px">';
+  html += '<button type="button" class="green-btn" id="e3BillingUpgrade" style="flex:1;min-width:140px" onclick="e3SimulateUpgrade()">Upgrade (demo)</button>';
+  html += '<button type="button" class="ghost-btn" id="e3BillingDowngrade" style="flex:1;min-width:140px" onclick="e3OpenPricingPage()">Change plan</button>';
+  html += '<button type="button" class="ghost-btn" style="flex:1;min-width:140px" onclick="e3OpenBillingPage(\'e3-manage-pg\');e3RenderManagePage();">Manage subscription</button>';
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function e3InitBillingFramework() {
+  document.querySelectorAll('[data-e3-pricing]').forEach(function(a) {
+    a.addEventListener('click', function(ev) { ev.preventDefault(); e3OpenPricingPage(); });
+  });
+  document.querySelectorAll('[data-e3-billing]').forEach(function(a) {
+    a.addEventListener('click', function(ev) { ev.preventDefault(); e3OpenBillingDashboard(); });
+  });
+}
+
+// ================================================================
 // SPRINT E2 — Legal framework skeleton (draft only)
 // ================================================================
 var E2_COOKIE_KEY = 'leasesmart_cookie_consent_v1';
@@ -5970,6 +6179,7 @@ function initLeaseSmart() {
   if (typeof e2SeedIfNeeded === 'function') e2SeedIfNeeded();
   d3InitMobile();
   e2InitLegalFramework();
+  e3InitBillingFramework();
 
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
     sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
@@ -6062,6 +6272,10 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 <footer id="lsGlobalLegalFooter" class="e2-legal-footer" aria-label="Legal links">
+  <a href="#" data-e3-pricing>Pricing</a>
+  <span>·</span>
+  <a href="#" data-e3-billing>Billing</a>
+  <span>·</span>
   <a href="#" data-e2-legal-tos>Terms of Service</a>
   <span>·</span>
   <a href="#" data-e2-legal-privacy>Privacy Policy</a>

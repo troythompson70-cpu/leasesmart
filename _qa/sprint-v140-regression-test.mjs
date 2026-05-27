@@ -14,7 +14,7 @@ const seed = readFileSync(join(ROOT, '_data/sprint-v140-mock-seed.js'), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('v1.9.0 build id', html.includes("LS_BUILD = '20260526-v2.1.0-e2'") || html.includes("LS_BUILD = '20260526-v2.0.0-d3'") || html.includes("LS_BUILD = '20260526-v1.9.0-d5'") || html.includes("LS_BUILD = '20260526-v1.8.0-d4'") || html.includes("LS_BUILD = '" + BUILD + "'"));
+assert('v1.9.0 build id', html.includes("LS_BUILD = '20260526-v2.2.0-e3'") || html.includes("LS_BUILD = '20260526-v2.1.0-e2'") || html.includes("LS_BUILD = '20260526-v2.0.0-d3'") || html.includes("LS_BUILD = '20260526-v1.9.0-d5'") || html.includes("LS_BUILD = '20260526-v1.8.0-d4'") || html.includes("LS_BUILD = '" + BUILD + "'"));
 assert('v140 mock seed linked', html.includes('sprint-v140-mock-seed.js'));
 assert('Mock seed no real data', seed.includes('noRealClientData: true'));
 
