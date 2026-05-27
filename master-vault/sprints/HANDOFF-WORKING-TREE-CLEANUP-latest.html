@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Working Tree Cleanup Handoff — May 27, 2026</title>
+<style>.ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}
+.ls-copy-for-claude-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35);letter-spacing:.2px}
+.ls-copy-for-claude-btn:hover{filter:brightness(1.05)}
+.ls-copy-for-claude-btn:active{transform:scale(.98)}
+.ls-copy-for-claude-status{display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#16a34a;min-height:20px}</style>
+</head><body style="max-width:900px;margin:0 auto;padding:24px 18px;color:#111827">
+<h1 style="font-size:22px;margin-bottom:8px">Working Tree Cleanup Handoff — May 27, 2026</h1>
+<p style="color:#6b7280;font-size:14px;margin-bottom:20px">TGT Technologies Inc. — click <strong>Copy for Claude</strong> below.</p>
+<div class="ls-handoff-wrap">
+  <pre class="ls-handoff-pre" id="lsHandoffBlock">--- CLAUDE HANDOFF START ---
+Project: LeaseSmart by TGT Technologies Inc.
+Task: Working Tree Cleanup
+Mode: Cleanup only — NOT COMMITTED — NOT PUSHED
+
+TASK 1 — Delete backup and strip files: COMPLETE
+Deleted 7 files permanently:
+• _qa/_strip-for-commit.mjs
+• _qa/_strip-for-d2-commit.mjs
+• _qa/_strip-for-d3-commit.mjs
+• _qa/_strip-for-e2-commit.mjs
+• index.html.b4-backup
+• index.html.full-stack-backup
+• index.html.working-stack
+
+Note: _qa/_strip-for-d4-commit.mjs remains (tracked in repo; not in delete list).
+
+TASK 2 — Update .gitignore: COMPLETE
+Added:
+• master-vault/morning/auto-sync-log.txt
+• master-vault/morning/launchd-out.log
+• master-vault/morning/launchd-err.log
+• *.backup
+• *.working-stack
+
+TASK 3 — Stage clean files: COMPLETE (staged, not committed)
+• .gitignore
+• master-vault/AI-CONTEXT-SNAPSHOT.md (new)
+• master-vault/DOMAIN-SETUP-GUIDE.md (new)
+• master-vault/morning/HANDOFF-latest.html (modified)
+• master-vault/morning/MORNING-REVIEW-latest.md (modified)
+• scripts/leasesmart-auto-sync.sh (new)
+
+TASK 4 — Security check: PASS
+• No sk-, sk-ant-, AIza, ghp_ patterns in staged diff
+• No passwords or service role keys in staged diff
+• leasesmart-auto-sync.sh: git pull + morning scripts only — no git commit or git push
+
+TASK 5 — Git status
+Branch: main (up to date with origin/main)
+Staged: 6 files ready for next commit
+Unstaged tracked changes: none
+Untracked: none (auto-sync-log.txt gitignored)
+
+READY FOR: One final commit when Troy approves
+COMMIT: Not performed (cleanup mode)
+PUSH: Not performed (cleanup mode)
+--- CLAUDE HANDOFF END ---</pre>
+  <button type="button" class="ls-copy-for-claude-btn" data-handoff-target="lsHandoffBlock" onclick="lsCopyHandoffForClaude(this)">Copy for Claude</button>
+  <span class="ls-copy-for-claude-status" aria-live="polite"></span>
+</div>
+<script>function lsCopyHandoffForClaude(btn){
+  var id=btn.getAttribute("data-handoff-target");
+  var el=document.getElementById(id);
+  var status=btn.parentElement.querySelector(".ls-copy-for-claude-status");
+  if(!el){if(status)status.textContent="Handoff block not found.";return;}
+  var text=el.textContent||el.innerText||"";
+  function ok(){if(status){status.textContent="Copied! Paste into Claude.";setTimeout(function(){status.textContent="";},3000);}}
+  function fail(){if(status){status.textContent="Copy failed — select the block manually.";}}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(ok).catch(fail);}
+  else{try{var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);ok();}catch(e){fail();}}
+}</script>
+</body></html>
