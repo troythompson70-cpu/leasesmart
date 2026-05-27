@@ -299,6 +299,13 @@ button,input,textarea,select{font-family:inherit}
 .e2-consent-chk input{width:22px;height:22px;margin-top:2px;accent-color:#22d98a;flex-shrink:0}
 body.e2-has-footer{padding-bottom:52px}
 body.e2-has-cookie{padding-bottom:140px}
+/* Sprint E1 — public source imports (HPD, NJ HRC, HUD FMR) */
+.e1-public-banner{background:#f0fdf4;border:2px solid #86efac;color:#166534;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:800;margin-bottom:14px;line-height:1.5}
+.e1-source-badge{display:inline-block;background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;font-size:11px;font-weight:800;padding:4px 8px;border-radius:6px;margin-top:6px}
+.e1-fmr-panel{background:#fff;border:2px solid #e5e7eb;border-radius:14px;padding:16px;margin-bottom:14px}
+.e1-fmr-panel h3{font-size:15px;font-weight:900;margin-bottom:10px}
+.e1-benefits-panel{background:#fff;border:2px dashed #c4b5fd;border-radius:14px;padding:16px;margin-top:14px}
+.e1-benefits-draft{background:#faf5ff;border:1px solid #e9d5ff;color:#6b21a8;font-size:11px;font-weight:800;padding:6px 10px;border-radius:8px;display:inline-block;margin-bottom:8px}
 /* Sprint E3 — billing skeleton (TEST MODE) */
 .e3-test-banner{background:#eff6ff;border:2px solid #93c5fd;color:#1e40af;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:800;text-align:center;margin-bottom:16px;letter-spacing:.2px}
 .e3-pricing-wrap{max-width:1100px;margin:0 auto;padding:24px 18px 100px}
@@ -1288,9 +1295,11 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-d3-mock-seed.js"></script>
 <script src="_data/sprint-e2-mock-seed.js"></script>
 <script src="_data/sprint-e3-mock-seed.js"></script>
+<script src="_data/sprint-e1-public-source-seed.js"></script>
+<script src="_data/sprint-e1-mock-seed.js"></script>
 <script>
-// v2.2.0 Sprint E3 — Stripe billing skeleton (+ D5 + D4 + E2)
-var LS_BUILD = '20260526-v2.2.0-e3';
+// v2.3.0 Sprint E1 — public source imports (+ E3 + D5 + D4 + E2)
+var LS_BUILD = '20260526-v2.3.0-e1';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -3868,7 +3877,26 @@ function lsEnsureLandlordIntelSeed() {
     if (!existingIds[r.id]) LS_STORE.landlordIntel.push(JSON.parse(JSON.stringify(r)));
   });
   LS_STORE.landlordIntelSeeded = true;
+  e1SeedPublicSourcesIfNeeded();
   d2EnsureProgramCompatibility();
+  lsSave();
+}
+
+function e1SeedPublicSourcesIfNeeded() {
+  if (LS_STORE.e1PublicSourcesSeeded) return;
+  var pack = window.SPRINT_E1_PUBLIC_SOURCES;
+  if (!pack || !pack.records || !pack.records.length) return;
+  if (!LS_STORE.landlordIntel) LS_STORE.landlordIntel = [];
+  var existingIds = {};
+  LS_STORE.landlordIntel.forEach(function(r) { existingIds[r.id] = true; });
+  pack.records.forEach(function(r) {
+    if (!existingIds[r.id]) {
+      var rec = JSON.parse(JSON.stringify(r));
+      rec.program_compatibility = rec.program_compatibility || 'Section 8';
+      LS_STORE.landlordIntel.push(rec);
+    }
+  });
+  LS_STORE.e1PublicSourcesSeeded = true;
   lsSave();
 }
 
@@ -4146,7 +4174,10 @@ function renderLandlordIntel() {
   var rows = liApplyIntelFilters(lsGetVisibleLandlordIntel());
 
   var html = '<div style="max-width:920px">';
-  html += '<div class="li-notice"><strong>Demo data only.</strong> Sprint C1 + D2 advanced filters. 50 sample NJ landlord records. No real personal information.</div>';
+  html += '<div class="li-notice"><strong>Demo data only.</strong> Sprint C1 + D2 + E1 public source imports. No real PII. No verified claims.</div>';
+
+  html += '<div class="e1-public-banner"><strong>E1 Public Sources (demo seed)</strong> — NYC HPD Registry + NJ HRC listings stored locally until Supabase migration. Official API mapping only — no scraping.</div>';
+  html += e1RenderFmrPanelHtml();
 
   html += '<div class="li-saved-search"><strong>Saved search alerts</strong> <span class="b4-mock-tag">D2 DEMO</span>';
   html += '<p style="font-size:12px;color:#6b7280;margin:6px 0 10px">Save filter profiles — app flags new matching listings in the notification bell (dummy logic).</p>';
@@ -4210,6 +4241,11 @@ function renderLandlordIntel() {
       html += 'Phone: ' + (r.phone || '--') + ' &bull; Email: ' + (r.email || '--') + '<br/>';
       html += 'Availability: ' + (r.availability_status || '--') + ' &bull; Next recheck: ' + (r.next_recheck_date || '--');
       if (r.program_notes) html += '<br/>Program: ' + r.program_notes;
+      if (r.source_label) html += '<br/><span class="e1-source-badge">' + r.source_label + '</span>';
+      if (r.source_label === 'Public Source — HPD Registry' || r.source_label === 'Public Source — NJ Registry') {
+        var fmr = e1GetFmrDisplay(r.county, 2);
+        if (fmr) html += ' <span class="e1-source-badge" style="background:#fef3c7;color:#92400e;border-color:#fcd34d">' + fmr + '</span>';
+      }
       if (contacts) html += '<br/>Contact attempts: ' + contacts + ' (demo log)';
       if (r.warning_flags && r.warning_flags.length) html += '<br/>Flags: ' + r.warning_flags.join(', ');
       html += '</div><div class="li-actions">';
@@ -5030,6 +5066,7 @@ function renderC2ClientProfile() {
   }
   html += '</div>';
   html += renderC2FollowUpTracker([client]);
+  html += e1RenderBenefitsPanelHtml();
   panel.innerHTML = html;
   if (b4CanWriteCaseNote(ctx, client)) setTimeout(function() { bindC2CaseNotes(client.id); }, 0);
 }
@@ -5677,6 +5714,96 @@ function d5AddFirstDemoClient() {
 }
 
 // ================================================================
+// SPRINT E1 — Public source imports (HPD, NJ HRC, HUD FMR, benefits)
+// ================================================================
+function e1GetMock() {
+  return window.SPRINT_E1_MOCK || { noPii: true, dummyHouseholds: [], targetCounties: [] };
+}
+
+function e1GetFmrTable() {
+  return {
+    Essex: { 1: 1380, 2: 1680, 3: 2100 },
+    Passaic: { 1: 1320, 2: 1600, 3: 1980 },
+    Hudson: { 1: 1450, 2: 1750, 3: 2180 },
+    Bergen: { 1: 1480, 2: 1780, 3: 2220 },
+    Union: { 1: 1400, 2: 1700, 3: 2120 },
+    Manhattan: { 1: 2200, 2: 2600, 3: 3300 },
+    Brooklyn: { 1: 2050, 2: 2400, 3: 3000 }
+  };
+}
+
+function e1GetFmrDisplay(county, bedrooms) {
+  var beds = bedrooms || 2;
+  var table = e1GetFmrTable()[county];
+  if (!table || !table[beds]) return '';
+  return 'HUD 2026 Fair Market Rate: $' + table[beds] + '/mo (' + beds + ' BR)';
+}
+
+function e1RenderFmrPanelHtml() {
+  var mock = e1GetMock();
+  var counties = mock.targetCounties || ['Essex', 'Passaic', 'Hudson', 'Bergen', 'Union'];
+  var html = '<div class="e1-fmr-panel"><h3>HUD 2026 Fair Market Rate <span class="b4-mock-tag">DEMO</span></h3>';
+  html += '<p style="font-size:12px;color:#6b7280;margin-bottom:10px">Reference: huduser.gov/portal/datasets/fmr — demo values only. Not a verified rent claim.</p>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;font-size:12px">';
+  counties.forEach(function(c) {
+    html += '<div style="background:#f8fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px"><strong>' + c + '</strong><br/>1BR: ' + e1GetFmrDisplay(c, 1).replace('HUD 2026 Fair Market Rate: ', '') + '<br/>2BR: ' + e1GetFmrDisplay(c, 2).replace('HUD 2026 Fair Market Rate: ', '') + '</div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function e1ScreenDummyHousehold(householdId) {
+  var mock = e1GetMock();
+  var hh = (mock.dummyHouseholds || []).find(function(h) { return h.id === householdId; });
+  if (!hh) return { error: 'Unknown household', programs: [], no_pii_sent: true };
+  var forbidden = ['name', 'ssn', 'email', 'phone', 'address'];
+  forbidden.forEach(function(k) { if (hh[k]) return { error: 'PII not allowed', programs: [] }; });
+  var programs = ['SNAP', 'Cash Assistance', 'Section 8', 'HEAP', 'WIC', 'Medicaid', 'Child Care', 'NYCHA Public Housing', 'CityFHEPS', 'Rental Assistance'];
+  if (hh.household_size >= 3) programs.push('Section 8', 'WIC');
+  return {
+    draft: true,
+    label: 'DRAFT — Demo household screening only',
+    household_size: hh.household_size,
+    income_band: hh.income_band,
+    programs: programs.slice(0, 10),
+    eligible_count: programs.length,
+    all_programs_count: 40,
+    no_pii_sent: true,
+    nyc_opportunity: 'https://www.nyc.gov/site/opportunity/index.page'
+  };
+}
+
+function e1RunBenefitsScreen(householdId) {
+  var result = e1ScreenDummyHousehold(householdId);
+  APP.e1LastBenefitsScreen = result;
+  if (!LS_STORE.e1BenefitsScreens) LS_STORE.e1BenefitsScreens = [];
+  LS_STORE.e1BenefitsScreens.push({ ts: new Date().toISOString(), householdId: householdId, mock: true, no_pii: true });
+  lsSave();
+  if (typeof renderC2ClientProfile === 'function' && APP.c2SelectedClientId) renderC2ClientProfile();
+  if (typeof d5ShowToast === 'function') d5ShowToast('filter_applied');
+}
+
+function e1RenderBenefitsPanelHtml() {
+  var mock = e1GetMock();
+  var html = '<div class="e1-benefits-panel ls-internal-card"><span class="e1-benefits-draft">DRAFT — Demo only · No PII</span>';
+  html += '<h3>Program Eligibility Checker <span class="b4-mock-tag">E1 DEMO</span></h3>';
+  html += '<p style="font-size:13px;color:#6b7280;margin-bottom:10px">NYC Benefits Platform skeleton (nyc.gov/opportunity). Household size + income band only — no names or contact info sent.</p>';
+  (mock.dummyHouseholds || []).forEach(function(hh) {
+    html += '<button type="button" class="ghost-btn" style="margin:4px 8px 4px 0;padding:10px 14px;font-weight:700" onclick="e1RunBenefitsScreen(\'' + hh.id + '\')">Screen: ' + hh.household_size + ' person · ' + hh.income_band + ' income</button>';
+  });
+  if (APP.e1LastBenefitsScreen && APP.e1LastBenefitsScreen.programs) {
+    html += '<div style="margin-top:12px;font-size:13px"><strong>Last screen (demo):</strong> ' + APP.e1LastBenefitsScreen.eligible_count + ' eligible of 40+ programs<br/>';
+    html += APP.e1LastBenefitsScreen.programs.join(', ') + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function e1InitPublicSources() {
+  e1SeedPublicSourcesIfNeeded();
+}
+
+// ================================================================
 // SPRINT E3 — Stripe billing skeleton (TEST MODE only)
 // ================================================================
 function e3GetMock() {
@@ -6180,6 +6307,7 @@ function initLeaseSmart() {
   d3InitMobile();
   e2InitLegalFramework();
   e3InitBillingFramework();
+  e1InitPublicSources();
 
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
     sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');
