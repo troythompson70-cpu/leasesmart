@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sprint A8 Handoff — May 27, 2026</title>
+<style>.ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}
+.ls-copy-for-claude-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35);letter-spacing:.2px}
+.ls-copy-for-claude-btn:hover{filter:brightness(1.05)}
+.ls-copy-for-claude-btn:active{transform:scale(.98)}
+.ls-copy-for-claude-status{display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#16a34a;min-height:20px}</style>
+</head><body style="max-width:900px;margin:0 auto;padding:24px 18px;color:#111827">
+<h1 style="font-size:22px;margin-bottom:8px">Sprint A8 Handoff — May 27, 2026</h1>
+<p style="color:#6b7280;font-size:14px;margin-bottom:20px">TGT Technologies Inc. — click <strong>Copy for Claude</strong> below.</p>
+<div class="ls-handoff-wrap">
+  <pre class="ls-handoff-pre" id="lsHandoffBlock">--- CLAUDE HANDOFF START ---
+Project: LeaseSmart by TGT Technologies Inc.
+Sprint: A8 — Product Mode Split: LeaseSmart Renter + LeaseSmart Pro
+Build ID: 20260527-v2.5.0-a8
+Claude GO: Confirmed
+Mode: Build only — NOT COMMITTED — NOT PUSHED
+
+SUMMARY
+One platform, same Supabase/auth/RLS/backend — two clean UX modes after onboarding:
+• LeaseSmart Renter — apartment/housing search dashboard
+• LeaseSmart Pro — case management workspace (C2/C3/B5 demo skeletons)
+
+MODE SELECTION
+• New page a8-mode-pg: “Choose your LeaseSmart experience”
+• Question: How are you using LeaseSmart?
+• Renter card → productMode: renter
+• Pro card → productMode: pro
+• Storage: leasesmartProfile.productMode (preferred) + LS_STORE.productMode
+• Shown after onboarding complete when no mode set
+• Profile tab: switch modes + copy “You can update how you use LeaseSmart anytime in your profile.”
+
+RENTER MODE
+• Header: LeaseSmart / MY HOUSING SEARCH
+• Routes to dash-pg (matches, favorites, call guide, landlord intel, profile)
+• Blocks A8_PRO_PAGES + internal demo pages
+• Home internal demo section hidden
+
+PRO MODE
+• Header: LeaseSmart Pro / CLIENT HOUSING SUPPORT
+• Routes to C2 case workspace by default
+• Pro nav: Clients, Cases, Follow-Ups, Reports, Landlord Intel, Agency/Admin (role-gated)
+• C3/B3/B5 pages include pro nav + pro back routing
+• Mode does NOT bypass B4 role permissions — mock/demo skeleton only
+
+REGRESSION
+• _qa/sprint-a8-regression-test.mjs — PASS (includes nested A7 + A6)
+• A7 auth, magic link, support, legal gate preserved
+• No API keys / no service role in frontend
+• No real client data added
+
+KEY FILES
+• index.html (BUILD 20260527-v2.5.0-a8)
+• _qa/sprint-a8-regression-test.mjs
+• _qa/sprint-a7-regression-test.mjs (build id updated for A8 chain)
+• _qa/sprint-a6-regression-test.mjs (build id regex updated)
+• master-vault/sprints/HANDOFF-A8-latest.html
+
+COMMIT: Say exact phrase when Troy approves (e.g. Commit Sprint A8)
+PUSH: Only when Troy explicitly requests
+--- CLAUDE HANDOFF END ---</pre>
+  <button type="button" class="ls-copy-for-claude-btn" data-handoff-target="lsHandoffBlock" onclick="lsCopyHandoffForClaude(this)">Copy for Claude</button>
+  <span class="ls-copy-for-claude-status" aria-live="polite"></span>
+</div>
+<script>function lsCopyHandoffForClaude(btn){
+  var id=btn.getAttribute("data-handoff-target");
+  var el=document.getElementById(id);
+  var status=btn.parentElement.querySelector(".ls-copy-for-claude-status");
+  if(!el){if(status)status.textContent="Handoff block not found.";return;}
+  var text=el.textContent||el.innerText||"";
+  function ok(){if(status){status.textContent="Copied! Paste into Claude.";setTimeout(function(){status.textContent="";},3000);}}
+  function fail(){if(status){status.textContent="Copy failed — select the block manually.";}}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(ok).catch(fail);}
+  else{try{var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);ok();}catch(e){fail();}}
+}</script>
+</body></html>

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const QA = join(ROOT, '_qa');
-const BUILD = '20260527-v2.4.0-a7';
+const BUILD = '20260527-v2.5.0-a8';
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const emailDoc = readFileSync(join(ROOT, 'master-vault/SUPABASE-EMAIL-SETUP.md'), 'utf8');
 const tests = [];
@@ -43,7 +43,7 @@ assert('Email doc SMTP steps', emailDoc.includes('SMTP') && emailDoc.includes('E
 assert('Magic link OTP', html.includes('signInWithOtp'));
 assert('No signInWithPassword', !html.includes('signInWithPassword'));
 assert('No password in beta auth forms', !html.match(/beta-(signup|login)-pg[\s\S]*?type="password"/));
-assert('routeOnboarding dashboard', html.includes('function routeOnboarding') && html.includes("showPage('dash-pg')"));
+assert('routeOnboarding mode routing', html.includes('function routeOnboarding') && html.includes('a8RouteToModeHome()'));
 assert('Legal gate intact', html.includes('beta-legal-pg') && html.includes('submitBetaLegalAccept'));
 assert('No API keys in index', !html.match(/\bsk-[A-Za-z0-9]{20,}/) && !html.match(/service_role/));
 assert('Resend stores last email', html.includes('A7_LAST_MAGIC_EMAIL'));

@@ -482,6 +482,22 @@ body.e2-has-cookie{padding-bottom:140px}
 .a7-support-text{font-size:13px;color:#6b7280;margin-bottom:8px}
 .a7-help-btn{background:#f8fafb;border:2px solid #e5e7eb;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;color:#374151;cursor:pointer;font-family:inherit}
 .a7-help-btn:hover{border-color:#22d98a;color:#111827}
+/* Sprint A8 — product mode split (Renter / Pro) */
+.a8-mode-wrap{max-width:920px;margin:0 auto;padding:28px 18px 80px}
+.a8-mode-title{font-size:24px;font-weight:900;color:#111827;text-align:center;margin-bottom:8px}
+.a8-mode-sub{font-size:14px;color:#6b7280;text-align:center;margin-bottom:24px;line-height:1.6}
+.a8-mode-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.a8-mode-card{background:#fff;border:2px solid #e5e7eb;border-radius:18px;padding:24px;cursor:pointer;transition:border-color .15s,box-shadow .15s;text-align:left;font-family:inherit;width:100%}
+.a8-mode-card:hover{border-color:#22d98a;box-shadow:0 8px 24px rgba(34,217,138,.12)}
+.a8-mode-card h3{font-size:18px;font-weight:900;margin-bottom:8px;color:#111827}
+.a8-mode-card p{font-size:14px;color:#6b7280;line-height:1.55;margin:0}
+.a8-mode-badge{display:inline-block;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;margin-bottom:10px}
+.a8-mode-badge-renter{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.a8-mode-badge-pro{background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd}
+.a8-pro-nav{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px;background:#fff;border-bottom:2px solid #e5e7eb}
+.a8-pro-nav button{background:#f8fafb;border:2px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;color:#374151}
+.a8-pro-nav button.on{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8}
+.a8-renter-sub{font-size:11px;font-weight:800;letter-spacing:.8px;color:#6b7280;text-transform:uppercase}
 .beta-welcome-hero{text-align:center;margin-bottom:22px}
 .beta-welcome-icon{font-size:52px;margin-bottom:10px;line-height:1}
 .beta-welcome-name{font-size:22px;font-weight:900;color:#111827;margin-bottom:6px}
@@ -828,7 +844,7 @@ body { font-size: 16px !important; }
       Contact: <a href="mailto:leasesmart@tgttechnologies.com" style="color:#22d98a;font-weight:600">leasesmart@tgttechnologies.com</a> &bull; <a href="mailto:support@tgttechnologies.com" style="color:#22d98a;font-weight:600">support@tgttechnologies.com</a>
     </div>
   </div>
-  <div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:14px;padding:18px;margin-top:24px">
+  <div id="a8HomeInternalSection" style="background:#fff7ed;border:2px solid #fed7aa;border-radius:14px;padding:18px;margin-top:24px;display:none">
     <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#9a3412;text-transform:uppercase;margin-bottom:8px">Demo / Internal Only</div>
     <p style="font-size:14px;color:#7c2d12;line-height:1.6;margin-bottom:12px">Internal skeletons — <strong>mock data only</strong>. Not for production, grants, or investor claims.</p>
     <div class="ls-internal-nav">
@@ -1175,13 +1191,33 @@ body { font-size: 16px !important; }
 </div>
 </div>
 
+<!-- A8 — Product mode selection -->
+<div id="a8-mode-pg" class="pg">
+  <div class="a8-mode-wrap">
+    <div class="a8-mode-title">Choose your LeaseSmart experience</div>
+    <p class="a8-mode-sub">How are you using LeaseSmart? Same platform — two focused experiences. You can change this anytime in Profile.</p>
+    <div class="a8-mode-grid">
+      <button type="button" class="a8-mode-card" onclick="a8SelectMode('renter')">
+        <span class="a8-mode-badge a8-mode-badge-renter">LeaseSmart Renter</span>
+        <h3>I&rsquo;m looking for housing</h3>
+        <p>Find housing, save listings, track calls, and manage your apartment search.</p>
+      </button>
+      <button type="button" class="a8-mode-card" onclick="a8SelectMode('pro')">
+        <span class="a8-mode-badge a8-mode-badge-pro">LeaseSmart Pro</span>
+        <h3>I help people find housing</h3>
+        <p>Manage clients, track follow-ups, and support housing placements. Demo skeleton only.</p>
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- DASHBOARD PAGE -->
 <div id="dash-pg" class="pg">
   <header class="dash-head">
     <div class="dash-head-in">
       <div style="display:flex;align-items:center;gap:10px">
         <div class="dash-mark">LS</div>
-        <div><div class="dash-name">LeaseSmart</div><div class="dash-sub">YOUR MATCHES</div></div>
+        <div><div class="dash-name" id="a8RenterDashTitle">LeaseSmart</div><div class="dash-sub a8-renter-sub" id="a8RenterDashSub">MY HOUSING SEARCH</div></div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <div id="dashFollowUpBar" class="ls-followup-bar" style="display:none;margin:0;border-radius:8px;padding:6px 12px;font-size:12px"></div>
@@ -1265,7 +1301,8 @@ body { font-size: 16px !important; }
 <div id="c2-case-pg" class="pg">
   <div class="ls-internal-banner"><strong>&#9888; DEMO / INTERNAL — Case Management Skeleton</strong>Mock clients only. B4 permission model. No real clients. No cross-agency sharing.</div>
   <div id="c2FollowUpHeader" class="ls-followup-bar" style="display:none"></div>
-  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;width:100%"><div style="display:flex;align-items:center;gap:10px"><div class="dash-mark">LS</div><div><div class="dash-name">Case Management</div><div class="dash-sub">SPRINT C2 + D1</div></div></div><div style="display:flex;gap:8px;align-items:center"><div id="c2NotifBell"></div><button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Back</button></div></div></div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;width:100%"><div style="display:flex;align-items:center;gap:10px"><div class="dash-mark">LS</div><div><div class="dash-name" id="a8ProDashTitle">LeaseSmart Pro</div><div class="dash-sub a8-renter-sub" id="a8ProDashSub">CLIENT HOUSING SUPPORT</div></div></div><div style="display:flex;gap:8px;align-items:center"><div id="c2NotifBell"></div><button class="ghost-btn" onclick="a8OpenModePicker()">Switch mode</button></div></div></div>
+  <div id="a8ProNavBar" class="a8-pro-nav"></div>
   <div class="b4-role-bar" id="c2RoleBar"></div>
   <div class="ls-internal-panel" id="c2CasePanel"></div>
 </div>
@@ -1280,21 +1317,24 @@ body { font-size: 16px !important; }
 <!-- C3 REPORTING DASHBOARD -->
 <div id="c3-reporting-pg" class="pg">
   <div class="ls-internal-banner"><strong>&#9888; INTERNAL PREVIEW — Reporting Skeleton</strong>All metrics are DEMO METRIC or INTERNAL PREVIEW. Not for public, grant, or investor claims.</div>
-  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="dash-name">Reporting Dashboard</div><div class="dash-sub">SPRINT C3 SKELETON</div></div><button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Back</button></div></div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="dash-name">Reporting Dashboard</div><div class="dash-sub">CASE MANAGEMENT WORKSPACE</div></div><button class="ghost-btn" onclick="a8ProBack()">&#8592; Back</button></div></div>
+  <div class="a8-pro-nav"></div>
   <div class="ls-internal-panel" id="c3ReportingPanel"></div>
 </div>
 
 <!-- B3 USER DATA DASHBOARD -->
 <div id="b3-user-data-pg" class="pg">
   <div class="ls-internal-banner"><strong>&#9888; DEMO DATA PREVIEW — User Data Skeleton</strong>Your device data only. Masked samples. Skeleton only.</div>
-  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="dash-name">User Data Dashboard</div><div class="dash-sub">SPRINT B3 SKELETON</div></div><button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Back</button></div></div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="dash-name">User Data Dashboard</div><div class="dash-sub">CASE MANAGEMENT WORKSPACE</div></div><button class="ghost-btn" onclick="a8ProBack()">&#8592; Back</button></div></div>
+  <div class="a8-pro-nav"></div>
   <div class="ls-internal-panel" id="b3UserDataPanel"></div>
 </div>
 
 <!-- B5 PLATFORM ADMIN -->
 <div id="b5-platform-pg" class="pg">
   <div class="ls-internal-banner"><strong>&#9888; TEST / DEMO — Platform Admin Skeleton</strong>Troy/platform admin preview. Mock counts only. No service role key in frontend.</div>
-  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="dash-name">Platform Admin</div><div class="dash-sub">SPRINT B5 SKELETON</div></div><button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Back</button></div></div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="dash-name">Platform Admin</div><div class="dash-sub">CASE MANAGEMENT WORKSPACE</div></div><button class="ghost-btn" onclick="a8ProBack()">&#8592; Back</button></div></div>
+  <div class="a8-pro-nav"></div>
   <div class="ls-internal-panel" id="b5PlatformPanel"></div>
 </div>
 
@@ -1314,8 +1354,8 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-e1-public-source-seed.js"></script>
 <script src="_data/sprint-e1-mock-seed.js"></script>
 <script>
-// v2.4.0 Sprint A7 — magic-link auth polish (+ E1 + E3 + D5 + D4 + E2)
-var LS_BUILD = '20260527-v2.4.0-a7';
+// v2.5.0 Sprint A8 — product mode split (+ A7 + E1 + E3)
+var LS_BUILD = '20260527-v2.5.0-a8';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -1342,7 +1382,8 @@ var APP = {
   lastFieldChanged: ''
 };
 
-var ONBOARDING_PAGES = ['beta-signup-pg', 'beta-login-pg', 'beta-welcome-pg', 'beta-legal-pg', 'profile-create-pg', 'quiz-pg', 'search-pg'];
+var ONBOARDING_PAGES = ['beta-signup-pg', 'beta-login-pg', 'beta-welcome-pg', 'beta-legal-pg', 'profile-create-pg', 'quiz-pg', 'search-pg', 'a8-mode-pg'];
+var A8_PRO_PAGES = ['b4-workspace-pg', 'c2-case-pg', 'c2-client-pg', 'c3-reporting-pg', 'b3-user-data-pg', 'b5-platform-pg'];
 var E2_LEGAL_PAGES = ['e2-tos-pg', 'e2-privacy-pg'];
 var E3_BILLING_PAGES = ['e3-pricing-pg', 'e3-checkout-pg', 'e3-manage-pg', 'e3-billing-pg'];
 var INTERNAL_DEMO_PAGES = ['admin-pg', 'b4-workspace-pg', 'c2-case-pg', 'c2-client-pg', 'c3-reporting-pg', 'b3-user-data-pg', 'b5-platform-pg'];
@@ -1795,7 +1836,7 @@ function getStepById(id) {
 // Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
 // ================================================================
 var LS_VERSION = 'Beta v1.2 — Housing Intelligence Foundation';
-var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false, d2SavedSearchProfiles: [], liContactHistory: {}, d2Seeded: false, d2AlertsChecked: false, d4RateLimits: {}, securityLog: { failedLoginAttempts: [], totalFailedCount: 0 }, d4SessionExpiresAt: null, e2DemoClientsAdded: [], e2ClientConsentLog: [], e2DataRetentionPreview: null };
+var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false, d2SavedSearchProfiles: [], liContactHistory: {}, d2Seeded: false, d2AlertsChecked: false, d4RateLimits: {}, securityLog: { failedLoginAttempts: [], totalFailedCount: 0 }, d4SessionExpiresAt: null, e2DemoClientsAdded: [], e2ClientConsentLog: [], e2DataRetentionPreview: null, productMode: null };
 var LS_STORE = Object.assign({}, LS_STORE_DEFAULTS);
 
 function lsNormalizeStore(data) {
@@ -1935,6 +1976,126 @@ function submitCreateProfile() {
   beginQuestionnaire();
 }
 
+// ================================================================
+// SPRINT A8 — Product mode split (Renter / Pro)
+// ================================================================
+function a8GetProductMode() {
+  var prof = lsLoadProfile() || {};
+  return prof.productMode || LS_STORE.productMode || APP.productMode || null;
+}
+
+function a8SetProductMode(mode) {
+  if (mode !== 'renter' && mode !== 'pro') return;
+  LS_STORE.productMode = mode;
+  APP.productMode = mode;
+  var prof = lsLoadProfile() || {};
+  prof.productMode = mode;
+  lsSaveFullProfile(prof);
+  lsSave();
+  a8RefreshHomeChrome();
+}
+
+function a8NeedsModeSelection() {
+  var prof = lsLoadProfile() || {};
+  return isOnboardingComplete(prof) && !a8GetProductMode();
+}
+
+function a8SelectMode(mode) {
+  a8SetProductMode(mode);
+  a8RouteToModeHome();
+}
+
+function a8SwitchMode(mode) {
+  a8SetProductMode(mode);
+  a8RouteToModeHome();
+}
+
+function a8OpenModePicker() {
+  showPage('a8-mode-pg');
+}
+
+function a8ApplyRenterChrome() {
+  var title = document.getElementById('a8RenterDashTitle');
+  var sub = document.getElementById('a8RenterDashSub');
+  if (title) title.textContent = 'LeaseSmart';
+  if (sub) sub.textContent = 'MY HOUSING SEARCH';
+}
+
+function a8ApplyProChrome() {
+  var title = document.getElementById('a8ProDashTitle');
+  var sub = document.getElementById('a8ProDashSub');
+  if (title) title.textContent = 'LeaseSmart Pro';
+  if (sub) sub.textContent = 'CLIENT HOUSING SUPPORT';
+}
+
+function a8RefreshHomeChrome() {
+  var sec = document.getElementById('a8HomeInternalSection');
+  if (sec) sec.style.display = a8GetProductMode() === 'pro' ? 'block' : 'none';
+}
+
+function a8ProBack() {
+  if (a8GetProductMode() === 'pro') showC2CaseWorkspace();
+  else showPage('home-pg');
+}
+
+function a8RenderProNav(active) {
+  var ctx = b4GetDemoContext();
+  var items = [
+    { id: 'clients', label: 'Clients', fn: 'showC2CaseWorkspace()' },
+    { id: 'cases', label: 'Cases', fn: 'showC2CaseWorkspace()' },
+    { id: 'followups', label: 'Follow-Ups', fn: 'showC2CaseWorkspace()' },
+    { id: 'reports', label: 'Reports', fn: 'showC3Reporting()' },
+    { id: 'intel', label: 'Landlord Intel', fn: 'a8OpenProLandlordIntel()' }
+  ];
+  if (ctx.roleKey === 'supervisor' || ctx.roleKey === 'manager' || ctx.roleKey === 'director' || ctx.roleKey === 'agency_admin') {
+    items.push({ id: 'agency', label: 'Agency / Admin', fn: 'showB5PlatformAdmin()' });
+  }
+  var html = items.map(function(it) {
+    var on = active === it.id ? ' on' : '';
+    return '<button type="button" class="' + on.trim() + '" onclick="' + it.fn + '">' + it.label + '</button>';
+  }).join('');
+  document.querySelectorAll('.a8-pro-nav').forEach(function(bar) { bar.innerHTML = html; });
+}
+
+function a8OpenProLandlordIntel() {
+  APP.a8AllowRenterDash = true;
+  buildDashboard();
+  a8ApplyRenterChrome();
+  showPage('dash-pg');
+  var tabBtn = document.querySelector('#dash-pg .tab-btn[onclick*="landlord-intel"]');
+  if (tabBtn) showTab('tab-landlord-intel', tabBtn);
+  APP.a8AllowRenterDash = false;
+}
+
+function a8EnterProWorkspace() {
+  if (a8GetProductMode() !== 'pro') {
+    buildDashboard();
+    a8ApplyRenterChrome();
+    showPage('dash-pg');
+    return;
+  }
+  showC2CaseWorkspace();
+}
+
+function a8RouteToModeHome() {
+  if (a8GetProductMode() === 'pro') {
+    a8EnterProWorkspace();
+    return;
+  }
+  APP.listings = applyIntelligenceToListings(
+    (LS_STORE.session && LS_STORE.session.listings) || getFallback(),
+    APP.profile || lsLoadProfile() || {}
+  );
+  buildDashboard();
+  a8ApplyRenterChrome();
+  showPage('dash-pg');
+}
+
+function a8SyncModeFromProfile() {
+  var mode = a8GetProductMode();
+  if (mode) APP.productMode = mode;
+}
+
 function routeOnboarding() {
   if (!BETA_SESSION.authUserId) {
     showBetaLoginPage();
@@ -1964,8 +2125,11 @@ function routeOnboarding() {
     APP.profile
   );
   APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
-  buildDashboard();
-  showPage('dash-pg');
+  if (a8NeedsModeSelection()) {
+    showPage('a8-mode-pg');
+    return;
+  }
+  a8RouteToModeHome();
 }
 
 function lsPickCompleteResumeRecord() {
@@ -2529,8 +2693,11 @@ function resumeSession() {
   if (!LS_STORE.session || !LS_STORE.session.profile) {
     lsPersistProfile(APP.profile);
   }
-  buildDashboard();
-  showPage('dash-pg');
+  if (a8NeedsModeSelection()) {
+    showPage('a8-mode-pg');
+    return;
+  }
+  a8RouteToModeHome();
   lsTrack('session_resume');
 }
 
@@ -2543,6 +2710,18 @@ function showPage(id) {
   if (id === 'c2-client-pg') flushC2CaseNotes();
   if (requiresBetaOnboarding() && !isOnboardingComplete() && ONBOARDING_PAGES.indexOf(id) < 0 && INTERNAL_DEMO_PAGES.indexOf(id) < 0 && E2_LEGAL_PAGES.indexOf(id) < 0 && E3_BILLING_PAGES.indexOf(id) < 0) {
     routeOnboarding();
+    return;
+  }
+  if (requiresBetaOnboarding() && isOnboardingComplete() && a8NeedsModeSelection() && id !== 'a8-mode-pg' && id !== 'ls-logout-pg' && id !== 'ls-error-pg' && E2_LEGAL_PAGES.indexOf(id) < 0 && E3_BILLING_PAGES.indexOf(id) < 0) {
+    showPage('a8-mode-pg');
+    return;
+  }
+  if (a8GetProductMode() === 'renter' && (A8_PRO_PAGES.indexOf(id) >= 0 || INTERNAL_DEMO_PAGES.indexOf(id) >= 0)) {
+    a8RouteToModeHome();
+    return;
+  }
+  if (a8GetProductMode() === 'pro' && id === 'dash-pg' && !APP.a8AllowRenterDash) {
+    a8EnterProWorkspace();
     return;
   }
   document.querySelectorAll('.pg').forEach(function(p) { p.classList.remove('show'); });
@@ -3283,6 +3462,8 @@ function getFallback() {
 // ================================================================
 function buildDashboard() {
   var p = APP.profile;
+  a8ApplyRenterChrome();
+  a8RefreshHomeChrome();
   document.getElementById('profChip').textContent = (p.name || '').split(' ')[0] + ' \u2022 ' + (p.state || '');
   updateStats();
   updateFavoritesCount();
@@ -3897,6 +4078,14 @@ function renderProfile() {
   html += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px">';
   html += '<button class="green-btn" style="flex:1;min-width:200px" onclick="openEditProfile()">Edit Profile &rarr;</button>';
   html += '<button class="ghost-btn" style="flex:1;min-width:200px;padding:16px;font-size:15px;font-weight:700" onclick="startOver()">Start Over</button>';
+  html += '</div>';
+  var curMode = a8GetProductMode();
+  html += '<div style="margin-top:24px;padding:16px;background:#f8fafb;border:2px solid #e5e7eb;border-radius:14px">';
+  html += '<h3 style="font-size:16px;font-weight:900;margin-bottom:8px">LeaseSmart experience</h3>';
+  html += '<p style="font-size:13px;color:#6b7280;margin-bottom:12px">You can update how you use LeaseSmart anytime in your profile.</p>';
+  html += '<p style="font-size:13px;margin-bottom:12px"><strong>Current mode:</strong> ' + (curMode === 'pro' ? 'LeaseSmart Pro' : (curMode === 'renter' ? 'LeaseSmart Renter' : 'Not set')) + '</p>';
+  html += '<button type="button" class="ghost-btn" style="margin:4px 8px 4px 0;font-weight:700" onclick="a8SwitchMode(\'renter\')">Switch to Renter</button>';
+  html += '<button type="button" class="ghost-btn" style="margin:4px 0;font-weight:700" onclick="a8SwitchMode(\'pro\')">Switch to Pro</button>';
   html += '</div>';
   html += '</div>';
   document.getElementById('tab-profile').innerHTML = html;
@@ -5007,6 +5196,10 @@ function c2GetAuthorizedClients() {
 }
 
 function showC2CaseWorkspace() {
+  if (a8GetProductMode() === 'renter') {
+    a8RouteToModeHome();
+    return;
+  }
   var ctx = b4GetDemoContext();
   if (ctx.roleKey !== 'caseworker' && ctx.roleKey !== 'supervisor' && ctx.roleKey !== 'agency_admin' && ctx.roleKey !== 'director' && ctx.roleKey !== 'manager') {
     LS_STORE.b4DemoRole = 'caseworker';
@@ -5019,6 +5212,8 @@ function showC2CaseWorkspace() {
   b4RecordAudit('c2_workspace_open', 'case_clients', null, { mock: true });
   renderC2CaseWorkspace();
   d1RefreshNotificationUI();
+  a8ApplyProChrome();
+  a8RenderProNav('clients');
 }
 
 function renderC2RoleBar() {
@@ -5040,7 +5235,7 @@ function renderC2CaseWorkspace() {
   var ctx = b4GetDemoContext();
   var clients = c2GetAuthorizedClients();
   b4RecordAudit('c2_query_clients', 'case_clients', null, { returned: clients.length, mock: true });
-  var html = '<h2 style="font-size:18px;margin-bottom:12px">My Clients <span class="b4-mock-tag">DEMO/INTERNAL</span></h2>';
+  var html = '<h2 style="font-size:18px;margin-bottom:12px">Client housing support <span class="b4-mock-tag">DEMO/INTERNAL</span></h2>';
   if (ctx.roleKey !== 'caseworker') {
     html += '<p style="font-size:13px;color:#6b7280;margin-bottom:12px">Caseworker view shows assigned clients only. Switch to Demo Caseworker Sam for full C2 demo.</p>';
   }
@@ -5171,7 +5366,12 @@ function bindC2CaseNotes(clientId) {
 }
 
 function showC3Reporting() {
+  if (a8GetProductMode() === 'renter') {
+    a8RouteToModeHome();
+    return;
+  }
   showPage('c3-reporting-pg');
+  a8RenderProNav('reports');
   renderC3ReportingDashboard();
 }
 
@@ -5207,12 +5407,17 @@ function canAccessB5PlatformAdmin() {
 }
 
 function showB5PlatformAdmin() {
+  if (a8GetProductMode() === 'renter') {
+    a8RouteToModeHome();
+    return;
+  }
   if (!canAccessB5PlatformAdmin()) {
     var code = prompt('Platform admin demo — enter admin code (same as TGT admin gate):');
     if (code !== ADMIN_CODE) { alert('Access denied. Admin route does not bypass auth.'); return; }
     APP.b5AdminUnlocked = true;
   }
   showPage('b5-platform-pg');
+  a8RenderProNav('agency');
   renderB5PlatformDashboard();
 }
 
@@ -5243,7 +5448,12 @@ function renderB5PlatformDashboard() {
 }
 
 function showB3UserData() {
+  if (a8GetProductMode() === 'renter') {
+    a8RouteToModeHome();
+    return;
+  }
   showPage('b3-user-data-pg');
+  a8RenderProNav('clients');
   renderB3UserDataDashboard();
 }
 
@@ -6220,12 +6430,14 @@ function d3RefreshMobileNavLinks() {
       items.push({ label: label, tabId: m[1], type: 'tab' });
     });
   } else if (pageId === 'c2-case-pg' || pageId === 'c2-client-pg') {
-    items.push({ label: 'My Clients', type: 'fn', fn: 'c2' });
-    items.push({ label: 'Home', type: 'page', page: 'home-pg' });
+    items.push({ label: 'Clients', type: 'fn', fn: 'c2' });
+    items.push({ label: 'Reports', type: 'fn', fn: 'c3' });
+    items.push({ label: 'Switch mode', type: 'fn', fn: 'mode' });
+  } else if (a8GetProductMode() === 'pro') {
+    items.push({ label: 'Clients', type: 'fn', fn: 'c2' });
+    items.push({ label: 'Reports', type: 'fn', fn: 'c3' });
   } else {
     items.push({ label: 'Home', type: 'page', page: 'home-pg' });
-    if (typeof showC2CaseWorkspace === 'function') items.push({ label: 'Case Management (C2)', type: 'fn', fn: 'c2' });
-    if (typeof showC3Reporting === 'function') items.push({ label: 'Reporting (C3)', type: 'fn', fn: 'c3' });
   }
 
   var html = '';
@@ -6248,6 +6460,8 @@ function d3RefreshMobileNavLinks() {
         showC2CaseWorkspace();
       } else if (it.fn === 'c3') {
         showC3Reporting();
+      } else if (it.fn === 'mode') {
+        a8OpenModePicker();
       }
     });
   });
@@ -6354,6 +6568,8 @@ function initLeaseSmart() {
   e2InitLegalFramework();
   e3InitBillingFramework();
   e1InitPublicSources();
+  a8SyncModeFromProfile();
+  a8RefreshHomeChrome();
 
   if (location.search.indexOf('v=') < 0 && !sessionStorage.getItem('ls_bust_' + LS_BUILD)) {
     sessionStorage.setItem('ls_bust_' + LS_BUILD, '1');

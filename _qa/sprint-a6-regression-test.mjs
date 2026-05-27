@@ -9,7 +9,7 @@ const buildMatch = html.match(/LS_BUILD = '([^']+)'/);
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('A6 build id', buildMatch && /^20260526-v2\.(3\.0-e1|4\.0-a7)$|^20260527-v2\.4\.0-a7$/.test(buildMatch[1]));
+assert('A6 build id', buildMatch && /^20260526-v2\.(3\.0-e1|4\.0-a7)$|^20260527-v2\.(4\.0-a7|5\.0-a8)$/.test(buildMatch[1]));
 assert('Profile create page', html.includes('id="profile-create-pg"') && html.includes('submitCreateProfile'));
 assert('Onboarding router', html.includes('function routeOnboarding'));
 assert('No home default show', !html.includes('id="home-pg" class="pg show"'));
