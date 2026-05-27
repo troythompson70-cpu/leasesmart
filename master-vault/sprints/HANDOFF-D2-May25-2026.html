@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sprint D2 Handoff — May 25, 2026</title>
+<style>.ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}
+.ls-copy-for-claude-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35);letter-spacing:.2px}
+.ls-copy-for-claude-btn:hover{filter:brightness(1.05)}
+.ls-copy-for-claude-btn:active{transform:scale(.98)}
+.ls-copy-for-claude-status{display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#16a34a;min-height:20px}</style>
+</head><body style="max-width:900px;margin:0 auto;padding:24px 18px;color:#111827">
+<h1 style="font-size:22px;margin-bottom:8px">Sprint D2 Handoff — May 25, 2026</h1>
+<p style="color:#6b7280;font-size:14px;margin-bottom:20px">TGT Technologies Inc. — click <strong>Copy for Claude</strong> below.</p>
+<div class="ls-handoff-wrap">
+  <pre class="ls-handoff-pre" id="lsHandoffBlock">--- CLAUDE HANDOFF START ---
+Project: LeaseSmart by TGT Technologies Inc.
+Sprint: D2 — Landlord Search, Saved Alerts, Contact History
+Build ID: 20260526-v1.6.0-d2
+Mode: Build only — NOT COMMITTED — NOT PUSHED
+Date: May 25, 2026
+
+AGENT 1 — Advanced landlord search filters: COMPLETE
+• C1 Landlord Intel tab — filter by county, verification status, availability, program compatibility
+• liApplyIntelFilters / liSetFilter + Clear filters
+• program_compatibility backfilled on all 50 NJ demo records
+
+AGENT 2 — Saved search alerts: COMPLETE
+• Save current filter profile (d2SaveSearchProfile)
+• Dummy matching via d2MatchLandlordsForProfile + mock fixtures
+• New matches → d1AddInAppAlert (saved_search_match) in notification bell
+• d2CheckSavedSearchAlerts on dashboard load + manual Check button
+• Module: scripts/d2-saved-search-alerts.mjs
+
+AGENT 3 — Landlord contact history log: COMPLETE
+• Per-landlord contact log (date, method, outcome, notes)
+• Tied to landlord record only — liContactHistory store
+• Auto-save 1s debounce (bindLiContactHistoryAutosave)
+• Seeded dummy history in _data/sprint-d2-mock-seed.js
+• UI in landlord edit modal (#liContactHistoryBody)
+
+AGENT 4 — Regression: PASS 46/46
+• D2: 46/46 PASS
+• Nested A6: 34/34 · C1: 24/24 · B2: 29/29 · B4: 64/64 · v1.4.0: 50/50 · D1: 46/46
+
+KEY FILES
+• index.html (LS_BUILD = 20260526-v1.6.0-d2)
+• _data/sprint-d2-mock-seed.js
+• scripts/d2-saved-search-alerts.mjs
+• _qa/sprint-d2-regression-test.mjs
+• supabase/drafts/sprint_d2_landlord_search.sql (DRAFT ONLY)
+
+HOW TO DEMO
+1. Dashboard → Landlord Intel tab → use 4 filters + Save current search
+2. Check notification bell for saved_search_match alerts
+3. Edit any landlord → Contact history section → log attempt (auto-saves)
+
+PRIOR SPRINTS INTACT: A6, C1, B2, B4, C2, C3, B5, B3, D1
+
+COMMIT: Say exact phrase when Troy approves (e.g. Commit Sprint D2)
+PUSH: Only when Troy explicitly requests
+--- CLAUDE HANDOFF END ---</pre>
+  <button type="button" class="ls-copy-for-claude-btn" data-handoff-target="lsHandoffBlock" onclick="lsCopyHandoffForClaude(this)">Copy for Claude</button>
+  <span class="ls-copy-for-claude-status" aria-live="polite"></span>
+</div>
+<script>function lsCopyHandoffForClaude(btn){
+  var id=btn.getAttribute("data-handoff-target");
+  var el=document.getElementById(id);
+  var status=btn.parentElement.querySelector(".ls-copy-for-claude-status");
+  if(!el){if(status)status.textContent="Handoff block not found.";return;}
+  var text=el.textContent||el.innerText||"";
+  function ok(){if(status){status.textContent="Copied! Paste into Claude.";setTimeout(function(){status.textContent="";},3000);}}
+  function fail(){if(status){status.textContent="Copy failed — select the block manually.";}}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(ok).catch(fail);}
+  else{try{var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);ok();}catch(e){fail();}}
+}</script>
+</body></html>

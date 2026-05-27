@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sprint F1 Handoff — May 26, 2026</title>
+<style>.ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}
+.ls-copy-for-claude-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35);letter-spacing:.2px}
+.ls-copy-for-claude-btn:hover{filter:brightness(1.05)}
+.ls-copy-for-claude-btn:active{transform:scale(.98)}
+.ls-copy-for-claude-status{display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#16a34a;min-height:20px}</style>
+</head><body style="max-width:900px;margin:0 auto;padding:24px 18px;color:#111827">
+<h1 style="font-size:22px;margin-bottom:8px">Sprint F1 Handoff — May 26, 2026</h1>
+<p style="color:#6b7280;font-size:14px;margin-bottom:20px">TGT Technologies Inc. — click <strong>Copy for Claude</strong> below.</p>
+<div class="ls-handoff-wrap">
+  <pre class="ls-handoff-pre" id="lsHandoffBlock">--- CLAUDE HANDOFF START ---
+Project: LeaseSmart by TGT Technologies Inc.
+Sprint: F1 — AI Communication Framework + Mobile Command Center v2
+Build ID: 20260526-v2.3.0-f1 (command center) · index.html 20260526-v2.2.0-e3 (E3 integrated for regression chain)
+Mode: Build only — NOT COMMITTED — NOT PUSHED
+
+AGENT 1 — AI Shared Sprint Log: COMPLETE
+• scripts/ai-comms-bridge.mjs — append-only JSON log with sanitize()
+• master-vault/ai-comms/AI-SHARED-LOG.json — timestamp, sprint, phase, source, type, content, verdict, commit_phrase_required
+• scripts/ai-context-export.mjs → master-vault/AI-CONTEXT-SNAPSHOT.md
+• Refuses entries containing secrets after sanitization
+
+AGENT 2 — Mobile Command Center v2: COMPLETE
+• command-center.html — standalone internal tool (index.html NOT modified)
+• Demo gate / localhost notice · 5 tabs: Triple AI Review, Sprint Status Board, AI Log Viewer, Commit Control (READ ONLY), Morning Briefing
+• API keys memory-only — no localStorage · no hardcoded keys · no git actions
+
+AGENT 3 — Push notification skeleton: COMPLETE
+• scripts/f1-push-notifications.mjs — demo alerts only, realPushSent: false
+• Label: DEMO — Real push needs VAPID keys to activate
+• Demo panel in command center Tab 5
+
+AGENT 4 — Context export + domain guide: COMPLETE
+• scripts/ai-context-export.mjs — full project state snapshot for any AI
+• scripts/domain-setup-guide.mjs → master-vault/DOMAIN-SETUP-GUIDE.md
+• GoDaddy CNAME + GitHub Pages steps for leasesmart.tgttechnologies.com
+
+AGENT 5 — Regression: PASS 45/45
+• F1: 45/45 · E3: 52/52 · E2: 47/47 · D5: 44/44 · D4: 43/43 · D1–D3 + A6/C1/B2/B4/v1.4.0 all PASS
+• No Stripe live keys in tracked files · No real billing · No real push · AI log sanitized
+
+KEY FILES
+• command-center.html
+• scripts/ai-comms-bridge.mjs, scripts/ai-context-export.mjs
+• scripts/f1-push-notifications.mjs, scripts/domain-setup-guide.mjs
+• master-vault/ai-comms/AI-SHARED-LOG.json
+• master-vault/AI-CONTEXT-SNAPSHOT.md, master-vault/DOMAIN-SETUP-GUIDE.md
+• _qa/sprint-f1-regression-test.mjs
+• master-vault/sprints/HANDOFF-F1-latest.html
+
+NOTE: E3 billing skeleton integrated into index.html (v2.2.0-e3) to satisfy F1 nested E3 regression chain.
+
+COMMIT: Say exact phrase when Troy approves (e.g. Commit Sprint F1)
+PUSH: Only when Troy explicitly requests
+NEXT: Await Claude GO before next phase
+--- CLAUDE HANDOFF END ---</pre>
+  <button type="button" class="ls-copy-for-claude-btn" data-handoff-target="lsHandoffBlock" onclick="lsCopyHandoffForClaude(this)">Copy for Claude</button>
+  <span class="ls-copy-for-claude-status" aria-live="polite"></span>
+</div>
+<script>function lsCopyHandoffForClaude(btn){
+  var id=btn.getAttribute("data-handoff-target");
+  var el=document.getElementById(id);
+  var status=btn.parentElement.querySelector(".ls-copy-for-claude-status");
+  if(!el){if(status)status.textContent="Handoff block not found.";return;}
+  var text=el.textContent||el.innerText||"";
+  function ok(){if(status){status.textContent="Copied! Paste into Claude.";setTimeout(function(){status.textContent="";},3000);}}
+  function fail(){if(status){status.textContent="Copy failed — select the block manually.";}}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(ok).catch(fail);}
+  else{try{var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);ok();}catch(e){fail();}}
+}</script>
+</body></html>
