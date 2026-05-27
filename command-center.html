@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>LeaseSmart Command Center v2 — INTERNAL</title>
+<style>
+:root{--cc-green:#22d98a;--cc-green-d:#0ea060;--cc-bg:#f8fafb;--cc-card:#fff;--cc-border:#e5e7eb;--cc-text:#111827;--cc-muted:#6b7280;--cc-claude:#16a34a;--cc-chatgpt:#2563eb;--cc-cursor:#7c3aed;--cc-gemini:#ca8a04;--cc-troy:#d97706;--cc-touch:44px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--cc-bg);color:var(--cc-text);padding-bottom:72px;min-height:100vh}
+.cc-gate{background:linear-gradient(135deg,#fef3c7,#fff7ed);border-bottom:2px solid #fcd34d;padding:12px 16px;font-size:13px;font-weight:700;color:#92400e;text-align:center;line-height:1.45}
+.cc-head{background:var(--cc-card);border-bottom:2px solid var(--cc-border);padding:16px;position:sticky;top:0;z-index:100}
+.cc-head h1{font-size:18px;font-weight:900}
+.cc-head p{font-size:12px;color:var(--cc-muted);margin-top:4px}
+.cc-tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;background:var(--cc-card);border-bottom:1.5px solid var(--cc-border);-webkit-overflow-scrolling:touch}
+.cc-tab{flex:0 0 auto;padding:10px 14px;border:2px solid var(--cc-border);border-radius:12px;background:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;min-height:var(--cc-touch)}
+.cc-tab.on{background:linear-gradient(135deg,var(--cc-green),var(--cc-green-d));border-color:var(--cc-green);color:#000}
+.cc-panel{display:none;padding:16px;max-width:720px;margin:0 auto}
+.cc-panel.on{display:block}
+.cc-card{background:var(--cc-card);border:2px solid var(--cc-border);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.cc-card h2{font-size:15px;font-weight:900;margin-bottom:10px}
+.cc-label{display:block;font-size:12px;font-weight:700;color:var(--cc-muted);margin:10px 0 6px}
+.cc-input,.cc-textarea{width:100%;padding:12px;border:2px solid var(--cc-border);border-radius:10px;font-size:14px;font-family:inherit;min-height:var(--cc-touch)}
+.cc-textarea{min-height:120px;resize:vertical}
+.cc-btn{display:inline-flex;align-items:center;justify-content:center;min-height:var(--cc-touch);padding:12px 18px;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,var(--cc-green),var(--cc-green-d));color:#000;width:100%;margin-top:8px}
+.cc-btn-ghost{background:#fff;border:2px solid var(--cc-border);color:var(--cc-text)}
+.cc-note{font-size:12px;color:var(--cc-muted);line-height:1.5;margin-top:8px}
+.cc-warn{background:#fff7ed;border:2px solid #fed7aa;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;color:#9a3412;margin-bottom:12px}
+.cc-verdict{border-radius:14px;padding:16px;text-align:center;font-weight:900;font-size:16px;margin-top:12px}
+.cc-verdict.go{background:#f0fdf4;border:2px solid var(--cc-green);color:#166534}
+.cc-verdict.nogo{background:#fef2f2;border:2px solid #fecaca;color:#dc2626}
+.cc-verdict.pending{background:#eff6ff;border:2px solid #93c5fd;color:#1d4ed8}
+.cc-review-box{background:#f8fafb;border:1.5px solid var(--cc-border);border-radius:12px;padding:12px;margin-bottom:10px;font-size:13px;line-height:1.5}
+.cc-review-box strong{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.cc-timeline-item{border-left:4px solid var(--cc-border);padding:10px 12px;margin-bottom:10px;background:#fff;border-radius:0 10px 10px 0;font-size:13px}
+.cc-timeline-item.claude{border-color:var(--cc-claude)}
+.cc-timeline-item.chatgpt{border-color:var(--cc-chatgpt)}
+.cc-timeline-item.cursor{border-color:var(--cc-cursor)}
+.cc-timeline-item.gemini{border-color:var(--cc-gemini)}
+.cc-timeline-item.troy{border-color:var(--cc-troy)}
+.cc-status-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
+.cc-badge{font-size:10px;font-weight:800;padding:4px 8px;border-radius:6px}
+.cc-badge.pass{background:#f0fdf4;color:#166534}
+.cc-badge.fail{background:#fef2f2;color:#dc2626}
+.cc-badge.wait{background:#fef3c7;color:#92400e}
+.cc-push-item{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:8px;font-size:13px}
+.cc-brief{white-space:pre-wrap;font-size:14px;line-height:1.6;color:#374151}
+.cc-readonly-banner{background:#fef2f2;border:2px solid #fecaca;color:#dc2626;border-radius:10px;padding:10px;font-size:12px;font-weight:800;text-align:center;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="cc-gate">&#9888; INTERNAL DEMO TOOL — Use on localhost or trusted devices only. Not linked from production index.html. API keys: memory only — never saved to disk or localStorage.</div>
+<header class="cc-head">
+  <h1>LeaseSmart Command Center v2</h1>
+  <p>TGT Technologies Inc. · Sprint F1 · Mobile internal ops</p>
+</header>
+<nav class="cc-tabs" role="tablist">
+  <button type="button" class="cc-tab on" data-tab="review">Triple AI</button>
+  <button type="button" class="cc-tab" data-tab="sprints">Sprints</button>
+  <button type="button" class="cc-tab" data-tab="ailog">AI Log</button>
+  <button type="button" class="cc-tab" data-tab="commit">Commit</button>
+  <button type="button" class="cc-tab" data-tab="briefing">Briefing</button>
+</nav>
+
+<!-- Tab 1 — Triple AI Review (A5) -->
+<section id="panel-review" class="cc-panel on" role="tabpanel">
+  <div class="cc-warn">Keys stay in page memory only. Refresh clears them. No localStorage. No hardcoded keys.</div>
+  <div class="cc-card">
+    <h2>Triple AI Review</h2>
+    <label class="cc-label">Review prompt</label>
+    <textarea id="ccReviewPrompt" class="cc-textarea" placeholder="Paste sprint handoff or diff summary for all three AIs to review…"></textarea>
+    <label class="cc-label">Claude API key (memory only)</label>
+    <input type="password" id="ccKeyClaude" class="cc-input" placeholder="sk-ant-…" autocomplete="off"/>
+    <label class="cc-label">OpenAI / ChatGPT key (memory only)</label>
+    <input type="password" id="ccKeyOpenAI" class="cc-input" placeholder="sk-…" autocomplete="off"/>
+    <label class="cc-label">Gemini API key (memory only)</label>
+    <input type="password" id="ccKeyGemini" class="cc-input" placeholder="AIza…" autocomplete="off"/>
+    <button type="button" class="cc-btn" id="ccRunTripleReview">Run parallel review</button>
+    <p class="cc-note">Without keys: demo skeleton responses. With keys: live API calls from this browser session only.</p>
+  </div>
+  <div id="ccReviewResults"></div>
+  <div id="ccCombinedVerdict" class="cc-verdict pending" style="display:none"></div>
+</section>
+
+<!-- Tab 2 — Sprint Status Board -->
+<section id="panel-sprints" class="cc-panel" role="tabpanel">
+  <div class="cc-card">
+    <h2>Sprint Status Board</h2>
+    <p class="cc-note">Paste master sprint log excerpt or edit JSON below to refresh the board.</p>
+    <textarea id="ccSprintLogPaste" class="cc-textarea" placeholder="Paste LeaseSmart-Sprint-Master-Log.md excerpt…"></textarea>
+    <button type="button" class="cc-btn cc-btn-ghost" id="ccLoadDefaultSprints">Load default sprint table</button>
+  </div>
+  <div id="ccSprintBoard"></div>
+</section>
+
+<!-- Tab 3 — AI Shared Log Viewer -->
+<section id="panel-ailog" class="cc-panel" role="tabpanel">
+  <div class="cc-card">
+    <h2>AI Shared Log Viewer</h2>
+    <p class="cc-note">Paste contents of master-vault/ai-comms/AI-SHARED-LOG.json</p>
+    <textarea id="ccAiLogPaste" class="cc-textarea" placeholder='{"entries":[…]}'></textarea>
+    <button type="button" class="cc-btn" id="ccRenderAiLog">Render timeline</button>
+  </div>
+  <div id="ccAiTimeline"></div>
+</section>
+
+<!-- Tab 4 — Commit Control Panel (READ ONLY) -->
+<section id="panel-commit" class="cc-panel" role="tabpanel">
+  <div class="cc-readonly-banner">READ ONLY — No git commands. Status display only.</div>
+  <div class="cc-card">
+    <h2>Commit Control Panel</h2>
+    <p class="cc-note">Derived from AI log + sprint board. Does not run git.</p>
+    <div id="ccCommitStatus"></div>
+  </div>
+</section>
+
+<!-- Tab 5 — Morning Briefing -->
+<section id="panel-briefing" class="cc-panel" role="tabpanel">
+  <div class="cc-card">
+    <h2>Morning Briefing</h2>
+    <p class="cc-note">Paste MORNING-REVIEW-latest.md for a formatted 2-minute read.</p>
+    <textarea id="ccMorningPaste" class="cc-textarea" placeholder="# Morning Review…"></textarea>
+    <button type="button" class="cc-btn" id="ccRenderBriefing">Format briefing</button>
+  </div>
+  <div class="cc-card"><div id="ccBriefingOut" class="cc-brief"></div></div>
+  <div class="cc-card">
+    <h2>Push notification skeleton</h2>
+    <p class="cc-note">DEMO — Real push needs VAPID keys to activate. No notifications sent.</p>
+    <div id="ccPushDemo"></div>
+  </div>
+</section>
+
+<script>
+(function() {
+  var CC_KEYS = { claude: '', openai: '', gemini: '' };
+
+  document.querySelectorAll('.cc-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.cc-tab').forEach(function(t) { t.classList.remove('on'); });
+      document.querySelectorAll('.cc-panel').forEach(function(p) { p.classList.remove('on'); });
+      tab.classList.add('on');
+      var id = 'panel-' + tab.getAttribute('data-tab');
+      var panel = document.getElementById(id);
+      if (panel) panel.classList.add('on');
+    });
+  });
+
+  function readKeysFromInputs() {
+    CC_KEYS.claude = (document.getElementById('ccKeyClaude').value || '').trim();
+    CC_KEYS.openai = (document.getElementById('ccKeyOpenAI').value || '').trim();
+    CC_KEYS.gemini = (document.getElementById('ccKeyGemini').value || '').trim();
+  }
+
+  function demoReview(name, color, prompt) {
+    return { name: name, color: color, text: '[DEMO] Review of: ' + (prompt.slice(0, 80) || 'empty prompt') + '… Verdict: PENDING — connect API key for live review.', verdict: 'PENDING' };
+  }
+
+  async function callClaude(key, prompt) {
+    var r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400, messages: [{ role: 'user', content: 'Sprint review (GO/NO-GO/PENDING only at end): ' + prompt }] })
+    });
+    var j = await r.json();
+    var text = (j.content && j.content[0] && j.content[0].text) || JSON.stringify(j).slice(0, 300);
+    return { name: 'Claude', color: '#16a34a', text: text, verdict: /NO-GO/i.test(text) ? 'NO-GO' : (/\\bGO\\b/i.test(text) ? 'GO' : 'PENDING') };
+  }
+
+  async function callOpenAI(key, prompt) {
+    var r = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({ model: 'gpt-4o-mini', max_tokens: 400, messages: [{ role: 'user', content: 'PM review — end with GO, NO-GO, or PENDING: ' + prompt }] })
+    });
+    var j = await r.json();
+    var text = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || JSON.stringify(j).slice(0, 300);
+    return { name: 'ChatGPT', color: '#2563eb', text: text, verdict: /NO-GO/i.test(text) ? 'NO-GO' : (/\\bGO\\b/i.test(text) ? 'GO' : 'PENDING') };
+  }
+
+  async function callGemini(key, prompt) {
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + encodeURIComponent(key);
+    var r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: 'Review sprint handoff. End with GO, NO-GO, or PENDING: ' + prompt }] }] })
+    });
+    var j = await r.json();
+    var text = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts[0].text) || JSON.stringify(j).slice(0, 300);
+    return { name: 'Gemini', color: '#ca8a04', text: text, verdict: /NO-GO/i.test(text) ? 'NO-GO' : (/\\bGO\\b/i.test(text) ? 'GO' : 'PENDING') };
+  }
+
+  document.getElementById('ccRunTripleReview').addEventListener('click', async function() {
+    readKeysFromInputs();
+    var prompt = document.getElementById('ccReviewPrompt').value || '';
+    var wrap = document.getElementById('ccReviewResults');
+    wrap.innerHTML = '<p class="cc-note">Running reviews…</p>';
+    var tasks = [
+      CC_KEYS.claude ? callClaude(CC_KEYS.claude, prompt).catch(function(e) { return demoReview('Claude', '#16a34a', 'API error: ' + e.message); }) : Promise.resolve(demoReview('Claude', '#16a34a', prompt)),
+      CC_KEYS.openai ? callOpenAI(CC_KEYS.openai, prompt).catch(function(e) { return demoReview('ChatGPT', '#2563eb', 'API error: ' + e.message); }) : Promise.resolve(demoReview('ChatGPT', '#2563eb', prompt)),
+      CC_KEYS.gemini ? callGemini(CC_KEYS.gemini, prompt).catch(function(e) { return demoReview('Gemini', '#ca8a04', 'API error: ' + e.message); }) : Promise.resolve(demoReview('Gemini', '#ca8a04', prompt))
+    ];
+    var results = await Promise.all(tasks);
+    wrap.innerHTML = '';
+    var verdicts = [];
+    results.forEach(function(res) {
+      verdicts.push(res.verdict);
+      var box = document.createElement('div');
+      box.className = 'cc-review-box';
+      box.innerHTML = '<strong style="color:' + res.color + '">' + res.name + '</strong>' + esc(res.text);
+      wrap.appendChild(box);
+    });
+    var combined = 'PENDING';
+    if (verdicts.indexOf('NO-GO') >= 0) combined = 'NO-GO';
+    else if (verdicts.every(function(v) { return v === 'GO'; })) combined = 'GO';
+    var vd = document.getElementById('ccCombinedVerdict');
+    vd.style.display = 'block';
+    vd.className = 'cc-verdict ' + combined.toLowerCase().replace('-', '');
+    vd.textContent = 'Combined verdict: ' + combined;
+  });
+
+  var DEFAULT_SPRINTS = [
+    { name: 'D1', build: '20260526-v1.5.0-d1', status: 'Committed', tests: 'PASS', committed: true, pushed: true },
+    { name: 'D2', build: '20260526-v1.6.0-d2', status: 'Committed', tests: 'PASS', committed: true, pushed: true },
+    { name: 'D3', build: '20260526-v2.0.0-d3', status: 'Committed', tests: 'PASS', committed: true, pushed: true },
+    { name: 'D4', build: '20260526-v1.8.0-d4', status: 'Committed', tests: 'PASS', committed: true, pushed: true },
+    { name: 'D5', build: '20260526-v1.9.0-d5', status: 'Committed', tests: 'PASS', committed: true, pushed: true },
+    { name: 'E2', build: '20260526-v2.1.0-e2', status: 'Committed', tests: 'PASS', committed: true, pushed: true },
+    { name: 'E3', build: '20260526-v2.2.0-e3', status: 'Build only', tests: 'PENDING', committed: false, pushed: false },
+    { name: 'F1', build: '20260526-v2.3.0-f1', status: 'Building', tests: 'RUNNING', committed: false, pushed: false }
+  ];
+
+  function renderSprintBoard(rows) {
+    var el = document.getElementById('ccSprintBoard');
+    el.innerHTML = '';
+    rows.forEach(function(s) {
+      var card = document.createElement('div');
+      card.className = 'cc-card';
+      var tb = s.tests === 'PASS' ? 'pass' : (s.tests === 'FAIL' ? 'fail' : 'wait');
+      card.innerHTML = '<div class="cc-status-row"><strong>' + esc(s.name) + '</strong><span class="cc-badge ' + tb + '">' + esc(s.tests) + '</span></div>' +
+        '<div class="cc-status-row"><span>Build</span><code>' + esc(s.build) + '</code></div>' +
+        '<div class="cc-status-row"><span>Status</span><span>' + esc(s.status) + '</span></div>' +
+        '<div class="cc-status-row"><span>Committed</span><span>' + (s.committed ? 'Yes' : 'No') + '</span></div>' +
+        '<div class="cc-status-row"><span>Pushed</span><span>' + (s.pushed ? 'Yes' : 'No') + '</span></div>';
+      el.appendChild(card);
+    });
+    window.__ccSprints = rows;
+    refreshCommitPanel();
+  }
+
+  document.getElementById('ccLoadDefaultSprints').addEventListener('click', function() {
+    renderSprintBoard(DEFAULT_SPRINTS);
+  });
+
+  document.getElementById('ccRenderAiLog').addEventListener('click', function() {
+    var raw = document.getElementById('ccAiLogPaste').value || '';
+    var el = document.getElementById('ccAiTimeline');
+    el.innerHTML = '';
+    try {
+      var data = JSON.parse(raw);
+      var entries = data.entries || [];
+      window.__ccAiEntries = entries;
+      entries.slice().reverse().forEach(function(e) {
+        var item = document.createElement('div');
+        item.className = 'cc-timeline-item ' + (e.source || '');
+        item.innerHTML = '<strong>' + esc(e.source) + ' · ' + esc(e.type) + ' · ' + esc(e.verdict) + '</strong>' +
+          '<div style="font-size:11px;color:#9ca3af">' + esc(e.timestamp) + ' · ' + esc(e.sprint) + '</div>' +
+          '<div style="margin-top:6px">' + esc(e.content) + '</div>';
+        el.appendChild(item);
+      });
+      refreshCommitPanel();
+    } catch (err) {
+      el.innerHTML = '<p class="cc-note">Invalid JSON: ' + esc(err.message) + '</p>';
+    }
+  });
+
+  function refreshCommitPanel() {
+    var el = document.getElementById('ccCommitStatus');
+    var entries = window.__ccAiEntries || [];
+    var ready = entries.filter(function(e) { return e.verdict === 'GO' && e.commit_phrase_required; });
+    var pending = entries.filter(function(e) { return e.verdict === 'PENDING'; });
+    var html = '<h3 style="font-size:14px;margin-bottom:10px">Ready to commit (needs Troy phrase)</h3>';
+    if (ready.length) ready.forEach(function(e) { html += '<div class="cc-status-row"><span>' + esc(e.sprint) + '</span><span class="cc-badge pass">GO</span></div>'; });
+    else html += '<p class="cc-note">None marked GO with commit phrase required.</p>';
+    html += '<h3 style="font-size:14px;margin:16px 0 10px">Needs review</h3>';
+    if (pending.length) pending.forEach(function(e) { html += '<div class="cc-status-row"><span>' + esc(e.sprint) + '</span><span class="cc-badge wait">PENDING</span></div>'; });
+    else html += '<p class="cc-note">No pending reviews in log.</p>';
+    var sprints = window.__ccSprints || DEFAULT_SPRINTS;
+    var uncommitted = sprints.filter(function(s) { return !s.committed; });
+    html += '<h3 style="font-size:14px;margin:16px 0 10px">Uncommitted sprints (display)</h3>';
+    uncommitted.forEach(function(s) { html += '<div class="cc-status-row"><span>' + esc(s.name) + '</span><span>' + esc(s.status) + '</span></div>'; });
+    el.innerHTML = html;
+  }
+
+  document.getElementById('ccRenderBriefing').addEventListener('click', function() {
+    var md = document.getElementById('ccMorningPaste').value || '';
+    document.getElementById('ccBriefingOut').textContent = md || 'Paste morning review markdown above.';
+  });
+
+  function renderPushDemo() {
+    var types = [
+      { t: 'Sprint complete', b: 'Build finished — review handoff.' },
+      { t: 'Test failed', b: 'Regression failed — fix before commit.' },
+      { t: 'Commit ready', b: 'Awaiting Troy exact phrase.' },
+      { t: 'Review needed', b: 'Claude/ChatGPT review pending.' }
+    ];
+    var el = document.getElementById('ccPushDemo');
+    el.innerHTML = '<p class="cc-warn">DEMO — Real push needs VAPID keys to activate.</p>';
+    types.forEach(function(x) {
+      var d = document.createElement('div');
+      d.className = 'cc-push-item';
+      d.innerHTML = '<strong>' + esc(x.t) + '</strong><br/>' + esc(x.b) + '<br/><em style="font-size:11px">realPushSent: false</em>';
+      el.appendChild(d);
+    });
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  window.addEventListener('beforeunload', function() {
+    CC_KEYS.claude = '';
+    CC_KEYS.openai = '';
+    CC_KEYS.gemini = '';
+  });
+
+  renderSprintBoard(DEFAULT_SPRINTS);
+  renderPushDemo();
+  refreshCommitPanel();
+
+  fetch('master-vault/ai-comms/AI-SHARED-LOG.json').then(function(r) { return r.ok ? r.text() : ''; }).then(function(t) {
+    if (t) { document.getElementById('ccAiLogPaste').value = t; document.getElementById('ccRenderAiLog').click(); }
+  }).catch(function() {});
+
+  fetch('master-vault/morning/MORNING-REVIEW-latest.md').then(function(r) { return r.ok ? r.text() : ''; }).then(function(t) {
+    if (t) document.getElementById('ccMorningPaste').value = t;
+  }).catch(function() {});
+})();
+</script>
+</body>
+</html>

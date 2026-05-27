@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "appendOnly": true,
+  "description": "LeaseSmart AI shared sprint log — append-only, sanitized via ai-comms-bridge.mjs",
+  "entries": [
+    {
+      "timestamp": "2026-05-26T12:00:00.000Z",
+      "sprint": "F1",
+      "phase": "build",
+      "source": "cursor",
+      "type": "report",
+      "content": "Sprint F1 build started — AI comms bridge, command center v2, push skeleton, context export.",
+      "verdict": "PENDING",
+      "commit_phrase_required": false
+    },
+    {
+      "timestamp": "2026-05-26T11:30:00.000Z",
+      "sprint": "D5",
+      "phase": "commit",
+      "source": "troy",
+      "type": "command",
+      "content": "Commit Sprint D5. Push origin main.",
+      "verdict": "GO",
+      "commit_phrase_required": true
+    },
+    {
+      "timestamp": "2026-05-26T10:00:00.000Z",
+      "sprint": "E2",
+      "phase": "review",
+      "source": "claude",
+      "type": "review",
+      "content": "Legal skeleton draft-only — GO for build. Attorney review required before live users.",
+      "verdict": "GO",
+      "commit_phrase_required": true
+    },
+    {
+      "timestamp": "2026-05-26T09:00:00.000Z",
+      "sprint": "E3",
+      "phase": "planning",
+      "source": "chatgpt",
+      "type": "verdict",
+      "content": "Conditional GO on Stripe billing skeleton — TEST MODE only, no real keys in repo.",
+      "verdict": "GO",
+      "commit_phrase_required": false
+    },
+    {
+      "timestamp": "2026-05-26T23:47:03.149Z",
+      "sprint": "F1",
+      "phase": "build",
+      "source": "cursor",
+      "type": "report",
+      "content": "Sprint F1 complete — AI comms bridge, command center v2, push skeleton, context export, domain guide. Regression PASS 45/45. E3 integrated for chain. NOT COMMITTED.",
+      "verdict": "PENDING",
+      "commit_phrase_required": false
+    }
+  ]
+}
