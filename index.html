@@ -817,6 +817,28 @@ body { font-size: 16px !important; }
 </div>
 
 <!-- HOME PAGE -->
+<!-- DEMO START — simplified, login-free landing (Jerome demo) -->
+<div id="demo-start-pg" class="pg">
+  <div class="beta-wrap">
+    <div class="beta-card" style="text-align:center">
+      <div class="brand" style="justify-content:center;margin-bottom:14px">
+        <div class="brand-mark">LS</div>
+        <div style="text-align:left">
+          <div class="brand-name">LeaseSmart</div>
+          <div class="brand-sub">By TGT Technologies Inc.</div>
+        </div>
+      </div>
+      <div class="demo-badge" style="display:inline-block;margin-bottom:14px">&#9888;&#65039; Demo Mode &bull; No Login Required</div>
+      <div class="beta-title">Choose a demo to explore</div>
+      <div class="beta-sub">Pick a lane below. These open the sandbox demo directly &mdash; no sign-up, no password. Sample data only.</div>
+      <button type="button" class="green-btn" style="width:100%;padding:16px;font-size:16px;margin-top:8px" onclick="demoEnterConsumer()">&#127968; Explore Consumer Apartment Search</button>
+      <button type="button" class="green-btn" style="width:100%;padding:16px;font-size:16px;margin-top:12px" onclick="demoEnterCaseworker()">&#128203; Open Caseworker Placement Demo</button>
+      <p style="color:#9ca3af;font-size:13px;line-height:1.6;margin-top:18px">Sandbox demo &mdash; sample listings and placeholder values only. Not real housing, landlord, tenant, or client data.</p>
+      <button type="button" class="beta-link" style="margin-top:6px" onclick="showBetaLoginPage()">Staff / advanced sign-in (optional)</button>
+    </div>
+  </div>
+</div>
+
 <div id="home-pg" class="pg">
 <div class="home-wrap">
   <div class="brand">
@@ -835,7 +857,7 @@ body { font-size: 16px !important; }
   <h1 class="home-h1">Apartment Hunting<br/><span>Made Simple.</span></h1>
   <p class="home-p">Compare rent, square footage, deposits, parking, pets, move-in dates, listing links, direct property links, tours, and follow-ups in one dashboard. Built for renters who want to make better lease decisions before applying or signing.</p>
   <div class="disclaimer">
-    <strong>&#128274; Beta Demo Notice:</strong> This is a test version for feedback purposes. Sample listings are used in demo mode. Verified listing data will be reviewed by TGT Technologies before being shown to real customers. All real listing details &mdash; pricing, availability, parking, pet rules, and fees &mdash; must be verified directly with the property before applying or signing a lease.
+    <strong>&#128274; Beta Demo Notice:</strong> This is a test version for feedback purposes. Sample listings are used in demo mode. Verified listing data will be reviewed by TGT Technologies Inc. before being shown to real customers. All real listing details &mdash; pricing, availability, parking, pet rules, and fees &mdash; must be verified directly with the property before applying or signing a lease.
   </div>
   <button class="green-btn" id="startBtn" style="display:none">&#127968; Start Demo Search &rarr;</button>
   <button class="ghost-btn" id="resumeBtn" style="display:none;width:100%;margin-top:10px;padding:14px;font-size:15px;font-weight:700" onclick="resumeSession()">&#128260; Continue Last Search</button>
@@ -873,7 +895,7 @@ body { font-size: 16px !important; }
 
   <div style="background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:24px;margin-top:40px;box-shadow:0 2px 8px rgba(0,0,0,.05)">
     <div style="color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">For Beta Testers</div>
-    <p style="color:#374151;font-size:15px;line-height:1.7;margin-bottom:16px">I am testing a new tool called <strong>LeaseSmart by TGT Technologies</strong>. It helps renters compare apartments side by side &mdash; tracking pricing, square footage, parking, pets, direct property links, tours, and follow-ups all in one dashboard.</p>
+    <p style="color:#374151;font-size:15px;line-height:1.7;margin-bottom:16px">I am testing a new tool called <strong>LeaseSmart by TGT Technologies Inc.</strong> It helps renters compare apartments side by side &mdash; tracking pricing, square footage, parking, pets, direct property links, tours, and follow-ups all in one dashboard.</p>
     <p style="color:#374151;font-size:15px;line-height:1.7;margin-bottom:16px">This is a <strong>beta demo</strong>, so I am looking for feedback on the experience, layout, and what would make apartment searching easier for you.</p>
     <p style="color:#6b7280;font-size:14px;line-height:1.6">After testing, tell me: <strong>What was clear?</strong> What was confusing? Would this help you during a real apartment search?</p>
     <div style="margin-top:16px;padding-top:16px;border-top:1.5px solid #e5e7eb;font-size:13px;color:#9ca3af">
@@ -892,7 +914,7 @@ body { font-size: 16px !important; }
     </div>
   </div>
   <div class="admin-area">
-    <button class="back-link" id="adminToggle">Admin Login &mdash; TGT Technologies</button>
+    <button class="back-link" id="adminToggle">Admin Login &mdash; TGT Technologies Inc.</button>
     <div id="adminBox" style="display:none;margin-top:12px">
       <input type="password" id="adminCode" placeholder="Enter admin code" style="background:#f8fafb;border:2px solid #e5e7eb;border-radius:8px;padding:10px 14px;color:#111827;font-size:14px;outline:none;width:160px;letter-spacing:4px"/>
       <button onclick="tryAdmin()" style="background:linear-gradient(135deg,#22d98a,#0ea060);color:#000;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:800;cursor:pointer;margin-left:8px">Enter</button>
@@ -1008,7 +1030,7 @@ body { font-size: 16px !important; }
     <div class="d4-branded-card">
       <div class="d4-branded-mark">LS</div>
       <div class="d4-branded-title">You're signed out</div>
-      <p class="d4-branded-sub" id="lsLogoutMessage">Your LeaseSmart session ended. Thanks for using LeaseSmart by TGT Technologies.</p>
+      <p class="d4-branded-sub" id="lsLogoutMessage">Your LeaseSmart session ended. Thanks for using LeaseSmart by TGT Technologies Inc.</p>
       <button type="button" class="green-btn" onclick="d4ReturnToLogin('consumer')">Consumer login (magic link)</button>
       <button type="button" class="ghost-btn" style="margin-top:10px" onclick="d4ReturnToLogin('pro')">Case Manager login</button>
     </div>
@@ -1191,7 +1213,7 @@ body { font-size: 16px !important; }
         <p>You agree to keep confidential all non-public LeaseSmart beta features, screenshots, workflows, and feedback mechanisms shared during internal testing.</p>
         <p><strong>Beta Terms (Placeholder)</strong></p>
         <p>LeaseSmart is provided as-is during beta testing. Sample listings may be used. You will verify all real listing details directly with properties before applying or signing a lease.</p>
-        <p>You agree to provide good-faith feedback and not misuse the beta platform. TGT Technologies may modify or revoke beta access at any time.</p>
+        <p>You agree to provide good-faith feedback and not misuse the beta platform. TGT Technologies Inc. may modify or revoke beta access at any time.</p>
         <p><strong>Agreement URL (Placeholder):</strong> <a href="#" onclick="openBetaAgreementPlaceholder(); return false;">View placeholder agreement</a></p>
         <p style="margin-top:16px">Scroll to the bottom to confirm you reviewed this placeholder text.</p>
       </div>
@@ -1348,7 +1370,7 @@ body { font-size: 16px !important; }
   <div class="admin-head">
     <div style="display:flex;align-items:center;gap:10px">
       <div class="dash-mark">LS</div>
-      <div style="font-weight:800;font-size:15px;color:#111827">LeaseSmart Admin &bull; TGT Technologies</div>
+      <div style="font-weight:800;font-size:15px;color:#111827">LeaseSmart Admin &bull; TGT Technologies Inc.</div>
     </div>
     <button class="ghost-btn" onclick="showPage('home-pg')">&#8592; Home</button>
   </div>
@@ -1446,7 +1468,7 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-newark-mock-seed.js"></script>
 <script>
 // v2.7.0 Sprint AUTH-1 — enterprise Pro login (+ C1-Pro + A8)
-var LS_BUILD = '20260529-v2.9.0-actionpanel';
+var LS_BUILD = '20260529-v2.10.0-frontpage';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -2339,6 +2361,31 @@ function a8NeedsModeSelection() {
 function a8SelectMode(mode) {
   a8SetProductMode(mode);
   a8RouteToModeHome();
+}
+
+// Login-free demo entry points used by the simplified demo-start landing.
+// Both route directly into the relevant sandbox flow with no auth required.
+function demoEnterConsumer() {
+  a8SetProductMode('renter');
+  if (!APP.profile || !APP.profile.name) {
+    APP.profile = { name: 'Demo Renter', email: '', phone: '', state: 'NJ', city: 'Newark', placementType: 'Apartment', quizCompleted: true };
+  }
+  APP.quizAnswers = Object.assign({}, APP.quizAnswers, APP.profile);
+  a8RouteToModeHome();
+  if (typeof setLastAction === 'function') setLastAction('Entered Consumer demo (no login)');
+}
+
+function demoEnterCaseworker() {
+  a8SetProductMode('pro');
+  if (typeof newarkShowPlacementPage === 'function') {
+    newarkShowPlacementPage();
+  } else {
+    showPage('newark-placement-pg');
+  }
+}
+
+function showDemoStart() {
+  showPage('demo-start-pg');
 }
 
 function a8SwitchMode(mode) {
@@ -6486,7 +6533,7 @@ async function d4PerformLogout(reason) {
     if (msg) {
       msg.textContent = reason === 'timeout'
         ? 'Your session expired for security. Sign in again to continue with LeaseSmart.'
-        : 'You\'re signed out of LeaseSmart. Thanks for using LeaseSmart by TGT Technologies.';
+        : 'You\'re signed out of LeaseSmart. Thanks for using LeaseSmart by TGT Technologies Inc.';
     }
     showPage('ls-logout-pg');
   } catch (e) {
@@ -7234,7 +7281,7 @@ function initLeaseSmart() {
     if (rb) rb.style.display = 'block';
   }
 
-  showBetaLoginPage();
+  showPage('demo-start-pg');
   d4InstallErrorHandlers();
   d4RouteCheck();
   initBetaAuthSession();

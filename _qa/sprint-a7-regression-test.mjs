@@ -21,7 +21,7 @@ function pgBlock(pgId) {
   return next >= 0 ? rest.slice(0, 10 + next) : rest;
 }
 
-assert('A7 build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260528-v2.7.0-auth1'") || html.includes("LS_BUILD = '20260528-v2.8.0-newark'") || html.includes("LS_BUILD = '20260529-v2.9.0-actionpanel'"));
+assert('A7 build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260528-v2.7.0-auth1'") || html.includes("LS_BUILD = '20260528-v2.8.0-newark'") || html.includes("LS_BUILD = '20260529-v2.9.0-actionpanel'") || html.includes("LS_BUILD = '20260529-v2.10.0-frontpage'"));
 
 // Agent 1 — auth screen
 assert('Sign Up button on home', html.includes('onclick="showBetaSignupPage()">Sign Up</button>'));

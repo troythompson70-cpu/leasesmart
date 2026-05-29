@@ -9,7 +9,7 @@ const buildMatch = html.match(/LS_BUILD = '([^']+)'/);
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('A6 build id', buildMatch && /^20260526-v2\.(3\.0-e1|4\.0-a7)$|^20260527-v2\.(4\.0-a7|5\.0-a8)$|^20260528-v2\.(7\.0-auth1|8\.0-newark)$|^20260529-v2\.9\.0-actionpanel$/.test(buildMatch[1]));
+assert('A6 build id', buildMatch && /^20260526-v2\.(3\.0-e1|4\.0-a7)$|^20260527-v2\.(4\.0-a7|5\.0-a8)$|^20260528-v2\.(7\.0-auth1|8\.0-newark)$|^20260529-v2\.(9\.0-actionpanel|10\.0-frontpage)$/.test(buildMatch[1]));
 assert('Profile create page', html.includes('id="profile-create-pg"') && html.includes('submitCreateProfile'));
 assert('Onboarding router', html.includes('function routeOnboarding'));
 assert('No home default show', !html.includes('id="home-pg" class="pg show"'));
@@ -28,7 +28,10 @@ assert('State list uses SEARCH_STATES', html.includes('SEARCH_STATES.filter(func
 assert('PLACEMENT_TYPES', html.includes("PLACEMENT_TYPES = ['Individual', 'Family', 'Families']"));
 assert('Family in life opts', html.includes("'Family','Families'"));
 assert('profileStateAbbr', html.includes('function profileStateAbbr'));
-assert('Default beta login on init', html.includes('showBetaLoginPage();') && /initLeaseSmart[\s\S]*?showBetaLoginPage/.test(html));
+// Boot now opens the simplified login-free demo landing (FRONTPAGE sprint).
+// The magic-link login function/page remain preserved and reachable.
+assert('Init opens demo-start landing', /initLeaseSmart[\s\S]*?showPage\('demo-start-pg'\)/.test(html));
+assert('Beta login preserved/reachable', html.includes('function showBetaLoginPage') && html.includes("id=\"beta-login-pg\""));
 
 // A4 preservation
 assert('Select All preserved', html.includes('multiSelectAllBtn'));
