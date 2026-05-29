@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sprint AUTH-1 Handoff — May 28, 2026</title>
+<style>.ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}
+.ls-copy-for-claude-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35);letter-spacing:.2px}
+.ls-copy-for-claude-btn:hover{filter:brightness(1.05)}
+.ls-copy-for-claude-btn:active{transform:scale(.98)}
+.ls-copy-for-claude-status{display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#16a34a;min-height:20px}</style>
+</head><body style="max-width:900px;margin:0 auto;padding:24px 18px;color:#111827">
+<h1 style="font-size:22px;margin-bottom:8px">Sprint AUTH-1 Handoff — May 28, 2026</h1>
+<p style="color:#6b7280;font-size:14px;margin-bottom:20px">TGT Technologies Inc. — click <strong>Copy for Claude</strong> below.</p>
+<div class="ls-handoff-wrap">
+  <pre class="ls-handoff-pre" id="lsHandoffBlock">--- CLAUDE HANDOFF START ---
+Project: LeaseSmart by TGT Technologies Inc.
+Sprint: AUTH-1 — Enterprise Pro Auth Lane (separate from consumer magic link)
+Build ID: 20260528-v2.7.0-auth1
+Claude GO: Confirmed (enterprise auth pivot)
+Mode: Build only — NOT COMMITTED — NOT PUSHED
+
+SUMMARY
+Two auth lanes on one app — no regression to consumer renter flow:
+• Consumer lane: magic link (signInWithOtp) — unchanged
+• Pro / Case Manager lane: email + password via Supabase Auth only — no public signup, no custom password storage
+
+PRO LOGIN (auth1-pro-login-pg)
+• Home CTA: “Case Manager Command Center →”
+• Email/password form → auth1SubmitProLogin() → signInWithPassword
+• Forgot password → resetPasswordForEmail with lane=pro redirect
+• Demo sandbox buttons (no Supabase required): Platform Admin, Org Admin, Case Manager
+• Sandbox banners throughout — dummy data only
+
+MANAGE TEAM (auth1-manage-team-pg)
+• Admin/supervisor/platform_admin only (auth1CanManageTeam)
+• Mock staff list + pending invites from SPRINT_AUTH1_MOCK + local auth1PendingInvites
+• Demo invite button — mock/local only
+• Import Client List — disabled “Coming Soon”
+• Pro nav includes “Manage Team” when role allows
+
+SESSION + ROUTING
+• AUTH1_SESSION object — separate from BETA_SESSION
+• initBetaAuthSession: auth1ProcessAuthRedirect → pro vs consumer lane split
+• handleMagicLinkReturn skips when AUTH1_SESSION.active or pro user_metadata
+• LS_STORE.auth1LastStaffId restores demo staff on refresh (cleared on logout)
+• Logout page: Consumer login + Case Manager login buttons
+
+DRAFT SCHEMA (NOT APPLIED)
+• supabase/migrations/DRAFT_sprint_auth1_enterprise.sql
+• organizations, organization_staff, organization_invites, organization_audit_logs, case_manager_clients + RLS
+• NO password columns — Supabase Auth only
+
+C1-PRO (bundled smoke — same build)
+• renderC2ClientProfile: placement readiness, 10 matches, family, 10-for-10, area resources
+• renderC3ReportingDashboard: c1pro monthly card (3 processed / 2 placed / 67%)
+
+REGRESSION
+• _qa/sprint-auth1-regression-test.mjs — run for PASS/FAIL
+• Nested: A8 + A7 + A6 chain
+• master-vault/AUTH1-MAGIC-LINK-DIAGNOSIS.md — magic link troubleshooting
+
+KEY FILES
+• index.html (BUILD 20260528-v2.7.0-auth1)
+• _data/sprint-auth1-mock-seed.js
+• supabase/migrations/DRAFT_sprint_auth1_enterprise.sql
+• _qa/sprint-auth1-regression-test.mjs
+• master-vault/sprints/HANDOFF-AUTH1-latest.html
+
+DO NOT
+• Apply DRAFT SQL to Supabase without Troy + Claude approval
+• Put service_role or API keys in frontend
+• Break consumer magic link, saved listings, feedback, Edit Filters
+
+COMMIT: Say exact phrase when Troy approves (e.g. Commit Sprint AUTH-1)
+PUSH: Only when Troy explicitly requests
+--- CLAUDE HANDOFF END ---</pre>
+  <button type="button" class="ls-copy-for-claude-btn" data-handoff-target="lsHandoffBlock" onclick="lsCopyHandoffForClaude(this)">Copy for Claude</button>
+  <span class="ls-copy-for-claude-status" aria-live="polite"></span>
+</div>
+<script>function lsCopyHandoffForClaude(btn){
+  var id=btn.getAttribute("data-handoff-target");
+  var el=document.getElementById(id);
+  var status=btn.parentElement.querySelector(".ls-copy-for-claude-status");
+  if(!el){if(status)status.textContent="Handoff block not found.";return;}
+  var text=el.textContent||el.innerText||"";
+  function ok(){if(status){status.textContent="Copied! Paste into Claude.";setTimeout(function(){status.textContent="";},3000);}}
+  function fail(){if(status){status.textContent="Copy failed — select the block manually.";}}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(ok).catch(fail);}
+  else{try{var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);ok();}catch(e){fail();}}
+}</script>
+</body></html>

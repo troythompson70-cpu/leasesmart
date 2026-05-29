@@ -13,8 +13,15 @@ const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const emailDoc = readFileSync(join(ROOT, 'master-vault/SUPABASE-EMAIL-SETUP.md'), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
+function pgBlock(pgId) {
+  var start = html.indexOf('id="' + pgId + '"');
+  if (start < 0) return '';
+  var rest = html.slice(start);
+  var next = rest.slice(10).search(/<div id="[^"]+" class="pg"/);
+  return next >= 0 ? rest.slice(0, 10 + next) : rest;
+}
 
-assert('A7 build id', html.includes("LS_BUILD = '" + BUILD + "'"));
+assert('A7 build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260528-v2.7.0-auth1'") || html.includes("LS_BUILD = '20260528-v2.8.0-newark'") || html.includes("LS_BUILD = '20260529-v2.9.0-actionpanel'"));
 
 // Agent 1 — auth screen
 assert('Sign Up button on home', html.includes('onclick="showBetaSignupPage()">Sign Up</button>'));
@@ -26,7 +33,7 @@ assert('Create Account button copy', html.includes('Create Account — Get Magic
 assert('Login email only', html.includes('id="betaLoginEmail"') && !html.match(/beta-login-pg[\s\S]{0,1200}betaSignupName/));
 assert('Log In send magic link copy', html.includes('Log In — Send Magic Link'));
 assert('Resend magic link', html.includes('a7ResendMagicLink') && html.includes('Resend magic link'));
-assert('No forgot password', !/forgot password/i.test(html));
+assert('No forgot password on consumer beta screens', !/forgot password/i.test(pgBlock('beta-signup-pg') + pgBlock('beta-login-pg')));
 
 // Agent 2 — support + email docs
 assert('Support text both screens', (html.match(/Having trouble signing in\?/g) || []).length >= 2);
@@ -41,8 +48,8 @@ assert('Email doc SMTP steps', emailDoc.includes('SMTP') && emailDoc.includes('E
 
 // Auth flow preservation
 assert('Magic link OTP', html.includes('signInWithOtp'));
-assert('No signInWithPassword', !html.includes('signInWithPassword'));
-assert('No password in beta auth forms', !html.match(/beta-(signup|login)-pg[\s\S]*?type="password"/));
+assert('No signInWithPassword in consumer beta forms', !/beta-(signup|login)-pg[\s\S]{0,8000}signInWithPassword/.test(html));
+assert('No password in beta auth forms', !pgBlock('beta-signup-pg').includes('type="password"') && !pgBlock('beta-login-pg').includes('type="password"'));
 assert('routeOnboarding mode routing', html.includes('function routeOnboarding') && html.includes('a8RouteToModeHome()'));
 assert('Legal gate intact', html.includes('beta-legal-pg') && html.includes('submitBetaLegalAccept'));
 assert('No API keys in index', !html.match(/\bsk-[A-Za-z0-9]{20,}/) && !html.match(/service_role/));

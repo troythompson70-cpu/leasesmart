@@ -12,8 +12,15 @@ const BUILD = '20260527-v2.5.0-a8';
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
+function pgBlock(pgId) {
+  var start = html.indexOf('id="' + pgId + '"');
+  if (start < 0) return '';
+  var rest = html.slice(start);
+  var next = rest.slice(10).search(/<div id="[^"]+" class="pg"/);
+  return next >= 0 ? rest.slice(0, 10 + next) : rest;
+}
 
-assert('A8 build id', html.includes("LS_BUILD = '" + BUILD + "'"));
+assert('A8 build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260528-v2.7.0-auth1'") || html.includes("LS_BUILD = '20260528-v2.8.0-newark'") || html.includes("LS_BUILD = '20260529-v2.9.0-actionpanel'"));
 
 // Mode selection UI
 assert('Mode picker page', html.includes('id="a8-mode-pg"') && html.includes('Choose your LeaseSmart experience'));
@@ -61,8 +68,8 @@ assert('Log In button', html.includes('onclick="showBetaLoginPage()">Log In</but
 assert('Resend magic link', html.includes('a7ResendMagicLink'));
 assert('Get Help support', html.includes('a7OpenBetaLoginHelp'));
 assert('Magic link OTP', html.includes('signInWithOtp'));
-assert('No signInWithPassword', !html.includes('signInWithPassword'));
-assert('No beta password fields', !html.match(/beta-(signup|login)-pg[\s\S]*?type="password"/));
+assert('No signInWithPassword in consumer beta forms', !/beta-(signup|login)-pg[\s\S]{0,8000}signInWithPassword/.test(html));
+assert('No beta password fields', !pgBlock('beta-signup-pg').includes('type="password"') && !pgBlock('beta-login-pg').includes('type="password"'));
 assert('Legal gate intact', html.includes('beta-legal-pg') && html.includes('submitBetaLegalAccept'));
 
 // Skeleton preservation

@@ -498,6 +498,41 @@ body.e2-has-cookie{padding-bottom:140px}
 .a8-pro-nav button{background:#f8fafb;border:2px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;color:#374151}
 .a8-pro-nav button.on{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8}
 .a8-renter-sub{font-size:11px;font-weight:800;letter-spacing:.8px;color:#6b7280;text-transform:uppercase}
+/* Sprint C1-Pro — placement intelligence (Pro mode demo) */
+.c1pro-panel{border:2px solid #e5e7eb;border-radius:14px;padding:18px;margin-bottom:14px;background:#fff}
+.c1pro-demo-banner{background:#fff7ed;border:2px solid #fed7aa;border-radius:10px;padding:10px 14px;font-size:12px;color:#9a3412;margin-bottom:14px;line-height:1.55}
+.c1pro-cat-row{border:1.5px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:10px;background:#fafafa}
+.c1pro-status{display:inline-block;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;margin-left:6px}
+.c1pro-status-found{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.c1pro-status-unknown{background:#f3f4f6;color:#4b5563;border:1px solid #d1d5db}
+.c1pro-status-needs{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
+.c1pro-field-lbl{font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin:8px 0 4px}
+.c1pro-input,.c1pro-select,.c1pro-textarea{width:100%;padding:10px 12px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:inherit;box-sizing:border-box}
+.c1pro-textarea{min-height:56px;resize:vertical}
+.c1pro-resource-row{padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
+.c1pro-readiness-card{background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:2px solid #93c5fd;border-radius:16px;padding:20px;margin-bottom:14px}
+.c1pro-readiness-metric{display:inline-block;background:#fff;border:2px solid #e5e7eb;border-radius:10px;padding:10px 14px;margin:4px 8px 4px 0;font-size:13px;font-weight:700}
+.c1pro-family-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:10px}
+.c1pro-family-item{background:#f8fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:13px}
+.c1pro-save-status{font-size:12px;color:#6b7280;margin-top:4px}
+.c1pro-save-status.saved{color:#16a34a;font-weight:700}
+.c1pro-match-row{border:2px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:10px;background:#fff}
+.c1pro-match-label{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd}
+.c1pro-outcome-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.c1pro-outcome-btn{font-size:11px;font-weight:800;padding:8px 12px;border-radius:8px;border:2px solid #e5e7eb;background:#f8fafb;cursor:pointer;font-family:inherit}
+.c1pro-outcome-btn.on-placed{background:#dcfce7;border-color:#86efac;color:#166534}
+.c1pro-outcome-btn.on-pending{background:#fef9c3;border-color:#fde047;color:#854d0e}
+.c1pro-outcome-btn.on-pass{background:#f3f4f6;border-color:#d1d5db;color:#6b7280}
+.c1pro-month-card{background:#fff;border:2px solid #93c5fd;border-radius:16px;padding:20px;margin-bottom:16px}
+.c1pro-month-stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px}
+.c1pro-month-rate{font-size:28px;font-weight:900;color:#1d4ed8;margin-top:8px}
+/* Sprint AUTH-1 — enterprise Pro login */
+.auth1-sandbox-banner{background:#eff6ff;border:2px solid #93c5fd;border-radius:12px;padding:12px 16px;font-size:12px;color:#1e3a8a;margin-bottom:16px;line-height:1.55}
+.auth1-pro-badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;background:#1e3a8a;color:#fff;padding:4px 10px;border-radius:999px;margin-bottom:10px}
+.auth1-demo-login-grid{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.auth1-demo-login-grid button{font-size:12px;font-weight:700;text-align:left}
+.auth1-staff-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1.5px solid #e5e7eb;border-radius:10px;margin-bottom:8px;background:#fff;font-size:13px}
+.auth1-invite-pending{opacity:.75;border-style:dashed}
 .beta-welcome-hero{text-align:center;margin-bottom:22px}
 .beta-welcome-icon{font-size:52px;margin-bottom:10px;line-height:1}
 .beta-welcome-name{font-size:22px;font-weight:900;color:#111827;margin-bottom:6px}
@@ -811,6 +846,7 @@ body { font-size: 16px !important; }
       <button type="button" class="green-btn" style="flex:1;min-width:160px;font-size:15px;padding:14px" onclick="showBetaSignupPage()">Sign Up</button>
       <button type="button" class="ghost-btn" style="flex:1;min-width:160px;padding:14px;font-size:15px;font-weight:700" onclick="showBetaLoginPage()">Log In</button>
     </div>
+    <button type="button" class="ghost-btn" style="width:100%;margin-top:10px;padding:12px;font-size:14px;font-weight:800;border-color:#93c5fd;color:#1d4ed8" onclick="auth1ShowProLoginPage()">Case Manager Command Center &rarr;</button>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
     <button type="button" class="ghost-btn" style="flex:1;min-width:140px;padding:12px;font-weight:700" data-e3-pricing onclick="e3OpenPricingPage();return false;">Pricing</button>
@@ -915,6 +951,7 @@ body { font-size: 16px !important; }
       </form>
       <div class="beta-actions" style="margin-top:14px">
         <button type="button" class="beta-link" onclick="showBetaSignupPage()">Need an account? Sign up</button>
+        <button type="button" class="beta-link" onclick="auth1ShowProLoginPage()">Case Manager / staff login &rarr;</button>
       </div>
       <div class="a7-support-block">
         <div class="a7-support-text">Having trouble signing in?</div>
@@ -924,6 +961,47 @@ body { font-size: 16px !important; }
   </div>
 </div>
 
+<!-- AUTH-1 — Case Manager Pro login (email/password — no public signup) -->
+<div id="auth1-pro-login-pg" class="pg">
+  <div class="beta-wrap">
+    <div class="beta-card">
+      <span class="auth1-pro-badge">Housing Placement Command Center</span>
+      <div class="auth1-sandbox-banner"><strong>Demo Sandbox: Admin-Provisioned Profiles Interface.</strong> No public self-signup. Staff access is invited by your organization admin. Dummy data only — not production, not HIPAA/HUD certified.</div>
+      <div class="beta-title">Case Manager Log In</div>
+      <div class="beta-sub">Email and password — provisioned by your organization admin. Magic link signup is disabled for this lane.</div>
+      <div class="beta-error" id="auth1ProLoginError"></div>
+      <div class="beta-success" id="auth1ProLoginSuccess"></div>
+      <form id="auth1ProLoginForm" autocomplete="on" novalidate onsubmit="event.preventDefault(); auth1SubmitProLogin();">
+        <label class="beta-lbl" for="auth1ProEmail">Work email</label>
+        <input class="beta-input" id="auth1ProEmail" name="email" type="email" autocomplete="username" placeholder="you@organization.org"/>
+        <label class="beta-lbl" for="auth1ProPassword">Password</label>
+        <input class="beta-input" id="auth1ProPassword" name="password" type="password" autocomplete="current-password" placeholder="Set via admin invite"/>
+        <button type="submit" class="green-btn">Log In — Command Center</button>
+      </form>
+      <button type="button" class="ghost-btn" style="width:100%;margin-top:10px;font-weight:700" onclick="auth1RequestPasswordReset()">Forgot password — send reset link</button>
+      <div class="auth1-demo-login-grid">
+        <div style="font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;margin-top:8px">Demo sandbox logins (no Supabase required)</div>
+        <button type="button" class="ghost-btn" onclick="auth1DemoLoginAs('platform_admin')">Demo: Platform Admin (Troy)</button>
+        <button type="button" class="ghost-btn" onclick="auth1DemoLoginAs('admin')">Demo: Org Admin (Jerome)</button>
+        <button type="button" class="ghost-btn" onclick="auth1DemoLoginAs('case_manager')">Demo: Case Manager Staff</button>
+        <button type="button" class="ghost-btn" onclick="newarkShowPlacementPage()">Demo: Newark Placement Readiness (10-for-10 score)</button>
+      </div>
+      <div class="beta-actions" style="margin-top:14px">
+        <button type="button" class="beta-link" onclick="showPage('home-pg')">&larr; Back to consumer app</button>
+        <button type="button" class="beta-link" onclick="showBetaLoginPage()">Consumer magic link login</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH-1 — Manage Team (org admin sandbox) -->
+<div id="auth1-manage-team-pg" class="pg">
+  <div class="ls-internal-banner"><strong>&#9888; DEMO SANDBOX — Manage Team</strong> Admin-provisioned access model. Invite flow is mock/local until Supabase invite API is configured. No real staff data.</div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;width:100%"><div><div class="dash-name">Manage Team</div><div class="dash-sub">ADMIN-PROVISIONED STAFF</div></div><button class="ghost-btn" onclick="showC2CaseWorkspace()">&larr; Command Center</button></div></div>
+  <div class="a8-pro-nav" id="auth1ManageTeamNav"></div>
+  <div class="ls-internal-panel" id="auth1ManageTeamPanel"></div>
+</div>
+
 <!-- D4 — branded logout screen -->
 <div id="ls-logout-pg" class="pg">
   <div class="d4-branded-screen">
@@ -931,7 +1009,8 @@ body { font-size: 16px !important; }
       <div class="d4-branded-mark">LS</div>
       <div class="d4-branded-title">You're signed out</div>
       <p class="d4-branded-sub" id="lsLogoutMessage">Your LeaseSmart session ended. Thanks for using LeaseSmart by TGT Technologies.</p>
-      <button type="button" class="green-btn" onclick="d4ReturnToLogin()">Return to login</button>
+      <button type="button" class="green-btn" onclick="d4ReturnToLogin('consumer')">Consumer login (magic link)</button>
+      <button type="button" class="ghost-btn" style="margin-top:10px" onclick="d4ReturnToLogin('pro')">Case Manager login</button>
     </div>
   </div>
 </div>
@@ -1338,6 +1417,15 @@ body { font-size: 16px !important; }
   <div class="ls-internal-panel" id="b5PlatformPanel"></div>
 </div>
 
+<!-- NEWARK — Placement Readiness (demo support score) -->
+<div id="newark-placement-pg" class="pg">
+  <div class="ls-internal-banner"><strong>&#9888; DEMO SANDBOX — Newark Placement Readiness</strong> Sandbox data only. No real clients, no real addresses, no live APIs. Scores are a demo support tool, not a placement decision. Fair Housing safe: protected-class factors are never scored.</div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;width:100%"><div><div class="dash-name">Placement Readiness</div><div class="dash-sub">NEWARK SANDBOX &bull; 10-FOR-10 DEMO SCORE</div></div><button class="ghost-btn" onclick="showPage('home-pg')">&larr; Home</button></div></div>
+  <div class="ls-internal-panel" id="newarkIntakePanel"></div>
+  <div class="ls-internal-panel" id="newarkResultsPanel"></div>
+  <div class="ls-internal-panel" id="capActionPanel" style="display:none"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>window.LEASESMART_CONFIG = window.LEASESMART_CONFIG || null;</script>
 <script src="config.js"></script>
@@ -1353,9 +1441,12 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-e3-mock-seed.js"></script>
 <script src="_data/sprint-e1-public-source-seed.js"></script>
 <script src="_data/sprint-e1-mock-seed.js"></script>
+<script src="_data/sprint-c1pro-mock-seed.js"></script>
+<script src="_data/sprint-auth1-mock-seed.js"></script>
+<script src="_data/sprint-newark-mock-seed.js"></script>
 <script>
-// v2.5.0 Sprint A8 — product mode split (+ A7 + E1 + E3)
-var LS_BUILD = '20260527-v2.5.0-a8';
+// v2.7.0 Sprint AUTH-1 — enterprise Pro login (+ C1-Pro + A8)
+var LS_BUILD = '20260529-v2.9.0-actionpanel';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -1383,10 +1474,11 @@ var APP = {
 };
 
 var ONBOARDING_PAGES = ['beta-signup-pg', 'beta-login-pg', 'beta-welcome-pg', 'beta-legal-pg', 'profile-create-pg', 'quiz-pg', 'search-pg', 'a8-mode-pg'];
-var A8_PRO_PAGES = ['b4-workspace-pg', 'c2-case-pg', 'c2-client-pg', 'c3-reporting-pg', 'b3-user-data-pg', 'b5-platform-pg'];
+var A8_PRO_PAGES = ['b4-workspace-pg', 'c2-case-pg', 'c2-client-pg', 'c3-reporting-pg', 'b3-user-data-pg', 'b5-platform-pg', 'auth1-manage-team-pg'];
+var AUTH1_PRO_PAGES = ['auth1-pro-login-pg', 'auth1-manage-team-pg'];
 var E2_LEGAL_PAGES = ['e2-tos-pg', 'e2-privacy-pg'];
 var E3_BILLING_PAGES = ['e3-pricing-pg', 'e3-checkout-pg', 'e3-manage-pg', 'e3-billing-pg'];
-var INTERNAL_DEMO_PAGES = ['admin-pg', 'b4-workspace-pg', 'c2-case-pg', 'c2-client-pg', 'c3-reporting-pg', 'b3-user-data-pg', 'b5-platform-pg'];
+var INTERNAL_DEMO_PAGES = ['admin-pg', 'b4-workspace-pg', 'c2-case-pg', 'c2-client-pg', 'c3-reporting-pg', 'b3-user-data-pg', 'b5-platform-pg', 'auth1-manage-team-pg', 'newark-placement-pg'];
 var SEARCH_STATES = ['New Jersey', 'New York', 'Pennsylvania', 'Ohio', 'Other'];
 var PLACEMENT_TYPES = ['Individual', 'Family', 'Families'];
 var MAJOR_FIELDS = ['state', 'city', 'movein', 'budget', 'beds', 'baths', 'pets', 'park', 'commute', 'placementType'];
@@ -1410,6 +1502,7 @@ var BETA_TERMS_VERSION = 'placeholder-2026-05-23';
 var BETA_AGREEMENT_URL = 'https://leasesmart.internal/placeholder-beta-agreement';
 var APP_SUPABASE = null;
 var BETA_SESSION = { authUserId: null, appUserId: null, email: '', fullName: '', phone: '', hasAgreement: false, legalScrolled: false };
+var AUTH1_SESSION = { active: false, authUserId: null, email: '', fullName: '', organizationId: null, organizationName: '', role: null, staffId: null, isDemoSandbox: true };
 
 function lsGetSupabaseConfig() {
   var cfg = window.LEASESMART_CONFIG || {};
@@ -1678,10 +1771,14 @@ async function submitBetaMagicLink() {
 
 async function handleMagicLinkReturn() {
   if (!lsSupabaseConfigured()) return false;
+  if (AUTH1_SESSION.active) return false;
   try {
     var client = initSupabaseClient();
     var sessionRes = await client.auth.getSession();
+    auth1StripAuthTokensFromUrl();
     if (!sessionRes.data || !sessionRes.data.session || !sessionRes.data.session.user) return false;
+    var umeta = sessionRes.data.session.user.user_metadata || {};
+    if (umeta.lane === 'pro' || umeta.auth1_role) return false;
     BETA_SESSION.authUserId = sessionRes.data.session.user.id;
     BETA_SESSION.email = sessionRes.data.session.user.email || BETA_SESSION.email;
     await ensureAppUserRecord(sessionRes.data.session.user, sessionRes.data.session.user.user_metadata || {});
@@ -1692,6 +1789,228 @@ async function handleMagicLinkReturn() {
     console.warn('LeaseSmart: magic link session failed', e);
     return false;
   }
+}
+
+// ================================================================
+// SPRINT AUTH-1 — Enterprise Pro login (separate from consumer magic link)
+// ================================================================
+function auth1GetMock() {
+  return window.SPRINT_AUTH1_MOCK || { organizations: [], staff: [], pendingInvites: [] };
+}
+
+function auth1StripAuthTokensFromUrl() {
+  try {
+    var u = new URL(window.location.href);
+    var dirty = false;
+    ['code', 'token', 'type', 'access_token', 'refresh_token', 'error', 'error_description'].forEach(function(k) {
+      if (u.searchParams.has(k)) { u.searchParams.delete(k); dirty = true; }
+    });
+    if (u.hash && (u.hash.indexOf('access_token') >= 0 || u.hash.indexOf('type=') >= 0)) {
+      u.hash = '';
+      dirty = true;
+    }
+    if (dirty) window.history.replaceState({}, '', u.pathname + u.search + u.hash);
+  } catch (e) { /* ignore */ }
+}
+
+function auth1FindStaffByEmail(email) {
+  var mock = auth1GetMock();
+  return (mock.staff || []).find(function(s) {
+    return s.email.toLowerCase() === String(email || '').toLowerCase() && s.isActive !== false;
+  }) || null;
+}
+
+function auth1FindStaffByRole(role) {
+  var mock = auth1GetMock();
+  return (mock.staff || []).find(function(s) { return s.role === role && s.isActive !== false; }) || null;
+}
+
+function auth1ApplyStaffSession(staff, isDemo) {
+  if (!staff) return;
+  var mock = auth1GetMock();
+  var org = staff.organizationId ? (mock.organizations || []).find(function(o) { return o.id === staff.organizationId; }) : null;
+  AUTH1_SESSION.active = true;
+  AUTH1_SESSION.authUserId = staff.id;
+  AUTH1_SESSION.staffId = staff.id;
+  AUTH1_SESSION.email = staff.email;
+  AUTH1_SESSION.fullName = staff.fullName;
+  AUTH1_SESSION.organizationId = staff.organizationId;
+  AUTH1_SESSION.organizationName = org ? org.name : 'Platform';
+  AUTH1_SESSION.role = staff.role;
+  AUTH1_SESSION.isDemoSandbox = !!isDemo;
+  a8SetProductMode('pro');
+  LS_STORE.auth1LastStaffId = staff.id;
+  lsSave();
+}
+
+function auth1CanManageTeam() {
+  if (!AUTH1_SESSION.active) return false;
+  var r = AUTH1_SESSION.role;
+  return r === 'platform_admin' || r === 'admin' || r === 'supervisor';
+}
+
+function auth1ShowProLoginPage() {
+  clearBetaMessages('auth1ProLogin');
+  showPage('auth1-pro-login-pg');
+}
+
+function auth1RouteProAfterLogin() {
+  a8SetProductMode('pro');
+  showC2CaseWorkspace();
+}
+
+function auth1DemoLoginAs(roleKey) {
+  var staff = auth1FindStaffByRole(roleKey);
+  if (!staff) {
+    showBetaError('auth1ProLoginError', 'Demo staff profile not found.');
+    return;
+  }
+  auth1ApplyStaffSession(staff, true);
+  showBetaSuccess('auth1ProLoginSuccess', 'Demo sandbox login — ' + staff.fullName);
+  setTimeout(function() { auth1RouteProAfterLogin(); }, 400);
+}
+
+async function auth1SubmitProLogin() {
+  clearBetaMessages('auth1ProLogin');
+  var email = (document.getElementById('auth1ProEmail').value || '').trim();
+  var password = (document.getElementById('auth1ProPassword').value || '');
+  if (!email || !password) {
+    showBetaError('auth1ProLoginError', 'Email and password are required.');
+    return;
+  }
+  if (!d4TrackApiCall('auth_pro_login')) {
+    showBetaError('auth1ProLoginError', d4GetRateLimitMessage());
+    return;
+  }
+  if (!lsSupabaseConfigured()) {
+    showBetaError('auth1ProLoginError', 'Supabase not configured. Use demo sandbox buttons below.');
+    return;
+  }
+  try {
+    var client = initSupabaseClient();
+    var res = await client.auth.signInWithPassword({ email: email, password: password });
+    if (res.error) throw res.error;
+    var user = res.data.user;
+    var meta = user.user_metadata || {};
+    var staff = auth1FindStaffByEmail(email);
+    AUTH1_SESSION.active = true;
+    AUTH1_SESSION.authUserId = user.id;
+    AUTH1_SESSION.email = user.email || email;
+    AUTH1_SESSION.fullName = meta.full_name || (staff ? staff.fullName : email);
+    AUTH1_SESSION.role = meta.auth1_role || (staff ? staff.role : 'case_manager');
+    AUTH1_SESSION.organizationId = meta.organization_id || (staff ? staff.organizationId : null);
+    AUTH1_SESSION.organizationName = meta.organization_name || 'Organization';
+    AUTH1_SESSION.isDemoSandbox = false;
+    a8SetProductMode('pro');
+    d4StartSessionTimer();
+    auth1StripAuthTokensFromUrl();
+    auth1RouteProAfterLogin();
+  } catch (e) {
+    d4LogFailedLogin();
+    showBetaError('auth1ProLoginError', (e && e.message) ? e.message : String(e));
+  }
+}
+
+async function auth1RequestPasswordReset() {
+  clearBetaMessages('auth1ProLogin');
+  var email = (document.getElementById('auth1ProEmail').value || '').trim();
+  if (!email) {
+    showBetaError('auth1ProLoginError', 'Enter your work email first.');
+    return;
+  }
+  if (!lsSupabaseConfigured()) {
+    showBetaError('auth1ProLoginError', 'Password reset requires Supabase. Use demo sandbox buttons.');
+    return;
+  }
+  try {
+    var client = initSupabaseClient();
+    var redirectTo = window.location.origin + window.location.pathname + '?v=' + encodeURIComponent(LS_BUILD) + '&lane=pro';
+    var res = await client.auth.resetPasswordForEmail(email, { redirectTo: redirectTo });
+    if (res.error) throw res.error;
+    showBetaSuccess('auth1ProLoginSuccess', 'If that email is provisioned, a reset link was sent.');
+  } catch (e) {
+    showBetaError('auth1ProLoginError', (e && e.message) ? e.message : String(e));
+  }
+}
+
+async function auth1ProcessAuthRedirect(client) {
+  if (!client) return null;
+  var params = new URLSearchParams(window.location.search);
+  var isAuthCallback = params.get('beta') === 'magic' || params.get('code') || params.get('lane') === 'pro' ||
+    (window.location.hash && window.location.hash.indexOf('access_token') >= 0);
+  if (!isAuthCallback) return null;
+  try {
+    var sessionRes = await client.auth.getSession();
+    auth1StripAuthTokensFromUrl();
+    if (!sessionRes.data || !sessionRes.data.session || !sessionRes.data.session.user) return null;
+    var user = sessionRes.data.session.user;
+    var meta = user.user_metadata || {};
+    if (params.get('lane') === 'pro' || meta.lane === 'pro' || meta.auth1_role) {
+      var staff = auth1FindStaffByEmail(user.email);
+      AUTH1_SESSION.active = true;
+      AUTH1_SESSION.authUserId = user.id;
+      AUTH1_SESSION.email = user.email || '';
+      AUTH1_SESSION.fullName = meta.full_name || (staff ? staff.fullName : '');
+      AUTH1_SESSION.role = meta.auth1_role || (staff ? staff.role : 'case_manager');
+      AUTH1_SESSION.organizationId = meta.organization_id || (staff ? staff.organizationId : null);
+      AUTH1_SESSION.organizationName = meta.organization_name || 'Organization';
+      AUTH1_SESSION.isDemoSandbox = false;
+      a8SetProductMode('pro');
+      d4StartSessionTimer();
+      auth1RouteProAfterLogin();
+      return 'pro';
+    }
+    return 'consumer';
+  } catch (e) {
+    console.warn('LeaseSmart: auth redirect processing failed', e);
+    auth1StripAuthTokensFromUrl();
+    return null;
+  }
+}
+
+function auth1ShowManageTeam() {
+  if (!auth1CanManageTeam()) {
+    alert('Manage Team is available to organization admins and supervisors only.');
+    return;
+  }
+  showPage('auth1-manage-team-pg');
+  auth1RenderManageTeam();
+  if (typeof a8RenderProNav === 'function') a8RenderProNav('team');
+}
+
+function auth1RenderManageTeam() {
+  var panel = document.getElementById('auth1ManageTeamPanel');
+  if (!panel) return;
+  var mock = auth1GetMock();
+  var org = (mock.organizations || []).find(function(o) { return o.id === AUTH1_SESSION.organizationId; }) || mock.organizations[0];
+  var html = '<div class="auth1-sandbox-banner"><strong>Demo Sandbox: Admin-Provisioned Profiles Interface.</strong> Invites pending until Supabase auth confirms. Import Client List — Coming Soon (disabled).</div>';
+  html += '<h3 style="font-size:16px;margin-bottom:8px">' + (org ? org.name : 'Organization') + ' <span class="b4-mock-tag">DEMO</span></h3>';
+  html += '<p style="font-size:13px;color:#6b7280;margin-bottom:14px">Logged in as: <strong>' + (AUTH1_SESSION.fullName || '') + '</strong> (' + (AUTH1_SESSION.role || '') + ')</p>';
+  html += '<div class="ls-internal-card"><h3>Active staff <span class="b4-mock-tag">MOCK</span></h3>';
+  (mock.staff || []).filter(function(s) {
+    return !s.organizationId || s.organizationId === (org && org.id) || AUTH1_SESSION.role === 'platform_admin';
+  }).forEach(function(s) {
+    html += '<div class="auth1-staff-row"><div><strong>' + s.fullName + '</strong><br><span style="font-size:12px;color:#6b7280">' + s.email + ' · ' + s.role + '</span></div><span class="b4-mock-tag">' + (s.isActive !== false ? 'ACTIVE' : 'INACTIVE') + '</span></div>';
+  });
+  html += '</div>';
+  html += '<div class="ls-internal-card"><h3>Pending invites <span class="ls-preview-tag">DEMO</span></h3>';
+  (mock.pendingInvites || []).concat(LS_STORE.auth1PendingInvites || []).forEach(function(inv) {
+    html += '<div class="auth1-staff-row auth1-invite-pending"><div><strong>' + inv.email + '</strong><br><span style="font-size:12px;color:#6b7280">Role: ' + (inv.role || 'case_manager') + ' · Not active until auth confirms</span></div><span class="b4-mock-tag">PENDING</span></div>';
+  });
+  html += '<button type="button" class="green-btn" style="margin-top:12px;max-width:320px" onclick="auth1MockCreateInvite()">+ Invite staff (demo mock)</button>';
+  html += '<button type="button" class="ghost-btn" style="margin-top:8px;max-width:320px;opacity:.5" disabled>Import Client List — Coming Soon</button>';
+  html += '</div>';
+  panel.innerHTML = html;
+}
+
+function auth1MockCreateInvite() {
+  var email = prompt('Demo invite email (fake only — use @leasesmart-demo.invalid):');
+  if (!email || email.indexOf('@') < 0) return;
+  if (!LS_STORE.auth1PendingInvites) LS_STORE.auth1PendingInvites = [];
+  LS_STORE.auth1PendingInvites.push({ email: email.trim(), role: 'case_manager', status: 'pending', ts: new Date().toISOString(), mock: true });
+  lsSave();
+  if (typeof d5ShowToast === 'function') d5ShowToast('record_added');
+  auth1RenderManageTeam();
 }
 
 async function submitBetaLegalAccept() {
@@ -1742,11 +2061,18 @@ async function submitBetaLegalAccept() {
 }
 
 async function initBetaAuthSession() {
+  if (LS_STORE.auth1LastStaffId && !AUTH1_SESSION.active) {
+    var last = auth1GetMock().staff.find(function(s) { return s.id === LS_STORE.auth1LastStaffId; });
+    if (last) auth1ApplyStaffSession(last, true);
+  }
   if (!lsSupabaseConfigured()) return;
   try {
     var client = initSupabaseClient();
     client.auth.onAuthStateChange(async function(event, session) {
+      if (AUTH1_SESSION.active && event !== 'SIGNED_OUT') return;
       if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && session.user) {
+        var meta = session.user.user_metadata || {};
+        if (meta.lane === 'pro' || meta.auth1_role) return;
         BETA_SESSION.authUserId = session.user.id;
         BETA_SESSION.email = session.user.email || BETA_SESSION.email;
         try {
@@ -1758,10 +2084,15 @@ async function initBetaAuthSession() {
         }
       }
     });
+    var redirectLane = await auth1ProcessAuthRedirect(client);
+    if (redirectLane === 'pro') return;
     var handledMagic = await handleMagicLinkReturn();
     if (handledMagic) return;
+    if (AUTH1_SESSION.active) return;
     var sessionRes = await client.auth.getSession();
     if (!sessionRes.data || !sessionRes.data.session || !sessionRes.data.session.user) return;
+    var umeta = sessionRes.data.session.user.user_metadata || {};
+    if (umeta.lane === 'pro' || umeta.auth1_role) return;
     BETA_SESSION.authUserId = sessionRes.data.session.user.id;
     await ensureAppUserRecord(sessionRes.data.session.user, sessionRes.data.session.user.user_metadata || {});
     BETA_SESSION.hasAgreement = await hasBetaAgreement(BETA_SESSION.appUserId);
@@ -1836,7 +2167,7 @@ function getStepById(id) {
 // Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
 // ================================================================
 var LS_VERSION = 'Beta v1.2 — Housing Intelligence Foundation';
-var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false, d2SavedSearchProfiles: [], liContactHistory: {}, d2Seeded: false, d2AlertsChecked: false, d4RateLimits: {}, securityLog: { failedLoginAttempts: [], totalFailedCount: 0 }, d4SessionExpiresAt: null, e2DemoClientsAdded: [], e2ClientConsentLog: [], e2DataRetentionPreview: null, productMode: null };
+var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false, d2SavedSearchProfiles: [], liContactHistory: {}, d2Seeded: false, d2AlertsChecked: false, d4RateLimits: {}, securityLog: { failedLoginAttempts: [], totalFailedCount: 0 }, d4SessionExpiresAt: null, e2DemoClientsAdded: [], e2ClientConsentLog: [], e2DataRetentionPreview: null, productMode: null, c1proChecklists: {}, c1proClientResources: {}, c1proMatchOutcomes: {}, auth1LastStaffId: null, auth1PendingInvites: [] };
 var LS_STORE = Object.assign({}, LS_STORE_DEFAULTS);
 
 function lsNormalizeStore(data) {
@@ -1869,6 +2200,11 @@ function lsNormalizeStore(data) {
   if (!Array.isArray(store.e2DemoClientsAdded)) store.e2DemoClientsAdded = [];
   if (!Array.isArray(store.e2ClientConsentLog)) store.e2ClientConsentLog = [];
   if (store.e2DataRetentionPreview === undefined) store.e2DataRetentionPreview = null;
+  if (!store.c1proChecklists || typeof store.c1proChecklists !== 'object') store.c1proChecklists = {};
+  if (!store.c1proClientResources || typeof store.c1proClientResources !== 'object') store.c1proClientResources = {};
+  if (!store.c1proMatchOutcomes || typeof store.c1proMatchOutcomes !== 'object') store.c1proMatchOutcomes = {};
+  if (store.auth1LastStaffId === undefined) store.auth1LastStaffId = null;
+  if (!Array.isArray(store.auth1PendingInvites)) store.auth1PendingInvites = store.auth1PendingInvites ? [].concat(store.auth1PendingInvites) : [];
   return store;
 }
 
@@ -2049,6 +2385,9 @@ function a8RenderProNav(active) {
   ];
   if (ctx.roleKey === 'supervisor' || ctx.roleKey === 'manager' || ctx.roleKey === 'director' || ctx.roleKey === 'agency_admin') {
     items.push({ id: 'agency', label: 'Agency / Admin', fn: 'showB5PlatformAdmin()' });
+  }
+  if (auth1CanManageTeam() || ctx.roleKey === 'supervisor' || ctx.roleKey === 'agency_admin' || ctx.roleKey === 'platform_admin') {
+    items.push({ id: 'team', label: 'Manage Team', fn: 'auth1ShowManageTeam()' });
   }
   var html = items.map(function(it) {
     var on = active === it.id ? ' on' : '';
@@ -5195,6 +5534,319 @@ function c2GetAuthorizedClients() {
   return b4FilterClientsForRole(all, ctx);
 }
 
+function c2ResolveClient(clientId) {
+  if (!clientId) return null;
+  var mock = b4GetMockFoundation();
+  var client = (mock.clients || []).find(function(c) { return c.id === clientId; });
+  if (client) return client;
+  var extra = LS_STORE.e2DemoClientsAdded || [];
+  return extra.find(function(c) { return c.id === clientId; }) || null;
+}
+
+function c1proGetMock() {
+  return window.SPRINT_C1PRO_MOCK || { tenForTenCategories: [], statusOptions: ['Found', 'Unknown', 'Needs Check'] };
+}
+
+function c1proEnsureClientChecklist(client) {
+  if (!client || !client.id) return {};
+  if (!LS_STORE.c1proChecklists) LS_STORE.c1proChecklists = {};
+  if (!LS_STORE.c1proChecklists[client.id]) {
+    var mock = c1proGetMock();
+    LS_STORE.c1proChecklists[client.id] = mock.defaultChecklistForClient
+      ? JSON.parse(JSON.stringify(mock.defaultChecklistForClient(client.id, client.placementType)))
+      : {};
+    lsSave();
+  }
+  return LS_STORE.c1proChecklists[client.id];
+}
+
+function c1proStatusClass(status) {
+  if (status === 'Found') return 'c1pro-status-found';
+  if (status === 'Needs Check') return 'c1pro-status-needs';
+  return 'c1pro-status-unknown';
+}
+
+function c1proSetCategoryStatus(clientId, catId, status) {
+  var cl = c1proEnsureClientChecklist({ id: clientId, placementType: 'Individual' });
+  if (!cl[catId]) cl[catId] = { status: 'Unknown', publicNotes: '', cwNotes: '' };
+  cl[catId].status = status;
+  LS_STORE.c1proChecklists[clientId] = cl;
+  lsSave();
+  if (typeof renderC2ClientProfile === 'function' && APP.c2SelectedClientId === clientId) renderC2ClientProfile();
+}
+
+function c1proSaveCategoryField(clientId, catId, field, value) {
+  var client = c2ResolveClient(clientId);
+  if (!client) return;
+  var cl = c1proEnsureClientChecklist(client);
+  if (!cl[catId]) cl[catId] = { status: 'Unknown', publicNotes: '', cwNotes: '' };
+  cl[catId][field] = value;
+  LS_STORE.c1proChecklists[clientId] = cl;
+  lsSave();
+}
+
+function c1proAddResource(clientId, catId) {
+  var name = prompt('Add demo resource name (Public Source only — planning purposes):');
+  if (!name || !name.trim()) return;
+  if (!LS_STORE.c1proClientResources) LS_STORE.c1proClientResources = {};
+  if (!LS_STORE.c1proClientResources[clientId]) LS_STORE.c1proClientResources[clientId] = [];
+  LS_STORE.c1proClientResources[clientId].push({
+    categoryId: catId,
+    name: name.trim(),
+    source: 'Caseworker-added — DEMO',
+    ts: new Date().toISOString()
+  });
+  lsSave();
+  if (typeof d5ShowToast === 'function') d5ShowToast('record_added');
+  renderC2ClientProfile();
+}
+
+function c1proChecklistSummary(clientId) {
+  var cl = LS_STORE.c1proChecklists && LS_STORE.c1proChecklists[clientId];
+  var out = { Found: 0, Unknown: 0, 'Needs Check': 0, total: 10 };
+  var mock = c1proGetMock();
+  (mock.tenForTenCategories || []).forEach(function(cat) {
+    var st = (cl && cl[cat.id] && cl[cat.id].status) || 'Unknown';
+    if (out[st] !== undefined) out[st]++;
+  });
+  return out;
+}
+
+function c1proRenderPlacementReadinessHtml(client) {
+  var v140 = v140GetMock();
+  var calls = (v140.c2 && v140.c2.callsByClient && v140.c2.callsByClient[client.id]) || 0;
+  var d1 = d1GetMock();
+  var pendingFollowUps = (d1.followUpSchedule || []).filter(function(f) { return f.clientId === client.id; }).length;
+  var summary = c1proChecklistSummary(client.id);
+  var mock = c1proGetMock();
+  var actionIdx = Math.abs(String(client.id).length + (client.status || '').length) % (mock.readinessActions || []).length;
+  var nextAction = (mock.readinessActions || [])[actionIdx] || 'Review 10-for-10 checklist items';
+  var html = '<div class="c1pro-readiness-card c1pro-panel">';
+  html += '<div class="c1pro-demo-banner"><strong>DEMO — Internal planning tool only.</strong> Not a clinical or legal assessment. Not a guarantee of placement. No verified claims.</div>';
+  html += '<h3 style="font-size:17px;margin-bottom:10px">Placement Readiness <span class="b4-mock-tag">C1-PRO DEMO</span></h3>';
+  html += '<p style="font-size:14px;margin-bottom:8px"><strong>Client:</strong> ' + client.displayName + ' <span class="b4-mock-tag">MOCK</span></p>';
+  html += '<p style="font-size:13px;margin-bottom:12px"><strong>Housing search status:</strong> ' + (client.status || 'unknown').replace(/_/g, ' ') + ' · ' + (client.placementType || 'Individual') + '</p>';
+  html += '<div style="margin-bottom:12px">';
+  html += '<span class="c1pro-readiness-metric">10-for-10 Found: ' + summary.Found + '</span>';
+  html += '<span class="c1pro-readiness-metric">Unknown: ' + summary.Unknown + '</span>';
+  html += '<span class="c1pro-readiness-metric">Needs Check: ' + summary['Needs Check'] + '</span>';
+  html += '</div>';
+  html += '<p style="font-size:13px;margin-bottom:6px"><strong>Landlord contacts made:</strong> ' + calls + ' <span class="ls-demo-metric-tag">DEMO METRIC</span></p>';
+  html += '<p style="font-size:13px;margin-bottom:12px"><strong>Follow-ups pending:</strong> ' + pendingFollowUps + ' <span class="ls-demo-metric-tag">DEMO METRIC</span></p>';
+  html += '<p style="font-size:13px;background:#fff;border:2px solid #e5e7eb;border-radius:10px;padding:12px"><strong>Next recommended action:</strong> ' + nextAction + '</p>';
+  html += '</div>';
+  return html;
+}
+
+function c1proRenderFamilyPanelHtml(client) {
+  var fp = client.familyProfile || {};
+  var html = '<div class="c1pro-panel ls-internal-card">';
+  html += '<div class="c1pro-demo-banner"><strong>Family Placement Mode — DEMO only.</strong> Dummy client fields. No real family data ever.</div>';
+  html += '<h3>Family profile <span class="b4-mock-tag">C1-PRO DEMO</span></h3>';
+  html += '<div class="c1pro-family-grid">';
+  html += '<div class="c1pro-family-item"><div class="c1pro-field-lbl">Adults in household</div>' + (fp.adultsInHousehold != null ? fp.adultsInHousehold : '—') + '</div>';
+  html += '<div class="c1pro-family-item"><div class="c1pro-field-lbl">Children count</div>' + (fp.childrenCount != null ? fp.childrenCount : '—') + '</div>';
+  html += '<div class="c1pro-family-item"><div class="c1pro-field-lbl">Children ages</div>' + (fp.childrenAges || '—') + '</div>';
+  html += '<div class="c1pro-family-item"><div class="c1pro-field-lbl">Bedroom requirement</div>' + (fp.bedroomRequirement != null ? fp.bedroomRequirement : '—') + '</div>';
+  html += '<div class="c1pro-family-item"><div class="c1pro-field-lbl">School district preference</div>' + (fp.schoolDistrictPreference || '—') + '</div>';
+  html += '<div class="c1pro-family-item"><div class="c1pro-field-lbl">Pet situation</div>' + (fp.petSituation || '—') + '</div>';
+  html += '</div>';
+  html += '<div style="margin-top:12px"><div class="c1pro-field-lbl">Special needs — text note only</div>';
+  html += '<p style="font-size:13px;color:#374151;line-height:1.6;background:#f8fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px">' + (fp.specialNeedsNote || 'Demo text note only.') + '</p></div>';
+  html += '</div>';
+  return html;
+}
+
+function c1proRenderTenForTenPanelHtml(client, canWrite) {
+  var mock = c1proGetMock();
+  var checklist = c1proEnsureClientChecklist(client);
+  var html = '<div class="c1pro-panel ls-internal-card">';
+  html += '<div class="c1pro-demo-banner"><strong>10-for-10 Placement Checklist — DEMO.</strong> Public source notes are samples only. No guaranteed or verified claims.</div>';
+  html += '<h3>10-for-10 Placement Checklist <span class="b4-mock-tag">C1-PRO DEMO</span></h3>';
+  (mock.tenForTenCategories || []).forEach(function(cat) {
+    var item = checklist[cat.id] || { status: 'Unknown', publicNotes: '', cwNotes: '' };
+    html += '<div class="c1pro-cat-row">';
+    html += '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px"><strong style="font-size:14px">' + cat.label + '</strong>';
+    html += '<span class="c1pro-status ' + c1proStatusClass(item.status) + '">' + item.status + '</span></div>';
+    if (canWrite) {
+      html += '<div class="c1pro-field-lbl">Status</div><select class="c1pro-select" data-c1pro-status="' + cat.id + '" onchange="c1proSetCategoryStatus(\'' + client.id + '\',\'' + cat.id + '\',this.value)">';
+      (mock.statusOptions || ['Found', 'Unknown', 'Needs Check']).forEach(function(st) {
+        html += '<option value="' + st + '"' + (item.status === st ? ' selected' : '') + '>' + st + '</option>';
+      });
+      html += '</select>';
+    }
+    html += '<div class="c1pro-field-lbl">Public source notes</div>';
+    html += '<textarea class="c1pro-textarea" data-c1pro-public="' + cat.id + '" rows="2" placeholder="Public source notes — planning only"' + (canWrite ? '' : ' readonly') + '>' + (item.publicNotes || '') + '</textarea>';
+    html += '<div class="c1pro-field-lbl">Caseworker notes <span style="font-weight:600;text-transform:none">(auto-save 1s)</span></div>';
+    html += '<textarea class="c1pro-textarea" data-c1pro-cw="' + cat.id + '" rows="2" placeholder="Caseworker notes — auto-save"' + (canWrite ? '' : ' readonly') + '>' + (item.cwNotes || '') + '</textarea>';
+    html += '<div id="c1proSaveStatus_' + cat.id + '" class="c1pro-save-status"></div>';
+    if (canWrite) {
+      html += '<button type="button" class="ghost-btn" style="margin-top:8px;font-weight:700;font-size:12px" onclick="c1proAddResource(\'' + client.id + '\',\'' + cat.id + '\')">+ Link to add resource (demo)</button>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function c1proRenderAreaResourcesPanelHtml(client) {
+  var mock = c1proGetMock();
+  var zip = client.zipCode || (mock.countyZipMap && mock.countyZipMap[client.county]) || '07102';
+  var area = mock.areaResourcesForZip ? mock.areaResourcesForZip(zip, client.county) : { categories: {}, sources: [] };
+  var html = '<div class="c1pro-panel ls-internal-card">';
+  html += '<div class="c1pro-demo-banner"><strong>Area Resource Snapshot — Public Source only.</strong> ' + (area.disclaimer || 'For planning purposes only. No accuracy guarantees.') + '</div>';
+  html += '<h3>Area resources near ZIP ' + zip + ' <span class="b4-mock-tag">C1-PRO DEMO</span></h3>';
+  html += '<p style="font-size:12px;color:#6b7280;margin-bottom:10px">' + (client.county || '') + ' County · Dummy listings from 211 NJ, HUD, and Places-style demo index</p>';
+  html += '<div style="margin-bottom:12px">';
+  (area.sources || []).forEach(function(s) {
+    html += '<a href="' + s.url + '" target="_blank" rel="noopener noreferrer" class="ghost-btn" style="margin:4px 8px 4px 0;font-size:12px;font-weight:700">' + s.name + ' ↗</a>';
+  });
+  html += '</div>';
+  var labels = {
+    transit_stops: 'Transit stops',
+    grocery_stores: 'Grocery stores',
+    clinics_pharmacies: 'Clinics and pharmacies',
+    schools_daycare: 'Schools and daycare',
+    food_pantries: 'Food pantries',
+    community_orgs: 'Community organizations'
+  };
+  Object.keys(labels).forEach(function(key) {
+    var items = (area.categories && area.categories[key]) || [];
+    html += '<div style="margin-top:12px"><strong style="font-size:14px">' + labels[key] + '</strong> <span class="ls-demo-metric-tag">PUBLIC SOURCE ONLY</span>';
+    if (!items.length) html += '<p style="font-size:13px;color:#9ca3af">No demo entries.</p>';
+    items.forEach(function(r) {
+      html += '<div class="c1pro-resource-row"><strong>' + r.name + '</strong><br><span style="color:#6b7280;font-size:12px">' + r.detail + '</span><br><span style="font-size:11px;color:#9ca3af">' + r.source + '</span></div>';
+    });
+    html += '</div>';
+  });
+  var added = (LS_STORE.c1proClientResources && LS_STORE.c1proClientResources[client.id]) || [];
+  if (added.length) {
+    html += '<div style="margin-top:14px;padding-top:12px;border-top:2px solid #e5e7eb"><strong style="font-size:13px">Caseworker-added resources (demo)</strong>';
+    added.forEach(function(r) {
+      html += '<div class="c1pro-resource-row">' + r.name + ' <span class="b4-mock-tag">DEMO</span></div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function c1proBindTenForTenNotes(clientId) {
+  var client = c2ResolveClient(clientId);
+  if (!client) return;
+  var ctx = b4GetDemoContext();
+  if (!b4CanWriteCaseNote(ctx, client)) return;
+  if (APP.c1proNoteHandlers) {
+    APP.c1proNoteHandlers.forEach(function(h) {
+      if (h.el && h.fn) h.el.removeEventListener('input', h.fn);
+    });
+  }
+  APP.c1proNoteHandlers = [];
+  document.querySelectorAll('[data-c1pro-public],[data-c1pro-cw]').forEach(function(ta) {
+    var catId = ta.getAttribute('data-c1pro-public') || ta.getAttribute('data-c1pro-cw');
+    var field = ta.hasAttribute('data-c1pro-public') ? 'publicNotes' : 'cwNotes';
+    var statusEl = document.getElementById('c1proSaveStatus_' + catId);
+    var fn = function() {
+      if (statusEl) { statusEl.textContent = 'Saving...'; statusEl.className = 'c1pro-save-status'; }
+      if (APP.c1proDebounce && APP.c1proDebounce[catId + field]) clearTimeout(APP.c1proDebounce[catId + field]);
+      if (!APP.c1proDebounce) APP.c1proDebounce = {};
+      APP.c1proDebounce[catId + field] = setTimeout(function() {
+        c1proSaveCategoryField(clientId, catId, field, ta.value);
+        if (statusEl) { statusEl.textContent = 'Saved ✓'; statusEl.className = 'c1pro-save-status saved'; }
+      }, 1000);
+    };
+    ta.addEventListener('input', fn);
+    APP.c1proNoteHandlers.push({ el: ta, fn: fn });
+  });
+}
+
+function c1proFlushNotes() {
+  if (!APP.c2SelectedClientId) return;
+  document.querySelectorAll('[data-c1pro-public],[data-c1pro-cw]').forEach(function(ta) {
+    var catId = ta.getAttribute('data-c1pro-public') || ta.getAttribute('data-c1pro-cw');
+    var field = ta.hasAttribute('data-c1pro-public') ? 'publicNotes' : 'cwNotes';
+    c1proSaveCategoryField(APP.c2SelectedClientId, catId, field, ta.value);
+  });
+}
+
+function c1proGetClientMatches(client) {
+  var mock = c1proGetMock();
+  return (mock.demoApartmentMatches || []).map(function(m, i) {
+    return Object.assign({}, m, { id: m.id || ('dm-' + (i + 1)) });
+  });
+}
+
+function c1proGetMatchOutcome(clientId, matchId) {
+  var o = LS_STORE.c1proMatchOutcomes && LS_STORE.c1proMatchOutcomes[clientId];
+  return (o && o[matchId]) || '';
+}
+
+function c1proSetMatchOutcome(clientId, matchId, outcome) {
+  if (!LS_STORE.c1proMatchOutcomes) LS_STORE.c1proMatchOutcomes = {};
+  if (!LS_STORE.c1proMatchOutcomes[clientId]) LS_STORE.c1proMatchOutcomes[clientId] = {};
+  LS_STORE.c1proMatchOutcomes[clientId][matchId] = outcome;
+  lsSave();
+  b4RecordAudit('c1pro_match_outcome', 'case_clients', clientId, { matchId: matchId, outcome: outcome, mock: true });
+  if (typeof d5ShowToast === 'function') d5ShowToast('record_added');
+  renderC2ClientProfile();
+}
+
+function c1proGetMonthlyMetrics() {
+  var m = v140GetMock().c3Metrics || {};
+  var monthly = m.monthly || { clientsProcessed: 3, placed: 2, pending: 1, successRatePct: 67, monthLabel: 'May 2026' };
+  monthly.successRatePct = monthly.clientsProcessed
+    ? Math.round((monthly.placed / monthly.clientsProcessed) * 100)
+    : 0;
+  return monthly;
+}
+
+function c1proRenderC3MonthlyCardHtml() {
+  var monthly = c1proGetMonthlyMetrics();
+  var html = '<div class="c1pro-month-card">';
+  html += '<div class="c1pro-demo-banner"><strong>DEMO METRIC — This month.</strong> Not for grants, investors, or production claims. Dummy data only.</div>';
+  html += '<h3 style="font-size:17px;margin-bottom:12px">This Month <span class="b4-mock-tag">' + (monthly.monthLabel || 'Demo') + '</span></h3>';
+  html += '<div class="c1pro-month-stat"><span>Clients Processed</span><strong>' + monthly.clientsProcessed + '</strong></div>';
+  html += '<div class="c1pro-month-stat"><span>Placed</span><strong>' + monthly.placed + '</strong></div>';
+  html += '<div class="c1pro-month-stat"><span>Pending</span><strong>' + monthly.pending + '</strong></div>';
+  html += '<div style="margin-top:12px"><div style="font-size:12px;font-weight:800;color:#6b7280;text-transform:uppercase">Success Rate</div>';
+  html += '<div class="c1pro-month-rate">' + monthly.successRatePct + '%</div>';
+  html += '<p style="font-size:12px;color:#6b7280">' + monthly.placed + ' placed ÷ ' + monthly.clientsProcessed + ' processed (demo math)</p></div>';
+  html += '</div>';
+  return html;
+}
+
+function c1proRenderClientMatchesPanelHtml(client, canWrite) {
+  var matches = c1proGetClientMatches(client);
+  var intake = c1proGetMock().demoIntakeProfile || {};
+  var html = '<div class="c1pro-panel ls-internal-card">';
+  html += '<div class="c1pro-demo-banner"><strong>Placement matches — DEMO only.</strong> Sample listings. Not confirmed availability. No verified or guaranteed claims.</div>';
+  html += '<h3>CLIENT: ' + client.displayName + ' <span class="b4-mock-tag">MOCK</span></h3>';
+  html += '<p style="font-size:13px;color:#6b7280;margin-bottom:12px">Demo intake: ' + (intake.bedrooms || 1) + ' BR · $' + (intake.budgetMax || 1200) + ' budget · Pets: ' + (intake.pets ? 'Yes' : 'No') + ' · ' + (intake.city || 'Newark') + ', ' + (intake.state || 'NJ') + '</p>';
+  html += '<p style="font-size:14px;font-weight:800;margin-bottom:10px">MATCHES: ' + matches.length + ' apartments shown <span class="ls-demo-metric-tag">DEMO</span></p>';
+  matches.forEach(function(m, idx) {
+    var outcome = c1proGetMatchOutcome(client.id, m.id);
+    html += '<div class="c1pro-match-row">';
+    html += '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px">';
+    html += '<strong>' + (idx + 1) + '. ' + m.address + '</strong>';
+    html += '<span class="c1pro-match-label">' + (m.matchLabel || 'Not confirmed') + '</span></div>';
+    html += '<p style="font-size:13px;color:#374151;margin:0">$' + m.rent + '/mo · ' + m.bedrooms + 'BR · ' + m.tag + '</p>';
+    if (canWrite) {
+      html += '<div class="c1pro-outcome-btns">';
+      ['PLACED', 'PENDING', 'NOT INTERESTED'].forEach(function(label) {
+        var cls = 'c1pro-outcome-btn';
+        if (outcome === label) {
+          cls += label === 'PLACED' ? ' on-placed' : (label === 'PENDING' ? ' on-pending' : ' on-pass');
+        }
+        html += '<button type="button" class="' + cls + '" onclick="c1proSetMatchOutcome(\'' + client.id + '\',\'' + m.id + '\',\'' + label + '\')">' + label + '</button>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
 function showC2CaseWorkspace() {
   if (a8GetProductMode() === 'renter') {
     a8RouteToModeHome();
@@ -5250,6 +5902,10 @@ function renderC2CaseWorkspace() {
     });
   }
   html += renderC2FollowUpTracker(clients);
+  if (clients.length) {
+    html += c1proRenderPlacementReadinessHtml(clients[0]);
+    html += c1proRenderAreaResourcesPanelHtml(clients[0]);
+  }
   if (ctx.roleKey === 'caseworker' || ctx.roleKey === 'supervisor') {
     html += '<div class="ls-internal-card" style="margin-top:14px"><h3 style="font-size:15px;margin-bottom:8px">New client intake <span class="b4-mock-tag">E2 DEMO</span></h3>' +
       '<p style="font-size:13px;color:#6b7280;margin-bottom:10px">Consent required before creating a mock client record.</p>' +
@@ -5268,8 +5924,7 @@ function renderC2CaseWorkspace() {
 
 function openC2ClientProfile(clientId) {
   var ctx = b4GetDemoContext();
-  var mock = b4GetMockFoundation();
-  var client = (mock.clients || []).find(function(c) { return c.id === clientId; });
+  var client = c2ResolveClient(clientId);
   if (!client || !b4CanViewClient(ctx, client, b4GetTeamMemberIds(ctx))) {
     alert('Not authorized to view this mock client.');
     return;
@@ -5284,20 +5939,25 @@ function renderC2ClientProfile() {
   var panel = document.getElementById('c2ClientPanel');
   if (!panel || !APP.c2SelectedClientId) return;
   var ctx = b4GetDemoContext();
-  var mock = b4GetMockFoundation();
   var v140 = v140GetMock();
-  var client = (mock.clients || []).find(function(c) { return c.id === APP.c2SelectedClientId; });
+  var client = c2ResolveClient(APP.c2SelectedClientId);
   if (!client || !b4CanViewClient(ctx, client, b4GetTeamMemberIds(ctx))) {
     panel.innerHTML = '<div class="ls-internal-card"><p>Unauthorized mock client.</p></div>';
     return;
   }
+  var canWrite = b4CanWriteCaseNote(ctx, client);
   var calls = (v140.c2 && v140.c2.callsByClient && v140.c2.callsByClient[client.id]) || 0;
   var html = '<div class="ls-internal-card"><h2 style="font-size:20px;margin-bottom:8px">' + client.displayName + ' <span class="b4-mock-tag">MOCK</span></h2>' +
-    '<p style="font-size:13px;color:#6b7280;margin-bottom:10px">' + client.caseNumber + ' · ' + client.placementType + '</p>' +
+    '<p style="font-size:13px;color:#6b7280;margin-bottom:10px">' + client.caseNumber + ' · ' + client.placementType + (client.zipCode ? ' · ZIP ' + client.zipCode : '') + '</p>' +
     '<div style="margin-bottom:12px">' + c2StatusTag(client.status) + '</div>' +
     '<p style="font-size:13px"><strong>Demo calls logged:</strong> ' + calls + ' <span class="ls-demo-metric-tag">DEMO METRIC</span></p></div>';
+  html += c1proRenderPlacementReadinessHtml(client);
+  html += c1proRenderClientMatchesPanelHtml(client, canWrite);
+  html += c1proRenderFamilyPanelHtml(client);
+  html += c1proRenderTenForTenPanelHtml(client, canWrite);
+  html += c1proRenderAreaResourcesPanelHtml(client);
   html += '<div class="ls-internal-card"><h3>Notes <span class="b4-mock-tag">DEMO/INTERNAL</span></h3>';
-  if (b4CanWriteCaseNote(ctx, client)) {
+  if (canWrite) {
     var noteVal = b4GetCaseNote(client.id);
     if (!noteVal.trim()) html += d5EmptyStateHtml('No notes yet', 'Start typing — notes auto-save in one second.', 'Start typing a note', 'document.getElementById(\'c2CaseNotesInput\').focus()');
     html += '<textarea id="c2CaseNotesInput" rows="6" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px" placeholder="Case notes auto-save in 1 second..."></textarea>' +
@@ -5309,7 +5969,12 @@ function renderC2ClientProfile() {
   html += renderC2FollowUpTracker([client]);
   html += e1RenderBenefitsPanelHtml();
   panel.innerHTML = html;
-  if (b4CanWriteCaseNote(ctx, client)) setTimeout(function() { bindC2CaseNotes(client.id); }, 0);
+  if (canWrite) {
+    setTimeout(function() {
+      bindC2CaseNotes(client.id);
+      c1proBindTenForTenNotes(client.id);
+    }, 0);
+  }
 }
 
 function renderC2FollowUpTracker(clients) {
@@ -5330,12 +5995,12 @@ function renderC2FollowUpTracker(clients) {
 }
 
 function flushC2CaseNotes() {
+  if (typeof c1proFlushNotes === 'function') c1proFlushNotes();
   if (APP.c2NoteDebounceTimer) { clearTimeout(APP.c2NoteDebounceTimer); APP.c2NoteDebounceTimer = null; }
   var ta = document.getElementById('c2CaseNotesInput');
   if (!ta || !APP.c2SelectedClientId) return;
   var ctx = b4GetDemoContext();
-  var mock = b4GetMockFoundation();
-  var client = (mock.clients || []).find(function(c) { return c.id === APP.c2SelectedClientId; });
+  var client = c2ResolveClient(APP.c2SelectedClientId);
   if (!client || !b4CanWriteCaseNote(ctx, client)) return;
   b4SetCaseNote(APP.c2SelectedClientId, ta.value);
 }
@@ -5380,7 +6045,8 @@ function renderC3ReportingDashboard() {
   if (!panel) return;
   var m = v140GetMock().c3Metrics || {};
   var br = m.statusBreakdown || {};
-  var html = '<div class="ls-metric-grid">';
+  var html = c1proRenderC3MonthlyCardHtml();
+  html += '<div class="ls-metric-grid">';
   [
     { n: m.placements, l: 'Placements', tag: 'DEMO METRIC' },
     { n: m.callsMade, l: 'Calls made', tag: 'DEMO METRIC' },
@@ -5804,6 +6470,18 @@ async function d4PerformLogout(reason) {
     BETA_SESSION.authUserId = null;
     BETA_SESSION.appUserId = null;
     BETA_SESSION.hasAgreement = false;
+    APP.d4LastLogoutWasPro = !!(AUTH1_SESSION.active || a8GetProductMode() === 'pro');
+    AUTH1_SESSION.active = false;
+    AUTH1_SESSION.authUserId = null;
+    AUTH1_SESSION.staffId = null;
+    AUTH1_SESSION.email = '';
+    AUTH1_SESSION.fullName = '';
+    AUTH1_SESSION.organizationId = null;
+    AUTH1_SESSION.organizationName = '';
+    AUTH1_SESSION.role = null;
+    AUTH1_SESSION.isDemoSandbox = true;
+    LS_STORE.auth1LastStaffId = null;
+    lsSave();
     var msg = document.getElementById('lsLogoutMessage');
     if (msg) {
       msg.textContent = reason === 'timeout'
@@ -5816,8 +6494,9 @@ async function d4PerformLogout(reason) {
   }
 }
 
-function d4ReturnToLogin() {
-  showBetaLoginPage();
+function d4ReturnToLogin(lane) {
+  if (lane === 'pro' || (!lane && APP.d4LastLogoutWasPro)) auth1ShowProLoginPage();
+  else showBetaLoginPage();
 }
 
 function d4ShowErrorScreen(title, detail) {
@@ -6632,6 +7311,504 @@ document.addEventListener('DOMContentLoaded', function() {
     box.style.display = visible ? 'block' : 'none';
   });
 });
+</script>
+<!-- ================================================================
+     NEWARK — Placement Readiness (demo support score)
+     Scope: intake form, local resource snapshot, 10-for-10 score.
+     Hard constraints (locked by spec):
+       1. neighborhoodLabel is DISPLAY-ONLY and never a scoring input.
+       2. No real addresses / lat-long — zone-style labels only.
+       3. Required disclaimer rendered below EVERY score.
+     Fair Housing: scoring reads ONLY the allowed factors below. It must
+     never read race, ethnicity, religion, disability, neighborhood
+     demographics, subjective safety labels, or protected-class proxies.
+     Scoring logic lives in JavaScript (Option A).
+     ================================================================ -->
+<script>
+var NEWARK_SCORE_DISCLAIMER = 'This is a demo support score based on sandbox data. Final placement decisions require caseworker review and agency approval.';
+
+// Factors that MUST NOT influence any score (Fair Housing guard).
+var NEWARK_PROHIBITED_FACTORS = ['race', 'ethnicity', 'religion', 'disability', 'neighborhood demographics', 'subjective safety labels', 'protected-class proxies'];
+
+// Factors the score is ALLOWED to consider.
+var NEWARK_ALLOWED_FACTORS = ['rent fit', 'bedroom fit', 'distance to resources', 'program/voucher fit', 'missing information'];
+
+// 10-for-10 framework = 7 demo-scored categories + these 3 review-only
+// categories. Review-only categories are DISPLAYED for caseworker context
+// but are deliberately NOT scored in the demo (no points, no score impact).
+var NEWARK_REVIEW_ONLY_CATEGORIES = [
+  { id: 'employment_workforce', label: 'Employment / workforce access' },
+  { id: 'community_support', label: 'Community / social support' },
+  { id: 'daily_life', label: 'Daily-life needs' }
+];
+
+var NEWARK_LAST_INPUT = null;
+
+function newarkGetMock() {
+  return window.SPRINT_NEWARK_MOCK || null;
+}
+
+function newarkEscape(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+function newarkClamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
+function newarkShowPlacementPage() {
+  newarkRenderIntakeForm();
+  document.getElementById('newarkResultsPanel').innerHTML = '';
+  var cap = document.getElementById('capActionPanel');
+  if (cap) { cap.innerHTML = ''; cap.style.display = 'none'; }
+  if (typeof capResetState === 'function') capResetState();
+  showPage('newark-placement-pg');
+  if (typeof setLastAction === 'function') setLastAction('Opened Newark Placement Readiness (demo)');
+}
+
+function newarkRenderIntakeForm() {
+  var mock = newarkGetMock();
+  var panel = document.getElementById('newarkIntakePanel');
+  if (!mock || !panel) { if (panel) panel.innerHTML = '<p>Sandbox data not loaded.</p>'; return; }
+  var voucherOpts = mock.voucherOptions.map(function(v) {
+    return '<option value="' + newarkEscape(v) + '">' + newarkEscape(v) + '</option>';
+  }).join('');
+  var needBoxes = mock.needOptions.map(function(n) {
+    return '<label style="display:inline-flex;align-items:center;gap:6px;margin:4px 10px 4px 0;font-size:14px">'
+      + '<input type="checkbox" class="newark-need" value="' + newarkEscape(n) + '"/> ' + newarkEscape(n) + '</label>';
+  }).join('');
+  panel.innerHTML =
+    '<div class="dash-name" style="font-size:18px">Client intake (demo)</div>'
+    + '<p class="dash-sub" style="margin:2px 0 14px">Sandbox profile only — do not enter real client information.</p>'
+    + '<div class="newark-error" id="newarkIntakeError" style="display:none;color:#b91c1c;font-weight:700;margin-bottom:10px"></div>'
+    + '<form id="newarkIntakeForm" novalidate onsubmit="event.preventDefault(); newarkSubmitIntake();">'
+    + '<label class="beta-lbl" for="newarkName">Client display name (demo)</label>'
+    + '<input class="beta-input" id="newarkName" type="text" placeholder="e.g., Demo Client A." value="Demo Client A."/>'
+    + '<label class="beta-lbl" for="newarkHousehold">Household size</label>'
+    + '<input class="beta-input" id="newarkHousehold" type="number" min="1" step="1" placeholder="e.g., 3" value="3"/>'
+    + '<label class="beta-lbl" for="newarkBedrooms">Bedrooms needed</label>'
+    + '<input class="beta-input" id="newarkBedrooms" type="number" min="0" step="1" placeholder="e.g., 2" value="2"/>'
+    + '<label class="beta-lbl" for="newarkBudget">Monthly budget (max $)</label>'
+    + '<input class="beta-input" id="newarkBudget" type="number" min="0" step="50" placeholder="e.g., 1500" value="1500"/>'
+    + '<label class="beta-lbl" for="newarkVoucher">Voucher / program type</label>'
+    + '<select class="beta-input" id="newarkVoucher">' + voucherOpts + '</select>'
+    + '<label class="beta-lbl">Stated housing needs (functional unit features)</label>'
+    + '<div style="margin:2px 0 6px">' + needBoxes + '</div>'
+    + '<p style="font-size:12px;color:#6b7280;margin:0 0 10px">Functional unit preferences only. We do not collect or score disability or any protected-class information.</p>'
+    + '<label class="beta-lbl" for="newarkNbhd">Neighborhood preference (display only — not scored)</label>'
+    + '<input class="beta-input" id="newarkNbhd" type="text" placeholder="Optional label, e.g., Ferry Street Corridor"/>'
+    + '<label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:14px">'
+    + '<input type="checkbox" id="newarkDocs"/> Key documents gathered (ID, income, voucher paperwork)</label>'
+    + '<button type="submit" class="green-btn" style="margin-top:8px">Analyze Client</button>'
+    + '</form>';
+}
+
+function newarkReadIntake() {
+  function val(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+  var needs = Array.prototype.slice.call(document.querySelectorAll('.newark-need:checked')).map(function(c) { return c.value; });
+  var household = parseInt(val('newarkHousehold'), 10);
+  var bedrooms = parseInt(val('newarkBedrooms'), 10);
+  var budget = parseInt(val('newarkBudget'), 10);
+  return {
+    displayName: (val('newarkName') || '').trim(),
+    householdSize: isNaN(household) ? null : household,
+    bedroomsNeeded: isNaN(bedrooms) ? null : bedrooms,
+    budgetMax: isNaN(budget) ? null : budget,
+    voucherType: val('newarkVoucher') || 'Unknown / To be confirmed',
+    needs: needs,
+    hasDocs: !!(document.getElementById('newarkDocs') && document.getElementById('newarkDocs').checked),
+    // Captured for DISPLAY ONLY. Never passed into the scoring function.
+    neighborhoodPreferenceDisplayOnly: (val('newarkNbhd') || '').trim()
+  };
+}
+
+// 10-for-10 scoring (Option A: logic in JavaScript).
+// Reads ONLY allowed factors. Never reads neighborhood label, demographics,
+// or any protected-class attribute. Returns a 1-10 score with a breakdown.
+function newarkEvaluatePlacementReadiness(clientInput, property, registry) {
+  var zone = null;
+  if (registry && registry.zones) {
+    for (var i = 0; i < registry.zones.length; i++) {
+      if (registry.zones[i].id === property.zoneId) { zone = registry.zones[i]; break; }
+    }
+  }
+  var missing = [];
+  var cats = [];
+
+  // 1. Rent / budget fit
+  var rentPts;
+  if (clientInput.budgetMax == null) { rentPts = 0; missing.push('monthly budget'); }
+  else {
+    var ratio = property.rent / clientInput.budgetMax;
+    rentPts = ratio <= 0.9 ? 10 : ratio <= 1.0 ? 8 : ratio <= 1.1 ? 5 : ratio <= 1.25 ? 3 : 1;
+  }
+  cats.push({ id: 'rent_fit', label: 'Rent / budget fit', points: rentPts });
+
+  // 2. Bedroom / household size fit
+  var bedPts;
+  if (clientInput.bedroomsNeeded == null) { bedPts = 0; missing.push('bedrooms needed'); }
+  else {
+    var diff = property.bedrooms - clientInput.bedroomsNeeded;
+    bedPts = diff === 0 ? 10 : diff === 1 ? 8 : diff >= 2 ? 6 : diff === -1 ? 4 : 1;
+  }
+  cats.push({ id: 'bedroom_fit', label: 'Bedroom / household size fit', points: bedPts });
+
+  // 3. Program / voucher fit
+  var vPts;
+  var v = clientInput.voucherType || '';
+  var accepts = property.acceptsVouchers || [];
+  if (v.indexOf('Unknown') === 0) { vPts = 3; missing.push('confirmed voucher/program type'); }
+  else if (v === 'None / Market') { vPts = (clientInput.budgetMax != null && property.rent <= clientInput.budgetMax) ? 7 : 4; }
+  else { vPts = accepts.indexOf(v) >= 0 ? 10 : 2; }
+  cats.push({ id: 'voucher_fit', label: 'Program / voucher fit', points: vPts });
+
+  // 4. Distance to resources — uses the zone resource-access rating only.
+  var resPts = zone ? Math.round((zone.resourceAccessScore || 0) * 10) : 5;
+  cats.push({ id: 'resource_distance', label: 'Distance to resources (zone access)', points: resPts });
+
+  // 5. Stated housing-need / unit-feature fit (functional only)
+  var needPts;
+  var needs = clientInput.needs || [];
+  if (!needs.length) { needPts = 5; }
+  else {
+    var feats = property.unitFeatures || [];
+    var matched = needs.filter(function(n) { return feats.indexOf(n) >= 0; }).length;
+    needPts = Math.round(2 + (matched / needs.length) * 8);
+  }
+  cats.push({ id: 'unit_need_fit', label: 'Stated housing-need / unit-feature fit', points: needPts });
+
+  // 6. Intake information completeness
+  var keyFields = [
+    clientInput.householdSize != null,
+    clientInput.bedroomsNeeded != null,
+    clientInput.budgetMax != null,
+    !!(clientInput.voucherType && clientInput.voucherType.indexOf('Unknown') !== 0),
+    (clientInput.needs || []).length > 0
+  ];
+  var provided = keyFields.filter(Boolean).length;
+  var infoPts = Math.round((provided / keyFields.length) * 10);
+  if (clientInput.householdSize == null) missing.push('household size');
+  cats.push({ id: 'info_completeness', label: 'Intake information completeness', points: infoPts });
+
+  // 7. Documentation readiness
+  var docPts = clientInput.hasDocs ? 10 : (v && v.indexOf('Unknown') !== 0 ? 5 : 3);
+  if (!clientInput.hasDocs) missing.push('key documents (ID, income, voucher paperwork)');
+  cats.push({ id: 'doc_readiness', label: 'Documentation readiness', points: docPts });
+
+  var sum = cats.reduce(function(a, c) { return a + c.points; }, 0);
+  var score = newarkClamp(Math.round(sum / cats.length), 1, 10);
+
+  return { score: score, categories: cats, missingInfo: missing, zoneLabel: zone ? zone.label : '' };
+}
+
+function newarkBuildResourceSnapshot(clientInput) {
+  var mock = newarkGetMock();
+  if (!mock) return [];
+  var registry = mock.registry;
+  return registry.properties.map(function(p) {
+    var result = newarkEvaluatePlacementReadiness(clientInput, p, registry);
+    return { property: p, result: result };
+  }).sort(function(a, b) { return b.result.score - a.result.score; });
+}
+
+function newarkSubmitIntake() {
+  var err = document.getElementById('newarkIntakeError');
+  var input = newarkReadIntake();
+  if (!input.displayName) {
+    if (err) { err.textContent = 'Enter a demo display name.'; err.style.display = 'block'; }
+    return;
+  }
+  if (input.budgetMax == null && input.bedroomsNeeded == null) {
+    if (err) { err.textContent = 'Enter at least a budget or bedrooms needed to run a snapshot.'; err.style.display = 'block'; }
+    return;
+  }
+  if (err) err.style.display = 'none';
+  NEWARK_LAST_INPUT = input;
+  var snapshot = newarkBuildResourceSnapshot(input);
+  newarkRenderResults(input, snapshot);
+  if (typeof capRevealActionPanel === 'function') capRevealActionPanel(input, snapshot);
+  if (typeof setLastAction === 'function') setLastAction('Ran Newark placement readiness snapshot (demo)');
+}
+
+function newarkRenderResults(clientInput, snapshot) {
+  var mock = newarkGetMock();
+  var panel = document.getElementById('newarkResultsPanel');
+  if (!panel) return;
+  if (!snapshot.length) { panel.innerHTML = '<p>No sandbox properties available.</p>'; return; }
+
+  var nbhd = clientInput.neighborhoodPreferenceDisplayOnly;
+  var head = '<div class="dash-name" style="font-size:18px">Resource snapshot &amp; readiness scores</div>'
+    + '<p class="dash-sub" style="margin:2px 0 6px">' + newarkEscape(clientInput.displayName)
+    + ' &bull; household ' + newarkEscape(clientInput.householdSize == null ? 'n/a' : clientInput.householdSize)
+    + ' &bull; ' + newarkEscape(clientInput.bedroomsNeeded == null ? 'n/a' : clientInput.bedroomsNeeded) + ' BR'
+    + ' &bull; ' + newarkEscape(clientInput.voucherType) + '</p>'
+    + (nbhd ? '<p style="font-size:12px;color:#6b7280;margin:0 0 12px">Neighborhood preference (display only, not scored): <strong>' + newarkEscape(nbhd) + '</strong></p>' : '');
+
+  var cards = snapshot.map(function(item) {
+    var p = item.property, r = item.result;
+    var bars = r.categories.map(function(c) {
+      var pct = Math.round((c.points / 10) * 100);
+      return '<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:13px">'
+        + '<span style="flex:0 0 200px;color:#374151">' + newarkEscape(c.label) + '</span>'
+        + '<span style="flex:1;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden"><span style="display:block;height:8px;width:' + pct + '%;background:#16a34a"></span></span>'
+        + '<strong style="flex:0 0 34px;text-align:right">' + c.points + '/10</strong></div>';
+    }).join('');
+    var reviewRows = NEWARK_REVIEW_ONLY_CATEGORIES.map(function(c) {
+      return '<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:13px;color:#6b7280">'
+        + '<span style="flex:0 0 200px">' + newarkEscape(c.label) + '</span>'
+        + '<span style="flex:1;font-style:italic">Caseworker review — not scored in demo</span>'
+        + '<strong style="flex:0 0 34px;text-align:right">—</strong></div>';
+    }).join('');
+    var reviewBlock = '<div style="margin-top:10px;border-top:1px dashed #e5e7eb;padding-top:8px">'
+      + '<div style="font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Review-only — caseworker assessment (not scored in demo)</div>'
+      + reviewRows + '</div>';
+    var miss = r.missingInfo.length
+      ? '<p style="font-size:12px;color:#b45309;margin:8px 0 0">Missing info to confirm: ' + newarkEscape(r.missingInfo.join(', ')) + '</p>'
+      : '<p style="font-size:12px;color:#15803d;margin:8px 0 0">No critical missing fields flagged.</p>';
+    return '<div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin:12px 0;background:#fff">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+      + '<div><div style="font-weight:800">' + newarkEscape(r.zoneLabel || p.neighborhoodLabel) + '</div>'
+      + '<div style="font-size:12px;color:#6b7280">' + newarkEscape(p.bedrooms) + ' BR &bull; $' + newarkEscape(p.rent) + '/mo &bull; accepts ' + newarkEscape((p.acceptsVouchers || []).join(', ')) + '</div></div>'
+      + '<div style="text-align:center"><div style="font-size:28px;font-weight:800;color:#16a34a;line-height:1">' + r.score + '<span style="font-size:14px;color:#6b7280">/10</span></div>'
+      + '<div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.04em">Support score</div>'
+      + '<div style="font-size:10px;color:#9ca3af">7 of 10 categories scored in demo</div></div></div>'
+      + '<div style="margin-top:10px"><div style="font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Demo-scored categories (7)</div>' + bars + '</div>'
+      + reviewBlock
+      + miss
+      + '<p class="newark-disclaimer" style="font-size:11px;color:#6b7280;margin:10px 0 0;border-top:1px dashed #e5e7eb;padding-top:8px">' + newarkEscape(NEWARK_SCORE_DISCLAIMER) + '</p>'
+      + '</div>';
+  }).join('');
+
+  var fairHousing = '<p style="font-size:12px;color:#6b7280;margin:14px 0 0">Fair Housing: scores consider only ' + newarkEscape(NEWARK_ALLOWED_FACTORS.join(', '))
+    + '. Protected-class factors (' + newarkEscape(NEWARK_PROHIBITED_FACTORS.join(', ')) + ') are never scored.</p>';
+
+  panel.innerHTML = head + cards + fairHousing;
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+<!-- ================================================================
+     CaseworkerActionPanel (Sprint C1-Pro action workflow)
+     DEMO-ONLY. In-memory session state ONLY:
+       - No localStorage / no persistence (clears on page refresh)
+       - No Supabase writes, no API calls, no real PII
+       - Fake 555 contact data, zone labels, demo timestamps
+     Fair Housing: uses the sprint's allowlisted language only.
+     Steering / redlining / false-promise phrasing must never appear
+     in UI or logic (see sprint spec for the prohibited list).
+     ================================================================ -->
+<script>
+var CAP_DEMO_DISCLAIMER = 'NOTICE: Placement readiness analytics are automated decision-support tools. Final unit referrals must be processed in accordance with official agency guidelines.';
+var CAP_DEMO_LABEL = 'DEMO SANDBOX: This is simulated data only. No real placements, contacts, or client information.';
+var CAP_STATUS_OPTIONS = ['Not Started', 'Contact Needed', 'In Progress', 'Waiting on Response', 'Completed', 'Escalated'];
+var CAP_PRIORITIES = { today: { label: 'Do Today', dot: '\uD83D\uDD34' }, week: { label: 'This Week', dot: '\uD83D\uDFE1' }, monitor: { label: 'Monitor', dot: '\uD83D\uDFE2' } };
+
+function capDefaultState() {
+  return { active: false, clientName: '', topZone: '', landlordPhone: '', landlordContact: '',
+    tasks: [], engagementLog: [], resources: [], risks: [], caseworkerNotes: '', owner: 'Demo Caseworker',
+    clock: 9 * 60, dialog: null, seq: 0 };
+}
+var CAP_STATE = capDefaultState();
+function capResetState() { CAP_STATE = capDefaultState(); }
+function capEsc(s) { return (window.newarkEscape ? newarkEscape(s) : String(s == null ? '' : s)); }
+function capNextId(prefix) { CAP_STATE.seq += 1; return (prefix || 'cap') + '-' + CAP_STATE.seq; }
+
+// Demo-only timestamps (never real wall-clock client activity).
+function capDemoTime() {
+  var m = CAP_STATE.clock; CAP_STATE.clock += 7;
+  var h = Math.floor(m / 60) % 24, mm = m % 60;
+  var ampm = h < 12 ? 'AM' : 'PM'; var h12 = (h % 12) || 12;
+  return 'Demo ' + h12 + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ampm;
+}
+
+function capRevealActionPanel(clientInput, snapshot) {
+  var panel = document.getElementById('capActionPanel');
+  if (!panel || !snapshot || !snapshot.length) return;
+  capResetState();
+  var top = snapshot[0];
+  var p = top.property, r = top.result;
+  var mock = (typeof newarkGetMock === 'function') ? newarkGetMock() : null;
+  var zone = null;
+  if (mock && mock.registry) {
+    for (var i = 0; i < mock.registry.zones.length; i++) {
+      if (mock.registry.zones[i].id === p.zoneId) { zone = mock.registry.zones[i]; break; }
+    }
+  }
+  CAP_STATE.active = true;
+  CAP_STATE.clientName = clientInput.displayName || 'Demo Client';
+  CAP_STATE.topZone = zone ? zone.label : (p.neighborhoodLabel || 'Active Sandbox Record');
+  CAP_STATE.signal = r.score;
+  CAP_STATE.landlordPhone = '(555) 010-0' + (100 + (r.score * 7) % 800);
+  CAP_STATE.landlordContact = 'Sandbox Property Manager';
+
+  // Column 1 — Caseworker Next Steps (generated from 10-for-10 analysis)
+  capAddTask('Contact landlord for the Active Sandbox Record (status: Not Confirmed)', 'today', 'Contact Needed');
+  capAddTask('Schedule unit walkthrough for the top sandbox match', 'week', 'Not Started');
+  var voucherUnknown = !clientInput.voucherType || clientInput.voucherType.indexOf('Unknown') === 0;
+  capAddTask('Confirm program/voucher fit with the housing authority', voucherUnknown ? 'today' : 'week', 'Contact Needed');
+  (r.missingInfo || []).forEach(function(m) {
+    capAddTask('Confirm intake detail: ' + m, 'today', 'Contact Needed');
+  });
+  (typeof NEWARK_REVIEW_ONLY_CATEGORIES !== 'undefined' ? NEWARK_REVIEW_ONLY_CATEGORIES : []).forEach(function(c) {
+    capAddTask('Caseworker Review Recommended: ' + c.label, 'monitor', 'Not Started');
+  });
+
+  // Column 2 — Outbound Engagement Log (seed)
+  CAP_STATE.engagementLog.push({ id: capNextId('log'), time: capDemoTime(), action: 'Sandbox review created from Placement Readiness Signal', status: 'Pending', notes: 'Auto-generated demo entry.' });
+
+  // Column 3 — Agency Stabilization Resources
+  var prox = zone ? (zone.resourceAccessLabel + ' access \u2014 within zone') : 'Within zone (demo)';
+  function firstName(arr) { return (arr && arr[0] && arr[0].name) || 'Demo resource'; }
+  var zr = zone ? zone.resources : {};
+  CAP_STATE.resources = [
+    { id: capNextId('res'), type: 'Food', name: firstName(zr.grocery), proximity: prox, flagged: false, note: '' },
+    { id: capNextId('res'), type: 'Healthcare', name: firstName(zr.clinics), proximity: prox, flagged: false, note: '' },
+    { id: capNextId('res'), type: 'Transit', name: firstName(zr.transit), proximity: prox, flagged: false, note: '' },
+    { id: capNextId('res'), type: 'Employment', name: firstName(zr.support), proximity: prox, flagged: false, note: '' },
+    { id: capNextId('res'), type: 'Housing', name: 'Active Sandbox Record \u2014 ' + CAP_STATE.topZone, proximity: 'Strong Resource Match (demo)', flagged: false, note: '' }
+  ];
+
+  // Placement Risks (approved safe language only)
+  CAP_STATE.risks = [];
+  capAddRisk('Landlord Contact Status', 'Top Active Sandbox Record is Not Confirmed', 'Caseworker Review Recommended');
+  if (voucherUnknown) capAddRisk('Program / Voucher Confirmation', 'Voucher or program type is not confirmed', 'Requires follow-up');
+  if ((r.missingInfo || []).length) capAddRisk('Intake Information Incomplete', r.missingInfo.join(', '), 'Requires follow-up');
+  capAddRisk('Resource Proximity', 'Confirm Proximity to Client-Specified Resource Vectors', 'Requires agency review');
+
+  panel.style.display = 'block';
+  capRender();
+}
+
+function capAddTask(label, priorityKey, status) {
+  var t = capDemoTime();
+  CAP_STATE.tasks.push({ id: capNextId('task'), label: label, priority: priorityKey, status: status || 'Not Started', checked: false, createdAt: t, updatedAt: t, owner: CAP_STATE.owner });
+}
+function capAddRisk(category, description, action) {
+  CAP_STATE.risks.push({ category: category, description: description, action: action });
+}
+
+// ---- Local interactions (session state only; no persistence) ----
+function capToggleTask(id, checked) {
+  CAP_STATE.tasks.forEach(function(t) {
+    if (t.id === id) { t.checked = checked; t.status = checked ? 'Completed' : (t.status === 'Completed' ? 'In Progress' : t.status); t.updatedAt = capDemoTime(); }
+  });
+  capRender();
+}
+function capSetStatus(id, value) {
+  CAP_STATE.tasks.forEach(function(t) {
+    if (t.id === id) { t.status = value; t.checked = (value === 'Completed'); t.updatedAt = capDemoTime(); }
+  });
+  capRender();
+}
+function capCallLandlord() {
+  CAP_STATE.engagementLog.push({ id: capNextId('log'), time: capDemoTime(), action: 'Called landlord (sandbox)', status: 'No response', notes: 'Demo call to ' + CAP_STATE.landlordPhone });
+  CAP_STATE.dialog = { title: 'Sandbox call \u2014 ' + CAP_STATE.landlordContact, body: 'This is a simulated call. No real number is dialed.\nDemo contact: ' + CAP_STATE.landlordPhone };
+  capRender();
+}
+function capScheduleTour() {
+  capAddTask('Unit walkthrough scheduled (demo)', 'week', 'In Progress');
+  CAP_STATE.engagementLog.push({ id: capNextId('log'), time: capDemoTime(), action: 'Scheduled unit walkthrough (sandbox)', status: 'Pending', notes: 'Demo tour added to Next Steps.' });
+  capRender();
+}
+function capAddNote() {
+  var el = document.getElementById('capNoteInput');
+  var val = el ? (el.value || '').trim() : '';
+  if (!val) return;
+  CAP_STATE.engagementLog.push({ id: capNextId('log'), time: capDemoTime(), action: 'Caseworker note', status: 'Pending', notes: val });
+  capRender();
+}
+function capCheckResource(id) {
+  CAP_STATE.resources.forEach(function(rs) { if (rs.id === id) rs.flagged = !rs.flagged; });
+  capRender();
+}
+function capSaveResourceNote(id, value) {
+  CAP_STATE.resources.forEach(function(rs) { if (rs.id === id) rs.note = value; });
+}
+function capSaveCaseworkerNotes(value) { CAP_STATE.caseworkerNotes = value; }
+function capRecomputeNextSteps() {
+  var openToday = CAP_STATE.tasks.filter(function(t) { return t.priority === 'today' && !t.checked; }).length;
+  CAP_STATE.engagementLog.push({ id: capNextId('log'), time: capDemoTime(), action: 'Refreshed recommended next steps', status: 'Pending', notes: openToday + ' Do-Today action(s) still open.' });
+  capRender();
+}
+function capCloseDialog() { CAP_STATE.dialog = null; capRender(); }
+
+// ---- Render (full rebuild from state) ----
+function capRender() {
+  var panel = document.getElementById('capActionPanel');
+  if (!panel || !CAP_STATE.active) return;
+
+  var header = '<div class="b4-demo-banner" style="margin-bottom:10px"><strong>' + capEsc(CAP_DEMO_LABEL) + '</strong></div>'
+    + '<div class="dash-name" style="font-size:18px">Caseworker Action Panel</div>'
+    + '<p class="dash-sub" style="margin:2px 0 8px">' + capEsc(CAP_STATE.clientName) + ' &bull; ' + capEsc(CAP_STATE.topZone)
+    + ' &bull; Placement Readiness Signal: <strong>' + capEsc(CAP_STATE.signal) + '/10</strong></p>'
+    + '<div style="border:2px solid #f59e0b;background:#fffbeb;border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:13px;font-weight:700;color:#92400e">\u26A0\uFE0F ' + capEsc(CAP_DEMO_DISCLAIMER) + '</div>';
+
+  var actionBtns = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">'
+    + '<button type="button" class="green-btn" style="width:auto;min-height:40px" onclick="capCallLandlord()">Call Landlord</button>'
+    + '<button type="button" class="ghost-btn" onclick="capScheduleTour()">Schedule Tour</button>'
+    + '<button type="button" class="ghost-btn" onclick="capRecomputeNextSteps()">Next Steps</button>'
+    + '</div>';
+
+  var dialog = '';
+  if (CAP_STATE.dialog) {
+    dialog = '<div style="border:1px solid #d1d5db;background:#f9fafb;border-radius:10px;padding:12px;margin-bottom:12px">'
+      + '<div style="font-weight:800;margin-bottom:4px">' + capEsc(CAP_STATE.dialog.title) + '</div>'
+      + '<div style="font-size:13px;color:#374151;white-space:pre-line">' + capEsc(CAP_STATE.dialog.body) + '</div>'
+      + '<button type="button" class="ghost-btn" style="margin-top:8px" onclick="capCloseDialog()">Close</button></div>';
+  }
+
+  // Column 1 — Next Steps
+  var taskRows = CAP_STATE.tasks.map(function(t) {
+    var pr = CAP_PRIORITIES[t.priority] || CAP_PRIORITIES.week;
+    var opts = CAP_STATUS_OPTIONS.map(function(s) { return '<option' + (s === t.status ? ' selected' : '') + '>' + s + '</option>'; }).join('');
+    return '<div style="border:1px solid #e5e7eb;border-radius:8px;padding:8px;margin:6px 0;background:#fff">'
+      + '<label style="display:flex;align-items:flex-start;gap:8px;font-size:13px">'
+      + '<input type="checkbox" class="cap-task-check"' + (t.checked ? ' checked' : '') + ' onchange="capToggleTask(\'' + t.id + '\', this.checked)"/>'
+      + '<span style="flex:1' + (t.checked ? ';text-decoration:line-through;color:#9ca3af' : '') + '">' + capEsc(t.label) + '</span></label>'
+      + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px">'
+      + '<span style="font-size:11px">' + pr.dot + ' ' + capEsc(pr.label) + '</span>'
+      + '<select class="cap-status-select beta-input" style="height:30px;padding:2px 6px;font-size:12px;width:auto" onchange="capSetStatus(\'' + t.id + '\', this.value)">' + opts + '</select>'
+      + '<span style="font-size:10px;color:#9ca3af">created ' + capEsc(t.createdAt) + ' \u00b7 updated ' + capEsc(t.updatedAt) + '</span>'
+      + '</div></div>';
+  }).join('');
+  var col1 = '<div style="flex:1 1 280px;min-width:260px"><div class="cap-col-title" style="font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#374151;margin-bottom:4px">Caseworker Next Steps</div>'
+    + '<div style="font-size:11px;color:#6b7280;margin-bottom:6px">What should I do now?</div>' + (taskRows || '<p style="font-size:12px;color:#6b7280">No tasks.</p>') + '</div>';
+
+  // Column 2 — Engagement Log
+  var logRows = CAP_STATE.engagementLog.map(function(l) {
+    return '<div style="border:1px solid #e5e7eb;border-radius:8px;padding:8px;margin:6px 0;background:#fff;font-size:12px">'
+      + '<div style="display:flex;justify-content:space-between;gap:8px"><strong>' + capEsc(l.action) + '</strong><span style="color:#9ca3af">' + capEsc(l.time) + '</span></div>'
+      + '<div style="color:#6b7280">Status: ' + capEsc(l.status) + (l.notes ? ' \u00b7 ' + capEsc(l.notes) : '') + '</div></div>';
+  }).join('');
+  var col2 = '<div style="flex:1 1 280px;min-width:260px"><div class="cap-col-title" style="font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#374151;margin-bottom:4px">Outbound Engagement Log</div>'
+    + '<div style="font-size:11px;color:#6b7280;margin-bottom:6px">What have I already tried?</div>' + logRows
+    + '<div style="margin-top:8px"><input id="capNoteInput" class="beta-input" type="text" placeholder="Add a caseworker note (demo)..." style="margin-bottom:6px"/>'
+    + '<button type="button" class="ghost-btn" onclick="capAddNote()">Add Note</button></div></div>';
+
+  // Column 3 — Agency Stabilization Resources
+  var resRows = CAP_STATE.resources.map(function(rs) {
+    return '<div style="border:1px solid ' + (rs.flagged ? '#16a34a' : '#e5e7eb') + ';border-radius:8px;padding:8px;margin:6px 0;background:' + (rs.flagged ? '#f0fdf4' : '#fff') + ';font-size:12px">'
+      + '<div style="display:flex;justify-content:space-between;gap:8px"><strong>' + capEsc(rs.type) + '</strong><button type="button" class="ghost-btn" style="min-height:28px;padding:2px 8px;font-size:11px" onclick="capCheckResource(\'' + rs.id + '\')">' + (rs.flagged ? 'Flagged \u2713' : 'Check Resource') + '</button></div>'
+      + '<div>' + capEsc(rs.name) + '</div>'
+      + '<div style="color:#6b7280">Proximity to Client-Specified Resource Vectors: ' + capEsc(rs.proximity) + '</div>'
+      + '<input class="beta-input" type="text" placeholder="Caseworker note (demo)..." value="' + capEsc(rs.note) + '" style="margin-top:6px;height:32px" onchange="capSaveResourceNote(\'' + rs.id + '\', this.value)"/></div>';
+  }).join('');
+  var col3 = '<div style="flex:1 1 280px;min-width:260px"><div class="cap-col-title" style="font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#374151;margin-bottom:4px">Agency Stabilization Resources</div>'
+    + '<div style="font-size:11px;color:#6b7280;margin-bottom:6px">What can I connect them to?</div>' + resRows + '</div>';
+
+  var columns = '<div style="display:flex;flex-wrap:wrap;gap:12px">' + col1 + col2 + col3 + '</div>';
+
+  // Placement Risks
+  var riskRows = CAP_STATE.risks.map(function(rk) {
+    return '<div style="font-size:13px;color:#92400e;margin:4px 0">\u26A0\uFE0F <strong>' + capEsc(rk.category) + '</strong> \u2014 ' + capEsc(rk.description) + ' \u2014 ' + capEsc(rk.action) + '</div>';
+  }).join('');
+  var risks = '<div style="border:1px solid #fde68a;background:#fffbeb;border-radius:10px;padding:12px;margin-top:14px">'
+    + '<div style="font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#92400e;margin-bottom:4px">Placement Risks</div>' + riskRows + '</div>';
+
+  var notes = '<div style="margin-top:14px"><label class="beta-lbl" for="capCaseworkerNotes">Caseworker notes (demo, session only)</label>'
+    + '<textarea id="capCaseworkerNotes" class="beta-input" rows="3" placeholder="Free-text demo notes..." onchange="capSaveCaseworkerNotes(this.value)">' + capEsc(CAP_STATE.caseworkerNotes) + '</textarea></div>';
+
+  panel.innerHTML = header + actionBtns + dialog + columns + risks + notes;
+}
 </script>
 <button type="button" id="d3HamburgerBtn" class="d3-hamburger" aria-label="Open navigation menu" aria-expanded="false" onclick="d3ToggleMobileNav()" style="display:none">&#9776;</button>
 <div id="d3MobileOverlay" class="d3-mobile-overlay" onclick="d3CloseMobileNav()" aria-hidden="true"></div>

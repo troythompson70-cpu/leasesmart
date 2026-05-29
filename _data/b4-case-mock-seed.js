@@ -33,7 +33,17 @@ window.B4_MOCK_FOUNDATION = (function() {
       assignedCaseworkerId: cw,
       followUpDue: i % 3 === 0 ? '2026-05-28' : null,
       isMock: true,
-      county: ['Essex', 'Passaic', 'Hudson', 'Bergen'][i % 4]
+      county: ['Essex', 'Passaic', 'Hudson', 'Bergen'][i % 4],
+      zipCode: ['07102', '07501', '07302', '07601'][i % 4],
+      familyProfile: {
+        adultsInHousehold: (i % 2 === 0) ? 2 : 1,
+        childrenCount: (i % 2 === 0) ? 2 : 0,
+        childrenAges: (i % 2 === 0) ? '7, 11' : '',
+        bedroomRequirement: (i % 2 === 0) ? 3 : 1,
+        schoolDistrictPreference: (i % 2 === 0) ? 'Demo district preference — verify with district' : 'N/A — individual placement',
+        petSituation: (i % 3 === 0) ? 'One cat — demo only' : 'No pets',
+        specialNeedsNote: 'Demo text note only — no real medical or disability data.'
+      }
     });
   }
   return {

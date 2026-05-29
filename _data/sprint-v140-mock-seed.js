@@ -22,7 +22,14 @@ window.SPRINT_V140_MOCK = (function() {
       followUpsDue: 5,
       activeCases: 28,
       timeSavedHours: 14.5,
-      statusBreakdown: { intake: 6, active: 12, follow_up: 5, placed: 12, on_hold: 3, closed: 2 }
+      statusBreakdown: { intake: 6, active: 12, follow_up: 5, placed: 12, on_hold: 3, closed: 2 },
+      monthly: {
+        monthLabel: 'May 2026',
+        clientsProcessed: 3,
+        placed: 2,
+        pending: 1,
+        successRatePct: 67
+      }
     },
     b5Admin: {
       totalUsers: 1240,

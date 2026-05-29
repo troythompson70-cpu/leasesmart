@@ -9,7 +9,7 @@ const buildMatch = html.match(/LS_BUILD = '([^']+)'/);
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('A6 build id', buildMatch && /^20260526-v2\.(3\.0-e1|4\.0-a7)$|^20260527-v2\.(4\.0-a7|5\.0-a8)$/.test(buildMatch[1]));
+assert('A6 build id', buildMatch && /^20260526-v2\.(3\.0-e1|4\.0-a7)$|^20260527-v2\.(4\.0-a7|5\.0-a8)$|^20260528-v2\.(7\.0-auth1|8\.0-newark)$|^20260529-v2\.9\.0-actionpanel$/.test(buildMatch[1]));
 assert('Profile create page', html.includes('id="profile-create-pg"') && html.includes('submitCreateProfile'));
 assert('Onboarding router', html.includes('function routeOnboarding'));
 assert('No home default show', !html.includes('id="home-pg" class="pg show"'));
@@ -37,7 +37,8 @@ assert('Stats filters preserved', html.includes('setStatusFilter') && html.inclu
 assert('Post-quiz feedback preserved', html.includes('schedulePostQuizFeedbackPrompt') && html.includes('150000'));
 assert('Q5 state persistence', html.includes('saved === s ? \' on\' : \'\''));
 assert('Q9 flex continue', html.includes("step.id === 'flex'") && html.includes('Continue &rarr;'));
-assert('Magic link only', html.includes('signInWithOtp') && !html.includes('signInWithPassword'));
+assert('Magic link OTP for consumer', html.includes('signInWithOtp'));
+assert('Pro lane may use signInWithPassword', html.includes('signInWithOtp') && (!html.includes('signInWithPassword') || /function auth1SubmitProLogin[\s\S]*?signInWithPassword/.test(html)));
 assert('Legal gate preserved', html.includes('beta-legal-pg') && html.includes('submitBetaLegalAccept'));
 assert('Favorites preserved', html.includes('lsToggleFavorite') && html.includes('renderFavorites'));
 
