@@ -23,7 +23,7 @@ const startEnd = startIdx >= 0 ? html.indexOf('<div id="home-pg"', startIdx) : -
 const landing = (startIdx >= 0 && startEnd >= 0) ? html.slice(startIdx, startEnd) : '';
 
 // 1. Build id (this sprint).
-assert('1. Build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260530-v2.11.0-c1pro'"));
+assert('1. Build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260530-v2.11.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.12.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.13.0-c1pro-app'"));
 // 2. Clean demo landing page exists.
 assert('2. demo-start-pg present', !!landing);
 // 3. App boots into the clean landing (not the magic-link login page).

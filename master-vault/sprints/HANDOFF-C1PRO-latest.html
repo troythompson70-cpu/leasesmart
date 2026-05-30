@@ -1,78 +1,128 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Sprint C1-PRO / NEWARK-P2 Handoff — May 30, 2026</title>
+<title>Sprint C1-PRO / NEWARK-P2 Handoff — May 30, 2026 (v2.12)</title>
 <style>.ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-.ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}
+.ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:560px;overflow:auto}
 .ls-copy-for-claude-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35);letter-spacing:.2px}
 .ls-copy-for-claude-btn:hover{filter:brightness(1.05)}
 .ls-copy-for-claude-btn:active{transform:scale(.98)}
 .ls-copy-for-claude-status{display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#16a34a;min-height:20px}</style>
 </head><body style="max-width:900px;margin:0 auto;padding:24px 18px;color:#111827">
-<h1 style="font-size:22px;margin-bottom:8px">Sprint C1-PRO / NEWARK-P2 Handoff — May 30, 2026</h1>
-<p style="color:#6b7280;font-size:14px;margin-bottom:20px">TGT Technologies Inc. — click <strong>Copy for Claude</strong> below.</p>
+<h1 style="font-size:22px;margin-bottom:8px">C1-PRO Placement Workbench — Claude Handoff (v2.12)</h1>
+<p style="color:#6b7280;font-size:14px;margin-bottom:20px">Troy feedback sprint — click <strong>Copy for Claude</strong> below.</p>
 <div class="ls-handoff-wrap">
   <pre class="ls-handoff-pre" id="lsHandoffBlock">--- CLAUDE HANDOFF START ---
 Project: LeaseSmart by TGT Technologies Inc.
-Sprint: C1-PRO / NEWARK-P2 — Local Workbench State Engine
-Build ID: 20260530-v2.11.0-c1pro
-Claude GO: Confirmed (Vanilla JS only; defaults + Claude spec)
-Mode: Build only — NOT COMMITTED — NOT PUSHED
-Local demo target: http://localhost:8080
+Sprint: C1-PRO / NEWARK-P2 — Placement Workbench (pipeline + supervisor UX)
+Build ID: 20260530-v2.12.0-c1pro
+Status: IMPLEMENTED IN WORKING TREE — NOT COMMITTED — NOT PUSHED
+Local demo: http://localhost:8080 (python3 -m http.server 8080, then Cmd+Shift+R)
 
-SUMMARY
-A Pro-mode-only "Placement Workbench" driven by an in-memory state engine.
-Sandbox units only; state resets on refresh. Renter dash-pg is never touched.
-No fetch, no Supabase, no storage, no auth changes, no PII.
+═══════════════════════════════════════════════════════════════
+TROY FEEDBACK — THREE ROUNDS (what he asked for)
+═══════════════════════════════════════════════════════════════
 
-STATE ENGINE (pure reducers)
-• scripts/c1pro-workbench.mjs — Node-importable canonical reducers
-  - c1proInitState(seed) — seeds every unit as "Reviewing", empty log
-  - c1proSetStage(state, unitId, stage) — pure; returns new state + logs transition
-  - c1proComputeMetrics(state) — derives the live counters
-• Identical inline copy lives in index.html (single-file app cannot <script>-load
-  a bare .mjs). Regression suite unit-tests the .mjs and asserts the inline copy.
+ROUND 1 — Dashboard / pipeline correctness
+• Missing Placed + On Hold on top → FIXED: 7 clickable stage tabs (incl. Placed, On Hold)
+• Contacted dropped to 0 when unit set to Tour Set → FIXED: cumulative “reached” counts; Contacted tab shows reached count as primary number
+• Activity log didn’t match live counters → FIXED: activity panel repeats live pipeline strip
+• Reviewing filter / stage changes not visible → FIXED: filters + session log update on every dropdown change
 
-WORKBENCH UI (c1pro-workbench-pg, Pro mode only)
-• Live metric counters: Active Sandbox Records, Placement-Ready (Signal >= 80),
-  Avg Placement Readiness Signal, Contacts Logged, Tours Set, Applications, Placed
-• Unit cards: label, zone (display-only), bedrooms, move-in ready, Rent Within
-  Standard Cap Estimates, resource match + Proximity to Client-Specified Resource
-  Vectors, vouchers accepted, accessibility, 555 contact, + placement-stage dropdown
-• Stage pipeline (compliance-safe): Reviewing -> Contacted -> Tour Set ->
-  Application Submitted -> Application Approved -> Placed -> On Hold
-• Session-only activity log; "Reset demo state" button
-• Footer disclaimer: automated decision-support tools / official agency guidelines
+ROUND 2 — “Looks very good” + structure for managers
+• Click Active Sandbox Record A–G → full detail spectrum like renter apartment “Details”
+  → FIXED: card click OR “Full record →” opens overlay (c1proDetailOverlay) with all sandbox fields, stage dropdown, caseworker notes, per-record stage history
+• Workbench activity needs date/time for supervisors/managers
+  → FIXED: every log entry has ISO `at` + formatted timestamp on the RIGHT of each row
+• Activity should feel like a live surface that updates as work happens
+  → FIXED: right-hand sticky “Workbench activity” column; pipeline strip inside feed; persists to LS_STORE.c1proWorkbenchLog until Reset
+• Stage tabs clickable (liked) — BUT filter was wrong: tab said 4 Contacted but only 1 card showed
+  → FIXED: stage:Contacted / Tour Set / App Submitted filters use CUMULATIVE reached logic (not exact-stage-only)
 
-ROUTING / ENTRY
-• Registered in INTERNAL_DEMO_PAGES as 'c1pro-workbench-pg' (Pro-only; renter reroutes)
-• c1proShowWorkbench() sets Pro mode, inits state, renders, shows page
-• Entry points: Pro-login demo grid + a link on the Newark Placement page
-• Existing Analyze Client -> CaseworkerActionPanel flow left exactly as-is
+ROUND 3 — Hand off to Claude for structure
+• This block is the consolidated spec for Claude to design production-ready placement tracking, supervisor dashboards, and data model — without changing renter flows.
 
-SEED (sandbox-safe)
-• _data/sprint-c1pro-newark-seed.js -> window.SPRINT_C1PRO
-• 7 dummy units, 555 numbers, no real addresses/landlords/clients, no live APIs
+═══════════════════════════════════════════════════════════════
+CURRENT UX LAYOUT (Placement Workbench)
+═══════════════════════════════════════════════════════════════
 
-REGRESSION (all green)
-• _qa/sprint-c1pro-regression-test.mjs — reducer unit tests + UI/wiring + compliance
-• Chain: FRONTPAGE -> ActionPanel -> NEWARK -> AUTH-1 -> A8 -> A7 -> A6
+TOP ROW (summary metrics, clickable)
+  Active Sandbox Records | Placement-Ready | Avg Readiness Signal
 
-KEY FILES
-• index.html (BUILD 20260530-v2.11.0-c1pro)
-• _data/sprint-c1pro-newark-seed.js
-• scripts/c1pro-workbench.mjs
+GRAY STRIP — Placement pipeline (live): exact count per stage (7 stages)
+
+STAGE TABS (click = filter cards below)
+  Reviewing | Contacted | Tour Set | App Submitted | App Approved | Placed | On Hold
+  • Pipeline tabs (except Reviewing/Placed/On Hold) show REACHED count as big number
+  • Subtitle explains “X exactly at this step · Y reached or passed” when different
+
+BLUE STRIP — Reached milestones (cumulative) — Tour Set still counts toward Contacted+
+
+MAIN (left) — Unit cards grid
+  • Click card → full record overlay
+  • Stage dropdown on card (stopPropagation)
+  • “Full record →” button
+
+RIGHT COLUMN — Workbench activity (supervisor feed)
+  • Title + “saved on device until Reset”
+  • Live pipeline summary
+  • Rows: Unit: From → To  |  date/time right-aligned
+
+FULL RECORD OVERLAY (like openDetail for apartments)
+  Summary, readiness, unit/financial, access/programs, 555 contact, stage select, caseworker notes (LS_STORE.c1proUnitNotes), stage history for that record
+
+═══════════════════════════════════════════════════════════════
+STATE ENGINE (pure reducers — keep .mjs + inline in sync)
+═══════════════════════════════════════════════════════════════
+
+scripts/c1pro-workbench.mjs (+ identical inline in index.html)
+• c1proInitState(seed, persistedLog?)
+• c1proSetStage(state, unitId, stage, atIso?) → log entry: { unit, unitId, from, to, at }
+• c1proHasReachedStage(unitStage, milestone) — cumulative pipeline
+• c1proUnitMatchesFilter(unit, filter) — stage: tabs use reached; Reviewing/Placed/On Hold exact
+• c1proComputeMetrics(state) — exactStage + reached* counters
+
+PERSISTENCE (demo only — view layer, not in pure reducers)
+• LS_STORE.c1proWorkbenchLog — activity survives refresh until “Reset demo state”
+• LS_STORE.c1proUnitNotes — per-unit caseworker notes on device
+
+SEED — _data/sprint-c1pro-newark-seed.js
+• 7 units A–G, 555 phones, enriched fields: agencyRefId, unitType, bathrooms, depositEstimate, parking, laundry, unitSummary, lastVerified, etc.
+
+═══════════════════════════════════════════════════════════════
+REGRESSION
+═══════════════════════════════════════════════════════════════
+
+_qa/sprint-c1pro-regression-test.mjs → 54/55 PASS on C1-PRO assertions
+• Chain test 10 may FAIL if upstream sprint-action-panel-regression fails (pre-existing chain, not C1-PRO logic)
+
+═══════════════════════════════════════════════════════════════
+KEY FILES TOUCHED
+═══════════════════════════════════════════════════════════════
+
+• index.html — BUILD 20260530-v2.12.0-c1pro, workbench UI/engine, detail overlay, layout
+• _data/sprint-c1pro-newark-seed.js — richer unit records
+• scripts/c1pro-workbench.mjs — timestamps, c1proUnitMatchesFilter
 • _qa/sprint-c1pro-regression-test.mjs
-• master-vault/sprints/HANDOFF-C1PRO-latest.html
+• master-vault/sprints/HANDOFF-C1PRO-latest.html (this file)
 
-DO NOT
-• Touch renter dash-pg, Supabase, auth, DNS, or production
-• Put service_role or API keys in frontend
-• Treat sandbox metrics as real placement outcomes
+═══════════════════════════════════════════════════════════════
+CLAUDE — SUGGESTED NEXT STRUCTURE (product, not coded yet)
+═══════════════════════════════════════════════════════════════
 
-OUT OF CURSOR LANE (for Claude + Troy)
-• Supabase custom SMTP via GoDaddy / Microsoft 365 (DNS + auth) — not done here
+1. Data model: PlacementEvent { unitId, clientId, fromStage, toStage, actorId, at, note } append-only
+2. Supervisor view: same right-rail activity feed but server-backed + filter by caseworker/date
+3. Unit detail: keep “full spectrum” pattern from renter detail-pg; map sandbox fields → production listing + agency fields
+4. Filters: always document “exact at stage” vs “reached milestone” in UI labels (Troy cares about both)
+5. Do NOT merge workbench into renter dash-pg; keep Pro-mode boundary (a8SetProductMode('pro'))
 
-COMMIT: Only on Troy's exact phrase. PUSH: Only when Troy explicitly requests.
+DO NOT (Cursor lane)
+• Supabase writes, auth, DNS, production deploy, renter dash-pg changes
+• Commit/push unless Troy uses exact phrase
+
+OUT OF CURSOR LANE
+• GoDaddy / M365 SMTP for Supabase — Claude + Troy
+
+COMMIT: Only on Troy’s exact phrase. PUSH: Only when Troy explicitly requests.
 --- CLAUDE HANDOFF END ---</pre>
   <button type="button" class="ls-copy-for-claude-btn" data-handoff-target="lsHandoffBlock" onclick="lsCopyHandoffForClaude(this)">Copy for Claude</button>
   <span class="ls-copy-for-claude-status" aria-live="polite"></span>

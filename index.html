@@ -1457,6 +1457,11 @@ body { font-size: 16px !important; }
   <div class="ls-internal-banner"><strong>&#9888; DEMO SANDBOX — Placement Workbench (NEWARK-P2)</strong> Local demo state only. Sandbox units, 555 numbers, no real housing / landlord / client data. State lives in memory and resets on refresh.</div>
   <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;width:100%"><div><div class="dash-name">Placement Workbench</div><div class="dash-sub">NEWARK SANDBOX &bull; LOCAL WORKBENCH STATE ENGINE</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost-btn" onclick="c1proResetAndRender()">&#8634; Reset demo state</button><button class="ghost-btn" onclick="newarkShowPlacementPage()">&larr; Analyze Client</button><button class="ghost-btn" onclick="showPage('home-pg')">Home</button></div></div></div>
   <div class="ls-internal-panel" id="c1proWorkbenchBody"></div>
+  <div id="c1proDetailOverlay" class="c1pro-detail-overlay" style="display:none" onclick="if(event.target===this)c1proCloseUnitDetail()">
+    <div class="c1pro-detail-panel" onclick="event.stopPropagation()">
+      <div id="c1proDetailContent"></div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1480,7 +1485,7 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-c1pro-newark-seed.js"></script>
 <script>
 // v2.7.0 Sprint AUTH-1 — enterprise Pro login (+ C1-Pro + A8)
-var LS_BUILD = '20260530-v2.11.0-c1pro';
+var LS_BUILD = '20260530-v2.13.0-c1pro-app';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -2201,7 +2206,7 @@ function getStepById(id) {
 // Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
 // ================================================================
 var LS_VERSION = 'Beta v1.2 — Housing Intelligence Foundation';
-var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false, d2SavedSearchProfiles: [], liContactHistory: {}, d2Seeded: false, d2AlertsChecked: false, d4RateLimits: {}, securityLog: { failedLoginAttempts: [], totalFailedCount: 0 }, d4SessionExpiresAt: null, e2DemoClientsAdded: [], e2ClientConsentLog: [], e2DataRetentionPreview: null, productMode: null, c1proChecklists: {}, c1proClientResources: {}, c1proMatchOutcomes: {}, auth1LastStaffId: null, auth1PendingInvites: [] };
+var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false, d2SavedSearchProfiles: [], liContactHistory: {}, d2Seeded: false, d2AlertsChecked: false, d4RateLimits: {}, securityLog: { failedLoginAttempts: [], totalFailedCount: 0 }, d4SessionExpiresAt: null, e2DemoClientsAdded: [], e2ClientConsentLog: [], e2DataRetentionPreview: null, productMode: null, c1proChecklists: {}, c1proClientResources: {}, c1proMatchOutcomes: {}, c1proWorkbenchLog: [], c1proUnitNotes: {}, c1proAppRecords: {}, c1proFollowUps: [], auth1LastStaffId: null, auth1PendingInvites: [] };
 var LS_STORE = Object.assign({}, LS_STORE_DEFAULTS);
 
 function lsNormalizeStore(data) {
@@ -2237,6 +2242,10 @@ function lsNormalizeStore(data) {
   if (!store.c1proChecklists || typeof store.c1proChecklists !== 'object') store.c1proChecklists = {};
   if (!store.c1proClientResources || typeof store.c1proClientResources !== 'object') store.c1proClientResources = {};
   if (!store.c1proMatchOutcomes || typeof store.c1proMatchOutcomes !== 'object') store.c1proMatchOutcomes = {};
+  if (!Array.isArray(store.c1proWorkbenchLog)) store.c1proWorkbenchLog = [];
+  if (!store.c1proUnitNotes || typeof store.c1proUnitNotes !== 'object') store.c1proUnitNotes = {};
+  if (!store.c1proAppRecords || typeof store.c1proAppRecords !== 'object') store.c1proAppRecords = {};
+  if (!Array.isArray(store.c1proFollowUps)) store.c1proFollowUps = [];
   if (store.auth1LastStaffId === undefined) store.auth1LastStaffId = null;
   if (!Array.isArray(store.auth1PendingInvites)) store.auth1PendingInvites = store.auth1PendingInvites ? [].concat(store.auth1PendingInvites) : [];
   return store;
@@ -7882,7 +7891,22 @@ var C1PRO_READY_THRESHOLD = 80;
 var C1PRO_CONTACTED_STAGES = ['Contacted', 'Tour Set', 'Application Submitted', 'Application Approved', 'Placed'];
 var C1PRO_TOUR_STAGES = ['Tour Set', 'Application Submitted', 'Application Approved', 'Placed'];
 var C1PRO_APPLICATION_STAGES = ['Application Submitted', 'Application Approved', 'Placed'];
+var C1PRO_APP_STATUSES = ['Not Started', 'Application Started', 'Submitted', 'Waiting for Response', 'Documents Missing', 'Follow-Up Needed', 'Approved / Accepted', 'Denied / Passed', 'Placed'];
 var C1PRO_STATE = null;
+var C1PRO_FILTER = 'all';
+
+var C1PRO_PIPELINE_STAGES = ['Reviewing', 'Contacted', 'Tour Set', 'Application Submitted', 'Application Approved', 'Placed'];
+
+var C1PRO_FILTER_LABELS = {
+  all: 'All active sandbox records',
+  ready: 'Placement-ready units (signal \u2265 80)',
+  signal: 'All units sorted by Placement Readiness Signal',
+  contacted: 'Units that reached contact or beyond',
+  tour: 'Units that reached tour set or beyond',
+  application: 'Units that reached application submitted or beyond',
+  placed: 'Units marked placed',
+  onhold: 'Units on hold'
+};
 
 function c1proEsc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
@@ -7893,22 +7917,62 @@ function c1proEsc(s) {
 function c1proGetSeed() { return window.SPRINT_C1PRO || null; }
 
 // --- pure reducers (mirror of scripts/c1pro-workbench.mjs) ---
-function c1proInitState(seed) {
+function c1proAppRecordKey(clientId, unitId) { return String(clientId) + ':' + String(unitId); }
+
+function c1proAppStatusIndex(status) { return C1PRO_APP_STATUSES.indexOf(status); }
+
+function c1proDefaultAppRecord(clientId, unitId, atIso) {
+  var at = atIso || new Date().toISOString();
+  return { id: 'app-' + String(unitId).replace(/[^a-z0-9]/gi, '') + '-' + Date.now(), clientId: clientId, unitId: unitId, status: 'Not Started', notes: '', followUpDue: false, followUpNote: '', createdAt: at, updatedAt: at };
+}
+
+function c1proGetAppRecord(state, clientId, unitId) {
+  var key = c1proAppRecordKey(clientId, unitId);
+  var rec = (state && state.appRecords && state.appRecords[key]) || null;
+  return rec ? Object.assign({}, rec) : c1proDefaultAppRecord(clientId, unitId);
+}
+
+function c1proInitState(seed, persistedLog, persistedAppRecords, activeClientId) {
   var units = (seed && Array.isArray(seed.units) ? seed.units : []).map(function(u) {
     return Object.assign({}, u, { stage: 'Reviewing' });
   });
-  return { units: units, log: [] };
+  var log = Array.isArray(persistedLog) ? persistedLog.slice() : [];
+  var demoClient = seed && seed.demoClient ? seed.demoClient : null;
+  return {
+    units: units,
+    log: log,
+    activeClientId: activeClientId || (demoClient && demoClient.id) || 'client-marcus-demo',
+    appRecords: persistedAppRecords && typeof persistedAppRecords === 'object' ? Object.assign({}, persistedAppRecords) : {}
+  };
 }
 
-function c1proSetStage(state, unitId, stage) {
+function c1proSetStage(state, unitId, stage, atIso) {
   if (C1PRO_STAGES.indexOf(stage) < 0) return state;
   var log = state.log.slice();
+  var at = atIso || new Date().toISOString();
   var units = state.units.map(function(u) {
     if (u.id !== unitId) return u;
-    if (u.stage !== stage) { log.push({ unit: u.label, from: u.stage, to: stage }); }
+    if (u.stage !== stage) { log.push({ unit: u.label, unitId: unitId, from: u.stage, to: stage, at: at }); }
     return Object.assign({}, u, { stage: stage });
   });
   return { units: units, log: log };
+}
+
+function c1proStageIndex(stage) {
+  if (stage === 'On Hold') return -1;
+  return C1PRO_STAGES.indexOf(stage);
+}
+
+function c1proHasReachedStage(unitStage, milestone) {
+  if (unitStage === 'On Hold' || milestone === 'On Hold') return false;
+  var ui = c1proStageIndex(unitStage);
+  var mi = c1proStageIndex(milestone);
+  if (ui < 0 || mi < 0) return false;
+  return ui >= mi;
+}
+
+function c1proCountExactStage(units, stage) {
+  return (units || []).filter(function(u) { return u.stage === stage; }).length;
 }
 
 function c1proComputeMetrics(state) {
@@ -7916,19 +7980,239 @@ function c1proComputeMetrics(state) {
   var avg = units.length
     ? Math.round(units.reduce(function(s, u) { return s + (u.readinessSignal || 0); }, 0) / units.length)
     : 0;
+  var exact = {};
+  C1PRO_STAGES.forEach(function(s) {
+    exact[s] = c1proCountExactStage(units, s);
+  });
   return {
     activeRecords: units.length,
     placementReady: units.filter(function(u) { return (u.readinessSignal || 0) >= C1PRO_READY_THRESHOLD; }).length,
     avgReadiness: avg,
+    exactStage: exact,
+    reachedContacted: units.filter(function(u) { return c1proHasReachedStage(u.stage, 'Contacted'); }).length,
+    reachedTour: units.filter(function(u) { return c1proHasReachedStage(u.stage, 'Tour Set'); }).length,
+    reachedApplication: units.filter(function(u) { return c1proHasReachedStage(u.stage, 'Application Submitted'); }).length,
+    reachedAppApproved: units.filter(function(u) { return c1proHasReachedStage(u.stage, 'Application Approved'); }).length,
+    reachedPlaced: exact.Placed || 0,
     contactsLogged: units.filter(function(u) { return C1PRO_CONTACTED_STAGES.indexOf(u.stage) >= 0; }).length,
     toursSet: units.filter(function(u) { return C1PRO_TOUR_STAGES.indexOf(u.stage) >= 0; }).length,
     applications: units.filter(function(u) { return C1PRO_APPLICATION_STAGES.indexOf(u.stage) >= 0; }).length,
-    placed: units.filter(function(u) { return u.stage === 'Placed'; }).length
+    placed: exact.Placed || 0,
+    onHold: exact['On Hold'] || 0
   };
 }
 
-// --- view / wiring ---
-function c1proResetState() { C1PRO_STATE = c1proInitState(c1proGetSeed()); }
+function c1proSetAppStatus(state, clientId, unitId, status, note) {
+  if (C1PRO_APP_STATUSES.indexOf(status) < 0) return state;
+  var at = new Date().toISOString();
+  var key = c1proAppRecordKey(clientId, unitId);
+  var prev = c1proGetAppRecord(state, clientId, unitId);
+  var rec = Object.assign({}, prev, { status: status, updatedAt: at, followUpDue: status === 'Follow-Up Needed' ? true : prev.followUpDue });
+  if (note !== undefined) rec.notes = String(note);
+  var appRecords = Object.assign({}, state.appRecords || {});
+  appRecords[key] = rec;
+  return Object.assign({}, state, { appRecords: appRecords });
+}
+
+function c1proToggleFollowUp(state, clientId, unitId, followUpNote) {
+  var at = new Date().toISOString();
+  var key = c1proAppRecordKey(clientId, unitId);
+  var prev = c1proGetAppRecord(state, clientId, unitId);
+  var nextDue = !prev.followUpDue;
+  var rec = Object.assign({}, prev, {
+    followUpDue: nextDue,
+    followUpNote: followUpNote !== undefined ? String(followUpNote) : (nextDue ? prev.followUpNote : ''),
+    status: nextDue ? 'Follow-Up Needed' : prev.status,
+    updatedAt: at
+  });
+  var appRecords = Object.assign({}, state.appRecords || {});
+  appRecords[key] = rec;
+  return Object.assign({}, state, { appRecords: appRecords });
+}
+
+function c1proSetAppNotes(state, clientId, unitId, notes) {
+  var key = c1proAppRecordKey(clientId, unitId);
+  var prev = c1proGetAppRecord(state, clientId, unitId);
+  var rec = Object.assign({}, prev, { notes: String(notes || ''), updatedAt: new Date().toISOString() });
+  var appRecords = Object.assign({}, state.appRecords || {});
+  appRecords[key] = rec;
+  return Object.assign({}, state, { appRecords: appRecords });
+}
+
+function c1proClientAppRecordsList(state, clientId) {
+  return (state.units || []).map(function(u) { return c1proGetAppRecord(state, clientId, u.id); });
+}
+
+function c1proComputeClientMetrics(state, clientId) {
+  var records = c1proClientAppRecordsList(state, clientId);
+  var m = { totalLeads: (state.units || []).length, landlordsContacted: 0, appsStarted: 0, appsSubmitted: 0, waitingResponse: 0, documentsMissing: 0, followUpsDue: 0, approved: 0, denied: 0, placed: 0 };
+  records.forEach(function(rec) {
+    if (rec.status !== 'Not Started') m.landlordsContacted += 1;
+    if (rec.status === 'Application Started') m.appsStarted += 1;
+    if (rec.status === 'Submitted') m.appsSubmitted += 1;
+    if (rec.status === 'Waiting for Response') m.waitingResponse += 1;
+    if (rec.status === 'Documents Missing') m.documentsMissing += 1;
+    if (rec.followUpDue || rec.status === 'Follow-Up Needed') m.followUpsDue += 1;
+    if (rec.status === 'Approved / Accepted') m.approved += 1;
+    if (rec.status === 'Denied / Passed') m.denied += 1;
+    if (rec.status === 'Placed') m.placed += 1;
+  });
+  return m;
+}
+
+function c1proComputeAgencyMetrics(state) {
+  var appRecords = state.appRecords || {};
+  var clientIds = {};
+  Object.keys(appRecords).forEach(function(k) {
+    var r = appRecords[k];
+    if (r && r.clientId) clientIds[r.clientId] = true;
+  });
+  if (!Object.keys(clientIds).length && state.activeClientId) clientIds[state.activeClientId] = true;
+  var ids = Object.keys(clientIds);
+  var agg = { activeClients: ids.length || 1, totalLeads: 0, landlordsContacted: 0, appsStarted: 0, appsSubmitted: 0, waitingResponse: 0, documentsMissing: 0, followUpsDue: 0, approved: 0, denied: 0, placed: 0 };
+  ids.forEach(function(cid) {
+    var cm = c1proComputeClientMetrics(state, cid);
+    Object.keys(agg).forEach(function(k) { if (k !== 'activeClients') agg[k] += cm[k] || 0; });
+  });
+  if (!ids.length) {
+    var single = c1proComputeClientMetrics(state, state.activeClientId || 'client-marcus-demo');
+    Object.keys(agg).forEach(function(k) { if (k !== 'activeClients') agg[k] = single[k] || 0; });
+  }
+  return agg;
+}
+
+// --- view / wiring (persistence in LS_STORE for demo supervisor review) ---
+function c1proLoadPersistedLog() {
+  if (typeof lsLoad !== 'function') return [];
+  lsLoad();
+  return Array.isArray(LS_STORE.c1proWorkbenchLog) ? LS_STORE.c1proWorkbenchLog.slice() : [];
+}
+
+function c1proPersistLog() {
+  if (typeof lsLoad !== 'function' || typeof lsSave !== 'function' || !C1PRO_STATE) return;
+  lsLoad();
+  LS_STORE.c1proWorkbenchLog = C1PRO_STATE.log.slice();
+  lsSave();
+}
+
+function c1proClearPersistedLog() {
+  if (typeof lsLoad !== 'function' || typeof lsSave !== 'function') return;
+  lsLoad();
+  LS_STORE.c1proWorkbenchLog = [];
+  lsSave();
+}
+
+function c1proLoadPersistedAppRecords() {
+  if (typeof lsLoad !== 'function') return {};
+  lsLoad();
+  return (LS_STORE.c1proAppRecords && typeof LS_STORE.c1proAppRecords === 'object') ? Object.assign({}, LS_STORE.c1proAppRecords) : {};
+}
+
+function c1proPersistAppRecords() {
+  if (typeof lsLoad !== 'function' || typeof lsSave !== 'function' || !C1PRO_STATE) return;
+  lsLoad();
+  LS_STORE.c1proAppRecords = Object.assign({}, C1PRO_STATE.appRecords || {});
+  var followUps = [];
+  Object.keys(LS_STORE.c1proAppRecords).forEach(function(k) {
+    var r = LS_STORE.c1proAppRecords[k];
+    if (r && r.followUpDue) {
+      followUps.push({ clientId: r.clientId, unitId: r.unitId, note: r.followUpNote || '', flaggedAt: r.updatedAt || new Date().toISOString() });
+    }
+  });
+  LS_STORE.c1proFollowUps = followUps;
+  lsSave();
+}
+
+function c1proClearPersistedAppRecords() {
+  if (typeof lsLoad !== 'function' || typeof lsSave !== 'function') return;
+  lsLoad();
+  LS_STORE.c1proAppRecords = {};
+  LS_STORE.c1proFollowUps = [];
+  lsSave();
+}
+
+function c1proGetActiveClient() {
+  var seed = c1proGetSeed();
+  var base = (seed && seed.demoClient) ? seed.demoClient : { id: 'client-marcus-demo', displayName: 'Marcus Johnson', readinessTenOfTen: 7, readinessLabel: 'Good Candidate' };
+  var nameEl = document.getElementById('newarkName');
+  if (nameEl && nameEl.value && String(nameEl.value).trim()) {
+    return { id: base.id, displayName: String(nameEl.value).trim(), readinessTenOfTen: base.readinessTenOfTen || 7, readinessLabel: base.readinessLabel || 'Good Candidate' };
+  }
+  return base;
+}
+
+function c1proAppStatusClass(status) {
+  var map = {
+    'Not Started': 'c1pro-app-ns',
+    'Application Started': 'c1pro-app-started',
+    'Submitted': 'c1pro-app-submitted',
+    'Waiting for Response': 'c1pro-app-waiting',
+    'Documents Missing': 'c1pro-app-docs',
+    'Follow-Up Needed': 'c1pro-app-followup',
+    'Approved / Accepted': 'c1pro-app-approved',
+    'Denied / Passed': 'c1pro-app-denied',
+    'Placed': 'c1pro-app-placed'
+  };
+  return map[status] || 'c1pro-app-ns';
+}
+
+function c1proFormatLogTime(iso) {
+  if (!iso) return '';
+  try {
+    var d = new Date(iso);
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+  } catch (e) { return iso; }
+}
+
+function c1proResetState() {
+  C1PRO_STATE = c1proInitState(c1proGetSeed(), c1proLoadPersistedLog(), c1proLoadPersistedAppRecords());
+  C1PRO_FILTER = 'all';
+}
+
+function c1proFilterLabel(filter) {
+  if (!filter) return '';
+  if (filter.indexOf('stage:') === 0) {
+    var st = filter.slice(6);
+    if (st === 'Reviewing' || st === 'Placed' || st === 'On Hold') return 'Units at stage: ' + st;
+    return 'Units that reached "' + st + '" or beyond';
+  }
+  return C1PRO_FILTER_LABELS[filter] || filter;
+}
+
+function c1proUnitMatchesFilter(unit, filter) {
+  if (!filter || filter === 'all' || filter === 'signal') return true;
+  if (filter.indexOf('stage:') === 0) {
+    var stage = filter.slice(6);
+    if (stage === 'Reviewing') return unit.stage === 'Reviewing';
+    if (stage === 'Placed') return unit.stage === 'Placed';
+    if (stage === 'On Hold') return unit.stage === 'On Hold';
+    return c1proHasReachedStage(unit.stage, stage);
+  }
+  if (filter === 'ready') return (unit.readinessSignal || 0) >= C1PRO_READY_THRESHOLD;
+  if (filter === 'contacted') return c1proHasReachedStage(unit.stage, 'Contacted');
+  if (filter === 'tour') return c1proHasReachedStage(unit.stage, 'Tour Set');
+  if (filter === 'application') return c1proHasReachedStage(unit.stage, 'Application Submitted');
+  if (filter === 'placed') return unit.stage === 'Placed';
+  if (filter === 'onhold') return unit.stage === 'On Hold';
+  return true;
+}
+
+function c1proGetFilteredUnits() {
+  var units = (C1PRO_STATE && C1PRO_STATE.units) ? C1PRO_STATE.units.slice() : [];
+  if (C1PRO_FILTER === 'signal') {
+    return units.sort(function(a, b) { return (b.readinessSignal || 0) - (a.readinessSignal || 0); });
+  }
+  if (!C1PRO_FILTER || C1PRO_FILTER === 'all') return units;
+  return units.filter(function(u) { return c1proUnitMatchesFilter(u, C1PRO_FILTER); });
+}
+
+function c1proOnMetricFilter(filterKey) {
+  if (!C1PRO_STATE) c1proResetState();
+  C1PRO_FILTER = (C1PRO_FILTER === filterKey) ? 'all' : filterKey;
+  c1proRender();
+  var grid = document.getElementById('c1proUnitGrid');
+  if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
 function c1proShowWorkbench() {
   if (typeof a8SetProductMode === 'function') a8SetProductMode('pro');
@@ -7938,77 +8222,411 @@ function c1proShowWorkbench() {
   if (typeof setLastAction === 'function') setLastAction('Opened Placement Workbench (NEWARK-P2 demo)');
 }
 
-function c1proResetAndRender() { c1proResetState(); c1proRender(); }
+function c1proResetAndRender() {
+  c1proClearPersistedLog();
+  c1proClearPersistedAppRecords();
+  C1PRO_STATE = c1proInitState(c1proGetSeed(), [], {}, null);
+  C1PRO_FILTER = 'all';
+  c1proRender();
+}
+
+function c1proOnAppStatusChange(unitId, status) {
+  if (!C1PRO_STATE) c1proResetState();
+  var client = c1proGetActiveClient();
+  C1PRO_STATE = c1proSetAppStatus(C1PRO_STATE, client.id, unitId, status);
+  c1proPersistAppRecords();
+  c1proRender();
+}
+
+function c1proOnAppNoteChange(unitId, notes) {
+  if (!C1PRO_STATE) c1proResetState();
+  var client = c1proGetActiveClient();
+  C1PRO_STATE = c1proSetAppNotes(C1PRO_STATE, client.id, unitId, notes);
+  c1proPersistAppRecords();
+}
+
+function c1proOnFollowUpToggle(unitId, checked, note) {
+  if (!C1PRO_STATE) c1proResetState();
+  var client = c1proGetActiveClient();
+  if (checked) {
+    var key = c1proAppRecordKey(client.id, unitId);
+    var prev = c1proGetAppRecord(C1PRO_STATE, client.id, unitId);
+    var rec = Object.assign({}, prev, { followUpDue: true, followUpNote: note || prev.followUpNote || '', status: 'Follow-Up Needed', updatedAt: new Date().toISOString() });
+    var appRecords = Object.assign({}, C1PRO_STATE.appRecords || {});
+    appRecords[key] = rec;
+    C1PRO_STATE = Object.assign({}, C1PRO_STATE, { appRecords: appRecords });
+  } else {
+    var key2 = c1proAppRecordKey(client.id, unitId);
+    var prev2 = c1proGetAppRecord(C1PRO_STATE, client.id, unitId);
+    var rec2 = Object.assign({}, prev2, { followUpDue: false, updatedAt: new Date().toISOString() });
+    var ar2 = Object.assign({}, C1PRO_STATE.appRecords || {});
+    ar2[key2] = rec2;
+    C1PRO_STATE = Object.assign({}, C1PRO_STATE, { appRecords: ar2 });
+  }
+  c1proPersistAppRecords();
+  c1proRender();
+}
 
 function c1proOnStageChange(unitId, stage) {
   if (!C1PRO_STATE) c1proResetState();
   C1PRO_STATE = c1proSetStage(C1PRO_STATE, unitId, stage);
+  c1proPersistLog();
   c1proRender();
+  var ov = document.getElementById('c1proDetailOverlay');
+  if (ov && ov.style.display === 'flex') {
+    var u = c1proFindUnit(unitId);
+    if (u) c1proRenderUnitDetail(u);
+  }
 }
 
-function c1proMetricCard(value, label) {
-  return '<div style="flex:1;min-width:130px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px">'
-    + '<div style="font-size:26px;font-weight:800;color:#0ea060">' + c1proEsc(value) + '</div>'
-    + '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;margin-top:2px">' + c1proEsc(label) + '</div></div>';
+function c1proFindUnit(unitId) {
+  if (!C1PRO_STATE || !C1PRO_STATE.units) return null;
+  return C1PRO_STATE.units.find(function(u) { return u.id === unitId; }) || null;
+}
+
+function c1proGetUnitNote(unitId) {
+  if (typeof lsLoad !== 'function') return '';
+  lsLoad();
+  return (LS_STORE.c1proUnitNotes && LS_STORE.c1proUnitNotes[unitId]) || '';
+}
+
+function c1proSaveUnitNote(unitId, text) {
+  if (typeof lsLoad !== 'function' || typeof lsSave !== 'function') return;
+  lsLoad();
+  if (!LS_STORE.c1proUnitNotes) LS_STORE.c1proUnitNotes = {};
+  LS_STORE.c1proUnitNotes[unitId] = text;
+  lsSave();
+}
+
+function c1proUnitActivity(unitId) {
+  if (!C1PRO_STATE || !C1PRO_STATE.log) return [];
+  return C1PRO_STATE.log.filter(function(e) { return e.unitId === unitId; });
+}
+
+function c1proOpenUnitDetail(unitId) {
+  var u = c1proFindUnit(unitId);
+  if (!u) return;
+  c1proRenderUnitDetail(u);
+  var ov = document.getElementById('c1proDetailOverlay');
+  if (ov) { ov.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+
+function c1proCloseUnitDetail() {
+  var ov = document.getElementById('c1proDetailOverlay');
+  if (ov) { ov.style.display = 'none'; document.body.style.overflow = ''; }
+}
+
+function c1proRenderUnitDetail(u) {
+  var el = document.getElementById('c1proDetailContent');
+  if (!el) return;
+  var client = c1proGetActiveClient();
+  var appRec = c1proGetAppRecord(C1PRO_STATE, client.id, u.id);
+  var ready = (u.readinessSignal || 0) >= C1PRO_READY_THRESHOLD;
+  var acts = c1proUnitActivity(u.id).slice().reverse();
+  var actHtml = acts.length
+    ? acts.map(function(e) {
+        return '<div class="c1pro-log-row"><span>' + c1proEsc(e.from) + ' &rarr; <strong>' + c1proEsc(e.to) + '</strong></span><span class="c1pro-log-ts">' + c1proEsc(c1proFormatLogTime(e.at)) + '</span></div>';
+      }).join('')
+    : '<p class="c1pro-det-muted">No stage changes for this record yet.</p>';
+  var note = c1proGetUnitNote(u.id);
+  el.innerHTML = ''
+    + '<div class="c1pro-det-head"><button type="button" class="ghost-btn" onclick="c1proCloseUnitDetail()">&larr; Back to workbench</button>'
+    + '<span class="c1pro-signal-badge" style="' + (ready ? 'background:#dcfce7;color:#166534' : 'background:#fef3c7;color:#92400e') + '">Signal ' + c1proEsc(u.readinessSignal) + '</span></div>'
+    + '<div class="c1pro-det-name">' + c1proEsc(u.label) + '</div>'
+    + '<div class="c1pro-det-sub">' + c1proEsc(u.zoneLabel) + ' &bull; Ref ' + c1proEsc(u.agencyRefId || '—') + ' &bull; Stage: <strong>' + c1proEsc(u.stage) + '</strong></div>'
+    + '<div class="c1pro-det-sec"><div class="c1pro-det-lbl">Record summary</div><p class="c1pro-det-body">' + c1proEsc(u.unitSummary || 'Sandbox placement record.') + '</p></div>'
+    + '<div class="c1pro-det-sec"><div class="c1pro-det-lbl">Placement readiness</div><div class="facts">'
+    + '<div class="fact"><div class="fact-lbl">Placement Readiness Signal</div><div class="fact-val fact-val-g">' + c1proEsc(u.readinessSignal) + '/100</div></div>'
+    + '<div class="fact"><div class="fact-lbl">Resource match</div><div class="fact-val">' + c1proEsc(u.resourceMatch) + '</div></div>'
+    + '<div class="fact"><div class="fact-lbl">Proximity</div><div class="fact-val">' + c1proEsc(u.proximity) + '</div></div>'
+    + '</div></div>'
+    + '<div class="c1pro-det-sec"><div class="c1pro-det-lbl">Unit &amp; financial (sandbox)</div><div class="facts">'
+    + '<div class="fact"><div class="fact-lbl">Bedrooms / Bath</div><div class="fact-val">' + c1proEsc(u.bedrooms) + ' BR / ' + c1proEsc(u.bathrooms || '—') + ' BA</div></div>'
+    + '<div class="fact"><div class="fact-lbl">Unit type</div><div class="fact-val">' + c1proEsc(u.unitType || '—') + '</div></div>'
+    + '<div class="fact"><div class="fact-lbl">Rent Within Standard Cap Estimates</div><div class="fact-val fact-val-g">$' + c1proEsc(u.rentEstimate) + '</div></div>'
+    + '<div class="fact"><div class="fact-lbl">Deposit estimate</div><div class="fact-val">$' + c1proEsc(u.depositEstimate || u.rentEstimate) + '</div></div>'
+    + '<div class="fact"><div class="fact-lbl">Move-in ready</div><div class="fact-val">' + c1proEsc(u.moveInReady) + '</div></div>'
+    + '<div class="fact"><div class="fact-lbl">Last sandbox review</div><div class="fact-val">' + c1proEsc(u.lastSandboxReview || 'Demo') + '</div></div>'
+    + '</div></div>'
+    + '<div class="c1pro-det-sec"><div class="c1pro-det-lbl">Access &amp; programs</div><div class="facts">'
+    + '<div class="fact"><div class="fact-lbl">Vouchers accepted</div><div class="fact-val">' + c1proEsc(u.vouchersAccepted) + '</div></div>'
+    + '<div class="fact"><div class="fact-lbl">Accessibility</div><div class="fact-val">' + c1proEsc(u.accessibility) + '</div></div>'
+    + '<div class="fact"><div class="fact-lbl">Parking</div><div class="fact-val">' + c1proEsc(u.parking || '—') + '</div></div>'
+    + '<div class="fact"><div class="fact-lbl">Laundry</div><div class="fact-val">' + c1proEsc(u.laundry || '—') + '</div></div>'
+    + '</div></div>'
+    + '<div class="c1pro-det-sec"><div class="c1pro-det-lbl">Sandbox contact</div><p class="c1pro-det-body"><strong>' + c1proEsc(u.contactPhone) + '</strong> (555 demo line — not a real landlord)</p></div>'
+    + '<div class="c1pro-det-sec"><div class="c1pro-det-lbl">Application tracker (client + property)</div>'
+    + '<span class="c1pro-app-badge ' + c1proAppStatusClass(appRec.status) + '">' + c1proEsc(appRec.status) + '</span>'
+    + '<div style="margin-top:8px"><label class="beta-lbl">Application status</label>' + c1proAppStatusSelect(u.id, appRec.status) + '</div>'
+    + '<div style="margin-top:8px"><label class="beta-lbl">Application notes</label><textarea class="beta-input" rows="3" onchange="c1proOnAppNoteChange(\'' + c1proEsc(u.id) + '\', this.value)">' + c1proEsc(appRec.notes) + '</textarea></div>'
+    + '</div>'
+    + '<div class="c1pro-det-sec"><div class="c1pro-det-lbl">Placement pipeline (unit outreach)</div>' + c1proStageSelect(u) + '</div>'
+    + '<div class="c1pro-det-sec"><div class="c1pro-det-lbl">Caseworker notes (demo, saved on device)</div>'
+    + '<textarea class="beta-input" rows="4" placeholder="Call notes, tour outcome, supervisor flags…" onchange="c1proSaveUnitNote(\'' + c1proEsc(u.id) + '\', this.value)">' + c1proEsc(note) + '</textarea></div>'
+    + '<div class="c1pro-det-sec"><div class="c1pro-det-lbl">Stage history for this record</div>' + actHtml + '</div>';
+}
+
+function c1proAppStatusSelect(unitId, currentStatus) {
+  var opts = C1PRO_APP_STATUSES.map(function(s) {
+    return '<option value="' + c1proEsc(s) + '"' + (s === currentStatus ? ' selected' : '') + '>' + c1proEsc(s) + '</option>';
+  }).join('');
+  return '<select class="beta-input c1pro-app-select" onclick="event.stopPropagation()" onchange="event.stopPropagation();c1proOnAppStatusChange(\'' + c1proEsc(unitId) + '\', this.value)">' + opts + '</select>';
+}
+
+function c1proBuildClientDashboardHtml(client, cm) {
+  var rows = [
+    ['Housing Leads', cm.totalLeads],
+    ['Landlords Contacted', cm.landlordsContacted],
+    ['Apps Started', cm.appsStarted],
+    ['Apps Submitted', cm.appsSubmitted],
+    ['Waiting Response', cm.waitingResponse],
+    ['Docs Missing', cm.documentsMissing],
+    ['Follow-Ups Due', cm.followUpsDue],
+    ['Approved', cm.approved],
+    ['Denied/Pass', cm.denied],
+    ['Placed', cm.placed]
+  ];
+  var rowHtml = rows.map(function(r) {
+    return '<div class="c1pro-dash-row"><span>' + c1proEsc(r[0]) + '</span><strong>' + c1proEsc(r[1]) + '</strong></div>';
+  }).join('');
+  return '<div class="c1pro-client-dash">'
+    + '<div class="c1pro-client-dash-head">' + c1proEsc(client.displayName) + ' &mdash; Placement Dashboard</div>'
+    + '<div class="c1pro-client-readiness">Readiness: <strong>' + c1proEsc(client.readinessTenOfTen) + '/10</strong> &mdash; ' + c1proEsc(client.readinessLabel) + ' <span class="c1pro-readiness-hint">(10-for-10 profile &mdash; separate from application pipeline)</span></div>'
+    + '<div class="c1pro-client-dash-grid">' + rowHtml + '</div></div>';
+}
+
+function c1proBuildAgencyRollupHtml(am) {
+  return '<div class="c1pro-agency-rollup">'
+    + '<div class="c1pro-agency-rollup-title">Agency overview (demo rollup &mdash; next sprint)</div>'
+    + '<div class="c1pro-agency-rollup-body">Active Clients: ' + c1proEsc(am.activeClients)
+    + ' &bull; Leads: ' + c1proEsc(am.totalLeads)
+    + ' &bull; Submitted: ' + c1proEsc(am.appsSubmitted)
+    + ' &bull; Awaiting Response: ' + c1proEsc(am.waitingResponse)
+    + ' &bull; Docs Missing: ' + c1proEsc(am.documentsMissing)
+    + ' &bull; Placements: ' + c1proEsc(am.placed) + '</div></div>';
+}
+
+function c1proMetricCard(value, label, filterKey, hint) {
+  var on = C1PRO_FILTER === filterKey;
+  return '<button type="button" class="c1pro-metric-btn' + (on ? ' on' : '') + '" onclick="c1proOnMetricFilter(\'' + filterKey + '\')" title="Click to filter unit cards below">'
+    + '<span class="c1pro-metric-val">' + c1proEsc(value) + '</span>'
+    + '<span class="c1pro-metric-lbl">' + c1proEsc(label) + '</span>'
+    + (hint ? '<span class="c1pro-metric-hint">' + c1proEsc(hint) + '</span>' : '')
+    + '</button>';
+}
+
+function c1proStageTab(stage, exactCount, reachedCount) {
+  var key = 'stage:' + stage;
+  var on = C1PRO_FILTER === key;
+  var short = stage === 'Application Submitted' ? 'App Submitted' : (stage === 'Application Approved' ? 'App Approved' : stage);
+  var useReached = (stage !== 'Reviewing' && stage !== 'On Hold' && stage !== 'Placed');
+  var displayVal = useReached ? reachedCount : exactCount;
+  var hint = (stage === 'On Hold')
+    ? exactCount + ' on hold'
+    : (useReached && reachedCount > exactCount
+      ? exactCount + ' exactly at this step \u00b7 ' + reachedCount + ' reached or passed'
+      : (useReached ? reachedCount + ' reached or passed' : exactCount + ' at this step'));
+  return '<button type="button" class="c1pro-stage-tab' + (on ? ' on' : '') + '" onclick="c1proOnMetricFilter(\'' + key + '\')" title="Filter cards to ' + c1proEsc(stage) + '">'
+    + '<span class="c1pro-stage-tab-val">' + c1proEsc(displayVal) + '</span>'
+    + '<span class="c1pro-stage-tab-lbl">' + c1proEsc(short) + '</span>'
+    + '<span class="c1pro-stage-tab-hint">' + c1proEsc(hint) + '</span>'
+    + '</button>';
+}
+
+function c1proBuildPipelineSummary(m) {
+  var parts = C1PRO_STAGES.map(function(s) {
+    return c1proEsc(s) + ': ' + (m.exactStage[s] || 0);
+  });
+  return parts.join(' \u00b7 ');
+}
+
+function c1proBuildReachedSummary(m) {
+  return 'Reached contact+: ' + m.reachedContacted
+    + ' \u00b7 Reached tour+: ' + m.reachedTour
+    + ' \u00b7 Reached application+: ' + m.reachedApplication
+    + ' \u00b7 Placed: ' + m.placed
+    + ' \u00b7 On hold: ' + m.onHold;
+}
+
+function c1proEnsureMetricStyles() {
+  if (document.getElementById('c1proWorkbenchStyles')) return;
+  var st = document.createElement('style');
+  st.id = 'c1proWorkbenchStyles';
+  st.textContent = ''
+    + '#c1proWorkbenchBody{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}'
+    + '.c1pro-metrics-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}'
+    + '.c1pro-stage-tabs-row{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;margin-bottom:10px;padding-bottom:4px}'
+    + '.c1pro-stage-tab{flex:0 0 auto;min-width:118px;text-align:left;background:#fff;border:2px solid #d1d5db;border-radius:12px;padding:12px 10px;cursor:pointer;font-family:inherit}'
+    + '.c1pro-stage-tab.on{border-color:#0ea060;background:#f0fdf4}'
+    + '.c1pro-stage-tab-lbl{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#111827;margin-top:4px}'
+    + '.c1pro-stage-tab-val{display:block;font-size:24px;font-weight:800;color:#047857;line-height:1}'
+    + '.c1pro-stage-tab-hint{display:block;font-size:10px;font-weight:500;color:#6b7280;margin-top:4px;line-height:1.3}'
+    + '.c1pro-pipeline-strip{font-size:13px;font-weight:600;color:#374151;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;margin-bottom:12px;line-height:1.55}'
+    + '.c1pro-metric-btn{flex:1;min-width:148px;max-width:220px;text-align:left;background:#fff;border:2px solid #e5e7eb;border-radius:14px;padding:16px 14px;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;font-family:inherit}'
+    + '.c1pro-metric-btn:hover{border-color:#86efac;background:#f9fffb;box-shadow:0 4px 14px rgba(14,160,96,.12)}'
+    + '.c1pro-metric-btn.on{border-color:#0ea060;background:linear-gradient(180deg,#f0fdf4 0%,#fff 100%);box-shadow:0 4px 16px rgba(14,160,96,.18)}'
+    + '.c1pro-metric-val{display:block;font-size:32px;font-weight:800;line-height:1.1;color:#047857;letter-spacing:-.03em}'
+    + '.c1pro-metric-lbl{display:block;margin-top:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#374151;line-height:1.35}'
+    + '.c1pro-metric-hint{display:block;margin-top:4px;font-size:12px;font-weight:500;color:#6b7280;line-height:1.4;text-transform:none;letter-spacing:0}'
+    + '.c1pro-filter-bar{font-size:14px;font-weight:600;color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;margin-bottom:14px;line-height:1.5}'
+    + '.c1pro-filter-bar button{margin-left:10px;font-size:13px;font-weight:700;color:#0ea060;background:none;border:none;cursor:pointer;text-decoration:underline;padding:0}'
+    + '#c1proUnitGrid{display:flex;gap:14px;flex-wrap:wrap}'
+    + '.c1pro-unit-card{border:2px solid #e5e7eb;border-radius:14px;padding:16px;min-width:280px;flex:1;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.04)}'
+    + '.c1pro-unit-card.focus{border-color:#0ea060;box-shadow:0 0 0 3px rgba(14,160,96,.2)}'
+    + '.c1pro-unit-title{font-size:17px;font-weight:800;color:#111827;letter-spacing:-.02em}'
+    + '.c1pro-unit-meta{font-size:14px;color:#4b5563;margin-top:8px;line-height:1.55}'
+    + '.c1pro-unit-row{font-size:14px;color:#374151;margin-top:6px;line-height:1.5}'
+    + '.c1pro-signal-badge{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap}'
+    + '.c1pro-empty-filter{width:100%;padding:28px 20px;text-align:center;font-size:15px;font-weight:600;color:#6b7280;background:#f9fafb;border:2px dashed #d1d5db;border-radius:14px}'
+    + '.c1pro-layout{display:flex;gap:18px;align-items:flex-start;margin-top:4px}'
+    + '.c1pro-main-col{flex:1;min-width:0}'
+    + '.c1pro-activity-col{flex:0 0 320px;max-width:360px;position:sticky;top:12px}'
+    + '.c1pro-activity-panel{border:2px solid #e5e7eb;background:#f9fafb;border-radius:12px;padding:14px;max-height:72vh;overflow-y:auto}'
+    + '.c1pro-activity-title{font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#374151;margin-bottom:4px}'
+    + '.c1pro-activity-sub{font-size:12px;color:#6b7280;margin-bottom:10px;line-height:1.45}'
+    + '.c1pro-log-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:1px solid #e5e7eb;font-size:13px;color:#374151}'
+    + '.c1pro-log-main{flex:1;line-height:1.45}'
+    + '.c1pro-log-ts{flex:0 0 auto;font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;text-align:right}'
+    + '.c1pro-unit-card{cursor:pointer}'
+    + '.c1pro-unit-card:hover{border-color:#86efac;box-shadow:0 4px 14px rgba(14,160,96,.1)}'
+    + '.c1pro-card-actions{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}'
+    + '.c1pro-detail-btn{font-size:13px;font-weight:800;padding:8px 14px;border-radius:8px;border:2px solid #0ea060;background:#f0fdf4;color:#166534;cursor:pointer;font-family:inherit}'
+    + '.c1pro-detail-overlay{position:fixed;inset:0;z-index:9000;background:rgba(17,24,39,.55);display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}'
+    + '.c1pro-detail-panel{background:#fff;border-radius:16px;max-width:720px;width:100%;padding:20px 22px;box-shadow:0 20px 50px rgba(0,0,0,.2);margin:auto}'
+    + '.c1pro-det-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}'
+    + '.c1pro-det-name{font-size:22px;font-weight:900;color:#111827;letter-spacing:-.02em}'
+    + '.c1pro-det-sub{font-size:14px;color:#6b7280;margin:6px 0 16px;line-height:1.5}'
+    + '.c1pro-det-sec{margin-bottom:18px}'
+    + '.c1pro-det-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:8px}'
+    + '.c1pro-det-body{font-size:14px;color:#374151;line-height:1.6;margin:0}'
+    + '.c1pro-det-muted{font-size:13px;color:#9ca3af;margin:0}'
+    + '.c1pro-client-dash{border:2px solid #93c5fd;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border-radius:14px;padding:16px 18px;margin-bottom:14px}'
+    + '.c1pro-client-dash-head{font-size:18px;font-weight:900;color:#111827;margin-bottom:8px}'
+    + '.c1pro-client-readiness{font-size:14px;color:#374151;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #bfdbfe}'
+    + '.c1pro-readiness-hint{font-size:12px;font-weight:500;color:#6b7280}'
+    + '.c1pro-client-dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px 16px}'
+    + '.c1pro-dash-row{display:flex;justify-content:space-between;font-size:14px;color:#374151;padding:4px 0}'
+    + '.c1pro-agency-rollup{border:1px dashed #d1d5db;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:13px;color:#4b5563}'
+    + '.c1pro-agency-rollup-title{font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}'
+    + '.c1pro-app-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;display:inline-block;margin-top:6px}'
+    + '.c1pro-app-ns{background:#f3f4f6;color:#4b5563}'
+    + '.c1pro-app-started{background:#dbeafe;color:#1d4ed8}'
+    + '.c1pro-app-submitted{background:#e0e7ff;color:#3730a3}'
+    + '.c1pro-app-waiting{background:#fef3c7;color:#92400e}'
+    + '.c1pro-app-docs{background:#ffedd5;color:#9a3412}'
+    + '.c1pro-app-followup{background:#fce7f3;color:#9d174d}'
+    + '.c1pro-app-approved{background:#dcfce7;color:#166534}'
+    + '.c1pro-app-denied{background:#f3f4f6;color:#6b7280}'
+    + '.c1pro-app-placed{background:#d1fae5;color:#047857}'
+    + '.c1pro-app-tracker-block{margin-top:10px;padding-top:10px;border-top:1px dashed #e5e7eb}'
+    + '.c1pro-app-tracker-lbl{font-size:11px;font-weight:800;text-transform:uppercase;color:#6b7280;margin-bottom:6px}'
+    + '.c1pro-app-notes{width:100%;min-height:48px;font-size:13px;margin-top:6px}'
+    + '.c1pro-follow-row{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;font-weight:600;color:#374151}'
+    + '@media(max-width:960px){.c1pro-layout{flex-direction:column}.c1pro-activity-col{flex:1;max-width:none;width:100%;position:static}}';
+  document.head.appendChild(st);
 }
 
 function c1proStageSelect(unit) {
   var opts = C1PRO_STAGES.map(function(s) {
     return '<option value="' + c1proEsc(s) + '"' + (s === unit.stage ? ' selected' : '') + '>' + c1proEsc(s) + '</option>';
   }).join('');
-  return '<select class="beta-input c1pro-stage-select" data-unit="' + c1proEsc(unit.id) + '" style="margin:0" onchange="c1proOnStageChange(\'' + c1proEsc(unit.id) + '\', this.value)">' + opts + '</select>';
+  return '<select class="beta-input c1pro-stage-select" data-unit="' + c1proEsc(unit.id) + '" style="margin:0" onclick="event.stopPropagation()" onchange="event.stopPropagation();c1proOnStageChange(\'' + c1proEsc(unit.id) + '\', this.value)">' + opts + '</select>';
 }
 
 function c1proRender() {
   var body = document.getElementById('c1proWorkbenchBody');
   if (!body) return;
+  c1proEnsureMetricStyles();
   if (!C1PRO_STATE) c1proResetState();
   var seed = c1proGetSeed();
   if (!C1PRO_STATE || !C1PRO_STATE.units.length) { body.innerHTML = '<p>Sandbox workbench data not loaded.</p>'; return; }
   var m = c1proComputeMetrics(C1PRO_STATE);
+  var client = c1proGetActiveClient();
+  var cm = c1proComputeClientMetrics(C1PRO_STATE, client.id);
+  var am = c1proComputeAgencyMetrics(C1PRO_STATE);
+  var filtered = c1proGetFilteredUnits();
+  var showingCount = filtered.length;
 
-  var metrics = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">'
-    + c1proMetricCard(m.activeRecords, 'Active Sandbox Records')
-    + c1proMetricCard(m.placementReady, 'Placement-Ready')
-    + c1proMetricCard(m.avgReadiness, 'Avg Placement Readiness Signal')
-    + c1proMetricCard(m.contactsLogged, 'Contacts Logged')
-    + c1proMetricCard(m.toursSet, 'Tours Set')
-    + c1proMetricCard(m.applications, 'Applications')
-    + c1proMetricCard(m.placed, 'Placed')
-    + '</div>';
+  var clientDash = c1proBuildClientDashboardHtml(client, cm) + c1proBuildAgencyRollupHtml(am);
 
-  var cards = C1PRO_STATE.units.map(function(u) {
-    var ready = (u.readinessSignal || 0) >= C1PRO_READY_THRESHOLD;
-    return '<div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;min-width:260px;flex:1;background:#fff">'
-      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">'
-        + '<strong style="font-size:15px">' + c1proEsc(u.label) + '</strong>'
-        + '<span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;'
-        + (ready ? 'background:#dcfce7;color:#166534' : 'background:#fef3c7;color:#92400e') + '">'
-        + 'Placement Readiness Signal ' + c1proEsc(u.readinessSignal) + '</span></div>'
-      + '<div style="font-size:13px;color:#6b7280;margin-top:6px">' + c1proEsc(u.zoneLabel) + ' &bull; ' + c1proEsc(u.bedrooms) + ' BR &bull; Move-in ready ' + c1proEsc(u.moveInReady) + '</div>'
-      + '<div style="font-size:13px;color:#374151;margin-top:4px">Rent Within Standard Cap Estimates: <strong>$' + c1proEsc(u.rentEstimate) + '</strong></div>'
-      + '<div style="font-size:13px;color:#374151;margin-top:4px">' + c1proEsc(u.resourceMatch) + ' &bull; Proximity to Client-Specified Resource Vectors: ' + c1proEsc(u.proximity) + '</div>'
-      + '<div style="font-size:13px;color:#374151;margin-top:4px">Vouchers accepted: ' + c1proEsc(u.vouchersAccepted) + '</div>'
-      + '<div style="font-size:13px;color:#374151;margin-top:4px">Accessibility: ' + c1proEsc(u.accessibility) + '</div>'
-      + '<div style="font-size:13px;color:#374151;margin-top:4px">Sandbox contact: ' + c1proEsc(u.contactPhone) + '</div>'
-      + '<div style="margin-top:10px"><label class="beta-lbl" style="margin-bottom:4px">Placement stage</label>' + c1proStageSelect(u) + '</div>'
-      + '</div>';
-  }).join('');
+  var metrics = '<div class="c1pro-metrics-row">'
+    + c1proMetricCard(m.activeRecords, 'Active Sandbox Records', 'all', 'Tap to show all 7 units')
+    + c1proMetricCard(m.placementReady, 'Placement-Ready', 'ready', 'Signal 80 or higher')
+    + c1proMetricCard(m.avgReadiness, 'Avg Readiness Signal', 'signal', 'Sort by score high to low')
+    + '</div>'
+    + '<div class="c1pro-pipeline-strip"><strong>Placement pipeline (live):</strong> ' + c1proBuildPipelineSummary(m) + '</div>'
+    + '<div class="c1pro-stage-tabs-row" role="tablist" aria-label="Placement stage filters">'
+    + c1proStageTab('Reviewing', m.exactStage['Reviewing'] || 0, m.exactStage['Reviewing'] || 0)
+    + c1proStageTab('Contacted', m.exactStage['Contacted'] || 0, m.reachedContacted)
+    + c1proStageTab('Tour Set', m.exactStage['Tour Set'] || 0, m.reachedTour)
+    + c1proStageTab('Application Submitted', m.exactStage['Application Submitted'] || 0, m.reachedApplication)
+    + c1proStageTab('Application Approved', m.exactStage['Application Approved'] || 0, m.reachedAppApproved)
+    + c1proStageTab('Placed', m.exactStage['Placed'] || 0, m.reachedPlaced)
+    + c1proStageTab('On Hold', m.exactStage['On Hold'] || 0, m.onHold)
+    + '</div>'
+    + '<div class="c1pro-pipeline-strip" style="background:#eff6ff;border-color:#bfdbfe;color:#1e3a8a">'
+    + '<strong>Reached milestones (cumulative):</strong> ' + c1proBuildReachedSummary(m)
+    + ' — moving to Tour Set still counts toward Contacted+.</div>';
+
+  var filterBar = '';
+  if (C1PRO_FILTER && C1PRO_FILTER !== 'all') {
+    filterBar = '<div class="c1pro-filter-bar">Showing <strong>' + showingCount + '</strong> of 7 — '
+      + c1proEsc(c1proFilterLabel(C1PRO_FILTER))
+      + '<button type="button" onclick="c1proOnMetricFilter(\'all\')">Show all records</button></div>';
+  } else {
+    filterBar = '<div class="c1pro-filter-bar" style="background:#f9fafb;border-color:#e5e7eb;color:#4b5563">'
+      + '<strong>Tip:</strong> Click a sandbox record card or <strong>Full record</strong> for the full detail view (like apartment Details). Stage tabs filter all units that reached that step.</div>';
+  }
+
+  var cards = filtered.length
+    ? filtered.map(function(u) {
+        var ready = (u.readinessSignal || 0) >= C1PRO_READY_THRESHOLD;
+        var focus = C1PRO_FILTER && C1PRO_FILTER !== 'all';
+        var appRec = c1proGetAppRecord(C1PRO_STATE, client.id, u.id);
+        var fuNote = appRec.followUpNote ? c1proEsc(appRec.followUpNote) : '';
+        return '<div class="c1pro-unit-card' + (focus ? ' focus' : '') + '" id="c1pro-card-' + c1proEsc(u.id) + '" onclick="c1proOpenUnitDetail(\'' + c1proEsc(u.id) + '\')" role="button" tabindex="0">'
+          + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
+            + '<span class="c1pro-unit-title">' + c1proEsc(u.label) + '</span>'
+            + '<span class="c1pro-signal-badge" style="'
+            + (ready ? 'background:#dcfce7;color:#166534' : 'background:#fef3c7;color:#92400e') + '">'
+            + 'Signal ' + c1proEsc(u.readinessSignal) + '</span></div>'
+          + '<span class="c1pro-app-badge ' + c1proAppStatusClass(appRec.status) + '">' + c1proEsc(appRec.status) + '</span>'
+          + '<div class="c1pro-unit-meta">' + c1proEsc(u.zoneLabel) + ' &bull; ' + c1proEsc(u.bedrooms) + ' BR &bull; Placement: <strong>' + c1proEsc(u.stage) + '</strong></div>'
+          + '<div class="c1pro-unit-row">Rent Within Standard Cap Estimates: <strong>$' + c1proEsc(u.rentEstimate) + '</strong></div>'
+          + '<div class="c1pro-app-tracker-block" onclick="event.stopPropagation()">'
+            + '<div class="c1pro-app-tracker-lbl">Application tracker (this client)</div>'
+            + '<label class="beta-lbl" style="margin:0;font-size:12px">Application status</label>'
+            + c1proAppStatusSelect(u.id, appRec.status)
+            + '<div class="c1pro-follow-row"><label><input type="checkbox"' + (appRec.followUpDue ? ' checked' : '') + ' onchange="c1proOnFollowUpToggle(\'' + c1proEsc(u.id) + '\', this.checked, document.getElementById(\'c1pro-fu-' + c1proEsc(u.id) + '\').value)"/> &#9873; Follow-up</label>'
+            + '<input type="text" class="beta-input" id="c1pro-fu-' + c1proEsc(u.id) + '" style="flex:1;font-size:12px;padding:6px 8px" placeholder="e.g. Call landlord Friday" value="' + fuNote + '" onclick="event.stopPropagation()"/></div>'
+            + '<textarea class="beta-input c1pro-app-notes" placeholder="Notes on this application…" onchange="c1proOnAppNoteChange(\'' + c1proEsc(u.id) + '\', this.value)">' + c1proEsc(appRec.notes) + '</textarea>'
+          + '</div>'
+          + '<div class="c1pro-card-actions" onclick="event.stopPropagation()">'
+            + '<label class="beta-lbl" style="margin:0;font-size:13px">Placement pipeline (unit)</label>'
+            + c1proStageSelect(u)
+            + '<button type="button" class="c1pro-detail-btn" onclick="c1proOpenUnitDetail(\'' + c1proEsc(u.id) + '\')">Full record &rarr;</button>'
+          + '</div></div>';
+      }).join('')
+    : '<div class="c1pro-empty-filter">No sandbox records match this filter yet. Change a placement stage on a unit, or click <strong>Show all records</strong>.</div>';
 
   var logRows = C1PRO_STATE.log.length
     ? C1PRO_STATE.log.slice().reverse().map(function(e) {
-        return '<div style="font-size:13px;color:#374151;margin:3px 0">' + c1proEsc(e.unit) + ': ' + c1proEsc(e.from) + ' &rarr; <strong>' + c1proEsc(e.to) + '</strong></div>';
+        return '<div class="c1pro-log-row"><span class="c1pro-log-main">' + c1proEsc(e.unit) + ': ' + c1proEsc(e.from) + ' &rarr; <strong>' + c1proEsc(e.to) + '</strong></span>'
+          + '<span class="c1pro-log-ts">' + c1proEsc(c1proFormatLogTime(e.at)) + '</span></div>';
       }).join('')
-    : '<div style="font-size:13px;color:#9ca3af">No stage changes yet this session.</div>';
-  var log = '<div style="border:1px solid #e5e7eb;background:#f9fafb;border-radius:12px;padding:12px;margin-top:16px">'
-    + '<div style="font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#374151;margin-bottom:4px">Workbench activity (session only)</div>' + logRows + '</div>';
+    : '<div style="font-size:13px;color:#9ca3af;padding:8px 0">No stage changes yet. Updates appear here with date and time.</div>';
+  var log = '<div class="c1pro-activity-panel">'
+    + '<div class="c1pro-activity-title">Workbench activity</div>'
+    + '<div class="c1pro-activity-sub">Live feed for supervisors — each change stamped with date &amp; time. Saved on this device until Reset.</div>'
+    + '<div class="c1pro-pipeline-strip" style="margin:0 0 10px;font-size:12px">' + c1proBuildPipelineSummary(m) + '</div>'
+    + logRows + '</div>';
 
-  var disclaimer = '<p style="font-size:12px;color:#6b7280;line-height:1.6;margin-top:16px;border-top:1px solid #e5e7eb;padding-top:12px">'
+  var disclaimer = '<p style="font-size:13px;color:#6b7280;line-height:1.65;margin-top:16px;border-top:1px solid #e5e7eb;padding-top:14px">'
     + c1proEsc((seed && seed.disclaimer) || '') + '</p>';
 
-  body.innerHTML = metrics
-    + '<div style="display:flex;gap:12px;flex-wrap:wrap">' + cards + '</div>'
-    + log + disclaimer;
+  body.innerHTML = clientDash + metrics + filterBar
+    + '<div class="c1pro-layout"><div class="c1pro-main-col"><div id="c1proUnitGrid">' + cards + '</div>' + disclaimer + '</div>'
+    + '<div class="c1pro-activity-col">' + log + '</div></div>';
 }
 </script>
 <button type="button" id="d3HamburgerBtn" class="d3-hamburger" aria-label="Open navigation menu" aria-expanded="false" onclick="d3ToggleMobileNav()" style="display:none">&#9776;</button>

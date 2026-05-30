@@ -10,13 +10,15 @@ import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import {
-  C1PRO_STAGES, C1PRO_READY_THRESHOLD,
-  c1proInitState, c1proSetStage, c1proComputeMetrics
+  C1PRO_STAGES, C1PRO_APP_STATUSES, C1PRO_READY_THRESHOLD,
+  c1proInitState, c1proSetStage, c1proSetAppStatus, c1proToggleFollowUp,
+  c1proComputeMetrics, c1proComputeClientMetrics, c1proComputeAgencyMetrics,
+  c1proHasReachedStage, c1proUnitMatchesFilter, c1proGetAppRecord
 } from '../scripts/c1pro-workbench.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const QA = join(ROOT, '_qa');
-const BUILD = '20260530-v2.11.0-c1pro';
+const BUILD = '20260530-v2.13.0-c1pro-app';
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const seed = readFileSync(join(ROOT, '_data/sprint-c1pro-newark-seed.js'), 'utf8');
 const tests = [];
@@ -36,6 +38,8 @@ assert('2b. Seed uses 555 numbers', /\(555\) \d{3}-\d{4}/.test(seed));
 assert('2c. No street addresses in seed', !/\b\d+\s+[A-Z][a-z]+\s+(St|Ave|Rd|Blvd|Ln|Pl|Dr|Street|Avenue|Road)\b/.test(seed));
 assert('2d. No fetch/Supabase in seed', !/\bfetch\s*\(/.test(seed) && !/supabase/i.test(seed));
 assert('2e. Seed has caseworker context fields', seed.includes('moveInReady') && seed.includes('vouchersAccepted') && seed.includes('accessibility') && seed.includes('proximity'));
+assert('2f. Seed has full-record detail fields', seed.includes('unitSummary') && seed.includes('agencyRefId') && seed.includes('parking'));
+assert('2g. Seed has demo client + app status enum', seed.includes('Marcus Johnson') && seed.includes('appStatuses') && seed.includes('Application Started'));
 
 // 3. Pure reducers — unit tests (the canonical .mjs engine).
 const S0 = c1proInitState(eval('(function(){var window={};' + seed + 'return window.SPRINT_C1PRO;})()'));
@@ -49,7 +53,7 @@ assert('3e. Contacts/tours/placed start at 0', m0.contactsLogged === 0 && m0.tou
 const S1 = c1proSetStage(S0, 'asr-a', 'Tour Set');
 assert('3f. setStage is pure (S0 unchanged)', S0.units[0].stage === 'Reviewing');
 assert('3g. setStage updates target', S1.units[0].stage === 'Tour Set');
-assert('3h. setStage logs transition', S1.log.length === 1 && S1.log[0].to === 'Tour Set');
+assert('3h. setStage logs transition with timestamp', S1.log.length === 1 && S1.log[0].to === 'Tour Set' && !!S1.log[0].at && S1.log[0].unitId === 'asr-a');
 const m1 = c1proComputeMetrics(S1);
 assert('3i. Tour Set counts as contacted + tour, not application/placed', m1.contactsLogged === 1 && m1.toursSet === 1 && m1.applications === 0 && m1.placed === 0);
 const Sapp = c1proSetStage(S1, 'asr-a', 'Application Submitted');
@@ -60,6 +64,18 @@ const m2 = c1proComputeMetrics(S2);
 assert('3j. Placed increments placed + implies tour + application', m2.placed === 1 && m2.toursSet === 1 && m2.applications === 1);
 assert('3k. Invalid stage is a no-op', c1proSetStage(S0, 'asr-a', 'Bogus') === S0);
 assert('3l. Seven compliance-safe stages', JSON.stringify(C1PRO_STAGES) === JSON.stringify(['Reviewing', 'Contacted', 'Tour Set', 'Application Submitted', 'Application Approved', 'Placed', 'On Hold']) && C1PRO_READY_THRESHOLD === 80);
+const S3 = c1proSetStage(S0, 'asr-a', 'Tour Set');
+const m3 = c1proComputeMetrics(S3);
+assert('3m. Tour Set counts toward reached Contacted (not zero)', m3.exactStage['Contacted'] === 0 && m3.reachedContacted === 1 && c1proHasReachedStage('Tour Set', 'Contacted'));
+const S4 = c1proSetStage(c1proSetStage(c1proSetStage(S0, 'asr-a', 'Tour Set'), 'asr-b', 'Tour Set'), 'asr-c', 'Application Submitted');
+assert('3n. Stage tab filter shows all units that reached milestone (cumulative)', c1proUnitMatchesFilter(S4.units[0], 'stage:Contacted') && c1proUnitMatchesFilter(S4.units[2], 'stage:Contacted') && !c1proUnitMatchesFilter(S4.units[0], 'stage:Application Submitted') && c1proUnitMatchesFilter(S4.units[2], 'stage:Application Submitted'));
+const CID = 'client-marcus-demo';
+const Sa = c1proSetAppStatus(S0, CID, 'asr-b', 'Submitted');
+const Sb = c1proSetAppStatus(Sa, CID, 'asr-c', 'Follow-Up Needed');
+const Sc = c1proToggleFollowUp(Sb, CID, 'asr-d', 'Call landlord Friday');
+assert('3o. Application tracker: setAppStatus + metrics', c1proGetAppRecord(Sc, CID, 'asr-b').status === 'Submitted' && c1proComputeClientMetrics(Sc, CID).appsSubmitted === 1);
+assert('3p. Application tracker: follow-up + client metrics', c1proComputeClientMetrics(Sc, CID).followUpsDue >= 2);
+assert('3q. Nine application statuses defined', C1PRO_APP_STATUSES.length === 9);
 
 // 4. Inline browser copy present + identical reducer names.
 assert('4. Inline engine block present', !!wb);
@@ -67,7 +83,16 @@ assert('4a. Inline c1proInitState', wb.includes('function c1proInitState('));
 assert('4b. Inline c1proSetStage', wb.includes('function c1proSetStage('));
 assert('4c. Inline c1proComputeMetrics', wb.includes('function c1proComputeMetrics('));
 assert('4d. Inline render + reset', wb.includes('function c1proRender(') && wb.includes('function c1proResetState('));
-assert('4e. Inline applications counter + new fields rendered', wb.includes("'Applications'") && wb.includes('Vouchers accepted') && wb.includes('Move-in ready') && wb.includes('Proximity to Client-Specified Resource Vectors'));
+assert('4e. Pipeline UI + full record detail rendered', wb.includes('c1proStageTab') && wb.includes('Full record') && wb.includes('c1proRenderUnitDetail') && wb.includes('Rent Within Standard Cap Estimates'));
+assert('4f. Clickable metric filters', wb.includes('function c1proOnMetricFilter(') && wb.includes('c1pro-metric-btn') && wb.includes('c1proGetFilteredUnits'));
+assert('4g. Metric filter labels + styles', wb.includes('C1PRO_FILTER_LABELS') && wb.includes('c1proEnsureMetricStyles'));
+assert('4h. Stage pipeline tabs (all 7 incl. Placed + On Hold)', wb.includes('c1proStageTab') && wb.includes("c1proStageTab('Placed'") && wb.includes("c1proStageTab('On Hold'") && wb.includes('c1proHasReachedStage'));
+assert('4i. Tour Set still counts toward reached Contacted', /reachedContacted[\s\S]*?c1proHasReachedStage\(u\.stage, 'Contacted'\)/.test(wb));
+assert('4j. Cumulative stage filter in inline engine', wb.includes('c1proHasReachedStage(unit.stage, stage)') && wb.includes('stage === \'Reviewing\''));
+assert('4k. Full record detail + timestamped activity feed', wb.includes('c1proOpenUnitDetail') && wb.includes('c1proDetailOverlay') && wb.includes('c1proFormatLogTime') && wb.includes('c1pro-log-ts'));
+assert('4l. Activity panel right column layout', wb.includes('c1pro-activity-col') && wb.includes('c1pro-layout'));
+assert('4m. Client application tracker UI + reducers', wb.includes('c1proSetAppStatus') && wb.includes('c1proComputeClientMetrics') && wb.includes('c1pro-client-dash') && wb.includes('Application tracker'));
+assert('4n. App records persistence keys', html.includes('c1proAppRecords') && wb.includes('c1proPersistAppRecords'));
 
 // 5. Page markup + Pro-mode routing.
 assert('5. Workbench page present', html.includes('id="c1pro-workbench-pg"'));

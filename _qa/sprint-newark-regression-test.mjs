@@ -36,7 +36,7 @@ const LATLNG_RE = /\b(lat|latitude|lng|lon|longitude|coordinates)\b/i;
 const DISCLAIMER = 'This is a demo support score based on sandbox data. Final placement decisions require caseworker review and agency approval.';
 
 // Build + wiring
-assert('NEWARK build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260529-v2.9.0-actionpanel'") || html.includes("LS_BUILD = '20260529-v2.10.0-frontpage'") || html.includes("LS_BUILD = '20260530-v2.11.0-c1pro'"));
+assert('NEWARK build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260529-v2.9.0-actionpanel'") || html.includes("LS_BUILD = '20260529-v2.10.0-frontpage'") || html.includes("LS_BUILD = '20260530-v2.11.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.12.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.13.0-c1pro-app'"));
 assert('Newark seed script included', html.includes('_data/sprint-newark-mock-seed.js'));
 assert('Newark seed file exists', !!seed);
 assert('SPRINT_NEWARK_MOCK global', seed.includes('window.SPRINT_NEWARK_MOCK'));
