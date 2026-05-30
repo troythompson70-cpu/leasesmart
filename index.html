@@ -1007,6 +1007,7 @@ body { font-size: 16px !important; }
         <button type="button" class="ghost-btn" onclick="auth1DemoLoginAs('admin')">Demo: Org Admin (Jerome)</button>
         <button type="button" class="ghost-btn" onclick="auth1DemoLoginAs('case_manager')">Demo: Case Manager Staff</button>
         <button type="button" class="ghost-btn" onclick="newarkShowPlacementPage()">Demo: Newark Placement Readiness (10-for-10 score)</button>
+        <button type="button" class="ghost-btn" onclick="c1proShowWorkbench()">Demo: Placement Workbench (NEWARK-P2)</button>
       </div>
       <div class="beta-actions" style="margin-top:14px">
         <button type="button" class="beta-link" onclick="showPage('home-pg')">&larr; Back to consumer app</button>
@@ -1443,9 +1444,19 @@ body { font-size: 16px !important; }
 <div id="newark-placement-pg" class="pg">
   <div class="ls-internal-banner"><strong>&#9888; DEMO SANDBOX — Newark Placement Readiness</strong> Sandbox data only. No real clients, no real addresses, no live APIs. Scores are a demo support tool, not a placement decision. Fair Housing safe: protected-class factors are never scored.</div>
   <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;width:100%"><div><div class="dash-name">Placement Readiness</div><div class="dash-sub">NEWARK SANDBOX &bull; 10-FOR-10 DEMO SCORE</div></div><button class="ghost-btn" onclick="showPage('home-pg')">&larr; Home</button></div></div>
+  <div style="margin:0 0 12px">
+    <button type="button" class="ghost-btn" style="font-weight:700;border-color:#93c5fd;color:#1d4ed8" onclick="c1proShowWorkbench()">&#128202; Open Placement Workbench (NEWARK-P2) &rarr;</button>
+  </div>
   <div class="ls-internal-panel" id="newarkIntakePanel"></div>
   <div class="ls-internal-panel" id="newarkResultsPanel"></div>
   <div class="ls-internal-panel" id="capActionPanel" style="display:none"></div>
+</div>
+
+<!-- C1-PRO / NEWARK-P2 — Placement Workbench (Pro-mode only, in-memory demo state) -->
+<div id="c1pro-workbench-pg" class="pg">
+  <div class="ls-internal-banner"><strong>&#9888; DEMO SANDBOX — Placement Workbench (NEWARK-P2)</strong> Local demo state only. Sandbox units, 555 numbers, no real housing / landlord / client data. State lives in memory and resets on refresh.</div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;width:100%"><div><div class="dash-name">Placement Workbench</div><div class="dash-sub">NEWARK SANDBOX &bull; LOCAL WORKBENCH STATE ENGINE</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost-btn" onclick="c1proResetAndRender()">&#8634; Reset demo state</button><button class="ghost-btn" onclick="newarkShowPlacementPage()">&larr; Analyze Client</button><button class="ghost-btn" onclick="showPage('home-pg')">Home</button></div></div></div>
+  <div class="ls-internal-panel" id="c1proWorkbenchBody"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1466,9 +1477,10 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-c1pro-mock-seed.js"></script>
 <script src="_data/sprint-auth1-mock-seed.js"></script>
 <script src="_data/sprint-newark-mock-seed.js"></script>
+<script src="_data/sprint-c1pro-newark-seed.js"></script>
 <script>
 // v2.7.0 Sprint AUTH-1 — enterprise Pro login (+ C1-Pro + A8)
-var LS_BUILD = '20260529-v2.10.0-frontpage';
+var LS_BUILD = '20260530-v2.11.0-c1pro';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -1500,7 +1512,7 @@ var A8_PRO_PAGES = ['b4-workspace-pg', 'c2-case-pg', 'c2-client-pg', 'c3-reporti
 var AUTH1_PRO_PAGES = ['auth1-pro-login-pg', 'auth1-manage-team-pg'];
 var E2_LEGAL_PAGES = ['e2-tos-pg', 'e2-privacy-pg'];
 var E3_BILLING_PAGES = ['e3-pricing-pg', 'e3-checkout-pg', 'e3-manage-pg', 'e3-billing-pg'];
-var INTERNAL_DEMO_PAGES = ['admin-pg', 'b4-workspace-pg', 'c2-case-pg', 'c2-client-pg', 'c3-reporting-pg', 'b3-user-data-pg', 'b5-platform-pg', 'auth1-manage-team-pg', 'newark-placement-pg'];
+var INTERNAL_DEMO_PAGES = ['admin-pg', 'b4-workspace-pg', 'c2-case-pg', 'c2-client-pg', 'c3-reporting-pg', 'b3-user-data-pg', 'b5-platform-pg', 'auth1-manage-team-pg', 'newark-placement-pg', 'c1pro-workbench-pg'];
 var SEARCH_STATES = ['New Jersey', 'New York', 'Pennsylvania', 'Ohio', 'Other'];
 var PLACEMENT_TYPES = ['Individual', 'Family', 'Families'];
 var MAJOR_FIELDS = ['state', 'city', 'movein', 'budget', 'beds', 'baths', 'pets', 'park', 'commute', 'placementType'];
@@ -7855,6 +7867,148 @@ function capRender() {
     + '<textarea id="capCaseworkerNotes" class="beta-input" rows="3" placeholder="Free-text demo notes..." onchange="capSaveCaseworkerNotes(this.value)">' + capEsc(CAP_STATE.caseworkerNotes) + '</textarea></div>';
 
   panel.innerHTML = header + actionBtns + dialog + columns + risks + notes;
+}
+</script>
+<!-- ================================================================
+     C1-PRO / NEWARK-P2 — Placement Workbench (local state engine)
+     Pro-mode only. Renter dash-pg is never touched. In-memory state that
+     resets on refresh; no fetch, no Supabase, no storage, no PII.
+     The pure reducers below are an inline copy of scripts/c1pro-workbench.mjs
+     (the regression suite unit-tests the .mjs and asserts these are present).
+     ================================================================ -->
+<script>
+var C1PRO_STAGES = ['Reviewing', 'Contacted', 'Tour Set', 'Application Submitted', 'Application Approved', 'Placed', 'On Hold'];
+var C1PRO_READY_THRESHOLD = 80;
+var C1PRO_CONTACTED_STAGES = ['Contacted', 'Tour Set', 'Application Submitted', 'Application Approved', 'Placed'];
+var C1PRO_TOUR_STAGES = ['Tour Set', 'Application Submitted', 'Application Approved', 'Placed'];
+var C1PRO_APPLICATION_STAGES = ['Application Submitted', 'Application Approved', 'Placed'];
+var C1PRO_STATE = null;
+
+function c1proEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+function c1proGetSeed() { return window.SPRINT_C1PRO || null; }
+
+// --- pure reducers (mirror of scripts/c1pro-workbench.mjs) ---
+function c1proInitState(seed) {
+  var units = (seed && Array.isArray(seed.units) ? seed.units : []).map(function(u) {
+    return Object.assign({}, u, { stage: 'Reviewing' });
+  });
+  return { units: units, log: [] };
+}
+
+function c1proSetStage(state, unitId, stage) {
+  if (C1PRO_STAGES.indexOf(stage) < 0) return state;
+  var log = state.log.slice();
+  var units = state.units.map(function(u) {
+    if (u.id !== unitId) return u;
+    if (u.stage !== stage) { log.push({ unit: u.label, from: u.stage, to: stage }); }
+    return Object.assign({}, u, { stage: stage });
+  });
+  return { units: units, log: log };
+}
+
+function c1proComputeMetrics(state) {
+  var units = (state && state.units) || [];
+  var avg = units.length
+    ? Math.round(units.reduce(function(s, u) { return s + (u.readinessSignal || 0); }, 0) / units.length)
+    : 0;
+  return {
+    activeRecords: units.length,
+    placementReady: units.filter(function(u) { return (u.readinessSignal || 0) >= C1PRO_READY_THRESHOLD; }).length,
+    avgReadiness: avg,
+    contactsLogged: units.filter(function(u) { return C1PRO_CONTACTED_STAGES.indexOf(u.stage) >= 0; }).length,
+    toursSet: units.filter(function(u) { return C1PRO_TOUR_STAGES.indexOf(u.stage) >= 0; }).length,
+    applications: units.filter(function(u) { return C1PRO_APPLICATION_STAGES.indexOf(u.stage) >= 0; }).length,
+    placed: units.filter(function(u) { return u.stage === 'Placed'; }).length
+  };
+}
+
+// --- view / wiring ---
+function c1proResetState() { C1PRO_STATE = c1proInitState(c1proGetSeed()); }
+
+function c1proShowWorkbench() {
+  if (typeof a8SetProductMode === 'function') a8SetProductMode('pro');
+  c1proResetState();
+  c1proRender();
+  showPage('c1pro-workbench-pg');
+  if (typeof setLastAction === 'function') setLastAction('Opened Placement Workbench (NEWARK-P2 demo)');
+}
+
+function c1proResetAndRender() { c1proResetState(); c1proRender(); }
+
+function c1proOnStageChange(unitId, stage) {
+  if (!C1PRO_STATE) c1proResetState();
+  C1PRO_STATE = c1proSetStage(C1PRO_STATE, unitId, stage);
+  c1proRender();
+}
+
+function c1proMetricCard(value, label) {
+  return '<div style="flex:1;min-width:130px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px">'
+    + '<div style="font-size:26px;font-weight:800;color:#0ea060">' + c1proEsc(value) + '</div>'
+    + '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;margin-top:2px">' + c1proEsc(label) + '</div></div>';
+}
+
+function c1proStageSelect(unit) {
+  var opts = C1PRO_STAGES.map(function(s) {
+    return '<option value="' + c1proEsc(s) + '"' + (s === unit.stage ? ' selected' : '') + '>' + c1proEsc(s) + '</option>';
+  }).join('');
+  return '<select class="beta-input c1pro-stage-select" data-unit="' + c1proEsc(unit.id) + '" style="margin:0" onchange="c1proOnStageChange(\'' + c1proEsc(unit.id) + '\', this.value)">' + opts + '</select>';
+}
+
+function c1proRender() {
+  var body = document.getElementById('c1proWorkbenchBody');
+  if (!body) return;
+  if (!C1PRO_STATE) c1proResetState();
+  var seed = c1proGetSeed();
+  if (!C1PRO_STATE || !C1PRO_STATE.units.length) { body.innerHTML = '<p>Sandbox workbench data not loaded.</p>'; return; }
+  var m = c1proComputeMetrics(C1PRO_STATE);
+
+  var metrics = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">'
+    + c1proMetricCard(m.activeRecords, 'Active Sandbox Records')
+    + c1proMetricCard(m.placementReady, 'Placement-Ready')
+    + c1proMetricCard(m.avgReadiness, 'Avg Placement Readiness Signal')
+    + c1proMetricCard(m.contactsLogged, 'Contacts Logged')
+    + c1proMetricCard(m.toursSet, 'Tours Set')
+    + c1proMetricCard(m.applications, 'Applications')
+    + c1proMetricCard(m.placed, 'Placed')
+    + '</div>';
+
+  var cards = C1PRO_STATE.units.map(function(u) {
+    var ready = (u.readinessSignal || 0) >= C1PRO_READY_THRESHOLD;
+    return '<div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;min-width:260px;flex:1;background:#fff">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">'
+        + '<strong style="font-size:15px">' + c1proEsc(u.label) + '</strong>'
+        + '<span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;'
+        + (ready ? 'background:#dcfce7;color:#166534' : 'background:#fef3c7;color:#92400e') + '">'
+        + 'Placement Readiness Signal ' + c1proEsc(u.readinessSignal) + '</span></div>'
+      + '<div style="font-size:13px;color:#6b7280;margin-top:6px">' + c1proEsc(u.zoneLabel) + ' &bull; ' + c1proEsc(u.bedrooms) + ' BR &bull; Move-in ready ' + c1proEsc(u.moveInReady) + '</div>'
+      + '<div style="font-size:13px;color:#374151;margin-top:4px">Rent Within Standard Cap Estimates: <strong>$' + c1proEsc(u.rentEstimate) + '</strong></div>'
+      + '<div style="font-size:13px;color:#374151;margin-top:4px">' + c1proEsc(u.resourceMatch) + ' &bull; Proximity to Client-Specified Resource Vectors: ' + c1proEsc(u.proximity) + '</div>'
+      + '<div style="font-size:13px;color:#374151;margin-top:4px">Vouchers accepted: ' + c1proEsc(u.vouchersAccepted) + '</div>'
+      + '<div style="font-size:13px;color:#374151;margin-top:4px">Accessibility: ' + c1proEsc(u.accessibility) + '</div>'
+      + '<div style="font-size:13px;color:#374151;margin-top:4px">Sandbox contact: ' + c1proEsc(u.contactPhone) + '</div>'
+      + '<div style="margin-top:10px"><label class="beta-lbl" style="margin-bottom:4px">Placement stage</label>' + c1proStageSelect(u) + '</div>'
+      + '</div>';
+  }).join('');
+
+  var logRows = C1PRO_STATE.log.length
+    ? C1PRO_STATE.log.slice().reverse().map(function(e) {
+        return '<div style="font-size:13px;color:#374151;margin:3px 0">' + c1proEsc(e.unit) + ': ' + c1proEsc(e.from) + ' &rarr; <strong>' + c1proEsc(e.to) + '</strong></div>';
+      }).join('')
+    : '<div style="font-size:13px;color:#9ca3af">No stage changes yet this session.</div>';
+  var log = '<div style="border:1px solid #e5e7eb;background:#f9fafb;border-radius:12px;padding:12px;margin-top:16px">'
+    + '<div style="font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#374151;margin-bottom:4px">Workbench activity (session only)</div>' + logRows + '</div>';
+
+  var disclaimer = '<p style="font-size:12px;color:#6b7280;line-height:1.6;margin-top:16px;border-top:1px solid #e5e7eb;padding-top:12px">'
+    + c1proEsc((seed && seed.disclaimer) || '') + '</p>';
+
+  body.innerHTML = metrics
+    + '<div style="display:flex;gap:12px;flex-wrap:wrap">' + cards + '</div>'
+    + log + disclaimer;
 }
 </script>
 <button type="button" id="d3HamburgerBtn" class="d3-hamburger" aria-label="Open navigation menu" aria-expanded="false" onclick="d3ToggleMobileNav()" style="display:none">&#9776;</button>
