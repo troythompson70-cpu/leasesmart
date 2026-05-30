@@ -1449,13 +1449,14 @@ body { font-size: 16px !important; }
   </div>
   <div class="ls-internal-panel" id="newarkIntakePanel"></div>
   <div class="ls-internal-panel" id="newarkResultsPanel"></div>
+  <div class="ls-internal-panel" id="newarkDataA1Panel" style="display:none"></div>
   <div class="ls-internal-panel" id="capActionPanel" style="display:none"></div>
 </div>
 
 <!-- C1-PRO / NEWARK-P2 — Placement Workbench (Pro-mode only, in-memory demo state) -->
 <div id="c1pro-workbench-pg" class="pg">
   <div class="ls-internal-banner"><strong>&#9888; DEMO SANDBOX — Placement Workbench (NEWARK-P2)</strong> Local demo state only. Sandbox units, 555 numbers, no real housing / landlord / client data. State lives in memory and resets on refresh.</div>
-  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;width:100%"><div><div class="dash-name">Placement Workbench</div><div class="dash-sub">NEWARK SANDBOX &bull; LOCAL WORKBENCH STATE ENGINE</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost-btn" onclick="c1proResetAndRender()">&#8634; Reset demo state</button><button class="ghost-btn" onclick="newarkShowPlacementPage()">&larr; Analyze Client</button><button class="ghost-btn" onclick="showPage('home-pg')">Home</button></div></div></div>
+  <div class="ls-internal-head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;width:100%"><div><div class="dash-name">Placement Workbench</div><div class="dash-sub">NEWARK SANDBOX &bull; LOCAL WORKBENCH STATE ENGINE</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost-btn" onclick="c1proResetAndRender()">&#8634; Reset demo state</button><button class="ghost-btn" onclick="dataA1OpenFromWorkbench()">&#127968; Landlord inventory (DATA-A1)</button><button class="ghost-btn" onclick="newarkShowPlacementPage()">&larr; Analyze Client</button><button class="ghost-btn" onclick="showPage('home-pg')">Home</button></div></div></div>
   <div class="ls-internal-panel" id="c1proWorkbenchBody"></div>
   <div id="c1proDetailOverlay" class="c1pro-detail-overlay" style="display:none" onclick="if(event.target===this)c1proCloseUnitDetail()">
     <div class="c1pro-detail-panel" onclick="event.stopPropagation()">
@@ -1483,9 +1484,10 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-auth1-mock-seed.js"></script>
 <script src="_data/sprint-newark-mock-seed.js"></script>
 <script src="_data/sprint-c1pro-newark-seed.js"></script>
+<script src="_data/sprint-data-a1-newark-seed.js"></script>
 <script>
 // v2.7.0 Sprint AUTH-1 — enterprise Pro login (+ C1-Pro + A8)
-var LS_BUILD = '20260530-v2.13.0-c1pro-app';
+var LS_BUILD = '20260530-v2.14.0-data-a1';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
 var LS_MIGRATION_FLAG = 'leasesmart_migrated_v1110';
@@ -2206,7 +2208,7 @@ function getStepById(id) {
 // Multi-source schema: Apartments.com, RentCafe, Zillow, AptList, Realtor, PM sites, public housing
 // ================================================================
 var LS_VERSION = 'Beta v1.2 — Housing Intelligence Foundation';
-var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false, d2SavedSearchProfiles: [], liContactHistory: {}, d2Seeded: false, d2AlertsChecked: false, d4RateLimits: {}, securityLog: { failedLoginAttempts: [], totalFailedCount: 0 }, d4SessionExpiresAt: null, e2DemoClientsAdded: [], e2ClientConsentLog: [], e2DataRetentionPreview: null, productMode: null, c1proChecklists: {}, c1proClientResources: {}, c1proMatchOutcomes: {}, c1proWorkbenchLog: [], c1proUnitNotes: {}, c1proAppRecords: {}, c1proFollowUps: [], auth1LastStaffId: null, auth1PendingInvites: [] };
+var LS_STORE_DEFAULTS = { profile: null, favorites: [], searches: [], feedback: [], analytics: [], session: null, listingStatuses: {}, listingNotes: {}, feedbackPromptDismissedUntil: null, landlordIntel: [], landlordIntelSeeded: false, b4CaseNotes: {}, b4AuditLog: [], b4DemoRole: 'caseworker', b4DemoUserId: 'u-cw-demo-1', b4Subtab: 'clients', inAppNotifications: [], d1EmailOutbox: [], d1Seeded: false, d2SavedSearchProfiles: [], liContactHistory: {}, d2Seeded: false, d2AlertsChecked: false, d4RateLimits: {}, securityLog: { failedLoginAttempts: [], totalFailedCount: 0 }, d4SessionExpiresAt: null, e2DemoClientsAdded: [], e2ClientConsentLog: [], e2DataRetentionPreview: null, productMode: null, c1proChecklists: {}, c1proClientResources: {}, c1proMatchOutcomes: {}, c1proWorkbenchLog: [], c1proUnitNotes: {}, c1proAppRecords: {}, c1proFollowUps: [], dataA1ListingState: {}, auth1LastStaffId: null, auth1PendingInvites: [] };
 var LS_STORE = Object.assign({}, LS_STORE_DEFAULTS);
 
 function lsNormalizeStore(data) {
@@ -2246,6 +2248,7 @@ function lsNormalizeStore(data) {
   if (!store.c1proUnitNotes || typeof store.c1proUnitNotes !== 'object') store.c1proUnitNotes = {};
   if (!store.c1proAppRecords || typeof store.c1proAppRecords !== 'object') store.c1proAppRecords = {};
   if (!Array.isArray(store.c1proFollowUps)) store.c1proFollowUps = [];
+  if (!store.dataA1ListingState || typeof store.dataA1ListingState !== 'object') store.dataA1ListingState = {};
   if (store.auth1LastStaffId === undefined) store.auth1LastStaffId = null;
   if (!Array.isArray(store.auth1PendingInvites)) store.auth1PendingInvites = store.auth1PendingInvites ? [].concat(store.auth1PendingInvites) : [];
   return store;
@@ -7652,6 +7655,179 @@ function newarkRenderResults(clientInput, snapshot) {
 
   panel.innerHTML = head + cards + fairHousing;
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (typeof dataA1RenderLayer === 'function') dataA1RenderLayer();
+}
+</script>
+<!-- ================================================================
+     NEWARK DATA-A1 — Landlord / Housing Inventory Layer (sandbox)
+     Not a public-resource-only directory. Local listings + provider registry.
+     No scrape. No live feeds. No Supabase. Persists in LS_STORE until reset.
+     ================================================================ -->
+<script>
+var DATA_A1_EXTERNAL_DISCLAIMER = 'External public source — confirm before referral.';
+var DATA_A1_BANNED_RE = /\b(verified|guaranteed|approved placement|safe neighborhood|perfect match)\b/i;
+
+function dataA1GetSeed() { return window.SPRINT_DATA_A1 || null; }
+
+function dataA1Esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+function dataA1LoadState() {
+  if (typeof lsLoad !== 'function') return {};
+  lsLoad();
+  return LS_STORE.dataA1ListingState && typeof LS_STORE.dataA1ListingState === 'object' ? Object.assign({}, LS_STORE.dataA1ListingState) : {};
+}
+
+function dataA1SaveState() {
+  if (typeof lsLoad !== 'function' || typeof lsSave !== 'function') return;
+  lsLoad();
+  if (!LS_STORE.dataA1ListingState) LS_STORE.dataA1ListingState = {};
+  lsSave();
+}
+
+function dataA1GetListingState(listingId) {
+  var st = dataA1LoadState();
+  return st[listingId] || {};
+}
+
+function dataA1SetListingField(listingId, field, value) {
+  if (typeof lsLoad !== 'function') return;
+  lsLoad();
+  if (!LS_STORE.dataA1ListingState) LS_STORE.dataA1ListingState = {};
+  var cur = LS_STORE.dataA1ListingState[listingId] || {};
+  cur[field] = value;
+  LS_STORE.dataA1ListingState[listingId] = cur;
+  lsSave();
+  if (typeof dataA1RenderLayer === 'function') dataA1RenderLayer();
+}
+
+function dataA1MapsUrl(listing, satellite) {
+  var q = [listing.location_label, listing.city, listing.state, listing.zip].filter(Boolean).join(', ');
+  var base = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+  return satellite ? base + '&basemap=satellite' : base;
+}
+
+function dataA1DemoToast(msg) {
+  if (typeof d5ShowToast === 'function') d5ShowToast(msg);
+  else if (typeof setLastAction === 'function') setLastAction(msg);
+}
+
+function dataA1EnsureStyles() {
+  if (document.getElementById('dataA1Styles')) return;
+  var st = document.createElement('style');
+  st.id = 'dataA1Styles';
+  st.textContent = ''
+    + '.data-a1-panel{border:2px solid #c4b5fd;background:#faf5ff;border-radius:14px;padding:16px 18px;margin-top:16px}'
+    + '.data-a1-head{font-size:18px;font-weight:900;color:#111827;margin-bottom:6px}'
+    + '.data-a1-sub{font-size:13px;color:#4b5563;line-height:1.55;margin-bottom:12px}'
+    + '.data-a1-card{border:2px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:12px;background:#fff}'
+    + '.data-a1-card.saved{border-color:#8b5cf6;background:#faf5ff}'
+    + '.data-a1-title{font-size:16px;font-weight:800;color:#111827}'
+    + '.data-a1-badge{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:#f3f4f6;color:#374151;margin-right:6px}'
+    + '.data-a1-row{font-size:13px;color:#374151;margin:4px 0;line-height:1.5}'
+    + '.data-a1-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}'
+    + '.data-a1-btn{font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;border:2px solid #d1d5db;background:#f9fafb;cursor:pointer;font-family:inherit}'
+    + '.data-a1-btn.primary{border-color:#7c3aed;background:#ede9fe;color:#5b21b6}'
+    + '.data-a1-prov-table{width:100%;font-size:12px;border-collapse:collapse;margin-top:8px}'
+    + '.data-a1-prov-table th,.data-a1-prov-table td{border:1px solid #e5e7eb;padding:6px 8px;text-align:left}'
+    + '.data-a1-ext{font-size:11px;color:#92400e;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:6px 10px;margin:8px 0}';
+  document.head.appendChild(st);
+}
+
+function dataA1RenderLandlordCard(listing, state) {
+  var contact = state.contactStatus || listing.pipeline_status || 'not called';
+  var appSt = state.applicationStatus || 'not started';
+  var saved = !!state.is_saved_landlord || listing.is_saved_landlord;
+  var contactOpts = (dataA1GetSeed().contactStatuses || []).map(function(s) {
+    return '<option value="' + dataA1Esc(s) + '"' + (s === contact ? ' selected' : '') + '>' + dataA1Esc(s) + '</option>';
+  }).join('');
+  var appOpts = (dataA1GetSeed().applicationStatuses || []).map(function(s) {
+    return '<option value="' + dataA1Esc(s) + '"' + (s === appSt ? ' selected' : '') + '>' + dataA1Esc(s) + '</option>';
+  }).join('');
+  var rent = listing.rent_min === listing.rent_max
+    ? '$' + dataA1Esc(listing.rent_min)
+    : '$' + dataA1Esc(listing.rent_min) + '–$' + dataA1Esc(listing.rent_max);
+  var ext = (listing.source_type === 'external_listing_reference' || listing.listing_status === 'external_reference')
+    ? '<div class="data-a1-ext">' + dataA1Esc(DATA_A1_EXTERNAL_DISCLAIMER) + ' No scraping or rehosted listings.</div>' : '';
+  var viewUrl = listing.official_property_url || listing.source_url || '';
+  return '<div class="data-a1-card' + (saved ? ' saved' : '') + '" id="data-a1-card-' + dataA1Esc(listing.listing_id) + '">'
+    + '<div class="data-a1-title">' + dataA1Esc(listing.property_name) + '</div>'
+    + '<div style="margin:6px 0"><span class="data-a1-badge">' + dataA1Esc(listing.confidence_status) + '</span>'
+    + '<span class="data-a1-badge">' + dataA1Esc(listing.voucher_program_fit) + '</span></div>'
+    + '<div class="data-a1-row"><strong>Landlord / mgmt:</strong> ' + dataA1Esc(listing.landlord_name) + (listing.management_company ? ' / ' + dataA1Esc(listing.management_company) : '') + '</div>'
+    + '<div class="data-a1-row">' + dataA1Esc(listing.location_label) + ' &bull; ' + dataA1Esc(listing.county) + ' County &bull; ZIP ' + dataA1Esc(listing.zip) + '</div>'
+    + '<div class="data-a1-row">' + dataA1Esc(listing.bedrooms_available) + ' BR &bull; ' + rent + '/mo &bull; ' + dataA1Esc(listing.availability_status) + '</div>'
+    + '<div class="data-a1-row">Phone: <strong>' + dataA1Esc(listing.phone || '—') + '</strong> &bull; Email: ' + dataA1Esc(listing.email || '—') + '</div>'
+    + '<div class="data-a1-row">Source: ' + dataA1Esc(listing.source_name) + ' (' + dataA1Esc(listing.source_type) + ')</div>'
+    + ext
+    + '<div class="data-a1-actions">'
+    + '<a class="data-a1-btn" href="' + dataA1Esc(dataA1MapsUrl(listing, false)) + '" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">Open maps</a>'
+    + '<a class="data-a1-btn" href="' + dataA1Esc(dataA1MapsUrl(listing, true)) + '" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">Satellite view</a>'
+    + (listing.phone ? '<a class="data-a1-btn primary" href="tel:' + dataA1Esc(String(listing.phone).replace(/[^\d+]/g, '')) + '" onclick="event.stopPropagation()">Call now</a>' : '')
+    + (listing.email ? '<button type="button" class="data-a1-btn" onclick="event.stopPropagation();dataA1DemoToast(\'Demo: email draft to ' + dataA1Esc(listing.email) + ' (not sent)\')">Email landlord</button>' : '')
+    + (viewUrl ? '<a class="data-a1-btn" href="' + dataA1Esc(viewUrl) + '" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">View listing</a>' : '')
+    + (listing.application_url ? '<a class="data-a1-btn primary" href="' + dataA1Esc(listing.application_url) + '" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">Apply online (demo)</a>' : '')
+    + '<button type="button" class="data-a1-btn" onclick="dataA1SetListingField(\'' + dataA1Esc(listing.listing_id) + '\', \'is_saved_landlord\', ' + !saved + ')">' + (saved ? 'Unsave' : 'Save landlord') + '</button>'
+    + '</div>'
+    + '<div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    + '<div><label class="beta-lbl" style="font-size:12px">Landlord contact status</label><select class="beta-input" onchange="dataA1SetListingField(\'' + dataA1Esc(listing.listing_id) + '\', \'contactStatus\', this.value)">' + contactOpts + '</select></div>'
+    + '<div><label class="beta-lbl" style="font-size:12px">Application status</label><select class="beta-input" onchange="dataA1SetListingField(\'' + dataA1Esc(listing.listing_id) + '\', \'applicationStatus\', this.value)">' + appOpts + '</select></div>'
+    + '</div>'
+    + '<div style="margin-top:8px"><label class="beta-lbl" style="font-size:12px">Notes</label><textarea class="beta-input" rows="2" style="width:100%" onchange="dataA1SetListingField(\'' + dataA1Esc(listing.listing_id) + '\', \'notes\', this.value)">' + dataA1Esc(state.notes || listing.notes || '') + '</textarea></div>'
+    + '</div>';
+}
+
+function dataA1RenderProviderRegistry(seed) {
+  var rows = (seed.providers || []).map(function(p) {
+    return '<tr><td>' + dataA1Esc(p.provider_type) + '</td><td>' + dataA1Esc(p.source_name) + '</td>'
+      + '<td>' + (p.live_link_available ? '<a href="' + dataA1Esc(p.source_url) + '" target="_blank" rel="noreferrer">Link</a>' : '—') + '</td>'
+      + '<td>' + dataA1Esc(p.housing_inventory_supported ? 'yes' : 'no') + '</td><td>' + dataA1Esc(p.risk_level) + '</td></tr>';
+  }).join('');
+  return '<details style="margin-top:12px"><summary style="font-weight:800;cursor:pointer">Provider registry (' + (seed.providers || []).length + ' sandbox providers)</summary>'
+    + '<p class="data-a1-sub" style="margin-top:8px">Categories: manual registry, HUD/PHA layers, county/municipal lists, nonprofit directories, property sites, external reference links (no scrape).</p>'
+    + '<table class="data-a1-prov-table"><thead><tr><th>Type</th><th>Source</th><th>Link</th><th>Inventory</th><th>Risk</th></tr></thead><tbody>' + rows + '</tbody></table></details>';
+}
+
+function dataA1RenderLayer() {
+  var panel = document.getElementById('newarkDataA1Panel');
+  var seed = dataA1GetSeed();
+  if (!panel || !seed || !seed.listings) return;
+  dataA1EnsureStyles();
+  var st = dataA1LoadState();
+  var cards = seed.listings.map(function(l) {
+    var merged = Object.assign({}, l, dataA1GetListingState(l.listing_id));
+    return dataA1RenderLandlordCard(l, merged);
+  }).join('');
+  panel.style.display = 'block';
+  panel.innerHTML = '<div class="data-a1-panel">'
+    + '<div class="data-a1-head">Resource Data Layer — Landlord / Housing Inventory (DATA-A1)</div>'
+    + '<p class="data-a1-sub"><strong>Foundation #2:</strong> sandbox landlord listings alongside 10-for-10 placement intelligence. '
+    + 'Not a public-resource-only directory. ' + dataA1Esc(seed.meta.externalLinkDisclaimer || DATA_A1_EXTERNAL_DISCLAIMER) + '</p>'
+    + '<p class="data-a1-sub">Housing/property fit from 10-for-10 scores appears in the readiness section above. This layer tracks <strong>landlord outreach and applications</strong> per listing.</p>'
+    + cards
+    + dataA1RenderProviderRegistry(seed)
+    + '</div>';
+}
+
+function dataA1ResetSandbox() {
+  if (typeof lsLoad !== 'function') return;
+  lsLoad();
+  LS_STORE.dataA1ListingState = {};
+  lsSave();
+  dataA1RenderLayer();
+}
+
+function dataA1OpenFromWorkbench() {
+  window.DATA_A1_SCROLL_ON_SHOW = true;
+  if (typeof newarkShowPlacementPage === 'function') newarkShowPlacementPage();
+  else showPage('newark-placement-pg');
+  setTimeout(function() {
+    var panel = document.getElementById('newarkDataA1Panel');
+    if (panel) { panel.style.display = 'block'; if (typeof dataA1RenderLayer === 'function') dataA1RenderLayer(); panel.scrollIntoView({ behavior: 'smooth' }); }
+  }, 400);
 }
 </script>
 <!-- ================================================================
@@ -8391,7 +8567,8 @@ function c1proBuildClientDashboardHtml(client, cm) {
   }).join('');
   return '<div class="c1pro-client-dash">'
     + '<div class="c1pro-client-dash-head">' + c1proEsc(client.displayName) + ' &mdash; Placement Dashboard</div>'
-    + '<div class="c1pro-client-readiness">Readiness: <strong>' + c1proEsc(client.readinessTenOfTen) + '/10</strong> &mdash; ' + c1proEsc(client.readinessLabel) + ' <span class="c1pro-readiness-hint">(10-for-10 profile &mdash; separate from application pipeline)</span></div>'
+    + '<div class="c1pro-client-readiness"><strong>Client 10-for-10 readiness:</strong> ' + c1proEsc(client.readinessTenOfTen) + '/10 &mdash; ' + c1proEsc(client.readinessLabel)
+    + ' <span class="c1pro-readiness-hint">(client profile score &mdash; not the unit signal average shown above)</span></div>'
     + '<div class="c1pro-client-dash-grid">' + rowHtml + '</div></div>';
 }
 
@@ -8404,6 +8581,18 @@ function c1proBuildAgencyRollupHtml(am) {
     + ' &bull; Awaiting Response: ' + c1proEsc(am.waitingResponse)
     + ' &bull; Docs Missing: ' + c1proEsc(am.documentsMissing)
     + ' &bull; Placements: ' + c1proEsc(am.placed) + '</div></div>';
+}
+
+function c1proBuildAvgReadinessHero(avg, unitCount) {
+  var on = C1PRO_FILTER === 'signal';
+  return '<button type="button" class="c1pro-readiness-hero' + (on ? ' on' : '') + '" onclick="c1proOnMetricFilter(\'signal\')" title="Click to sort property cards by Placement Readiness Signal">'
+    + '<div class="c1pro-readiness-hero-val">' + c1proEsc(avg) + '</div>'
+    + '<div class="c1pro-readiness-hero-text">'
+    + '<div class="c1pro-readiness-hero-title">Average Placement Readiness Signal</div>'
+    + '<div class="c1pro-readiness-hero-scale">Out of <strong>100</strong> &mdash; mean of all ' + c1proEsc(unitCount) + ' sandbox property records listed below</div>'
+    + '<p class="c1pro-readiness-hero-expl">Each unit has its own signal (demo range about 58&ndash;92). <strong>' + c1proEsc(avg) + ' is the average across those units</strong>, not a 10-for-10 score and not the client checklist score.</p>'
+    + '<p class="c1pro-readiness-hero-expl">Client <strong>10-for-10 readiness</strong> (e.g. 7/10) is shown in the placement dashboard under this banner.</p>'
+    + '</div></button>';
 }
 
 function c1proMetricCard(value, label, filterKey, hint) {
@@ -8500,6 +8689,14 @@ function c1proEnsureMetricStyles() {
     + '.c1pro-det-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:8px}'
     + '.c1pro-det-body{font-size:14px;color:#374151;line-height:1.6;margin:0}'
     + '.c1pro-det-muted{font-size:13px;color:#9ca3af;margin:0}'
+    + '.c1pro-readiness-hero{display:flex;align-items:flex-start;gap:20px;width:100%;text-align:left;background:linear-gradient(135deg,#ecfdf5 0%,#eff6ff 100%);border:3px solid #0ea060;border-radius:16px;padding:18px 20px;margin-bottom:14px;cursor:pointer;font-family:inherit;box-shadow:0 6px 20px rgba(14,160,96,.12)}'
+    + '.c1pro-readiness-hero:hover{border-color:#047857;box-shadow:0 8px 24px rgba(14,160,96,.18)}'
+    + '.c1pro-readiness-hero.on{box-shadow:0 0 0 3px rgba(14,160,96,.25)}'
+    + '.c1pro-readiness-hero-val{flex:0 0 auto;font-size:56px;font-weight:900;line-height:1;color:#047857;letter-spacing:-.04em;min-width:88px}'
+    + '.c1pro-readiness-hero-text{flex:1;min-width:0}'
+    + '.c1pro-readiness-hero-title{font-size:17px;font-weight:900;color:#111827;letter-spacing:-.02em}'
+    + '.c1pro-readiness-hero-scale{font-size:14px;font-weight:700;color:#1d4ed8;margin-top:4px}'
+    + '.c1pro-readiness-hero-expl{font-size:13px;font-weight:500;color:#374151;line-height:1.55;margin:8px 0 0}'
     + '.c1pro-client-dash{border:2px solid #93c5fd;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border-radius:14px;padding:16px 18px;margin-bottom:14px}'
     + '.c1pro-client-dash-head{font-size:18px;font-weight:900;color:#111827;margin-bottom:8px}'
     + '.c1pro-client-readiness{font-size:14px;color:#374151;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #bfdbfe}'
@@ -8547,12 +8744,12 @@ function c1proRender() {
   var filtered = c1proGetFilteredUnits();
   var showingCount = filtered.length;
 
+  var readinessHero = c1proBuildAvgReadinessHero(m.avgReadiness, m.activeRecords);
   var clientDash = c1proBuildClientDashboardHtml(client, cm) + c1proBuildAgencyRollupHtml(am);
 
   var metrics = '<div class="c1pro-metrics-row">'
     + c1proMetricCard(m.activeRecords, 'Active Sandbox Records', 'all', 'Tap to show all 7 units')
-    + c1proMetricCard(m.placementReady, 'Placement-Ready', 'ready', 'Signal 80 or higher')
-    + c1proMetricCard(m.avgReadiness, 'Avg Readiness Signal', 'signal', 'Sort by score high to low')
+    + c1proMetricCard(m.placementReady, 'Placement-Ready', 'ready', 'Units with signal 80+ (of 100)')
     + '</div>'
     + '<div class="c1pro-pipeline-strip"><strong>Placement pipeline (live):</strong> ' + c1proBuildPipelineSummary(m) + '</div>'
     + '<div class="c1pro-stage-tabs-row" role="tablist" aria-label="Placement stage filters">'
@@ -8624,7 +8821,7 @@ function c1proRender() {
   var disclaimer = '<p style="font-size:13px;color:#6b7280;line-height:1.65;margin-top:16px;border-top:1px solid #e5e7eb;padding-top:14px">'
     + c1proEsc((seed && seed.disclaimer) || '') + '</p>';
 
-  body.innerHTML = clientDash + metrics + filterBar
+  body.innerHTML = readinessHero + clientDash + metrics + filterBar
     + '<div class="c1pro-layout"><div class="c1pro-main-col"><div id="c1proUnitGrid">' + cards + '</div>' + disclaimer + '</div>'
     + '<div class="c1pro-activity-col">' + log + '</div></div>';
 }

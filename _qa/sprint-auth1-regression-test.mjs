@@ -26,7 +26,7 @@ function pgBlock(pgId) {
   return next >= 0 ? rest.slice(0, 10 + next) : rest;
 }
 
-assert('AUTH-1 build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260528-v2.8.0-newark'") || html.includes("LS_BUILD = '20260529-v2.9.0-actionpanel'") || html.includes("LS_BUILD = '20260529-v2.10.0-frontpage'") || html.includes("LS_BUILD = '20260530-v2.11.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.12.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.13.0-c1pro-app'"));
+assert('AUTH-1 build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260528-v2.8.0-newark'") || html.includes("LS_BUILD = '20260529-v2.9.0-actionpanel'") || html.includes("LS_BUILD = '20260529-v2.10.0-frontpage'") || html.includes("LS_BUILD = '20260530-v2.11.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.12.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.13.0-c1pro-app'") || html.includes("LS_BUILD = '20260530-v2.14.0-data-a1'"));
 assert('Auth1 mock seed script', html.includes('sprint-auth1-mock-seed.js'));
 assert('SPRINT_AUTH1_MOCK seed file', mockSeed.includes('SPRINT_AUTH1_MOCK') && mockSeed.includes('platform_admin'));
 
