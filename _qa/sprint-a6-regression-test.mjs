@@ -9,7 +9,7 @@ const buildMatch = html.match(/LS_BUILD = '([^']+)'/);
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('A6 build id', buildMatch && /^20260526-v2\.(3\.0-e1|4\.0-a7)$|^20260527-v2\.(4\.0-a7|5\.0-a8)$|^20260528-v2\.(7\.0-auth1|8\.0-newark)$|^20260529-v2\.(9\.0-actionpanel|10\.0-frontpage)$|^20260530-v2\.(11\.0-c1pro|12\.0-c1pro|13\.0-c1pro-app)$/.test(buildMatch[1]));
+assert('A6 build id', buildMatch && /^20260526-v2\.(3\.0-e1|4\.0-a7)$|^20260527-v2\.(4\.0-a7|5\.0-a8)$|^20260528-v2\.(7\.0-auth1|8\.0-newark)$|^20260529-v2\.(9\.0-actionpanel|10\.0-frontpage)$|^20260530-v2\.(11\.0-c1pro|12\.0-c1pro|13\.0-c1pro-app|14\.0-data-a1)$/.test(buildMatch[1]));
 assert('Profile create page', html.includes('id="profile-create-pg"') && html.includes('submitCreateProfile'));
 assert('Onboarding router', html.includes('function routeOnboarding'));
 assert('No home default show', !html.includes('id="home-pg" class="pg show"'));

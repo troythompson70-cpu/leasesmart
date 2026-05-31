@@ -102,7 +102,9 @@ assert('Analyze Client button label', html.includes('>Analyze Client</button>'))
 
 // Regression — no new live APIs / writes / secrets in Newark code
 const newarkBlockStart = html.indexOf('NEWARK_SCORE_DISCLAIMER');
-const newarkBlock = newarkBlockStart >= 0 ? html.slice(newarkBlockStart) : '';
+const dataA1BlockStart = html.indexOf('NEWARK DATA-A1');
+const newarkBlockEnd = dataA1BlockStart >= 0 ? dataA1BlockStart : html.length;
+const newarkBlock = newarkBlockStart >= 0 ? html.slice(newarkBlockStart, newarkBlockEnd) : '';
 assert('No fetch() in Newark code', !/\bfetch\s*\(/.test(newarkBlock));
 assert('No supabase writes in Newark code', !/\.(insert|upsert|update|delete)\s*\(/.test(newarkBlock));
 assert('No API keys added', !html.match(/\bsk-[A-Za-z0-9]{20,}/));

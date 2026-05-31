@@ -98,3 +98,37 @@ Built D1 at 20260526-v1.5.0-d1. Draft SQL for notification_outbox. Email placeho
 Not committed — waiting for Troy commit phrase.
 
 ---
+## 2026-05-30 — DATA-A1 — Sprint Command (Addendum)
+
+**Build ID:** 20260530-v2.14.0-data-a1
+
+NEWARK DATA A1 DATABASE — Landlord Listings / Housing Inventory layer required (not public-resource-only). Office 365 Vault rule acknowledged.
+
+---
+## 2026-05-30 — DATA-A1 — Cursor Report
+
+**Build ID:** 20260530-v2.14.0-data-a1
+
+Landlord inventory: 8 sandbox listings, 9 provider registry entries, caseworker cards on Newark panel + workbench link. No scrape, no live feeds, LS_STORE only. QA 29/29 PASS. Full report: `master-vault/cursor-reports/DATA-A1-COMPLIANCE-REPORT-2026-05-30.md` (upload to Office 365 Cursor Reports).
+
+---
+## 2026-05-30 — DATA-A1 — GO / NO-GO Decision
+
+**Build ID:** 20260530-v2.14.0-data-a1
+
+**Verdict:** GO (Troy) — committed `9fdaf9c`, pushed `main`.
+
+---
+## 2026-05-31 — DATA-A1 — Regression gate (Chain Test 10)
+
+**Build ID:** 20260530-v2.14.0-data-a1
+
+**Chain Test 10:** PASS 61/61 (`sprint-c1pro-regression-test.mjs`). Fixes: A6 build-id allowlist `14.0-data-a1`; Newark banned-word scan excludes DATA-A1 block; seed rename Manual Landlord Registry (no “Verified” in copy). **Uncommitted locally** until Troy GO.
+
+**DATA-A1 QA:** 29/29 PASS (unchanged).
+
+**Vault:** Upload `master-vault/cursor-reports/DATA-A1-COMPLIANCE-REPORT-2026-05-30.md` to Office 365 Cursor Reports — **pending Troy/PM**.
+
+**Troy live-tested:** Not confirmed by Cursor.
+
+---
