@@ -15,3 +15,4 @@ master-vault/morning/launchd-err.log
 # Local backup copies
 *.backup
 *.working-stack
+node_modules/

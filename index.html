@@ -1487,6 +1487,8 @@ body { font-size: 16px !important; }
 <script src="_data/sprint-data-a1-newark-seed.js"></script>
 <script>
 // v2.7.0 Sprint AUTH-1 — enterprise Pro login (+ C1-Pro + A8)
+var SUPABASE_URL='https://iajaftjnfxrywqgccdef.supabase.co';
+var SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhamFmdGpuZnhyeXdxZ2NjZGVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NDE3NzksImV4cCI6MjA5NzIxNzc3OX0.BNPyIUbEAAsSpQAj23ZOmojxOvnpPJ7Lz73qQ-82RwM';
 var LS_BUILD = '20260530-v2.14.0-data-a1';
 var LS_PROFILE_KEY = 'leasesmartProfile';
 var LS_STORE_KEY = 'leasesmart_store_v1';
@@ -3731,13 +3733,15 @@ function goBack() {
 // SEARCH
 // ================================================================
 function finishListingsFlow() {
-  APP.listings = applyIntelligenceToListings(getFallback(), APP.profile);
-  APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
-  lsSaveFullProfile(APP.profile);
-  lsPersistProfile(APP.profile);
-  lsPersistSearch(APP.profile);
-  buildDashboard();
-  showPage('dash-pg');
+  callAI(function(listings) {
+    APP.listings = applyIntelligenceToListings(listings, APP.profile);
+    APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
+    lsSaveFullProfile(APP.profile);
+    lsPersistProfile(APP.profile);
+    lsPersistSearch(APP.profile);
+    buildDashboard();
+    showPage('dash-pg');
+  });
 }
 
 function runSearch() {
@@ -3769,44 +3773,64 @@ function runSearch() {
   tick();
 }
 
+function mapSupabaseListing(row) {
+  var rentLow = row.rent_low != null ? Number(row.rent_low) : (row.rentLow || 0);
+  var rentStr = row.rent || (rentLow ? '$' + rentLow.toLocaleString('en-US') + '/mo' : '');
+  return {
+    id: row.id,
+    complex: row.property_name || row.complex || 'Unknown Property',
+    propertyName: row.property_name || row.complex || 'Unknown Property',
+    address: row.full_address || row.address || '',
+    city: row.city || '',
+    town: row.city || row.town || '',
+    state: row.state || '',
+    zip: row.zip || '',
+    rent: rentStr,
+    rentLow: rentLow,
+    bedrooms: row.beds != null ? String(row.beds) : (row.bedrooms || ''),
+    bathrooms: row.baths != null ? String(row.baths) : (row.bathrooms || ''),
+    size: row.square_feet ? row.square_feet + ' Sq Ft' : (row.size || ''),
+    phone: row.phone || '',
+    aptLink: row.direct_listing_url || row.official_property_url || row.aptLink || null,
+    directLink: row.official_property_url || row.directLink || null,
+    listingUrl: row.direct_listing_url || row.listingUrl || null,
+    propertyUrl: row.official_property_url || row.propertyUrl || null,
+    managementCo: row.management_company || row.managementCo || '',
+    source: row.source_name || row.source || 'leasesmart_verified',
+    verificationStatus: row.verificationStatus || (row.import_status === 'approved' ? 'VERIFIED' : 'PENDING'),
+    verificationLabel: row.verificationLabel || 'Verified Listing',
+    lastUpdated: row.last_verified_date || (row.updated_at ? String(row.updated_at).slice(0, 10) : new Date().toISOString().slice(0, 10)),
+    availability: row.availability || 'available',
+    status: row.status || 'NOT CALLED',
+    amenities: row.amenities || [],
+    notes: row.notes || ''
+  };
+}
+
 function callAI(cb) {
-  // Beta demo: client has no API credentials; use 8 local sample listings (LS-003)
-  if (!d4TrackApiCall('listings_ai')) {
-    d4ShowRateLimitMessage(d4GetRateLimitMessage());
-    setTimeout(function() { cb(getFallback()); }, 300);
-    return;
-  }
-  setTimeout(function() { cb(getFallback()); }, 300);
-  return;
-
-  var p = APP.profile;
-  function j(v) { return Array.isArray(v) ? v.join(', ') : (v || 'Not specified'); }
-
-  var prompt = 'You are LeaseSmart AI. Generate 8 realistic managed apartment listings. NO private houses, NO basements, NO 55+ unless requested. Real addresses in the requested state/city.\n\nClient profile:\nName: ' + p.name + '\nState: ' + p.state + '\nCity: ' + p.city + '\nWork: ' + (p.work || 'Not specified') + '\nBudget: ' + j(p.budget) + '\nBedrooms: ' + j(p.beds) + '\nBathrooms: ' + p.baths + '\nParking: ' + j(p.park) + '\nPets: ' + j(p.pets) + '\nTransit: ' + j(p.transit) + '\nCommute: ' + p.commute + '\nLaundry: ' + p.laundry + '\nAmenities: ' + j(p.amenities) + '\nNeighborhood: ' + j(p.vibe) + '\nDealbreakers: ' + j(p.avoid) + '\nLifestyle: ' + j(p.life) + '\nExtras: ' + (p.extras || 'None') + '\n\nReturn ONLY a valid JSON array. No markdown, no explanation:\n[{"id":1,"priority":1,"complex":"Name","address":"123 Main St, City, State ZIP","phone":"(555) 555-5555","town":"City","state":"State","rent":"$1,950/mo","rentLow":1950,"size":"920 Sq Ft","bathrooms":"1","bedrooms":"2","available":"July 1","washerDryer":"In-unit","pets":"Dogs OK","parking":"Assigned spot","transit":"Bus 0.2 mi","highways":"I-95 5 min","amenities":["Gym"],"deposit":"$1,000","aptLink":"https://www.apartments.com/example","directLink":null,"managementCo":"Company Name","score":88,"scoreBreakdown":{"budget":23,"parking":20,"pets":13,"transit":18,"movein":9,"amenities":5},"availability":"available","status":"NOT CALLED","whyItFits":"2 sentences why this matches the client.","notes":"Any flags to note.","verificationStatus":"NEEDS DIRECT LINK","missingData":["Confirm overnight parking"],"neighborhood":{"overview":"2-3 sentence description.","walkScore":72,"transitScore":65,"safetyRating":"Above average","nearbySchools":["School 0.4 mi"],"nearbyTransit":["Bus 0.2 mi"],"nearbyHighways":["I-95 0.5 mi"],"nearbyAmenities":["Grocery 0.3 mi"],"driveTimes":{"toWork":"20 min","toDowntown":"15 min","toAirport":"30 min"}}}]';
-
-  if (!d4TrackApiCall('anthropic_api')) {
-    d4ShowRateLimitMessage(d4GetRateLimitMessage());
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     cb(getFallback());
     return;
   }
-  fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 5000,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  }).then(function(r) { return r.json(); })
+
+  fetch(SUPABASE_URL + '/rest/v1/listings?active=eq.true&order=created_at.desc', {
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(function(res) { return res.json(); })
     .then(function(data) {
-      var txt = '';
-      if (data.content) {
-        data.content.forEach(function(b) { if (b.text) txt += b.text; });
+      if (Array.isArray(data) && data.length > 0) {
+        cb(data.map(mapSupabaseListing));
+      } else {
+        cb(getFallback());
       }
-      txt = txt.replace(/```json/g, '').replace(/```/g, '').trim();
-      try { cb(JSON.parse(txt)); } catch(e) { cb(getFallback()); }
     })
-    .catch(function() { cb(getFallback()); });
+    .catch(function() {
+      cb(getFallback());
+    });
 }
 
 function profileStateAbbr(state) {
