@@ -3822,29 +3822,48 @@ function getGovListings(state, cb) {
 }
 
 function callAI(cb) {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    cb(getFallback());
-    return;
-  }
-
-  fetch(SUPABASE_URL + '/rest/v1/listings?active=eq.true&order=created_at.desc', {
+  var state = (APP.profile && APP.profile.state) ? APP.profile.state.trim() : 'NJ';
+  fetch(SUPABASE_URL + '/rest/v1/gov_listings?state=eq.' + encodeURIComponent(state) + '&order=units.desc&limit=20', {
     headers: {
       'apikey': SUPABASE_ANON_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json'
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
     }
   })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      if (Array.isArray(data) && data.length > 0) {
-        cb(data.map(mapSupabaseListing));
-      } else {
-        cb(getFallback());
-      }
-    })
-    .catch(function() {
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (data && data.length > 0) {
+      var mapped = data.map(function(p, i) {
+        return {
+          id: p.property_id || String(i+1),
+          title: p.name || 'HUD Property',
+          address: p.address,
+          city: p.city,
+          state: p.state,
+          zip: p.zip,
+          rent: 'Income-Based',
+          bedrooms: null,
+          bathrooms: null,
+          units: p.units,
+          laundry: 'Contact property',
+          pets_allowed: false,
+          category: p.category,
+          owner_org: p.owner_org,
+          owner_phone: p.owner_phone,
+          owner_email: p.owner_email,
+          mgmt_org: p.mgmt_org,
+          mgmt_phone: p.mgmt_phone,
+          opportunity_zone: p.opportunity_zone,
+          source: 'HUD_SECTION8',
+          verificationStatus: 'HUD_VERIFIED',
+          confidenceScore: 95
+        };
+      });
+      cb(mapped);
+    } else {
       cb(getFallback());
-    });
+    }
+  })
+  .catch(function(){ cb(getFallback()); });
 }
 
 function profileStateAbbr(state) {
