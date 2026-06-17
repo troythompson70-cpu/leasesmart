@@ -2495,7 +2495,7 @@ function a8RouteToModeHome() {
     return;
   }
   APP.listings = applyIntelligenceToListings(
-    (LS_STORE.session && LS_STORE.session.listings) || getFallback(),
+    getFallback(),
     APP.profile || lsLoadProfile() || {}
   );
   buildDashboard();
@@ -2533,7 +2533,7 @@ function routeOnboarding() {
   APP.email = prof.email || APP.email || '';
   APP.phone = prof.phone || APP.phone || '';
   APP.listings = applyIntelligenceToListings(
-    (LS_STORE.session && LS_STORE.session.listings) || getFallback(),
+    getFallback(),
     APP.profile
   );
   APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
@@ -3098,7 +3098,7 @@ function resumeSession() {
   APP.email = profile.email || APP.email || '';
   APP.phone = profile.phone || APP.phone || '';
   APP.listings = applyIntelligenceToListings(
-    (LS_STORE.session && LS_STORE.session.listings) || getFallback(),
+    getFallback(),
     APP.profile
   );
   APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
@@ -3388,7 +3388,7 @@ function applyFiltersConfirmed(changedMajorFields) {
 }
 
 function refreshListingsFromProfile() {
-  APP.listings = applyIntelligenceToListings(getFallback(), APP.profile);
+  callAI(function(listings){ APP.listings = applyIntelligenceToListings(listings, APP.profile); buildDashboard(); });
   APP.adminList = APP.listings.map(function(l) { return Object.assign({}, l, { adminStatus: 'APPROVED' }); });
   LS_STORE.session = { profile: APP.profile, listings: APP.listings, savedAt: new Date().toISOString() };
   lsSave();
