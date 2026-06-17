@@ -2494,13 +2494,14 @@ function a8RouteToModeHome() {
     a8EnterProWorkspace();
     return;
   }
-  APP.listings = applyIntelligenceToListings(
-    getFallback(),
-    APP.profile || lsLoadProfile() || {}
-  );
-  buildDashboard();
-  a8ApplyRenterChrome();
-  showPage('dash-pg');
+  var profile = APP.profile || lsLoadProfile() || {};
+  APP.profile = profile;
+  callAI(function(listings) {
+    APP.listings = applyIntelligenceToListings(listings, profile);
+    buildDashboard();
+    a8ApplyRenterChrome();
+    showPage('dash-pg');
+  });
 }
 
 function a8SyncModeFromProfile() {
