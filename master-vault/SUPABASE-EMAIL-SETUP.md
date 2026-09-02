@@ -85,7 +85,13 @@ Enter secrets **only** in: **Supabase Dashboard → Project → Authentication �
 ## Step 1 — Supabase Dashboard → SMTP Settings
 
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard).
-2. Select project: **jufxyuqcgijaiuyratlp** (LeaseSmart).
+2. Select the project the deployed app authenticates against: **`iajaftjnfxrywqgccdef`**.
+   SMTP configured on any other project will not send LeaseSmart login emails.
+   Confirm the ref before changing anything:
+
+   ```bash
+   curl -s https://leasesmart.tgttechnologies.com/config.js | grep -o 'https://[a-z0-9]*\.supabase\.co'
+   ```
 3. Navigate to **Project Settings** → **Authentication** → **SMTP Settings** (or **Authentication** → **SMTP**).
 4. Enable **Custom SMTP**.
 5. Fill in (placeholders above — real password only in dashboard):
