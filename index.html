@@ -1586,15 +1586,16 @@ function lsSupabaseConfigured() {
   return !!(lsIsUsableConfigValue(c.url) && lsIsUsableConfigValue(c.anonKey));
 }
 
+/** Login-form text for a config problem, or '' when nothing detectable is wrong. */
 function lsSupabaseConfigError() {
   var c = lsGetSupabaseConfig();
   if (!lsIsUsableConfigValue(c.url) || !lsIsUsableConfigValue(c.anonKey)) {
     return 'Supabase is not configured. index.html is missing its project URL or anon key; a local config.js can override both.';
   }
   if (typeof supabase === 'undefined') {
-    return 'Supabase library did not load. Check the network connection and refresh.';
+    return 'Supabase library did not load. Check the connection and refresh.';
   }
-  return 'Supabase client could not start. Check the browser console for errors.';
+  return '';
 }
 
 function initSupabaseClient() {
