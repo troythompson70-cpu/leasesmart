@@ -1,7 +1,7 @@
 # Morning Review — Wednesday, September 2, 2026
 
 **LeaseSmart · TGT Technologies Inc.**
-**Build ID:** 20260530-v2.14.0-data-a1 · **Branch:** cursor/fix-stale-docs-and-regression-chain-642f
+**Build ID:** 20260902-v2.14.1-authcfg · **Branch:** cursor/drop-pages-mirror-and-doc-followups-642f
 
 > Read this in under 2 minutes. Upload `master-vault/` files to Microsoft 365 Master Vault.
 
@@ -20,7 +20,7 @@
 - Nothing — all regression tests passed
 
 ## What needs review
-- Review uncommitted files on disk (5 items)
+- Review uncommitted files on disk (1 items)
 
 ## Ready for commit
 - Code is tested — say exact commit phrase when Troy approves
@@ -34,14 +34,10 @@
 
 ---
 
-**Uncommitted files:** 5
+**Uncommitted files:** 1
 
 ```
-M DEPLOY_NOW.md
- M command-center.html
- M index.html
- M master-vault/DOMAIN-SETUP-GUIDE.md
- M scripts/domain-setup-guide.mjs
+M master-vault/AI-CONTEXT-SNAPSHOT.md
 ```
 
 **Full sprint log:** `master-vault/LeaseSmart-Sprint-Master-Log.md`
