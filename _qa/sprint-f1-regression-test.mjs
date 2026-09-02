@@ -64,7 +64,7 @@ assert('CC push demo panel', ccHtml.includes('DEMO') && ccHtml.includes('VAPID')
 // Agent 4 — domain guide
 assert('domain-setup-guide.mjs', existsSync(join(ROOT, 'scripts/domain-setup-guide.mjs')));
 const guide = buildDomainSetupGuide();
-assert('GoDaddy CNAME', guide.includes('GoDaddy') && guide.includes('CNAME'));
+assert('Netlify CNAME target', guide.includes('leasesmart2.netlify.app') && guide.includes('CNAME'));
 assert('GitHub Pages', guide.includes('GitHub Pages'));
 assert('leasesmart.tgttechnologies.com', guide.includes('leasesmart.tgttechnologies.com'));
 assert('verify', guide.toLowerCase().includes('verify'));
