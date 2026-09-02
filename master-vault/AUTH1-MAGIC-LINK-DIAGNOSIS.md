@@ -10,23 +10,31 @@ Both checks below eliminate known-bad pointers that produce a "the magic link ne
 arrives" symptom without SMTP being involved at all. They rule causes **out**; neither one
 reconstructs what broke a particular login attempt in the past.
 
-### Check 1 — is `config.js` actually reaching the browser?
+### Check 1 — which project is the auth client actually using?
 
-`index.html` loads auth config with `<script src="config.js"></script>`, and `config.js` is
-gitignored. If it is not present on the deployed host, `window.LEASESMART_CONFIG` stays
-null, the Supabase client is never constructed, and **both** lanes fail before any email is
-requested. The UI reports "Supabase is not configured" rather than an email failure.
+Auth config resolves from one of two places. `config.js` wins if it supplies **both** a URL
+and an anon key; otherwise the `SUPABASE_URL` / `SUPABASE_ANON_KEY` constants in
+`index.html` are used. Read the winner from the browser console after a login attempt:
 
-On Netlify this is easy to miss: `_redirects` rewrites unmatched paths to `index.html` with
-a **200**, so a missing `config.js` returns the whole app as HTML instead of a 404. Check
-the content type, not the status:
+```js
+window.LS_SUPABASE_CONFIG_SOURCE   // 'config.js' or 'index.html'
+```
+
+If that is `undefined`, the client was never constructed — the login form's error text says
+which of the two failed, and both lanes will fail before any email is requested.
+
+A local `config.js` with a half-filled or placeholder value does not error; it falls through
+to the `index.html` constants, so a login can succeed against a different project than the
+one you were editing. That is the case to rule out when the wrong inbox gets the email.
+
+Deployed hosts have no `config.js` at all — nothing generates it — so they always report
+`index.html`. Confirming that from the outside needs a content-type check, because the
+`_redirects` SPA rewrite answers missing files with `index.html` and a **200**:
 
 ```bash
 curl -sI https://leasesmart.tgttechnologies.com/config.js | grep -i content-type
-# text/javascript → deployed · text/html → NOT deployed (rewritten to index.html)
+# text/html → not deployed (expected) · text/javascript → someone added one
 ```
-
-Locally, confirm the file exists at the repo root next to `index.html`.
 
 ### Check 2 — does the configured project ref exist?
 
@@ -56,7 +64,7 @@ Full evidence for both checks: `master-vault/cursor-reports/LIVE-INFRA-PROBE-202
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
 | Magic link opens blank / home only | Redirect URL not in Supabase allow-list | Add `http://localhost:8080/*` and production URL |
-| Session not detected after click | `config.js` missing or wrong anon key | Copy from `config.example.js` |
+| Session not detected after click | Wrong project — `config.js` override pointing elsewhere | Check `window.LS_SUPABASE_CONFIG_SOURCE` (see Check 1) |
 | Link opens wrong device | Magic link is device/session sensitive | Open on same browser that requested link |
 | `#access_token` in URL but no login | `getSession()` not called after redirect | Fixed in AUTH-1: `auth1ProcessAuthRedirect()` |
 | `?code=` in URL stays visible | PKCE callback not exchanged | Supabase client `detectSessionInUrl: true` + strip URL after |

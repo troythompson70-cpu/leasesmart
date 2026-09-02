@@ -108,7 +108,7 @@ it with the anon key from the browser.
 
 | Finding | Action |
 |---------|--------|
-| 1 — `config.js` not deployed | Code fix required; auth must not depend on a file that no deploy produces |
+| 1 — `config.js` not deployed | **Fixed** — auth now falls back to the `index.html` constants, with `config.js` kept as a local override |
 | 2 — dead project refs | Docs corrected (PR #2); Pages mirror and its secrets retired |
 | 3 — no server-side lane enforcement | No action needed today; becomes a release gate before any real table is created |
 

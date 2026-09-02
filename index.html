@@ -1489,7 +1489,7 @@ body { font-size: 16px !important; }
 // v2.7.0 Sprint AUTH-1 — enterprise Pro login (+ C1-Pro + A8)
 var SUPABASE_URL='https://iajaftjnfxrywqgccdef.supabase.co';
 var SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhamFmdGpuZnhyeXdxZ2NjZGVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NDE3NzksImV4cCI6MjA5NzIxNzc3OX0.BNPyIUbEAAsSpQAj23ZOmojxOvnpPJ7Lz73qQ-82RwM';
-var LS_BUILD = '20260530-v2.14.0-data-a1';
+var LS_BUILD = '20260902-v2.14.1-authcfg';
 // Derived from LS_BUILD so the banner, footers and title cannot drift behind it.
 var LS_VERSION = (LS_BUILD.match(/-v(\d+\.\d+\.\d+)/) || [])[1] || '';
 var LS_VERSION_LABEL = LS_VERSION ? 'LeaseSmart Beta v' + LS_VERSION : 'LeaseSmart Beta';
@@ -1551,33 +1551,58 @@ var APP_SUPABASE = null;
 var BETA_SESSION = { authUserId: null, appUserId: null, email: '', fullName: '', phone: '', hasAgreement: false, legalScrolled: false };
 var AUTH1_SESSION = { active: false, authUserId: null, email: '', fullName: '', organizationId: null, organizationName: '', role: null, staffId: null, isDemoSandbox: true };
 
+function lsIsUsableConfigValue(v) {
+  return !!(v && v.indexOf('YOUR_') < 0);
+}
+
+/**
+ * Two Supabase entry points exist in this file and they resolve config differently:
+ *
+ *   - Auth (this client) prefers window.LEASESMART_CONFIG, set by the gitignored config.js,
+ *     so a local checkout can point at a scratch project without editing index.html.
+ *   - The HUD gov_listings fetches read the SUPABASE_URL / SUPABASE_ANON_KEY constants
+ *     above directly.
+ *
+ * No deploy produces config.js, so auth treats the constants as the shipped default and
+ * config.js purely as a local override. Without that fallback the two paths disagree on
+ * every deployed host: listings load and auth is dead.
+ */
 function lsGetSupabaseConfig() {
   var cfg = window.LEASESMART_CONFIG || {};
+  var url = String(cfg.supabaseUrl || '').trim();
+  var anonKey = String(cfg.supabaseAnonKey || '').trim();
+  if (lsIsUsableConfigValue(url) && lsIsUsableConfigValue(anonKey)) {
+    return { url: url, anonKey: anonKey, source: 'config.js' };
+  }
   return {
-    url: String(cfg.supabaseUrl || '').trim(),
-    anonKey: String(cfg.supabaseAnonKey || '').trim()
+    url: String(SUPABASE_URL || '').trim(),
+    anonKey: String(SUPABASE_ANON_KEY || '').trim(),
+    source: 'index.html'
   };
 }
 
 function lsSupabaseConfigured() {
   var c = lsGetSupabaseConfig();
-  return !!(c.url && c.anonKey && c.url.indexOf('YOUR_') < 0 && c.anonKey.indexOf('YOUR_') < 0);
+  return !!(lsIsUsableConfigValue(c.url) && lsIsUsableConfigValue(c.anonKey));
 }
 
 function lsSupabaseConfigError() {
-  if (!window.LEASESMART_CONFIG) {
-    return 'Supabase is not configured. Copy config.example.js to config.js and add your project URL + anon key.';
-  }
   var c = lsGetSupabaseConfig();
-  if (!c.url || c.url.indexOf('YOUR_') >= 0) return 'Supabase URL missing in config.js — replace YOUR_SUPABASE_URL with your project URL.';
-  if (!c.anonKey || c.anonKey.indexOf('YOUR_') >= 0) return 'Supabase anon key missing in config.js — replace YOUR_SUPABASE_ANON_KEY with your anon key only.';
-  return 'Supabase is not configured. Check config.js format and anon key.';
+  if (!lsIsUsableConfigValue(c.url) || !lsIsUsableConfigValue(c.anonKey)) {
+    return 'Supabase is not configured. index.html is missing its project URL or anon key; a local config.js can override both.';
+  }
+  if (typeof supabase === 'undefined') {
+    return 'Supabase library did not load. Check the network connection and refresh.';
+  }
+  return 'Supabase client could not start. Check the browser console for errors.';
 }
 
 function initSupabaseClient() {
   if (!lsSupabaseConfigured() || typeof supabase === 'undefined') return null;
   if (!APP_SUPABASE) {
     var c = lsGetSupabaseConfig();
+    // Which source won is the first thing to check when a login lane misbehaves.
+    window.LS_SUPABASE_CONFIG_SOURCE = c.source;
     APP_SUPABASE = supabase.createClient(c.url, c.anonKey, {
       auth: {
         detectSessionInUrl: true,

@@ -22,13 +22,17 @@ which host owns `leasesmart.tgttechnologies.com` first.
 |------|----------|
 | `index.html` | **YES — entire app (HTML + CSS + JS)** |
 | `_redirects` | YES for Netlify SPA routing |
-| `config.js` | Local dev only — gitignored, not generated for any deploy |
+| `config.js` | Optional local override — gitignored, not generated for any deploy |
 | `style.css` | **Does not exist** |
 | `script.js` | **Does not exist** |
 
 `_redirects` rewrites unmatched paths to `index.html` with a 200, so a request for a file
 that is not deployed returns the app's HTML instead of a 404. Keep that in mind when
 verifying that something shipped: check the content type, not just the status code.
+
+Supabase auth reads the `SUPABASE_URL` / `SUPABASE_ANON_KEY` constants in `index.html` on
+deployed hosts, and a local `config.js` overrides them only when it supplies both values.
+Anon key only — a service role key must never reach a frontend file.
 
 ---
 
