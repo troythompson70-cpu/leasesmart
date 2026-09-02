@@ -4,6 +4,53 @@
 
 ---
 
+## First-line checks — do these before touching SMTP
+
+Both checks below eliminate known-bad pointers that produce a "the magic link never
+arrives" symptom without SMTP being involved at all. They rule causes **out**; neither one
+reconstructs what broke a particular login attempt in the past.
+
+### Check 1 — is `config.js` actually reaching the browser?
+
+`index.html` loads auth config with `<script src="config.js"></script>`, and `config.js` is
+gitignored. If it is not present on the deployed host, `window.LEASESMART_CONFIG` stays
+null, the Supabase client is never constructed, and **both** lanes fail before any email is
+requested. The UI reports "Supabase is not configured" rather than an email failure.
+
+On Netlify this is easy to miss: `_redirects` rewrites unmatched paths to `index.html` with
+a **200**, so a missing `config.js` returns the whole app as HTML instead of a 404. Check
+the content type, not the status:
+
+```bash
+curl -sI https://leasesmart.tgttechnologies.com/config.js | grep -i content-type
+# text/javascript → deployed · text/html → NOT deployed (rewritten to index.html)
+```
+
+Locally, confirm the file exists at the repo root next to `index.html`.
+
+### Check 2 — does the configured project ref exist?
+
+Three project refs have appeared across this repo. Only one resolves:
+
+| Ref | Where it came from | Resolves? |
+|-----|--------------------|-----------|
+| `iajaftjnfxrywqgccdef` | `SUPABASE_URL` in `index.html` — what the shipped app uses | **Yes** — `/auth/v1/health` returns 401 with a Supabase error envelope |
+| `wsxsnbgvbrebbusgokmp` | `SUPABASE_URL` repo secret, baked into the retired Pages `config.js` | No — no DNS record |
+| `jufxyuqcgijaiuyratlp` | Earlier copy of `SUPABASE-EMAIL-SETUP.md` | No — no DNS record |
+
+```bash
+node scripts/supabase-live-probe.mjs   # reachability + auth settings + anon table access
+```
+
+Configuring SMTP on a ref that does not resolve looks exactly like SMTP being broken, so a
+doc or secret pointing at a dead ref is a **contributing** cause worth eliminating first.
+It is not evidence that this is what previously blocked the lane: a non-resolving ref today
+does not distinguish a typo from a project that was deleted after being used correctly.
+
+Full evidence for both checks: `master-vault/cursor-reports/LIVE-INFRA-PROBE-2026-09-02.md`.
+
+---
+
 ## Common failure causes (consumer lane)
 
 | Symptom | Likely cause | Fix |
