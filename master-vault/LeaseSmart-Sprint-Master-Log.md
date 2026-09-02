@@ -157,3 +157,10 @@ PR #1 verified GO by Claude. NOT MERGED - awaiting Troy commit phrase per repo c
 SMTP setup doc named project jufxyuqcgijaiuyratlp, but the deployed app authenticates against iajaftjnfxrywqgccdef - verified from the live config.js and the hardcoded constants in index.html. SMTP configured on the named project would never have sent LeaseSmart login emails, which matches SMTP being a long-standing open blocker. Doc now names the operative project and includes a command to re-confirm the ref. Fixed on its own branch so PR #1 stays exactly as Claude verified it.
 
 ---
+## 2026-09-02 15:31 UTC — QA-CHAIN-REPAIR — Sprint Command
+
+**Build ID:** 20260530-v2.14.0-data-a1
+
+Troy approved. PR #1 and PR #2 moved from draft to ready for review. Merge deliberately withheld pending the exact commit phrase per repo convention, and pending confirmation of which Supabase project is authoritative for PR #2.
+
+---
