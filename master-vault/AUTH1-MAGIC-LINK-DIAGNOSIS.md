@@ -24,9 +24,10 @@
    - Redirect URLs:
      ```
      http://localhost:8080/*
-     https://troythompson70-cpu.github.io/leasesmart/*
      https://leasesmart.tgttechnologies.com/*
      ```
+   - The `troythompson70-cpu.github.io/leasesmart/*` entry can be removed — the Pages
+     mirror is retired.
 
 2. **Authentication → Providers → Email**
    - Magic link / OTP enabled (consumer lane)
@@ -59,7 +60,7 @@ Tokens must not remain in URL bar, history, or localStorage.
 ## Troy recording checklist
 
 When sending login failure recording, include:
-1. Exact URL opened (local vs GitHub Pages vs custom domain)
+1. Exact URL opened (`localhost` vs `leasesmart.tgttechnologies.com`)
 2. Button clicked (Sign Up / Log In / Case Manager Login)
 3. Error message text
 4. Browser console errors (screenshot)

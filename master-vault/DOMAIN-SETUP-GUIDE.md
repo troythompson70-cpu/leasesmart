@@ -13,15 +13,18 @@ The live beta is served by **Netlify**, not GitHub Pages. The subdomain is a
 |------|-----|--------|
 | `leasesmart.tgttechnologies.com` | CNAME → `leasesmart2.netlify.app` | LeaseSmart beta (Netlify) |
 | `tgttechnologies.com` | Cloudflare | TGT corporate site |
-| `troythompson70-cpu.github.io/leasesmart` | GitHub Pages | Same build, parallel deploy |
 
-## Two deploy paths are live at once
+## GitHub Pages is retired
 
-Pushing to `main` triggers `.github/workflows/pages.yml`, which generates `config.js`
-from repo secrets and publishes to GitHub Pages. Netlify builds the same repo and is
-what the custom domain resolves to. Both currently serve identical output, so a change
-is only live on the custom domain once **Netlify** has finished — a green Pages workflow
-is not proof the custom domain updated.
+Pages used to deploy the same repo in parallel via `.github/workflows/pages.yml`, and a
+repo-root `CNAME` file claimed `leasesmart.tgttechnologies.com` for it. Both are deleted.
+Netlify is the only deploy path.
+
+The mirror was removed rather than left idle because a second host claiming the live
+hostname fails silently: if Pages were ever re-triggered it would contend for the same
+name with no warning, and the `config.js` it generated from repo secrets pointed at a
+Supabase project that no longer resolves. Do not re-enable Pages for this repo without
+first deciding which host owns the hostname.
 
 ## Step 1 — DNS for the subdomain
 
@@ -40,17 +43,16 @@ is not proof the custom domain updated.
 3. Let Netlify provision the TLS certificate, then enable **Force HTTPS**.
 4. `_redirects` in the repo root keeps SPA routes working on Netlify.
 
-## Step 3 — Repo CNAME file
+## Step 3 — Confirm no second host claims the name
 
-The repo root `CNAME` file contains:
+There must be no repo-root `CNAME` file and no Pages workflow. Verify:
 
+```bash
+ls CNAME .github/workflows/pages.yml   # expect: No such file or directory (both)
 ```
-leasesmart.tgttechnologies.com
-```
 
-That file is read by **GitHub Pages** for its custom-domain setting. Leave it in place
-only while the Pages deploy is intentionally kept as a mirror. If GitHub Pages is ever
-retired, delete `CNAME` so Pages stops claiming the same hostname.
+GitHub Pages should also be disabled in **Settings → Pages** so a manual or accidental
+deploy cannot republish under the live hostname.
 
 ## Step 4 — Expected propagation time
 
@@ -73,7 +75,7 @@ grep -o "LS_BUILD = '[^']*'" index.html
 
 ## Troubleshooting
 
-- **Old build still served:** Netlify cache or build not finished. Check the Netlify deploy log; a passing GitHub Pages run does not update the custom domain.
+- **Old build still served:** Netlify cache or build not finished. Check the Netlify deploy log — it is the only thing that updates the custom domain.
 - **Certificate pending:** Wait for Netlify to issue TLS; do not disable HTTPS enforcement prematurely.
 - **Wrong site or parking page:** CNAME points at the wrong target, or a stale `A` record still exists for `leasesmart`.
 - **Routes 404 on refresh:** `_redirects` missing from the deployed root.
