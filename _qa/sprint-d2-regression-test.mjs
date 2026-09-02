@@ -5,6 +5,7 @@ import { readFileSync, existsSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildAtLeast } from './build-id-lib.mjs';
 import {
   d2MatchLandlords,
   d2FindNewMatches,
@@ -20,7 +21,7 @@ const seed = readFileSync(join(ROOT, '_data/sprint-d2-mock-seed.js'), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('D2 build id', html.includes("LS_BUILD = '20260526-v2.3.0-e1'") || html.includes("LS_BUILD = '20260526-v2.2.0-e3'") || html.includes("LS_BUILD = '20260526-v2.1.0-e2'") || html.includes("LS_BUILD = '20260526-v2.0.0-d3'") || html.includes("LS_BUILD = '20260526-v1.9.0-d5'") || html.includes("LS_BUILD = '20260526-v1.8.0-d4'") || html.includes("LS_BUILD = '20260526-v1.6.0-d2'"));
+assert('D2 build id', buildAtLeast(html, BUILD));
 assert('D2 mock seed linked', html.includes('sprint-d2-mock-seed.js'));
 assert('D2 draft SQL', sql.includes('DRAFT ONLY') || sql.includes('saved_search_profiles'));
 assert('D2 saved_search_profiles table', sql.includes('saved_search_profiles'));

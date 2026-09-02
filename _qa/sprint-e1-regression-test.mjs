@@ -5,6 +5,7 @@ import { readFileSync, existsSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildAtLeast } from './build-id-lib.mjs';
 import {
   E1_HPD_API_URL,
   E1_HPD_SOURCE_LABEL,
@@ -37,7 +38,7 @@ const mockSeed = readFileSync(join(ROOT, '_data/sprint-e1-mock-seed.js'), 'utf8'
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('E1 build id', html.includes("LS_BUILD = '" + BUILD + "'"));
+assert('E1 build id', buildAtLeast(html, BUILD));
 assert('E1 public seed linked', html.includes('sprint-e1-public-source-seed.js'));
 assert('E1 mock seed linked', html.includes('sprint-e1-mock-seed.js'));
 assert('E1 draft SQL', sql.includes('DRAFT ONLY') && sql.includes('e1_public_source_imports'));

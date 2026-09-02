@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildAtLeast } from './build-id-lib.mjs';
 import {
   E3_TEST_PLAN_IDS,
   e3IsTestPublishableKey,
@@ -23,7 +24,7 @@ const configExample = readFileSync(join(ROOT, 'config.example.js'), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('E3 build id', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260526-v2.3.0-e1'"));
+assert('E3 build id', buildAtLeast(html, BUILD));
 assert('E3 mock seed linked', html.includes('sprint-e3-mock-seed.js'));
 assert('E3 draft SQL', sql.includes('DRAFT ONLY') && sql.includes('billing_subscriptions'));
 assert('E3 test_mode column', sql.includes('test_mode'));

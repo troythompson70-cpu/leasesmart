@@ -5,6 +5,7 @@ import { readFileSync, existsSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildAtLeast } from './build-id-lib.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const QA = join(ROOT, '_qa');
@@ -20,7 +21,7 @@ function pgBlock(pgId) {
   return next >= 0 ? rest.slice(0, 10 + next) : rest;
 }
 
-assert('A8 build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260528-v2.7.0-auth1'") || html.includes("LS_BUILD = '20260528-v2.8.0-newark'") || html.includes("LS_BUILD = '20260529-v2.9.0-actionpanel'") || html.includes("LS_BUILD = '20260529-v2.10.0-frontpage'") || html.includes("LS_BUILD = '20260530-v2.11.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.12.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.13.0-c1pro-app'") || html.includes("LS_BUILD = '20260530-v2.14.0-data-a1'"));
+assert('A8 build id or successor', buildAtLeast(html, BUILD));
 
 // Mode selection UI
 assert('Mode picker page', html.includes('id="a8-mode-pg"') && html.includes('Choose your LeaseSmart experience'));

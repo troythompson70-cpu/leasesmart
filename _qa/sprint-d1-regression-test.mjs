@@ -5,6 +5,7 @@ import { readFileSync, existsSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildAtLeast } from './build-id-lib.mjs';
 import {
   d1IsEmailServiceLive,
   d1QueueEmail,
@@ -20,8 +21,7 @@ const seed = readFileSync(join(ROOT, '_data/sprint-d1-mock-seed.js'), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-const buildMatch = html.match(/LS_BUILD = '([^']+)'/);
-assert('D1 build id preserved or superseded', buildMatch && /^20260526-v1\.(5\.0-d1|6\.0-d2|8\.0-d4|9\.0-d5)$|^20260526-v2\.(0\.0-d3|1\.0-e2|2\.0-e3|3\.0-e1)$/.test(buildMatch[1]));
+assert('D1 build id preserved or superseded', buildAtLeast(html, BUILD));
 assert('D1 mock seed linked', html.includes('sprint-d1-mock-seed.js'));
 assert('D1 draft SQL', sql.includes('DRAFT ONLY') || sql.includes('notification_outbox'));
 assert('D1 outbox table', sql.includes('notification_outbox'));

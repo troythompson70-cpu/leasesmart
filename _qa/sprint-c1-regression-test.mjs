@@ -2,15 +2,25 @@
  * Sprint C1 regression — landlord intelligence + A6 preservation
  */
 import { readFileSync } from 'fs';
+import { buildAtLeast } from './build-id-lib.mjs';
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const sql = readFileSync(new URL('../supabase/drafts/sprint_c1_landlord_intelligence.sql', import.meta.url), 'utf8');
 const seed = readFileSync(new URL('../_data/landlord-intel-seed-nj.js', import.meta.url), 'utf8');
-const buildMatch = html.match(/LS_BUILD = '([^']+)'/);
+const BUILD = '20260526-v1.2.0-c1';
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('C1 build id', buildMatch && /^20260526-v/.test(buildMatch[1]));
+/** Text of one top-level function declaration, up to the next one. */
+function functionBody(source, declaration) {
+  const start = source.indexOf(declaration);
+  if (start < 0) return '';
+  const rest = source.slice(start + declaration.length);
+  const end = rest.search(/\n(?:async )?function /);
+  return end < 0 ? rest : rest.slice(0, end);
+}
+
+assert('C1 build id', buildAtLeast(html, BUILD));
 assert('Draft SQL file exists', sql.includes('CREATE TABLE IF NOT EXISTS public.landlord_intelligence'));
 assert('Draft SQL not in migrations apply path only', sql.includes('DRAFT ONLY'));
 assert('All landlord fields in SQL', ['landlord_name', 'property_name', 'case_manager_notes', 'next_recheck_date', 'warning_flags'].every(f => sql.includes(f)));
@@ -37,7 +47,11 @@ assert('SEARCH_STATES', html.includes('SEARCH_STATES'));
 assert('A4 Select All', html.includes('multiSelectAllBtn'));
 assert('A4 auto-save notes', html.includes('bindDetailNotes'));
 assert('A4 stats filters', html.includes('setStatusFilter'));
-assert('Magic link only', html.includes('signInWithOtp') && !html.includes('signInWithPassword'));
+// AUTH-1 added an admin-provisioned staff lane that signs in with a password,
+// so the renter lane is verified as magic-link only rather than the whole file.
+const proLoginBody = functionBody(html, 'async function auth1SubmitProLogin');
+const passwordCalls = (html.match(/signInWithPassword/g) || []).length;
+assert('Renter lane magic link only', html.includes('signInWithOtp') && passwordCalls === 1 && proLoginBody.includes('signInWithPassword'));
 assert('Legal gate', html.includes('beta-legal-pg'));
 
 const passed = tests.filter(t => t.pass).length;

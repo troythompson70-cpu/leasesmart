@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildAtLeast } from './build-id-lib.mjs';
 import { e2CanTrack, e2ValidateConsentRecord } from '../scripts/e2-legal-framework.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -16,7 +17,7 @@ const seed = readFileSync(join(ROOT, '_data/sprint-e2-mock-seed.js'), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('E2 build id', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260526-v2.3.0-e1'") || html.includes("LS_BUILD = '20260526-v1.8.0-d4'") || html.includes("LS_BUILD = '20260526-v1.9.0-d5'") || html.includes("LS_BUILD = '20260526-v2.2.0-e3'"));
+assert('E2 build id', buildAtLeast(html, BUILD));
 assert('E2 mock seed linked', html.includes('sprint-e2-mock-seed.js'));
 assert('E2 draft SQL', sql.includes('DRAFT ONLY') && sql.includes('client_consent_log'));
 

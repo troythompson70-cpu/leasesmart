@@ -7,6 +7,7 @@ import { readFileSync, existsSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildAtLeast } from './build-id-lib.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const QA = join(ROOT, '_qa');
@@ -20,7 +21,7 @@ const capStart = html.indexOf('var CAP_DEMO_DISCLAIMER');
 const capEnd = capStart >= 0 ? html.indexOf('</script>', capStart) : -1;
 const cap = (capStart >= 0 && capEnd >= 0) ? html.slice(capStart, capEnd) : '';
 
-assert('Build id or successor', html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260529-v2.10.0-frontpage'") || html.includes("LS_BUILD = '20260530-v2.11.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.12.0-c1pro'") || html.includes("LS_BUILD = '20260530-v2.13.0-c1pro-app'") || html.includes("LS_BUILD = '20260530-v2.14.0-data-a1'"));
+assert('Build id or successor', buildAtLeast(html, BUILD));
 assert('CaseworkerActionPanel block present', !!cap);
 assert('Panel mount in page', html.includes('id="capActionPanel"'));
 
