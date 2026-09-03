@@ -75,6 +75,11 @@ assert('No password column in draft staff table', !draftSql.match(/organization_
 assert('No service_role in index', !html.match(/service_role/));
 assert('No API keys in index', !html.match(/\bsk-[A-Za-z0-9]{20,}/));
 
+// Auth config — no deploy generates config.js, so it must stay an override, not a dependency
+assert('Auth falls back to shipped constants', /function lsGetSupabaseConfig[\s\S]{0,700}?SUPABASE_ANON_KEY/.test(html));
+assert('config.js still overrides', /function lsGetSupabaseConfig[\s\S]{0,400}?LEASESMART_CONFIG/.test(html));
+assert('Config source exposed for debugging', html.includes('window.LS_SUPABASE_CONFIG_SOURCE'));
+
 // C1-Pro smoke (bundled in same build)
 assert('C1-Pro matches panel', html.includes('function c1proRenderClientMatchesPanelHtml'));
 assert('C1-Pro monthly card in C3', /renderC3ReportingDashboard[\s\S]*?c1proRenderC3MonthlyCardHtml/.test(html));

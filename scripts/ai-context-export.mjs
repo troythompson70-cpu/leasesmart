@@ -58,9 +58,15 @@ function gitShort(cmd) {
   return sanitize((r.stdout || r.stderr || '').trim());
 }
 
+/**
+ * Build slugs usually end in a sprint code (`-a1`, `-d5`), but a patch build's slug need
+ * not name a sprint. Fall back to the slug itself, since 'UNKNOWN' reads as missing data.
+ */
 function inferSprintStatus(buildId) {
-  const m = buildId.match(/-([a-z]\d+)$/i);
-  return m ? m[1].toUpperCase() : 'UNKNOWN';
+  const sprint = buildId.match(/-([a-z]\d+)$/i);
+  if (sprint) return sprint[1].toUpperCase();
+  const slug = buildId.match(/^\d{8}-v\d+\.\d+\.\d+-(.+)$/);
+  return slug ? slug[1].toUpperCase() : 'UNKNOWN';
 }
 
 function extractBlockers(entries, gitStatus) {

@@ -6,16 +6,13 @@
 
 ## How deployment happens
 
-Pushing to `main` triggers two independent deploys of the same repo:
+Pushing to `main` deploys to **Netlify**, which is the only deploy path. The custom domain
+is a CNAME to `leasesmart2.netlify.app`, so the Netlify deploy log is the only thing that
+tells you whether visitors have the new build.
 
-| Target | Trigger | Serves |
-|--------|---------|--------|
-| **Netlify** | Push to `main` | `leasesmart.tgttechnologies.com` (the live beta) |
-| **GitHub Pages** | `.github/workflows/pages.yml` | `troythompson70-cpu.github.io/leasesmart` (mirror) |
-
-The custom domain is a CNAME to `leasesmart2.netlify.app`, so **Netlify is what visitors
-hit**. A green Pages workflow does not prove the custom domain updated — check the Netlify
-deploy log too.
+The GitHub Pages mirror (`.github/workflows/pages.yml` plus the repo-root `CNAME`) was
+retired — see `master-vault/DOMAIN-SETUP-GUIDE.md`. Do not re-add either without deciding
+which host owns `leasesmart.tgttechnologies.com` first.
 
 ---
 
@@ -25,10 +22,17 @@ deploy log too.
 |------|----------|
 | `index.html` | **YES — entire app (HTML + CSS + JS)** |
 | `_redirects` | YES for Netlify SPA routing |
-| `CNAME` | Read by GitHub Pages for its custom domain |
-| `config.js` | Generated at deploy from repo secrets — never committed |
+| `config.js` | Optional local override — gitignored, not generated for any deploy |
 | `style.css` | **Does not exist** |
 | `script.js` | **Does not exist** |
+
+`_redirects` rewrites unmatched paths to `index.html` with a 200, so a request for a file
+that is not deployed returns the app's HTML instead of a 404. Keep that in mind when
+verifying that something shipped: check the content type, not just the status code.
+
+Supabase auth reads the `SUPABASE_URL` / `SUPABASE_ANON_KEY` constants in `index.html` on
+deployed hosts, and a local `config.js` overrides them only when it supplies both values.
+Anon key only — a service role key must never reach a frontend file.
 
 ---
 
@@ -69,6 +73,14 @@ Also check the host is what you expect:
 ```bash
 curl -sI https://leasesmart.tgttechnologies.com | grep -i server   # expect: Netlify
 dig leasesmart.tgttechnologies.com CNAME +short                     # expect: leasesmart2.netlify.app
+```
+
+To check whether a specific file is actually deployed, look at the content type — the SPA
+rewrite makes a missing file return the app HTML with a 200:
+
+```bash
+curl -sI https://leasesmart.tgttechnologies.com/config.js | grep -i content-type
+# text/javascript = deployed · text/html = NOT deployed (rewritten to index.html)
 ```
 
 ---

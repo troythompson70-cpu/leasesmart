@@ -1,14 +1,14 @@
 # AI Context Snapshot — LeaseSmart
 
-**TGT Technologies Inc.** · Generated `2026-09-02T05:16:06.960Z`
+**TGT Technologies Inc.** · Generated `2026-09-02T16:08:12.345Z`
 
 > Any AI reading this file gets full project state. All content sanitized — no API keys.
 
 ## Current sprint status
 
-- **Build ID:** `20260530-v2.14.0-data-a1`
-- **Active sprint marker:** A1
-- **Branch:** `cursor/fix-stale-docs-and-regression-chain-642f` · **Commits ahead of remote:** 0
+- **Build ID:** `20260902-v2.14.1-authcfg`
+- **Active sprint marker:** AUTHCFG
+- **Branch:** `cursor/drop-pages-mirror-and-doc-followups-642f` · **Commits ahead of remote:** 2
 
 ## Test suite results
 
@@ -24,7 +24,7 @@
 - **sprint-d5-regression-test:** PASS (44/44)
 - **sprint-e2-regression-test:** PASS (47/47)
 - **sprint-e3-regression-test:** PASS (52/52)
-- **sprint-f1-regression-test:** FAIL (44/45)
+- **sprint-f1-regression-test:** PASS (46/46)
 
 ## Last 5 Claude reviews
 
@@ -46,20 +46,13 @@
 
 ## Open blockers
 
-- Uncommitted local changes on disk
 - PENDING review: F1
 - PENDING review: F1
 
 ## Git working tree
 
 ```
-M DEPLOY_NOW.md
- M command-center.html
- M index.html
- M master-vault/DOMAIN-SETUP-GUIDE.md
- M master-vault/morning/HANDOFF-latest.html
- M master-vault/morning/MORNING-REVIEW-latest.md
- M scripts/domain-setup-guide.mjs
+clean
 ```
 
 ## Morning review pointer

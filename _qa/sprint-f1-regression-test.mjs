@@ -65,7 +65,8 @@ assert('CC push demo panel', ccHtml.includes('DEMO') && ccHtml.includes('VAPID')
 assert('domain-setup-guide.mjs', existsSync(join(ROOT, 'scripts/domain-setup-guide.mjs')));
 const guide = buildDomainSetupGuide();
 assert('Netlify CNAME target', guide.includes('leasesmart2.netlify.app') && guide.includes('CNAME'));
-assert('GitHub Pages', guide.includes('GitHub Pages'));
+assert('Pages retirement documented', guide.includes('GitHub Pages is retired'));
+assert('no live Pages mirror', !existsSync(join(ROOT, 'CNAME')) && !existsSync(join(ROOT, '.github/workflows/pages.yml')));
 assert('leasesmart.tgttechnologies.com', guide.includes('leasesmart.tgttechnologies.com'));
 assert('verify', guide.toLowerCase().includes('verify'));
 
