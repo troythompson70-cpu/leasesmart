@@ -132,3 +132,35 @@ Landlord inventory: 8 sandbox listings, 9 provider registry entries, caseworker 
 **Troy live-tested:** Not confirmed by Cursor.
 
 ---
+## 2026-09-02 11:34 UTC — QA-CHAIN-REPAIR — Claude Review
+
+**Build ID:** 20260530-v2.14.0-data-a1
+
+**Verdict:** GO
+
+Independently verified PR #1: cloned branch, re-ran all 22 suites from scratch, results match exactly (f1 45/45, c1pro 61/61, e1 58/58). Netlify CNAME doc fix confirmed in repo files. C1 auth fix confirmed: exactly one password call scoped inside auth1SubmitProLogin, renter lane still requires OTP. PR #1 confirmed not merged. Regenerated master-vault docs scanned for secrets - clean. Verdict GO. Caveat: C1 lane split is code-level static enforcement only; no visibility into whether Supabase RLS independently enforces it. Follow-ups (non-blocking): decide on dual Netlify/GH Pages deploy, and reconcile the two Supabase config paths.
+
+---
+## 2026-09-02 11:34 UTC — QA-CHAIN-REPAIR — GO / NO-GO Decision
+
+**Build ID:** 20260530-v2.14.0-data-a1
+
+**Verdict:** GO
+
+PR #1 verified GO by Claude. NOT MERGED - awaiting Troy commit phrase per repo convention. Separate finding logged: SUPABASE-EMAIL-SETUP.md named the wrong Supabase project for SMTP setup.
+
+---
+## 2026-09-02 11:34 UTC — SUPABASE-PROJECT-REF — Cursor Report
+
+**Build ID:** 20260530-v2.14.0-data-a1
+
+SMTP setup doc named project jufxyuqcgijaiuyratlp, but the deployed app authenticates against iajaftjnfxrywqgccdef - verified from the live config.js and the hardcoded constants in index.html. SMTP configured on the named project would never have sent LeaseSmart login emails, which matches SMTP being a long-standing open blocker. Doc now names the operative project and includes a command to re-confirm the ref. Fixed on its own branch so PR #1 stays exactly as Claude verified it.
+
+---
+## 2026-09-02 15:31 UTC — QA-CHAIN-REPAIR — Sprint Command
+
+**Build ID:** 20260530-v2.14.0-data-a1
+
+Troy approved. PR #1 and PR #2 moved from draft to ready for review. Merge deliberately withheld pending the exact commit phrase per repo convention, and pending confirmation of which Supabase project is authoritative for PR #2.
+
+---

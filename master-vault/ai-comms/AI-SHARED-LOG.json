@@ -52,6 +52,16 @@
       "content": "Sprint F1 complete — AI comms bridge, command center v2, push skeleton, context export, domain guide. Regression PASS 45/45. E3 integrated for chain. NOT COMMITTED.",
       "verdict": "PENDING",
       "commit_phrase_required": false
+    },
+    {
+      "timestamp": "2026-09-02T15:36:03.879Z",
+      "sprint": "SUPABASE-PROJECT-REF",
+      "phase": "review",
+      "source": "cursor",
+      "type": "report",
+      "content": "Triple AI review requested for PR #1 and PR #2. Resolved the open question on PR #2 with direct evidence: host iajaftjnfxrywqgccdef.supabase.co resolves and /auth/v1/health returns a valid Supabase 401 envelope, so it is a live project. Host jufxyuqcgijaiuyratlp.supabase.co does not resolve at all - no DNS record - so it is not an active project and cannot receive SMTP settings. PR #2 direction confirmed correct: the doc was wrong, not the app. Awaiting Claude and ChatGPT verdicts plus Troy commit phrase.",
+      "verdict": "PENDING",
+      "commit_phrase_required": true
     }
   ]
 }
