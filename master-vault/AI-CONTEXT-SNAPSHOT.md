@@ -1,18 +1,18 @@
 # AI Context Snapshot — LeaseSmart
 
-**TGT Technologies Inc.** · Generated `2026-05-27T01:36:07.030Z`
+**TGT Technologies Inc.** · Generated `2026-09-02T05:16:06.960Z`
 
 > Any AI reading this file gets full project state. All content sanitized — no API keys.
 
 ## Current sprint status
 
-- **Build ID:** `20260526-v2.3.0-e1`
-- **Active sprint marker:** E1
-- **Branch:** `main` · **Commits ahead of remote:** 0
+- **Build ID:** `20260530-v2.14.0-data-a1`
+- **Active sprint marker:** A1
+- **Branch:** `cursor/fix-stale-docs-and-regression-chain-642f` · **Commits ahead of remote:** 0
 
 ## Test suite results
 
-- **sprint-a6-regression-test:** PASS (34/34)
+- **sprint-a6-regression-test:** PASS (36/36)
 - **sprint-c1-regression-test:** PASS (24/24)
 - **sprint-b2-regression:** PASS (29/29)
 - **sprint-b4-regression-test:** PASS (64/64)
@@ -24,7 +24,7 @@
 - **sprint-d5-regression-test:** PASS (44/44)
 - **sprint-e2-regression-test:** PASS (47/47)
 - **sprint-e3-regression-test:** PASS (52/52)
-- **sprint-f1-regression-test:** PASS (45/45)
+- **sprint-f1-regression-test:** FAIL (44/45)
 
 ## Last 5 Claude reviews
 
@@ -53,19 +53,13 @@
 ## Git working tree
 
 ```
-M master-vault/morning/HANDOFF-latest.html
+M DEPLOY_NOW.md
+ M command-center.html
+ M index.html
+ M master-vault/DOMAIN-SETUP-GUIDE.md
+ M master-vault/morning/HANDOFF-latest.html
  M master-vault/morning/MORNING-REVIEW-latest.md
-?? _qa/_strip-for-commit.mjs
-?? _qa/_strip-for-d2-commit.mjs
-?? _qa/_strip-for-d3-commit.mjs
-?? _qa/_strip-for-e2-commit.mjs
-?? index.html.b4-backup
-?? index.html.full-stack-backup
-?? index.html.working-stack
-?? master-vault/AI-CONTEXT-SNAPSHOT.md
-?? master-vault/DOMAIN-SETUP-GUIDE.md
-?? master-vault/morning/auto-sync-log.txt
-?? scripts/leasesmart-auto-sync.sh
+ M scripts/domain-setup-guide.mjs
 ```
 
 ## Morning review pointer
@@ -74,21 +68,19 @@ See `master-vault/morning/MORNING-REVIEW-latest.md`.
 
 ## Recent master log (excerpt)
 
-## 2026-05-26 22:17 UTC — D1 — Cursor Report
+## 2026-05-30 — DATA-A1 — GO / NO-GO Decision
 
-**Build ID:** 20260526-v1.5.0-d1
+**Build ID:** 20260530-v2.14.0-data-a1
 
-Built D1 at 20260526-v1.5.0-d1. Draft SQL for notification_outbox. Email placeholder until Supabase live. Regression PASS 41/41, all nested suites PASS.
-
----
-
-## 2026-05-26 22:17 UTC — D1 — GO / NO-GO Decision
-
-**Build ID:** 20260526-v1.5.0-d1
-
-**Verdict:** NO-GO
-
-Not committed — waiting for Troy commit phrase.
+**Verdict:** GO (Troy) — committed `9fdaf9c`, pushed `main`.
 
 ---
+
+## 2026-05-31 — DATA-A1 — Regression gate (Chain Test 10)
+
+**Build ID:** 20260530-v2.14.0-data-a1
+
+**Chain Test 10:** PASS 61/61 (`sprint-c1pro-regression-test.mjs`). Fixes: A6 build-id allowlist `14.0-data-a1`; Newark banned-word scan excludes DATA-A1 block; seed rename Manual Landlord Registry (no “Verified” in copy). **Uncommitted locally** until Troy GO.
+
+**DATA-A1 QA:** 29/29 PASS (unchanged)
 

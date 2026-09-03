@@ -1,9 +1,21 @@
-# DEPLOY THESE FILES TO LIVE SITE NOW
+# Deploying LeaseSmart
 
-## I cannot deploy from Cursor to your Netlify account
+**Live beta:** https://leasesmart.tgttechnologies.com
 
-**Deployment target:** https://leasesmart.tgttechnologies.com  
-**You must upload/push these files yourself.**
+---
+
+## How deployment happens
+
+Pushing to `main` triggers two independent deploys of the same repo:
+
+| Target | Trigger | Serves |
+|--------|---------|--------|
+| **Netlify** | Push to `main` | `leasesmart.tgttechnologies.com` (the live beta) |
+| **GitHub Pages** | `.github/workflows/pages.yml` | `troythompson70-cpu.github.io/leasesmart` (mirror) |
+
+The custom domain is a CNAME to `leasesmart2.netlify.app`, so **Netlify is what visitors
+hit**. A green Pages workflow does not prove the custom domain updated — check the Netlify
+deploy log too.
 
 ---
 
@@ -12,59 +24,72 @@
 | File | Required |
 |------|----------|
 | `index.html` | **YES — entire app (HTML + CSS + JS)** |
-| `_redirects` | YES for Netlify SPA |
+| `_redirects` | YES for Netlify SPA routing |
+| `CNAME` | Read by GitHub Pages for its custom domain |
+| `config.js` | Generated at deploy from repo secrets — never committed |
 | `style.css` | **Does not exist** |
 | `script.js` | **Does not exist** |
 
 ---
 
-## How to deploy (Netlify)
+## Before you push
 
-1. Copy `c:\Users\T 25\Desktop\CURSOR\index.html` to your Netlify site root (replace old file).
-2. Copy `_redirects` to site root.
-3. In Netlify: **Deploys → Trigger deploy → Clear cache and deploy site**.
-4. Wait ~60 seconds.
+1. Bump `LS_BUILD` in `index.html` (see below) so caches break and the build is traceable.
+2. Run the regression chain:
+
+```bash
+cd _qa
+node sprint-c1pro-regression-test.mjs
+```
+
+That suite nests the earlier sprints, so a PASS covers the chain.
 
 ---
 
 ## Verify live (do not skip)
 
-Open in **private/incognito** browser:
+Open in a **private/incognito** window:
 
 ```
-https://leasesmart.tgttechnologies.com/?v=20260521-v1.1.4
+https://leasesmart.tgttechnologies.com
 ```
 
-**You MUST see at top:**
+Then confirm the deployed build matches the repo:
 
-> **LeaseSmart Beta v1.1 Functional Fix Build — Updated Today — Build 20260521-v1.1.4**
+```bash
+curl -s https://leasesmart.tgttechnologies.com | grep -o "LS_BUILD = '[^']*'"
+grep -o "LS_BUILD = '[^']*'" index.html
+```
 
-If you do NOT see that text, the old file is still live or cache is stale.
+Both must print the same value. If the live one is older, Netlify has not finished or is
+serving cache.
+
+Also check the host is what you expect:
+
+```bash
+curl -sI https://leasesmart.tgttechnologies.com | grep -i server   # expect: Netlify
+dig leasesmart.tgttechnologies.com CNAME +short                     # expect: leasesmart2.netlify.app
+```
 
 ---
 
-## Test steps (Troy)
+## Build ID
 
-### Fix 1 — Calendar (step 4, after phone)
-1. Start Demo Search.
-2. Name, email, phone → Move-in date step.
-3. **Expect:** native date field (not a list of “ASAP / June 1”).
-4. Pick a date → auto-advances OR tap Continue.
+`index.html` defines the build once:
 
-### Fix 2 — Laundry checkboxes (step 16)
-1. Reach Laundry question.
-2. **Expect:** real **checkboxes** (square boxes), not single-choice buttons only.
-3. Check 2+ options → “Selected: …” line updates → Confirm Selection.
+```js
+var LS_BUILD = '20260530-v2.14.0-data-a1';
+```
 
-### Fix 3 — Listings dashboard
-1. Finish last question (Anything else).
-2. **Expect:** short loading (~2 sec) then **8 listing cards**.
-3. Map, Details, Call Guide tab work.
+The page title, beta banner, and version footers are all derived from `LS_BUILD` at init,
+so bumping this one string updates every visible version label. Format is
+`YYYYMMDD-vMAJOR.MINOR.PATCH-slug`; `_qa/build-id-lib.mjs` parses and orders it, and the
+regression suites assert the shipped build is no older than the sprint they cover.
 
 ---
 
-## Build ID in source
+## Notes
 
-Search `index.html` for: `LS_BUILD = '20260521-v1.1.4'`
-
-Change this string every deploy to force cache bust.
+- Never commit `config.js`, API keys, or Supabase service role keys.
+- Draft SQL in `supabase/drafts/` must not be applied without explicit approval.
+- Billing (E3) is test mode only; legal (E2) is draft pending attorney review.

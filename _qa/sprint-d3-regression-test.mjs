@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildAtLeast } from './build-id-lib.mjs';
 import { D3_TOUCH_MIN, D3_MOBILE_BREAK, d3ValidateTouchTarget } from '../scripts/d3-mobile.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -15,7 +16,7 @@ const seed = readFileSync(join(ROOT, '_data/sprint-d3-mock-seed.js'), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('D3 build id', html.includes("LS_BUILD = '20260526-v2.3.0-e1'") || html.includes("LS_BUILD = '20260526-v2.2.0-e3'") || html.includes("LS_BUILD = '20260526-v1.8.0-d4'") || html.includes("LS_BUILD = '20260526-v1.9.0-d5'") || html.includes("LS_BUILD = '20260526-v2.1.0-e2'") || html.includes("LS_BUILD = '20260526-v2.0.0-d3'"));
+assert('D3 build id', buildAtLeast(html, BUILD));
 assert('D3 mock seed linked', html.includes('sprint-d3-mock-seed.js'));
 
 // Agent 1 — mobile navigation

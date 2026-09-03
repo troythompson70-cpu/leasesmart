@@ -9,6 +9,7 @@ import { readFileSync, existsSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildAtLeast } from './build-id-lib.mjs';
 import {
   C1PRO_STAGES, C1PRO_APP_STATUSES, C1PRO_READY_THRESHOLD,
   c1proInitState, c1proSetStage, c1proSetAppStatus, c1proToggleFollowUp,
@@ -30,7 +31,7 @@ const wbEnd = wbStart >= 0 ? html.indexOf('</script>', wbStart) : -1;
 const wb = (wbStart >= 0 && wbEnd >= 0) ? html.slice(wbStart, wbEnd) : '';
 
 // 1. Build id.
-assert('1. Build id', html.includes("LS_BUILD = '" + BUILD + "'"));
+assert('1. Build id', buildAtLeast(html, BUILD));
 // 2. Seed loaded + sandbox-safe.
 assert('2. Seed script loaded', html.includes('_data/sprint-c1pro-newark-seed.js'));
 assert('2a. Seed exposes window.SPRINT_C1PRO', seed.includes('window.SPRINT_C1PRO'));

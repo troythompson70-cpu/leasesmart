@@ -5,12 +5,13 @@ import { readFileSync, existsSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildAtLeast } from './build-id-lib.mjs';
 import { sanitize } from '../scripts/sprint-log-lib.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const QA = join(ROOT, '_qa');
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
-const buildMatch = html.match(/LS_BUILD = '([^']+)'/);
+const BUILD = '20260526-v1.2.0-c1';
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
@@ -51,7 +52,7 @@ assert('A6 SEARCH_STATES', html.includes('SEARCH_STATES'));
 assert('C1 Landlord Intel tab', html.includes('tab-landlord-intel'));
 assert('C1 verification levels', html.includes('LANDLORD_INTEL_VERIFICATION_LEVELS'));
 assert('C1 seed linked', html.includes('landlord-intel-seed-nj.js'));
-assert('C1 build id', buildMatch && /^20260526-v/.test(buildMatch[1]));
+assert('C1 build id', buildAtLeast(html, BUILD));
 
 // Copy for Claude handoff button
 assert('Handoff copy lib exists', existsSync(join(ROOT, 'scripts/handoff-copy-lib.mjs')));

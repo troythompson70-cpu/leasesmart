@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildAtLeast } from './build-id-lib.mjs';
 import { d5ValidateTooltip } from '../scripts/d5-ui-polish.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -16,7 +17,7 @@ const d2seed = readFileSync(join(ROOT, '_data/sprint-d2-mock-seed.js'), 'utf8');
 const tests = [];
 function assert(name, cond) { tests.push({ name, pass: !!cond }); }
 
-assert('D5 build id', html.includes("LS_BUILD = '20260526-v2.3.0-e1'") || html.includes("LS_BUILD = '20260526-v2.2.0-e3'") || html.includes("LS_BUILD = '" + BUILD + "'") || html.includes("LS_BUILD = '20260526-v1.9.0-d5'"));
+assert('D5 build id', buildAtLeast(html, BUILD));
 assert('D5 mock seed linked', html.includes('sprint-d5-mock-seed.js'));
 
 // Agent 1 — onboarding progress

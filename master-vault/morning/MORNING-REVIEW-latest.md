@@ -1,18 +1,18 @@
-# Morning Review — Tuesday, May 26, 2026
+# Morning Review — Wednesday, September 2, 2026
 
 **LeaseSmart · TGT Technologies Inc.**
-**Build ID:** 20260526-v2.3.0-e1 · **Branch:** main
+**Build ID:** 20260530-v2.14.0-data-a1 · **Branch:** cursor/fix-stale-docs-and-regression-chain-642f
 
 > Read this in under 2 minutes. Upload `master-vault/` files to Microsoft 365 Master Vault.
 
 ## What was built
-- Sprint v1.4.0 — C2 case mgmt, C3 reporting, B5 platform admin, B3 user data
-- Built internal skeletons at build 20260526-v1.4.0. C2 uses B4 permissions. All dummy data. Regression PASS 48/48.
-- Sprint D1 — email notifications, follow-up reminders, in-app panel
 - Built D1 at 20260526-v1.5.0-d1. Draft SQL for notification_outbox. Email placeholder until Supabase live. Regression PAS
+- NEWARK DATA A1 DATABASE — Landlord Listings / Housing Inventory layer required (not public-resource-only). Office 365 Va
+- Landlord inventory: 8 sandbox listings, 9 provider registry entries, caseworker cards on Newark panel + workbench link.
+- ---
 
 ## What passed
-- **sprint-a6-regression-test:** PASS (34/34)
+- **sprint-a6-regression-test:** PASS (36/36)
 - **sprint-c1-regression-test:** PASS (24/24)
 - **JS syntax:** assumed OK if regression scripts ran
 
@@ -20,36 +20,28 @@
 - Nothing — all regression tests passed
 
 ## What needs review
-- Review uncommitted files on disk (13 items)
+- Review uncommitted files on disk (5 items)
 
 ## Ready for commit
 - Code is tested — say exact commit phrase when Troy approves
 
 ## What needs to wait
-- NO-GO or not approved for commit yet
 - Draft SQL — do not apply to Supabase without approval
+- NO-GO or not approved for commit yet
 - Never commit until Troy says the exact commit phrase
 - Never apply Supabase migrations without explicit approval
 - Never paste API keys into logs or chat
 
 ---
 
-**Uncommitted files:** 13
+**Uncommitted files:** 5
 
 ```
-M master-vault/morning/HANDOFF-latest.html
- M master-vault/morning/MORNING-REVIEW-latest.md
-?? _qa/_strip-for-commit.mjs
-?? _qa/_strip-for-d2-commit.mjs
-?? _qa/_strip-for-d3-commit.mjs
-?? _qa/_strip-for-e2-commit.mjs
-?? index.html.b4-backup
-?? index.html.full-stack-backup
-?? index.html.working-stack
-?? master-vault/AI-CONTEXT-SNAPSHOT.md
-?? master-vault/DOMAIN-SETUP-GUIDE.md
-?? master-vault/morning/auto-sync-log.txt
-?? scripts/leasesmart-auto-sync.sh
+M DEPLOY_NOW.md
+ M command-center.html
+ M index.html
+ M master-vault/DOMAIN-SETUP-GUIDE.md
+ M scripts/domain-setup-guide.mjs
 ```
 
 **Full sprint log:** `master-vault/LeaseSmart-Sprint-Master-Log.md`
