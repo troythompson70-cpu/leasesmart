@@ -164,3 +164,17 @@ SMTP setup doc named project jufxyuqcgijaiuyratlp, but the deployed app authenti
 Troy approved. PR #1 and PR #2 moved from draft to ready for review. Merge deliberately withheld pending the exact commit phrase per repo convention, and pending confirmation of which Supabase project is authoritative for PR #2.
 
 ---
+
+---
+## 2026-09-03 — AUTH-CFG-DEPLOY — Cursor Report
+
+**Build ID:** 20260902-v2.14.1-authcfg
+
+Merged PRs #1, #3, #4, #2 to `main`. Netlify live. OVERALL_AUTH **PASS** (config from index.html; `/auth/v1/otp` 200). Pages workflow/CNAME removed; Pages site disable still needs Troy (API 403). Full record: `master-vault/cursor-reports/EXECUTION-HANDOFF-2026-09-03.md`.
+
+---
+## 2026-09-03 — AUTH-CFG-DEPLOY — GO / NO-GO Decision
+
+**Build ID:** 20260902-v2.14.1-authcfg
+
+**Verdict:** GO (deployed) — Cursor lane complete. Troy: disable GitHub Pages; vault append; DNS/SMTP items as listed in execution handoff.
