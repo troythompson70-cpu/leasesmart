@@ -1,0 +1,14 @@
+{
+  "name": "LeaseSmart",
+  "install": "npm --prefix _qa install && { [ -f config.js ] || cp config.example.js config.js; }",
+  "terminals": [
+    {
+      "name": "web",
+      "command": "python3 -m http.server 8080 --bind 0.0.0.0",
+      "description": "Static file server for the LeaseSmart single-page app (index.html + _data seeds). Open http://localhost:8080/ — runs in demo/sandbox mode without Supabase credentials."
+    }
+  ],
+  "ports": [
+    { "name": "web", "port": 8080 }
+  ]
+}
