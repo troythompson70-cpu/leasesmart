@@ -1,7 +1,7 @@
 {
   "version": 1,
   "appendOnly": true,
-  "description": "LeaseSmart AI shared sprint log — append-only, sanitized via ai-comms-bridge.mjs",
+  "description": "LeaseSmart AI shared sprint log \u2014 append-only, sanitized via ai-comms-bridge.mjs",
   "entries": [
     {
       "timestamp": "2026-05-26T12:00:00.000Z",
@@ -9,7 +9,7 @@
       "phase": "build",
       "source": "cursor",
       "type": "report",
-      "content": "Sprint F1 build started — AI comms bridge, command center v2, push skeleton, context export.",
+      "content": "Sprint F1 build started \u2014 AI comms bridge, command center v2, push skeleton, context export.",
       "verdict": "PENDING",
       "commit_phrase_required": false
     },
@@ -29,7 +29,7 @@
       "phase": "review",
       "source": "claude",
       "type": "review",
-      "content": "Legal skeleton draft-only — GO for build. Attorney review required before live users.",
+      "content": "Legal skeleton draft-only \u2014 GO for build. Attorney review required before live users.",
       "verdict": "GO",
       "commit_phrase_required": true
     },
@@ -39,7 +39,7 @@
       "phase": "planning",
       "source": "chatgpt",
       "type": "verdict",
-      "content": "Conditional GO on Stripe billing skeleton — TEST MODE only, no real keys in repo.",
+      "content": "Conditional GO on Stripe billing skeleton \u2014 TEST MODE only, no real keys in repo.",
       "verdict": "GO",
       "commit_phrase_required": false
     },
@@ -49,7 +49,7 @@
       "phase": "build",
       "source": "cursor",
       "type": "report",
-      "content": "Sprint F1 complete — AI comms bridge, command center v2, push skeleton, context export, domain guide. Regression PASS 45/45. E3 integrated for chain. NOT COMMITTED.",
+      "content": "Sprint F1 complete \u2014 AI comms bridge, command center v2, push skeleton, context export, domain guide. Regression PASS 45/45. E3 integrated for chain. NOT COMMITTED.",
       "verdict": "PENDING",
       "commit_phrase_required": false
     },
@@ -62,6 +62,16 @@
       "content": "Triple AI review requested for PR #1 and PR #2. Resolved the open question on PR #2 with direct evidence: host iajaftjnfxrywqgccdef.supabase.co resolves and /auth/v1/health returns a valid Supabase 401 envelope, so it is a live project. Host jufxyuqcgijaiuyratlp.supabase.co does not resolve at all - no DNS record - so it is not an active project and cannot receive SMTP settings. PR #2 direction confirmed correct: the doc was wrong, not the app. Awaiting Claude and ChatGPT verdicts plus Troy commit phrase.",
       "verdict": "PENDING",
       "commit_phrase_required": true
+    },
+    {
+      "timestamp": "2026-09-03T02:15:46.000Z",
+      "sprint": "AUTH-CFG-DEPLOY",
+      "phase": "verify",
+      "source": "cursor",
+      "type": "report",
+      "content": "Merged PRs #1,#3,#4,#2. Live build 20260902-v2.14.1-authcfg. OVERALL_AUTH PASS (otp 200, config from index.html). Pages workflow/CNAME removed; Pages site disable needs Troy (API 403). DOMAIN-SETUP-GUIDE Netlify. Append EXECUTION-HANDOFF-2026-09-03.md to Agent Inbox AI_HANDOFF.md.",
+      "verdict": "GO",
+      "commit_phrase_required": false
     }
   ]
 }
