@@ -7,6 +7,8 @@
 **Repo branch:** `cursor/tgt-homepage-conversion-5619`  
 **Security:** No passwords, tokens, or secrets stored in this report.
 
+**Active reviewer (2026-09-04):** ChatGPT — Claude at limit. Troy alternates Claude ↔ ChatGPT going forward. See `master-vault/ai-comms/AI-REVIEW-ROUTING.md`.
+
 ---
 
 ## DONE
