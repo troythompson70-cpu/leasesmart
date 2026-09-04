@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="88" viewBox="0 0 360 88" role="img" aria-labelledby="title desc">
+  <title id="title">TGT Technologies</title>
+  <desc id="desc">TGT monogram with a connected upward arrow and TGT Technologies wordmark</desc>
+  <g fill="none" fill-rule="evenodd">
+    <g transform="translate(4 6)">
+      <text x="0" y="55" fill="#082452" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="54" font-weight="900" letter-spacing="-5">TGT</text>
+      <path d="M11 59 C33 47 46 33 61 20 C75 9 89 7 105 10" stroke="#1769E8" stroke-width="7" stroke-linecap="round"/>
+      <path d="M95 3 L117 8 L105 27 Z" fill="#1769E8"/>
+      <circle cx="12" cy="59" r="5" fill="#FFFFFF" stroke="#1769E8" stroke-width="4"/>
+    </g>
+    <g transform="translate(128 18)">
+      <text x="0" y="24" fill="#082452" stroke="#FFFFFF" stroke-width="3" paint-order="stroke" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="800" letter-spacing="1.2">TGT TECHNOLOGIES</text>
+      <path d="M1 34 H219" stroke="#1769E8" stroke-width="3"/>
+      <text x="1" y="54" fill="#1769E8" stroke="#FFFFFF" stroke-width="2" paint-order="stroke" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" letter-spacing="3.4">EST. 2020</text>
+    </g>
+  </g>
+</svg>
