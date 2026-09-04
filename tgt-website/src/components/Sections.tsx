@@ -80,7 +80,7 @@ export function VideosSection() {
             </p>
           </div>
           <a
-            href="https://www.youtube.com/@TGTTechnologies"
+            href="https://www.youtube.com/@teegates"
             target="_blank"
             rel="noreferrer"
             className="btn-outline"
