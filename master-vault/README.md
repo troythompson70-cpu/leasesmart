@@ -2,13 +2,21 @@
 
 Upload these files to **Microsoft 365 Master Vault** for TGT record-keeping.
 
+## AI review routing
+
+Troy **alternates between Claude and ChatGPT**. When one hits a limit, route the same handoff to the other.
+
+- Standing note: [`ai-comms/AI-REVIEW-ROUTING.md`](ai-comms/AI-REVIEW-ROUTING.md)
+- **Current (2026-09-04):** Claude at limit → send reviews to **ChatGPT** until Claude resets.
+
 ## Files
 
 | File | Purpose |
 |------|---------|
+| `ai-comms/AI-REVIEW-ROUTING.md` | Claude ↔ ChatGPT alternate review routing |
 | `LeaseSmart-Sprint-Master-Log.md` | Running log of sprint commands, Cursor reports, Claude reviews, GO/NO-GO |
 | `morning/MORNING-REVIEW-latest.md` | Troy's 2-minute morning checklist (regenerated overnight or on demand) |
-| `morning/HANDOFF-latest.html` | One-click **Copy for Claude** button for latest handoff block |
+| `morning/HANDOFF-latest.html` | One-click **Copy for Claude** button for latest handoff block (same text OK for ChatGPT when Claude is limited) |
 
 ## Commands (from repo root)
 

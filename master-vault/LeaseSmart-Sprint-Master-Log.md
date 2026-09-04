@@ -6,6 +6,13 @@ This log records sprint commands, Claude reviews, GO/NO-GO decisions, and Cursor
 Secrets are stripped automatically — never paste API keys or passwords here.
 
 ---
+## 2026-09-04 — AI Review Routing Note
+
+**Active reviewer:** ChatGPT (Claude at usage limit)  
+**Standing rule:** Troy alternates between Claude and ChatGPT. When one is limited, route the same Cursor handoff block to the other.  
+**Doc:** `master-vault/ai-comms/AI-REVIEW-ROUTING.md`
+
+---
 ## 2026-05-26 21:41 UTC — B2 — Sprint Command
 
 **Build ID:** 20260526-v1.2.0-c1

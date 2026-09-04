@@ -4,6 +4,12 @@
 
 > Any AI reading this file gets full project state. All content sanitized — no API keys.
 
+## AI review routing (updated 2026-09-04)
+
+- Troy alternates reviewers between **Claude** and **ChatGPT**.
+- **Now:** Claude is at limit → send current handoffs/reviews to **ChatGPT**.
+- Standing note: `master-vault/ai-comms/AI-REVIEW-ROUTING.md`
+
 ## Current sprint status
 
 - **Build ID:** `20260902-v2.14.1-authcfg`
