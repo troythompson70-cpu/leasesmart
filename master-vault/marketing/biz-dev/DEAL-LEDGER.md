@@ -20,11 +20,13 @@
 ## P0 detail
 
 ### BD-2026-001 Lovable
-- Base account: **attempt in progress** with `tgates@tgttechnologies.com`
-- Prior Creator Program benefit claim (3 mo Pro / 100 credits / custom domains / no posting) — **NOT RECONFIRMED** on live pages 2026-09-06
-- Live `/programs`: Community Ambassadors — **Applications closed**
-- Live partners page still lists Content creators & influencers lane
-- Owner gates expected: password, email verify, MFA, OAuth, ToS acceptance
+- Base account: **NOT CREATED** — email `tgates@tgttechnologies.com` entered on `lovable.dev/signup`; stopped at **password + Cloudflare CAPTCHA** (~2026-09-06T10:49Z)
+- Prior Creator Program benefit claim (3 mo Pro / 100 credits / custom domains / no posting) — **NOT FOUND** on live site 2026-09-06
+- Ambassadors: **Applications closed** (`community.lovable.app/ambassadors`)
+- Content creators lane: **mailto:creators@lovable.dev** only (no self-serve apply form found)
+- Affiliate: commission up to $100/referral — not free Pro credits
+- Owner gates: password (≥8 + number), CAPTCHA, likely email verify; OAuth is owner-only alternative
+- Evidence: `evidence/lovable_*.webp`
 
 ### BD-2026-002 Moast Collect
 - Product retention + no follower/posting minimum: **reconfirmed**
