@@ -29,3 +29,12 @@
 ## Security
 
 Never store passwords, MFA codes, API keys, tokens, shipping addresses beyond owner-provided placeholders, or recovery secrets here.
+
+## Credential delivery (secrets stay out of git)
+
+| File | Purpose |
+|------|---------|
+| [`CREDENTIAL-HANDOFF-POLICY.md`](./CREDENTIAL-HANDOFF-POLICY.md) | Ranked secure ways to get passwords to Troy — never via repo |
+| [`CREDENTIALS-INVENTORY.md`](./CREDENTIALS-INVENTORY.md) | Username / status metadata only — **no password values** |
+
+Default for SaaS signups: **Troy sets the password** (Cursor stops at the gate).
