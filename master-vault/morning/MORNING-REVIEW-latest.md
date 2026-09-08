@@ -20,6 +20,10 @@
 Mirror: `master-vault/cursor-reports/AI-TROY-CHECKIN-PENDING-CLD-2026-09-08-001.md`  
 SharePoint pending (authoritative for this event): `AI_TROY_CHECKIN_PENDING_CLD-2026-09-08-001.md`
 
+## OneDrive / SharePoint search (same day)
+
+**BLOCKED** — no M365 MCP / not signed in. Tenant live at `netorgft7859571.sharepoint.com` (login wall). Full probe: `master-vault/cursor-reports/AI-TROY-ONEDRIVE-SEARCH-PROBE-2026-09-08.md`.
+
 ## Cursor lane note (same day, separate)
 
 Website Outlook/forms + laptop `/api/intake` work did **not** touch the ledger or Gates Online.

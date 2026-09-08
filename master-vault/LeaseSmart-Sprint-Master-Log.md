@@ -194,3 +194,11 @@ Merged PRs #1, #3, #4, #2 to `main`. Netlify live. OVERALL_AUTH **PASS** (config
 
 Claude check-in: live SharePoint ledger **untouched** (write refused by ~60KB ceiling vs ~159KB ledger; hash verified). No new items since CLD-2026-09-02-009. Item 7 still not staged. Pending SharePoint doc: AI_TROY_CHECKIN_PENDING_CLD-2026-09-08-001.md. Repo mirror: master-vault/cursor-reports/AI-TROY-CHECKIN-PENDING-CLD-2026-09-08-001.md. Troy owns size-fix option + scheduled-task gap.
 
+
+---
+## 2026-09-08 — AI-TROY-ONEDRIVE-SEARCH — Cursor Probe
+
+**Build ID:** 20260908-troy-onedrive-search
+
+Troy asked Cursor to search entire OneDrive/shared folders for AI Troy. **BLOCKED:** no SharePoint/OneDrive MCP; browser not signed in. Correct tenant hostname discovered: `netorgft7859571.sharepoint.com` (login wall). `tgttechnologies.sharepoint.com` does not resolve. Local mirror still shows ledger size write block + Item 7 Off. Report: `master-vault/cursor-reports/AI-TROY-ONEDRIVE-SEARCH-PROBE-2026-09-08.md`.
+
