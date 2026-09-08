@@ -185,3 +185,22 @@ Merged PRs #1, #3, #4, #2 to `main`. Netlify live. OVERALL_AUTH **PASS** (config
 **Build ID:** 20260902-v2.14.1-authcfg
 
 **Verdict:** GO (deployed) — Cursor lane complete. Troy: disable GitHub Pages; vault append; DNS/SMTP items as listed in execution handoff.
+
+---
+## 2026-09-08 — OUTLOOK-FORMS-STATUS — Cursor Report
+
+**Build ID:** 20260908-outlook-forms-status
+
+Live probe of `tgttechnologies.com` forms/Outlook behavior for Command Center dashboard status.
+
+| Check | Result |
+|---|---|
+| Site load | PASS |
+| Tips newsletter (API `/api/intake`) | PASS — no Outlook |
+| Assessment form | PASS — no Outlook |
+| Microsoft Bookings | PASS |
+| Laptop inquire mailto | WATCH — mail-reader / Outlook path |
+| Opens-another-form redirect | NOT OBSERVED |
+
+Full record: `master-vault/cursor-reports/OUTLOOK-FORMS-STATUS-2026-09-08.md`. Morning briefing updated for Command Center.
+

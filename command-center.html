@@ -119,7 +119,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;ba
   <div class="cc-card">
     <h2>Morning Briefing</h2>
     <p class="cc-note">Paste MORNING-REVIEW-latest.md for a formatted 2-minute read.</p>
-    <textarea id="ccMorningPaste" class="cc-textarea" placeholder="# Morning Review…"></textarea>
+    <textarea id="ccMorningPaste" class="cc-textarea" placeholder="# Morning Review…">TGT LIVE FORMS STATUS — 2026-09-08
+Site: PASS
+Tips newsletter (API): PASS — no Outlook
+Assessment form: PASS — no Outlook
+Microsoft Bookings: PASS
+Laptop inquire mailto: WATCH — still opens mail reader / Outlook path
+Opens-another-form redirect: NOT OBSERVED
+Overall: Outlook errors fixed on tips + assessment; one mailto CTA remains
+
+Full report: master-vault/cursor-reports/OUTLOOK-FORMS-STATUS-2026-09-08.md
+Morning review: master-vault/morning/MORNING-REVIEW-latest.md</textarea>
     <button type="button" class="cc-btn" id="ccRenderBriefing">Format briefing</button>
   </div>
   <div class="cc-card"><div id="ccBriefingOut" class="cc-brief"></div></div>
@@ -219,6 +229,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;ba
   });
 
   var DEFAULT_SPRINTS = [
+    { name: 'OUTLOOK-FORMS', build: '20260908-outlook-forms-status', status: 'Live probe — Tips/Assessment PASS; laptop mailto WATCH', tests: 'PASS', committed: true, pushed: true },
+    { name: 'AUTH-CFG', build: '20260902-v2.14.1-authcfg', status: 'Committed', tests: 'PASS', committed: true, pushed: true },
     { name: 'D1', build: '20260526-v1.5.0-d1', status: 'Committed', tests: 'PASS', committed: true, pushed: true },
     { name: 'D2', build: '20260526-v1.6.0-d2', status: 'Committed', tests: 'PASS', committed: true, pushed: true },
     { name: 'D3', build: '20260526-v2.0.0-d3', status: 'Committed', tests: 'PASS', committed: true, pushed: true },
