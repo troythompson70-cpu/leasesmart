@@ -185,3 +185,12 @@ Merged PRs #1, #3, #4, #2 to `main`. Netlify live. OVERALL_AUTH **PASS** (config
 **Build ID:** 20260902-v2.14.1-authcfg
 
 **Verdict:** GO (deployed) — Cursor lane complete. Troy: disable GitHub Pages; vault append; DNS/SMTP items as listed in execution handoff.
+
+
+---
+## 2026-09-08 — AI-TROY-CHECKIN — Cursor Mirror
+
+**Build ID:** 20260908-troy-checkin-ledger
+
+Claude check-in: live SharePoint ledger **untouched** (write refused by ~60KB ceiling vs ~159KB ledger; hash verified). No new items since CLD-2026-09-02-009. Item 7 still not staged. Pending SharePoint doc: AI_TROY_CHECKIN_PENDING_CLD-2026-09-08-001.md. Repo mirror: master-vault/cursor-reports/AI-TROY-CHECKIN-PENDING-CLD-2026-09-08-001.md. Troy owns size-fix option + scheduled-task gap.
+
