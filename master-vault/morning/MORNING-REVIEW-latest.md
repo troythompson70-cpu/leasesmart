@@ -1,39 +1,37 @@
 # Morning Review — Tuesday, September 8, 2026
 
 **LeaseSmart · TGT Technologies Inc.**
-**Build ID:** 20260908-laptop-intake-api · **Branch:** cursor/laptop-intake-api-5be0
+**Build ID:** 20260908-stop-live-email-tests-intake · **Branch:** cursor/stop-live-email-tests-intake-67c5
 
 > Read this in under 2 minutes. Upload `master-vault/` files to Microsoft 365 Master Vault.
 
-## Dashboard status — laptop inquire conversion (Claude GO)
+## Dashboard status — email probe ban + intake
 
 | Check | Result |
 |---|---|
-| Claude call (mailto → `/api/intake`) | **GO accepted** |
-| Laptop modal uses `/api/intake` | **DONE** in `tgt-website` |
-| Outlook / mail-reader on laptop submit | **REMOVED** (local preview verified) |
-| Intake validation suite | **5/5 PASS** |
-| Build / lint | **PASS** |
-| Live ChatGPT custom-domain apex cutover | **PENDING Troy** |
+| Claude Outlook verify (Tips “PASS — no Outlook”) | **FAIL / contradicted** — production Tips still fires Exchange + NDRs |
+| Live Exchange probes from Cursor/CI | **BANNED** (rule + client guard + policy test) |
+| Laptop inquire → `/api/intake` (repo) | **DONE** |
+| Tips signup → `/api/intake` (repo) | **DONE** (was mailto in this tree) |
+| Mailto `+` encoding bug | **Documented + tested** (`encodeURIComponent` only) |
+| Intake validation + policy suite | **PASS** |
+| Live ChatGPT apex cutover | **PENDING Troy** |
 
-Full report: `master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md`
+Full reports:
+- `master-vault/cursor-reports/EMAIL-LIVE-TEST-BAN-2026-09-08.md`
+- `master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md`
 
 ## What was built
-- Laptop inquiry modal posts `laptop_inquiry` to `/api/intake` (assessment fallback for hosts that only accept newsletter/assessment)
-- Dev/preview intake middleware + schema validation
-- No mailto on laptop send path
-
-## What passed
-- `npm run test:intake` 5/5
-- `npm run lint` / `npm run build`
-- Manual modal: validation + success, no Outlook dialog
+- Hard ban: never POST fabricated emails to production `/api/intake`
+- Probe-email guard on production hosts; local Vite intake remains mock / no SMTP
+- Tips + laptop forms in `tgt-website` use protected intake (no Outlook compose)
 
 ## What needs Troy
-- Aikido MCP sign-in (SAST still blocked)
-- Live apex is still `custom-domains.chatgpt.site` — apply same change there or deploy this app
+- Apply laptop mailto → intake on live ChatGPT custom-domain site **or** cut DNS to this deploy
+- Aikido MCP sign-in (SAST still blocked for this agent)
 
 ## Ready for commit
-- Code + vault docs on `cursor/laptop-intake-api-5be0`
+- Code + vault docs on `cursor/stop-live-email-tests-intake-67c5`
 
 ---
 

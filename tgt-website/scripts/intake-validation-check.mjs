@@ -1,5 +1,10 @@
 import assert from 'node:assert/strict'
 import { validateIntakePayload } from '../src/lib/intake-validate.ts'
+import {
+  isFabricatedProbeEmail,
+  isProductionIntakeHost,
+  assertSafeIntakeEmail,
+} from '../src/lib/intake-probe-guard.ts'
 
 function pass(name) {
   console.log(`PASS ${name}`)
@@ -74,6 +79,68 @@ function pass(name) {
   })
   assert.equal(result.ok, false)
   pass('rejects invalid email on laptop_inquiry')
+}
+
+{
+  const result = validateIntakePayload({
+    schemaVersion: '1.1',
+    requestType: 'newsletter',
+    submissionId: '44444444-4444-4444-8444-444444444444',
+    email: 'person@company.com',
+    newsletterConsent: true,
+    phonePlatform: 'iphone',
+    source: 'tgt-website-newsletter',
+  })
+  assert.equal(result.ok, true)
+  pass('accepts valid newsletter')
+}
+
+{
+  assert.equal(isFabricatedProbeEmail('live-diag@tgttechnologies.com'), true)
+  assert.equal(isFabricatedProbeEmail('overnight-gateway-1@tgttechnologies.com'), true)
+  assert.equal(isFabricatedProbeEmail('overnight-bridge@tgttechnologies.com'), true)
+  assert.equal(isFabricatedProbeEmail('overnight-puppeteer@tgttechnologies.com'), true)
+  assert.equal(isFabricatedProbeEmail('live-sp-map-1@tgttechnologies.com'), true)
+  assert.equal(isFabricatedProbeEmail('final-check-1@tgttechnologies.com'), true)
+  assert.equal(isFabricatedProbeEmail('live-ui-e2e-1@tgttechnologies.com'), true)
+  assert.equal(isFabricatedProbeEmail('live-v3-1@tgttechnologies.com'), true)
+  assert.equal(isFabricatedProbeEmail('cors2@tgttechnologies.com'), true)
+  assert.equal(isFabricatedProbeEmail('cors-test@tgttechnologies.com'), true)
+  assert.equal(isFabricatedProbeEmail('status-test@example.com'), true)
+  assert.equal(isFabricatedProbeEmail('troy@tgttechnologies.com'), false)
+  assert.equal(isFabricatedProbeEmail('customer@acme.com'), false)
+  pass('classifies fabricated probe emails')
+}
+
+{
+  assert.equal(isProductionIntakeHost('tgttechnologies.com'), true)
+  assert.equal(isProductionIntakeHost('www.tgttechnologies.com'), true)
+  assert.equal(isProductionIntakeHost('localhost'), false)
+  assert.equal(isProductionIntakeHost('127.0.0.1'), false)
+  const blocked = assertSafeIntakeEmail('status-test@example.com', 'tgttechnologies.com')
+  assert.equal(blocked.ok, false)
+  const localOk = assertSafeIntakeEmail('status-test@example.com', 'localhost')
+  assert.equal(localOk.ok, true)
+  pass('blocks probe emails on production host only')
+}
+
+{
+  // Mirror src/lib/mailto.ts — encodeURIComponent, never URLSearchParams.
+  const subject = encodeURIComponent('Labor Day $280 AI-Ready Laptop inquiry')
+  const body = encodeURIComponent(
+    "I'm interested in the $280 AI-Ready Laptop.\n\nName: Troy\nPhone: 555-0100",
+  )
+  const href = `mailto:info@tgttechnologies.com?subject=${subject}&body=${body}`
+  assert.match(href, /^mailto:info@tgttechnologies\.com\?/)
+  assert.equal(href.includes('+'), false)
+  assert.equal(href.includes('%20'), true)
+  assert.equal(href.includes('Name%3A%20Troy'), true)
+  const bad = `mailto:info@tgttechnologies.com?${new URLSearchParams({
+    subject: 'Labor Day $280 AI-Ready Laptop inquiry',
+    body: 'Name: Troy',
+  }).toString()}`
+  assert.equal(bad.includes('+'), true)
+  pass('mailto encodes spaces as %20 not + (URLSearchParams forbidden)')
 }
 
 console.log('All intake validation checks passed.')

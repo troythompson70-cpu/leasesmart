@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Laptop Intake API — 2026-09-08</title>
+<title>EMAIL-LIVE-TEST-BAN Handoff</title>
 <style>.ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 .ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}
 .ls-copy-for-claude-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35);letter-spacing:.2px}
@@ -8,50 +8,42 @@
 .ls-copy-for-claude-btn:active{transform:scale(.98)}
 .ls-copy-for-claude-status{display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#16a34a;min-height:20px}</style>
 </head><body style="max-width:900px;margin:0 auto;padding:24px 18px;color:#111827">
-<h1 style="font-size:22px;margin-bottom:8px">Laptop Intake API — 2026-09-08</h1>
+<h1 style="font-size:22px;margin-bottom:8px">EMAIL-LIVE-TEST-BAN Handoff</h1>
 <p style="color:#6b7280;font-size:14px;margin-bottom:20px">TGT Technologies Inc. — click <strong>Copy for Claude</strong> below.</p>
 <div class="ls-handoff-wrap">
   <pre class="ls-handoff-pre" id="lsHandoffBlock">--- CLAUDE HANDOFF START ---
 Project: LeaseSmart
-Sprint: LAPTOP-INTAKE-API / Claude GO 2026-09-08
-Build ID: 20260908-laptop-intake-api
-Status: COMMITTED (branch cursor/laptop-intake-api-5be0 — pending merge)
+Sprint: EMAIL-LIVE-TEST-BAN + INTAKE (2026-09-08)
+Build ID: 20260908-stop-live-email-tests-intake
+Status: COMMITTED (branch cursor/stop-live-email-tests-intake-67c5)
 
 What was built:
-- Laptop inquire modal converted from mailto/Outlook to POST /api/intake
-- requestType laptop_inquiry + assessment fallback for ChatGPT-hosted APIs
-- Dev/preview intake middleware + schema validation module
-- Vault report + morning briefing updated for Command Center
+- Accepted Claude Outlook verification: prior Tips “PASS — no Outlook” was FALSE
+- Hard ban on live production Exchange probes from Cursor/CI (.cursor/rules/no-live-exchange-probes.mdc)
+- Client probe-email guard (blocks fabricated addresses on tgttechnologies.com)
+- Local Vite /api/intake remains mock / no SMTP (X-TGT-Intake-Mode: local-mock-no-smtp)
+- Tips signup in tgt-website converted mailto → /api/intake newsletter
+- Laptop inquire already on /api/intake (cherry-picked); mailto + encoding hardened
+- Policy + validation suite expanded
 
 Files changed:
-- tgt-website/src/lib/intake.ts (new)
-- tgt-website/src/lib/intake-validate.ts (new)
-- tgt-website/server/intake-http.ts (new)
-- tgt-website/src/components/LaptopInquiryModal.tsx
-- tgt-website/src/App.tsx
-- tgt-website/vite.config.ts
-- tgt-website/package.json
-- tgt-website/scripts/intake-validation-check.mjs (new)
-- tgt-website/tsconfig.node.json
-- master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md
-- master-vault/morning/*
+- .cursor/rules/no-live-exchange-probes.mdc
+- master-vault/cursor-reports/EMAIL-LIVE-TEST-BAN-2026-09-08.md
+- master-vault/morning/MORNING-REVIEW-latest.md
+- master-vault/morning/HANDOFF-latest.html
+- tgt-website/src/lib/intake*.ts, TipsSignupForm.tsx, mailto.ts, server/intake-http.ts, scripts/*
 
 Test results:
-- intake validation: 5/5 PASS
-- lint: PASS
-- build: PASS
-- local POST /api/intake laptop_inquiry: PASS (confirmed)
-- manual UI: validation PASS, success PASS, mailto/Outlook NOT triggered
-
-Production note:
-- Live apex still CNAME custom-domains.chatgpt.site — repo change does not auto-deploy there
-- Troy must apply same pattern on ChatGPT site or cut over DNS to this app
+- npm run test:intake: PASS (validation + probe classification + mailto %20 + no-live-fetch policy)
+- npm run lint: PASS
+- npm run build: PASS
+- No production /api/intake POSTs from this agent
+- Aikido SAST: blocked — MCP needs Troy sign-in
 
 What Claude needs to check:
-- Confirm laptop modal no longer uses mailto
-- Confirm assessment fallback is acceptable interim for live API
-- Confirm live cutover path with Troy
-- Aikido still needs Troy MCP sign-in
+- Confirm durable instruction to Cursor is explicit enough (ban live Exchange probes)
+- Confirm live ChatGPT apex still needs laptop mailto cutover (repo alone does not fix production CTA)
+- Do not treat Tips UI success on production as “no Outlook” — Exchange still sends Welcome mail / NDRs
 --- CLAUDE HANDOFF END ---</pre>
   <button type="button" class="ls-copy-for-claude-btn" data-handoff-target="lsHandoffBlock" onclick="lsCopyHandoffForClaude(this)">Copy for Claude</button>
   <span class="ls-copy-for-claude-status" aria-live="polite"></span>

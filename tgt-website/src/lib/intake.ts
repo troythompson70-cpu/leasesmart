@@ -1,3 +1,10 @@
+import {
+  assertSafeIntakeEmail,
+  isProductionIntakeUrl,
+  resolveIntakePostUrl,
+} from './intake-probe-guard'
+import type { TipTopicId } from '../content'
+
 export type IntakeMode = 'api' | 'formspark' | 'unconfigured'
 
 export type IntakeConfig = {
@@ -12,6 +19,8 @@ export const intakeConfig: IntakeConfig = {
   apiEndpoint: '/api/intake',
   formsparkId: '',
 }
+
+export const NEWSLETTER_CONSENT_TEXT_VERSION = 'tgt-tips-email-v1-2026-09-08'
 
 export type LaptopInquiryPayload = {
   schemaVersion: '1.1'
@@ -45,11 +54,25 @@ export type AssessmentFallbackPayload = {
   source: 'tgt-website-laptop'
 }
 
+export type NewsletterPayload = {
+  schemaVersion: '1.1'
+  requestType: 'newsletter'
+  submissionId: string
+  name: string
+  email: string
+  newsletterConsent: true
+  phonePlatform: 'iphone' | 'android' | 'both'
+  contentLane: string
+  topics: TipTopicId[]
+  consentTextVersion: string
+  source: 'tgt-website-newsletter' | 'tgt-website-newsletter-repeat'
+}
+
 export type IntakeSuccess = {
   ok: true
   delivery: 'confirmed'
   requestId: string
-  method: 'laptop_inquiry' | 'assessment'
+  method: 'laptop_inquiry' | 'assessment' | 'newsletter'
 }
 
 export type IntakeFailure = {
@@ -61,7 +84,19 @@ function newSubmissionId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
   }
-  return `laptop-${Date.now()}-${Math.random().toString(16).slice(2)}`
+  return `intake-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+export function mapTopicsToPhonePlatform(
+  topics: TipTopicId[],
+): NewsletterPayload['phonePlatform'] {
+  const hasIphone = topics.includes('iphone')
+  const hasAndroid = topics.includes('android')
+  if (hasIphone && hasAndroid) return 'both'
+  if (hasIphone) return 'iphone'
+  if (hasAndroid) return 'android'
+  // Live apex expects iphone|android|both — non-device topic picks still enroll.
+  return 'both'
 }
 
 export function buildLaptopInquiryPayload(input: {
@@ -114,6 +149,31 @@ export function buildAssessmentFallbackPayload(
   }
 }
 
+export function buildNewsletterPayload(input: {
+  name: string
+  email: string
+  topics: TipTopicId[]
+  source?: NewsletterPayload['source']
+}): NewsletterPayload {
+  const phonePlatform = mapTopicsToPhonePlatform(input.topics)
+  const contentLane =
+    phonePlatform === 'both' ? 'iphone-and-android' : phonePlatform
+
+  return {
+    schemaVersion: '1.1',
+    requestType: 'newsletter',
+    submissionId: newSubmissionId(),
+    name: input.name.trim(),
+    email: input.email.trim(),
+    newsletterConsent: true,
+    phonePlatform,
+    contentLane,
+    topics: [...input.topics],
+    consentTextVersion: NEWSLETTER_CONSENT_TEXT_VERSION,
+    source: input.source ?? 'tgt-website-newsletter',
+  }
+}
+
 function isConfirmed(body: unknown): body is {
   ok: true
   delivery: 'confirmed'
@@ -129,8 +189,37 @@ function isConfirmed(body: unknown): body is {
   )
 }
 
+function currentHostname(): string {
+  if (typeof window === 'undefined') return 'localhost'
+  return window.location.hostname
+}
+
+function currentOrigin(): string {
+  if (typeof window === 'undefined') return 'http://localhost'
+  return window.location.origin
+}
+
+function guardEmailOrFail(email: string): IntakeFailure | null {
+  const guard = assertSafeIntakeEmail(email, currentHostname())
+  if (!guard.ok) return { ok: false, error: guard.error }
+  return null
+}
+
 async function postIntake(endpoint: string, payload: unknown): Promise<Response> {
-  return fetch(endpoint, {
+  const url = resolveIntakePostUrl(endpoint, currentOrigin())
+  if (isProductionIntakeUrl(url)) {
+    const record =
+      payload && typeof payload === 'object'
+        ? (payload as Record<string, unknown>)
+        : null
+    const email = typeof record?.email === 'string' ? record.email : ''
+    const blocked = guardEmailOrFail(email)
+    if (blocked) {
+      throw new Error(blocked.error)
+    }
+  }
+
+  return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify(payload),
@@ -151,6 +240,9 @@ export async function submitLaptopInquiry(input: {
   if (intakeConfig.mode !== 'api' || !intakeConfig.apiEndpoint) {
     return { ok: false, error: 'No protected intake destination is configured' }
   }
+
+  const blocked = guardEmailOrFail(input.email)
+  if (blocked) return blocked
 
   const primary = buildLaptopInquiryPayload(input)
 
@@ -182,7 +274,48 @@ export async function submitLaptopInquiry(input: {
     }
 
     return { ok: false, error: 'Inquiry could not be completed. Please try again.' }
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : ''
+    if (message.includes('Test/probe email blocked')) {
+      return { ok: false, error: message }
+    }
     return { ok: false, error: 'Inquiry could not be completed. Please try again.' }
+  }
+}
+
+/** Submit TGT Tips newsletter signup through protected intake (no mailto / Outlook). */
+export async function submitNewsletterSignup(input: {
+  name: string
+  email: string
+  topics: TipTopicId[]
+  source?: NewsletterPayload['source']
+}): Promise<IntakeSuccess | IntakeFailure> {
+  if (intakeConfig.mode !== 'api' || !intakeConfig.apiEndpoint) {
+    return { ok: false, error: 'No protected intake destination is configured' }
+  }
+
+  const blocked = guardEmailOrFail(input.email)
+  if (blocked) return blocked
+
+  const payload = buildNewsletterPayload(input)
+
+  try {
+    const res = await postIntake(intakeConfig.apiEndpoint, payload)
+    const body: unknown = await res.json().catch(() => null)
+    if (res.ok && isConfirmed(body)) {
+      return {
+        ok: true,
+        delivery: 'confirmed',
+        requestId: body.requestId,
+        method: 'newsletter',
+      }
+    }
+    return { ok: false, error: 'Signup could not be completed. Please try again.' }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : ''
+    if (message.includes('Test/probe email blocked')) {
+      return { ok: false, error: message }
+    }
+    return { ok: false, error: 'Signup could not be completed. Please try again.' }
   }
 }

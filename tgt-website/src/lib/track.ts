@@ -10,6 +10,8 @@ declare global {
 export type CtaEvent =
   | 'signup_click'
   | 'signup_submit'
+  | 'signup_error'
+  | 'signup_success'
   | 'laptop_inquiry'
   | 'video_play'
   | 'remote_help_inquiry'
