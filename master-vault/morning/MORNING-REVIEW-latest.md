@@ -1,44 +1,41 @@
-# Morning Review — Wednesday, September 2, 2026
+# Morning Review — Tuesday, September 8, 2026
 
 **LeaseSmart · TGT Technologies Inc.**
-**Build ID:** 20260902-v2.14.1-authcfg · **Branch:** cursor/drop-pages-mirror-and-doc-followups-642f
+**Build ID:** 20260908-laptop-intake-api · **Branch:** cursor/laptop-intake-api-5be0
 
 > Read this in under 2 minutes. Upload `master-vault/` files to Microsoft 365 Master Vault.
 
+## Dashboard status — laptop inquire conversion (Claude GO)
+
+| Check | Result |
+|---|---|
+| Claude call (mailto → `/api/intake`) | **GO accepted** |
+| Laptop modal uses `/api/intake` | **DONE** in `tgt-website` |
+| Outlook / mail-reader on laptop submit | **REMOVED** (local preview verified) |
+| Intake validation suite | **5/5 PASS** |
+| Build / lint | **PASS** |
+| Live ChatGPT custom-domain apex cutover | **PENDING Troy** |
+
+Full report: `master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md`
+
 ## What was built
-- Built D1 at 20260526-v1.5.0-d1. Draft SQL for notification_outbox. Email placeholder until Supabase live. Regression PAS
-- NEWARK DATA A1 DATABASE — Landlord Listings / Housing Inventory layer required (not public-resource-only). Office 365 Va
-- Landlord inventory: 8 sandbox listings, 9 provider registry entries, caseworker cards on Newark panel + workbench link.
-- ---
+- Laptop inquiry modal posts `laptop_inquiry` to `/api/intake` (assessment fallback for hosts that only accept newsletter/assessment)
+- Dev/preview intake middleware + schema validation
+- No mailto on laptop send path
 
 ## What passed
-- **sprint-a6-regression-test:** PASS (36/36)
-- **sprint-c1-regression-test:** PASS (24/24)
-- **JS syntax:** assumed OK if regression scripts ran
+- `npm run test:intake` 5/5
+- `npm run lint` / `npm run build`
+- Manual modal: validation + success, no Outlook dialog
 
-## What failed
-- Nothing — all regression tests passed
-
-## What needs review
-- Review uncommitted files on disk (1 items)
+## What needs Troy
+- Aikido MCP sign-in (SAST still blocked)
+- Live apex is still `custom-domains.chatgpt.site` — apply same change there or deploy this app
 
 ## Ready for commit
-- Code is tested — say exact commit phrase when Troy approves
-
-## What needs to wait
-- Draft SQL — do not apply to Supabase without approval
-- NO-GO or not approved for commit yet
-- Never commit until Troy says the exact commit phrase
-- Never apply Supabase migrations without explicit approval
-- Never paste API keys into logs or chat
+- Code + vault docs on `cursor/laptop-intake-api-5be0`
 
 ---
-
-**Uncommitted files:** 1
-
-```
-M master-vault/AI-CONTEXT-SNAPSHOT.md
-```
 
 **Full sprint log:** `master-vault/LeaseSmart-Sprint-Master-Log.md`
 

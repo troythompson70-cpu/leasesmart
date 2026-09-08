@@ -185,3 +185,15 @@ Merged PRs #1, #3, #4, #2 to `main`. Netlify live. OVERALL_AUTH **PASS** (config
 **Build ID:** 20260902-v2.14.1-authcfg
 
 **Verdict:** GO (deployed) — Cursor lane complete. Troy: disable GitHub Pages; vault append; DNS/SMTP items as listed in execution handoff.
+
+---
+## 2026-09-08 — LAPTOP-INTAKE-API — Cursor Report
+
+**Build ID:** 20260908-laptop-intake-api
+
+Claude GO accepted: convert laptop mailto → `/api/intake`.
+
+Implemented in `tgt-website/`: laptop modal posts `laptop_inquiry` (assessment fallback). Dev/preview `/api/intake` middleware. Validation 5/5 PASS. Manual UI: success with **no Outlook**. Live ChatGPT custom-domain apex cutover still Troy-owned.
+
+Full record: `master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md`.
+
