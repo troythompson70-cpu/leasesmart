@@ -1,0 +1,25 @@
+---
+description: Never fire live production Exchange / Outlook email from automated or CI tests
+alwaysApply: true
+---
+
+# No live Exchange probes
+
+Automated Cursor / CI / overnight tests MUST NOT create live mailbox traffic on `tgttechnologies.com`.
+
+## Hard ban
+
+- Do **not** POST to `https://tgttechnologies.com/api/intake` (or www) with fabricated emails.
+- Do **not** use probe local-parts: `live-diag@`, `overnight-gateway-*`, `overnight-bridge*`, `overnight-puppeteer@`, `live-sp-map-*`, `final-check-*`, `live-ui-e2e-*`, `live-v3-*`, `cors2@`, `cors-test@`, `status-test@`.
+- Do **not** use throwaway domains (`example.com`, `mailinator.com`, etc.) against production intake.
+- Production tips intake sends real Exchange mail (including “Welcome to TGT Tips”) and NDRs bounce into the real inbox.
+
+## Allowed testing
+
+- Local Vite `tgt-website` `/api/intake` only (header `X-TGT-Intake-Mode: local-mock-no-smtp`).
+- Unit validation via `npm run test:intake` and `npm run test:intake-policy`.
+- UI tests against `localhost` / preview — never against the live apex for form submits.
+
+## Mailto note
+
+If a mailto fallback remains, build it with `encodeURIComponent` (`%20` spaces). Never `URLSearchParams` (produces literal `+` in Outlook).
