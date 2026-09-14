@@ -1,0 +1,46 @@
+{
+  "schema_version": "2.1",
+  "feed_updated_at": "2026-09-14T20:00:00Z",
+  "generated_at": "2026-09-14T20:00:00Z",
+  "feed_reachable": true,
+  "pipeline_reachable": true,
+  "pipeline_feed_agree": true,
+  "integrity_verification_ok": true,
+  "ui_sync_health": {
+    "health_state": "RED",
+    "last_verified_at": "2026-09-14T20:00:00Z",
+    "last_full_audit_at": "2026-09-14T19:00:00Z",
+    "orphan_email_count": 1,
+    "orphan_record_count": 0,
+    "duplicate_count": 0,
+    "invalid_route_count": 0,
+    "failed_write_count": 0,
+    "stale_record_count": 0,
+    "verification_errors": [],
+    "audit_summary": { "result": "ORPHAN_EMAIL" }
+  },
+  "opportunities": [
+    {
+      "id": "opp-known",
+      "company": "Known Vendor",
+      "tier": 2,
+      "status": "WAITING",
+      "last_verified_at": "2026-09-14T12:00:00Z",
+      "source": "Tracker",
+      "thread_id": "thread-known",
+      "thread_subject": "Known vendor"
+    }
+  ],
+  "pipeline": [{ "opportunity_id": "opp-known", "status": "WAITING" }],
+  "orphan_emails": [
+    {
+      "id": "orphan-1",
+      "company": "Unknown Partner LLC",
+      "problem": "Inbound vendor reply with no tracker record",
+      "source": "Outlook message AAMk-orphan-demo",
+      "status": "UNTRACKED",
+      "recommended_fix": "Create or link tracker record after dedupe check",
+      "open_source_url": null
+    }
+  ]
+}

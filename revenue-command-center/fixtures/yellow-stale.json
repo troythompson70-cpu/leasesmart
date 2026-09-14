@@ -1,0 +1,62 @@
+{
+  "schema_version": "2.1",
+  "feed_updated_at": "2026-09-12T10:00:00Z",
+  "generated_at": "2026-09-12T10:00:00Z",
+  "feed_reachable": true,
+  "pipeline_reachable": true,
+  "pipeline_feed_agree": true,
+  "integrity_verification_ok": true,
+  "ui_sync_health": {
+    "health_state": "YELLOW",
+    "last_verified_at": "2026-09-12T10:00:00Z",
+    "last_full_audit_at": "2026-09-12T09:00:00Z",
+    "orphan_email_count": 0,
+    "orphan_record_count": 0,
+    "duplicate_count": 0,
+    "invalid_route_count": 0,
+    "failed_write_count": 0,
+    "stale_record_count": 2,
+    "verification_errors": [],
+    "audit_summary": { "result": "STALE_FEED" }
+  },
+  "opportunities": [
+    {
+      "id": "opp-stale-1",
+      "company": "Stale Vendor Co",
+      "tier": 1,
+      "status": "OWNER_ACTION",
+      "last_verified_at": "2026-09-10T08:00:00Z",
+      "source": "SharePoint record",
+      "owner_action_required": true,
+      "owner_action_category": "other",
+      "next_action": "Re-verify owner action",
+      "thread_id": "thread-stale-1",
+      "thread_subject": "Stale owner action"
+    },
+    {
+      "id": "opp-t2",
+      "company": "Tier Two Co",
+      "tier": 2,
+      "status": "WAITING",
+      "last_verified_at": "2026-09-10T09:00:00Z",
+      "source": "Email thread",
+      "owner_action_required": false,
+      "thread_id": "thread-t2",
+      "thread_subject": "Waiting reply"
+    }
+  ],
+  "pipeline": [
+    { "opportunity_id": "opp-stale-1", "status": "OWNER_ACTION" },
+    { "opportunity_id": "opp-t2", "status": "WAITING" }
+  ],
+  "stale_statuses": [
+    {
+      "id": "stale-1",
+      "company": "Stale Vendor Co",
+      "problem": "Last verified >24h",
+      "status": "OWNER_ACTION",
+      "recommended_fix": "Refresh verification"
+    }
+  ],
+  "software_checklist": []
+}
