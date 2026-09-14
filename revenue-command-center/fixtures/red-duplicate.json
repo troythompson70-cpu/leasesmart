@@ -1,0 +1,71 @@
+{
+  "schema_version": "2.1",
+  "feed_updated_at": "2026-09-14T20:00:00Z",
+  "generated_at": "2026-09-14T20:00:00Z",
+  "feed_reachable": true,
+  "pipeline_reachable": true,
+  "pipeline_feed_agree": true,
+  "integrity_verification_ok": true,
+  "ui_sync_health": {
+    "health_state": "RED",
+    "last_verified_at": "2026-09-14T20:00:00Z",
+    "last_full_audit_at": "2026-09-14T19:00:00Z",
+    "orphan_email_count": 0,
+    "orphan_record_count": 0,
+    "duplicate_count": 1,
+    "invalid_route_count": 0,
+    "failed_write_count": 0,
+    "stale_record_count": 0,
+    "verification_errors": [],
+    "audit_summary": { "result": "DUPLICATES" }
+  },
+  "opportunities": [
+    {
+      "id": "opp-dup-a",
+      "opportunity_id": "opp-dup-a",
+      "company": "Acme MSP Tools",
+      "tier": 1,
+      "status": "QUALIFYING",
+      "last_verified_at": "2026-09-14T18:00:00Z",
+      "source": "Outlook thread",
+      "owner_action_required": false,
+      "thread_id": "thread-dup-same",
+      "message_id": "msg-dup-1",
+      "thread_subject": "Acme partnership intro",
+      "next_action": "Qualify commercial terms",
+      "last_action": "Sent intro",
+      "most_recent_email": "Re: Acme partnership intro"
+    },
+    {
+      "id": "opp-dup-b",
+      "opportunity_id": "opp-dup-b",
+      "company": "Acme MSP Tools",
+      "tier": 1,
+      "status": "CONTACTED",
+      "last_verified_at": "2026-09-14T17:00:00Z",
+      "source": "Outlook thread",
+      "owner_action_required": false,
+      "thread_id": "thread-dup-same",
+      "message_id": "msg-dup-1",
+      "thread_subject": "Acme partnership intro",
+      "next_action": "Await reply",
+      "last_action": "Logged contact",
+      "most_recent_email": "Re: Acme partnership intro",
+      "duplicate_flag": true
+    }
+  ],
+  "pipeline": [
+    { "opportunity_id": "opp-dup-a", "status": "QUALIFYING" },
+    { "opportunity_id": "opp-dup-b", "status": "CONTACTED" }
+  ],
+  "duplicates": [
+    {
+      "id": "dup-1",
+      "company": "Acme MSP Tools",
+      "problem": "Duplicate active records for same thread_id",
+      "source": "thread-dup-same",
+      "status": "QUALIFYING/CONTACTED",
+      "recommended_fix": "Merge/update existing — do not create another record"
+    }
+  ]
+}

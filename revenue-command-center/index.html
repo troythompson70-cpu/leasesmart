@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<title>TGT Revenue Command Center — Sync Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Sans+Condensed:wght@700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="./css/rcc.css"/>
+</head>
+<body>
+<div class="rcc-gate">INTERNAL — Local UI only. SharePoint TEAM TGT MSP remains source of truth. No production deploy from this build. No second database.</div>
+
+<div id="rccHealthBar" class="rcc-health YELLOW" role="status" aria-live="polite">
+  <div id="rccHealthTitle" class="rcc-health-title">YELLOW — Loading…</div>
+  <div class="rcc-health-metrics">
+    <div class="rcc-metric"><span>Last verified</span><strong id="mLastVerified">—</strong></div>
+    <div class="rcc-metric"><span>Feed last updated</span><strong id="mFeedUpdated">—</strong></div>
+    <div class="rcc-metric"><span>Orphan emails</span><strong id="mOrphanEmail">—</strong></div>
+    <div class="rcc-metric"><span>Orphan records</span><strong id="mOrphanRecord">—</strong></div>
+    <div class="rcc-metric"><span>Duplicates</span><strong id="mDuplicate">—</strong></div>
+    <div class="rcc-metric"><span>Invalid/bounced routes</span><strong id="mInvalidRoute">—</strong></div>
+    <div class="rcc-metric"><span>Failed writes</span><strong id="mFailedWrite">—</strong></div>
+    <div class="rcc-metric"><span>Stale records</span><strong id="mStale">—</strong></div>
+  </div>
+  <div id="rccLockBanner" class="rcc-lock-banner"></div>
+</div>
+
+<main class="rcc-shell">
+  <header class="rcc-head">
+    <h1>TGT Revenue Command Center</h1>
+    <p>Sync-health guardrail against Dashboard Feed schema 2.1 · SoT: TEAM TGT MSP / Shared Documents/General/TGT REVENUE COMMAND CENTER / 10 Dashboard Feed</p>
+  </header>
+
+  <div class="rcc-fixture-bar">
+    <label for="rccFixtureSelect">Local feed fixture (acceptance / offline) — not a second SoT</label>
+    <select id="rccFixtureSelect">
+      <option value="green">GREEN — synced</option>
+      <option value="yellow-stale">YELLOW — stale feed</option>
+      <option value="yellow-incomplete">YELLOW — health fields incomplete</option>
+      <option value="red-failed-write">RED — failed write</option>
+      <option value="red-duplicate">RED — duplicate opportunities</option>
+      <option value="red-orphan-email">RED — orphan email</option>
+    </select>
+  </div>
+
+  <div class="rcc-toolbar">
+    <button type="button" class="rcc-btn primary" id="rccOpenAudit">Open Integrity Audit</button>
+    <button type="button" class="rcc-btn" id="rccRefresh">Refresh/Reconcile</button>
+    <button type="button" class="rcc-btn" data-lockable="1" id="rccCreateOpp">Create New Opportunity</button>
+    <button type="button" class="rcc-btn" data-lockable="1" id="rccBulkStatus">Bulk Status Change</button>
+    <button type="button" class="rcc-btn" id="rccSimSaveOk">Demo: SAVED + VERIFIED</button>
+    <button type="button" class="rcc-btn danger" id="rccSimFailVerify">Demo: SAVED — VERIFICATION FAILED</button>
+  </div>
+
+  <section id="rccOwnerPanel" class="rcc-panel-owner" style="display:none">
+    <h2>🔴 TROY — THESE MUST BE HANDLED</h2>
+    <div id="rccOwnerList"></div>
+  </section>
+
+  <h2 class="rcc-section-title">Opportunities (feed order)</h2>
+  <div id="rccCards"></div>
+
+  <h2 class="rcc-section-title">Software checklist reconciliation (LIST SOFTWARE is not final truth)</h2>
+  <div class="rcc-card" id="rccChecklist"></div>
+</main>
+
+<div id="rccDrawerBackdrop" class="rcc-drawer-backdrop"></div>
+<aside id="rccDrawer" class="rcc-drawer" aria-label="Integrity Audit">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+    <h2>Open Integrity Audit</h2>
+    <button type="button" class="rcc-btn" id="rccCloseAudit">Close</button>
+  </div>
+  <div id="rccAuditSections"></div>
+</aside>
+
+<div id="rccModalBackdrop" class="rcc-modal-backdrop">
+  <div class="rcc-modal" role="dialog" aria-modal="true" aria-labelledby="rccExistingTitle">
+    <h2 id="rccExistingTitle">Existing Opportunity Found</h2>
+    <div id="rccExistingBody"></div>
+    <div class="rcc-card-actions">
+      <button type="button" class="rcc-btn primary" id="rccMergeExisting">Merge/Update Existing</button>
+      <button type="button" class="rcc-btn" id="rccCloseModal">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="rccToast" class="rcc-toast" role="status"></div>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>
