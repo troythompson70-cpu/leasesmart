@@ -226,10 +226,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .rcc-lead-id {
   font-family: var(--rcc-display);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
-  letter-spacing: .3px;
-  color: #7eb6ff;
+  letter-spacing: .35px;
+  color: #9ec5ff;
   margin-bottom: 4px;
 }
 
@@ -482,22 +482,37 @@ a.rcc-btn {
 }
 
 @media (max-width: 640px) {
-  .rcc-health { padding: 8px 10px 10px; }
-  .rcc-health-title { font-size: 15px; margin-bottom: 6px; }
-  .rcc-health-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 8px; }
-  .rcc-metric { padding: 5px 7px; }
-  .rcc-metric span { font-size: 9px; }
-  .rcc-metric strong { font-size: 12px; }
-  .rcc-shell { padding: 10px 10px 72px; }
-  .rcc-head h1 { font-size: 20px; }
-  .rcc-head p { font-size: 12px; }
+  /* Compact sticky health strip — do not dominate first viewport */
+  .rcc-health { padding: 6px 10px 8px; }
+  .rcc-health-title { font-size: 13px; margin-bottom: 4px; }
+  .rcc-health-metrics {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .rcc-metric {
+    flex: 0 0 auto;
+    min-width: 88px;
+    padding: 4px 6px;
+  }
+  .rcc-metric span { font-size: 8px; }
+  .rcc-metric strong { font-size: 11px; }
+  .rcc-shell { padding: 8px 10px 72px; }
+  .rcc-head h1 { font-size: 18px; }
+  .rcc-head p { font-size: 11px; line-height: 1.35; }
+  .rcc-fixture-bar { padding: 8px; margin-bottom: 10px; }
+  .rcc-toolbar { gap: 6px; margin: 10px 0; }
   .rcc-card { padding: 10px; border-radius: 10px; }
   .rcc-card h3 { font-size: 15px; }
-  .rcc-lead-id { font-size: 12px; }
+  .rcc-lead-id { font-size: 13px; color: #9ec5ff; }
   .rcc-card-meta { grid-template-columns: 1fr; font-size: 12px; }
   .rcc-card-actions .rcc-btn { font-size: 12px; min-height: 40px; flex: 1 1 calc(50% - 6px); }
-  .rcc-toolbar .rcc-btn { font-size: 12px; }
+  .rcc-toolbar .rcc-btn { font-size: 12px; min-height: 40px; padding: 8px 10px; }
   .rcc-tab { font-size: 12px; padding: 8px 12px; }
   .rcc-tx { font-size: 12px; }
   .rcc-gate { font-size: 10px; padding: 5px 34px 5px 10px; }
+  .rcc-panel-owner { padding: 10px; margin: 8px 0 12px; }
+  .rcc-panel-owner h2 { font-size: 14px; }
 }

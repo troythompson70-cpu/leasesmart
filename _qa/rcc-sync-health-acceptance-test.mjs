@@ -181,7 +181,10 @@ async function main() {
     const css = readFileSync(join(root, 'css', 'rcc.css'), 'utf8');
     assert(/overflow-x:\s*hidden/.test(css), 'body must hide horizontal overflow');
     assert(/@media \(max-width:\s*640px\)/.test(css), 'mobile breakpoint required');
-    assert(/grid-template-columns:\s*repeat\(2/.test(css), 'mobile 2-col metrics');
+    assert(
+      /Compact sticky health strip/.test(css) || /\.rcc-health-metrics\s*\{[^}]*flex/.test(css),
+      'mobile health metrics must be compact',
+    );
     assert(/\.rcc-lead-id/.test(css), 'Lead ID styles required');
     assert(/\.rcc-tx/.test(css), 'transmission styles required');
     const html = readFileSync(join(root, 'index.html'), 'utf8');
