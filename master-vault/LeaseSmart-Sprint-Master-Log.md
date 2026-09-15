@@ -6,6 +6,13 @@ This log records sprint commands, Claude reviews, GO/NO-GO decisions, and Cursor
 Secrets are stripped automatically — never paste API keys or passwords here.
 
 ---
+## 2026-09-15 — TGT-OS-OUTLOOK-INGESTION-AUDIT — Cursor Report
+
+**Build ID:** 20260915-tgt-os-outlook-audit-vault
+
+Vaulted AppDeploy TGT OS Outlook ingestion audit (items 1–15). Receiving-side fixes reported deployed outside leasesmart. Item 14 (M365 Email Intake flow delivery) still needs Troy live verify; Max Farrell/NinjaOne 15:59Z Inbox message is the primary e2e candidate. No AppDeploy code changes in this repo. Report: `master-vault/cursor-reports/TGT-OS-OUTLOOK-INGESTION-AUDIT-2026-09-15.md`.
+
+---
 ## 2026-09-04 — AI Review Routing Note
 
 **Active reviewer:** ChatGPT (Claude at usage limit)  

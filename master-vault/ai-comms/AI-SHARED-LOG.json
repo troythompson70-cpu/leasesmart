@@ -1,15 +1,25 @@
 {
   "version": 1,
   "appendOnly": true,
-  "description": "LeaseSmart AI shared sprint log — append-only, sanitized via ai-comms-bridge.mjs",
+  "description": "LeaseSmart AI shared sprint log \u2014 append-only, sanitized via ai-comms-bridge.mjs",
   "entries": [
+    {
+      "timestamp": "2026-09-15T16:15:00.000Z",
+      "sprint": "TGT-OS-OUTLOOK-INGESTION-AUDIT",
+      "phase": "report",
+      "source": "cursor",
+      "type": "report",
+      "content": "Vaulted AppDeploy TGT OS Outlook ingestion audit. Receiving side reported FIXED+DEPLOYED. Item 14 M365 flow delivery needs live verify via Max Farrell/NinjaOne 15:59Z mail. leasesmart has no AppDeploy ingest code. Handoff: master-vault/morning/HANDOFF-latest.html",
+      "verdict": "PENDING_LIVE_VERIFY",
+      "commit_phrase_required": false
+    },
     {
       "timestamp": "2026-05-26T12:00:00.000Z",
       "sprint": "F1",
       "phase": "build",
       "source": "cursor",
       "type": "report",
-      "content": "Sprint F1 build started — AI comms bridge, command center v2, push skeleton, context export.",
+      "content": "Sprint F1 build started \u2014 AI comms bridge, command center v2, push skeleton, context export.",
       "verdict": "PENDING",
       "commit_phrase_required": false
     },
@@ -29,7 +39,7 @@
       "phase": "review",
       "source": "claude",
       "type": "review",
-      "content": "Legal skeleton draft-only — GO for build. Attorney review required before live users.",
+      "content": "Legal skeleton draft-only \u2014 GO for build. Attorney review required before live users.",
       "verdict": "GO",
       "commit_phrase_required": true
     },
@@ -39,7 +49,7 @@
       "phase": "planning",
       "source": "chatgpt",
       "type": "verdict",
-      "content": "Conditional GO on Stripe billing skeleton — TEST MODE only, no real keys in repo.",
+      "content": "Conditional GO on Stripe billing skeleton \u2014 TEST MODE only, no real keys in repo.",
       "verdict": "GO",
       "commit_phrase_required": false
     },
@@ -49,7 +59,7 @@
       "phase": "build",
       "source": "cursor",
       "type": "report",
-      "content": "Sprint F1 complete — AI comms bridge, command center v2, push skeleton, context export, domain guide. Regression PASS 45/45. E3 integrated for chain. NOT COMMITTED.",
+      "content": "Sprint F1 complete \u2014 AI comms bridge, command center v2, push skeleton, context export, domain guide. Regression PASS 45/45. E3 integrated for chain. NOT COMMITTED.",
       "verdict": "PENDING",
       "commit_phrase_required": false
     },
@@ -79,7 +89,7 @@
       "phase": "build",
       "source": "cursor",
       "type": "report",
-      "content": "Claude GO: laptop mailto → /api/intake. Implemented in tgt-website with laptop_inquiry + assessment fallback. Validation 5/5 PASS; local UI success without Outlook. Live apex still ChatGPT custom-domains — cutover pending Troy. Report: master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md",
+      "content": "Claude GO: laptop mailto \u2192 /api/intake. Implemented in tgt-website with laptop_inquiry + assessment fallback. Validation 5/5 PASS; local UI success without Outlook. Live apex still ChatGPT custom-domains \u2014 cutover pending Troy. Report: master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md",
       "verdict": "GO",
       "commit_phrase_required": false
     }
