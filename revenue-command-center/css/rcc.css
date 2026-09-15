@@ -30,13 +30,31 @@ html, body {
 button, input, select, textarea { font: inherit; color: inherit; }
 
 .rcc-gate {
+  position: relative;
   background: #2a1f0a;
   border-bottom: 1px solid #6b5218;
   color: #f0d48a;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 8px 12px;
+  padding: 6px 36px 6px 12px;
   text-align: center;
+  line-height: 1.35;
+}
+.rcc-gate[hidden] { display: none !important; }
+.rcc-gate-dismiss {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #f0d48a;
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+  line-height: 1;
 }
 
 /* GLOBAL SYNC HEALTH BAR */
@@ -176,6 +194,45 @@ button, input, select, textarea { font: inherit; color: inherit; }
   color: #c7d6e5;
 }
 
+.rcc-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+.rcc-tab {
+  min-height: var(--rcc-touch);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--rcc-border);
+  background: var(--rcc-surface);
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+.rcc-tab.on {
+  background: #1a3a55;
+  border-color: var(--rcc-accent);
+  color: #d6e8ff;
+}
+.rcc-tab-count {
+  display: inline-block;
+  min-width: 1.4em;
+  margin-left: 4px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(0,0,0,.35);
+  font-size: 11px;
+}
+
+.rcc-lead-id {
+  font-family: var(--rcc-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  color: #7eb6ff;
+  margin-bottom: 4px;
+}
+
 .rcc-card {
   background: var(--rcc-surface);
   border: 1px solid var(--rcc-border);
@@ -187,6 +244,83 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font-size: 16px;
   font-weight: 800;
   margin-bottom: 8px;
+}
+
+.rcc-tx {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(0,0,0,.28);
+  border: 1px solid rgba(255,255,255,.08);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.rcc-tx.muted { color: var(--rcc-muted); font-style: italic; }
+.rcc-tx-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.rcc-tx-dir {
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: .4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #243040;
+}
+.rcc-tx-dir.INCOMING { background: #1a3a55; color: #9ec5ff; }
+.rcc-tx-dir.OUTBOUND { background: #123528; color: #7dffb5; }
+.rcc-tx-at { color: var(--rcc-muted); font-size: 11px; font-weight: 700; }
+.rcc-tx-subject { font-weight: 800; margin-top: 2px; overflow-wrap: anywhere; }
+.rcc-tx-sender { color: var(--rcc-muted); margin-top: 2px; overflow-wrap: anywhere; }
+.rcc-tx-preview { margin-top: 4px; color: #c9d6e3; overflow-wrap: anywhere; }
+.rcc-tx-event { margin-top: 4px; font-size: 10px; color: #7a8b9c; }
+
+.rcc-notes-block {
+  background: #0f1a24;
+  border: 1px solid #35506a;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 10px 0 12px;
+}
+.rcc-notes-block h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #9ec5ff;
+  margin-bottom: 6px;
+}
+.rcc-notes-block p {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--rcc-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rcc-detail { width: min(560px, 100%); max-height: 92vh; overflow-y: auto; }
+.rcc-detail-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+.rcc-detail-sub {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--rcc-muted);
+  margin: 12px 0 6px;
+}
+.rcc-badge.INCOMING { background: #1a3a55; color: #9ec5ff; border-color: #3d8bfd; }
+a.rcc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 .rcc-card-meta {
   display: grid;
@@ -348,7 +482,22 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 
 @media (max-width: 640px) {
-  .rcc-health-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .rcc-card-meta { grid-template-columns: 1fr; }
-  .rcc-head h1 { font-size: 22px; }
+  .rcc-health { padding: 8px 10px 10px; }
+  .rcc-health-title { font-size: 15px; margin-bottom: 6px; }
+  .rcc-health-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 8px; }
+  .rcc-metric { padding: 5px 7px; }
+  .rcc-metric span { font-size: 9px; }
+  .rcc-metric strong { font-size: 12px; }
+  .rcc-shell { padding: 10px 10px 72px; }
+  .rcc-head h1 { font-size: 20px; }
+  .rcc-head p { font-size: 12px; }
+  .rcc-card { padding: 10px; border-radius: 10px; }
+  .rcc-card h3 { font-size: 15px; }
+  .rcc-lead-id { font-size: 12px; }
+  .rcc-card-meta { grid-template-columns: 1fr; font-size: 12px; }
+  .rcc-card-actions .rcc-btn { font-size: 12px; min-height: 40px; flex: 1 1 calc(50% - 6px); }
+  .rcc-toolbar .rcc-btn { font-size: 12px; }
+  .rcc-tab { font-size: 12px; padding: 8px 12px; }
+  .rcc-tx { font-size: 12px; }
+  .rcc-gate { font-size: 10px; padding: 5px 34px 5px 10px; }
 }

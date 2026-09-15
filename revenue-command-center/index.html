@@ -4,14 +4,18 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-<title>TGT Revenue Command Center — Sync Health</title>
+<title>TGT Revenue Command Center — Flow UI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Sans+Condensed:wght@700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="./css/rcc.css"/>
 </head>
 <body>
-<div class="rcc-gate">INTERNAL — Local UI only. SharePoint TEAM TGT MSP remains source of truth. No production deploy from this build. No second database.</div>
+<!-- Gate note is compact + dismissible so it does not obstruct mobile cards -->
+<div class="rcc-gate" id="rccGate" hidden>
+  INTERNAL — SharePoint TEAM TGT MSP SoT. Local fixtures only. No second database.
+  <button type="button" class="rcc-gate-dismiss" id="rccGateDismiss" aria-label="Dismiss notice">×</button>
+</div>
 
 <div id="rccHealthBar" class="rcc-health YELLOW" role="status" aria-live="polite">
   <div id="rccHealthTitle" class="rcc-health-title">YELLOW — Loading…</div>
@@ -31,13 +35,13 @@
 <main class="rcc-shell">
   <header class="rcc-head">
     <h1>TGT Revenue Command Center</h1>
-    <p>Sync-health guardrail against Dashboard Feed schema 2.1 · SoT: TEAM TGT MSP / Shared Documents/General/TGT REVENUE COMMAND CENTER / 10 Dashboard Feed</p>
+    <p>Schema 2.2 · SoT: TEAM TGT MSP / Shared Documents/General/TGT REVENUE COMMAND CENTER</p>
   </header>
 
   <div class="rcc-fixture-bar">
     <label for="rccFixtureSelect">Local feed fixture (acceptance / offline) — not a second SoT</label>
     <select id="rccFixtureSelect">
-      <option value="green">GREEN — synced</option>
+      <option value="green">GREEN — synced + incoming</option>
       <option value="yellow-stale">YELLOW — stale feed</option>
       <option value="yellow-incomplete">YELLOW — health fields incomplete</option>
       <option value="red-failed-write">RED — failed write</option>
@@ -45,6 +49,11 @@
       <option value="red-orphan-email">RED — orphan email</option>
     </select>
   </div>
+
+  <nav class="rcc-tabs" role="tablist" aria-label="Opportunity filters">
+    <button type="button" class="rcc-tab on" role="tab" aria-selected="true" data-filter="all" id="rccTabAll">All</button>
+    <button type="button" class="rcc-tab" role="tab" aria-selected="false" data-filter="incoming" id="rccTabIncoming">Incoming <span class="rcc-tab-count" id="rccIncomingCount">0</span></button>
+  </nav>
 
   <div class="rcc-toolbar">
     <button type="button" class="rcc-btn primary" id="rccOpenAudit">Open Integrity Audit</button>
@@ -56,11 +65,11 @@
   </div>
 
   <section id="rccOwnerPanel" class="rcc-panel-owner" style="display:none">
-    <h2>🔴 TROY — THESE MUST BE HANDLED</h2>
+    <h2>TROY — THESE MUST BE HANDLED</h2>
     <div id="rccOwnerList"></div>
   </section>
 
-  <h2 class="rcc-section-title">Opportunities (feed order)</h2>
+  <h2 class="rcc-section-title" id="rccCardsTitle">Opportunities</h2>
   <div id="rccCards"></div>
 
   <h2 class="rcc-section-title">Software checklist reconciliation (LIST SOFTWARE is not final truth)</h2>
@@ -75,6 +84,25 @@
   </div>
   <div id="rccAuditSections"></div>
 </aside>
+
+<!-- Opened card detail — Notes near top -->
+<div id="rccDetailBackdrop" class="rcc-modal-backdrop">
+  <div class="rcc-modal rcc-detail" role="dialog" aria-modal="true" aria-labelledby="rccDetailTitle">
+    <div class="rcc-detail-head">
+      <div>
+        <div class="rcc-lead-id" id="rccDetailLeadId">Lead ID —</div>
+        <h2 id="rccDetailTitle">Opportunity</h2>
+      </div>
+      <button type="button" class="rcc-btn" id="rccCloseDetail">Close</button>
+    </div>
+    <section class="rcc-notes-block" aria-label="Notes">
+      <h3>Notes</h3>
+      <p id="rccDetailNotes">—</p>
+    </section>
+    <div id="rccDetailBody"></div>
+    <div class="rcc-card-actions" id="rccDetailActions"></div>
+  </div>
+</div>
 
 <div id="rccModalBackdrop" class="rcc-modal-backdrop">
   <div class="rcc-modal" role="dialog" aria-modal="true" aria-labelledby="rccExistingTitle">

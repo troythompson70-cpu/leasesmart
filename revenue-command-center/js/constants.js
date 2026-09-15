@@ -1,8 +1,9 @@
 /**
- * TGT Revenue Command Center — shared constants (schema 2.1 contract).
+ * TGT Revenue Command Center — shared constants (schema 2.2 contract).
  * Source of truth remains SharePoint TEAM TGT MSP dashboard feed.
+ * Canonical path: Shared Documents/General/TGT REVENUE COMMAND CENTER
  */
-export const SCHEMA_VERSION = '2.1';
+export const SCHEMA_VERSION = '2.2';
 
 export const STATUSES = Object.freeze([
   'NEW',

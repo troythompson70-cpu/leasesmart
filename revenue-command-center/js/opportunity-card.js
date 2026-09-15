@@ -1,8 +1,15 @@
 /**
- * Opportunity card helpers + reply timing.
+ * Opportunity card helpers + reply timing + schema 2.2 display fields.
  */
 import { STALE_MS, REPLY_DELAY_MINUTES_DEFAULT } from './constants.js';
 import { findDuplicateCollisions } from './dedupe.js';
+import {
+  leadIdOf,
+  transmissionOf,
+  hasIncomingAttention,
+  buildEmailThreadLink,
+} from './transmission.js';
+import { formatResolvedPath, resolveRecordPath } from './paths.js';
 
 function parseTime(v) {
   if (!v) return null;
@@ -22,6 +29,10 @@ export function cardBadges(opp, allOpps, now = Date.now()) {
   const sync = cardSyncState(opp, now);
   if (sync === 'Stale') badges.push({ type: 'STALE', label: 'STALE' });
   if (sync === 'Error') badges.push({ type: 'ERROR', label: 'SYNC ERROR' });
+
+  if (hasIncomingAttention(opp)) {
+    badges.push({ type: 'INCOMING', label: 'INCOMING' });
+  }
 
   if (!(opp.source || opp.source_evidence || opp.source_ref)) {
     badges.push({ type: 'SOURCE_REQUIRED', label: 'SOURCE REQUIRED' });
@@ -61,3 +72,25 @@ export function ownerActionYesNo(opp) {
   if (opp.owner_action_required === false || opp.owner_action_required === 'No') return 'No';
   return s === 'OWNER_ACTION' || s === 'ACCOUNT_SETUP' || s === 'BLOCKED' ? 'Yes' : 'No';
 }
+
+export function cardViewModel(opp, allOpps, now = Date.now()) {
+  const leadId = leadIdOf(opp);
+  const tx = transmissionOf(opp);
+  const email = buildEmailThreadLink(opp);
+  const pathResolved = resolveRecordPath(opp);
+  return {
+    leadId,
+    transmission: tx,
+    emailLink: email,
+    sharePointPath: formatResolvedPath(pathResolved),
+    pathMalformedRejected: !!(pathResolved && pathResolved.malformedRejected),
+    badges: cardBadges(opp, allOpps, now),
+    sync: cardSyncState(opp, now),
+    timing: replyTimingMessage(opp, now),
+    incoming: hasIncomingAttention(opp),
+    notes: opp.notes || opp.operator_notes || '',
+    ownerYesNo: ownerActionYesNo(opp),
+  };
+}
+
+export { leadIdOf, transmissionOf, hasIncomingAttention, buildEmailThreadLink };

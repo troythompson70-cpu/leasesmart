@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.1",
+  "schema_version": "2.2",
   "feed_updated_at": "2026-09-14T20:00:00Z",
   "generated_at": "2026-09-14T20:00:00Z",
   "feed_reachable": true,
@@ -17,7 +17,9 @@
     "failed_write_count": 0,
     "stale_record_count": 0,
     "verification_errors": [],
-    "audit_summary": { "result": "ORPHAN_EMAIL" }
+    "audit_summary": {
+      "result": "ORPHAN_EMAIL"
+    }
   },
   "opportunities": [
     {
@@ -28,10 +30,26 @@
       "last_verified_at": "2026-09-14T12:00:00Z",
       "source": "Tracker",
       "thread_id": "thread-known",
-      "thread_subject": "Known vendor"
+      "thread_subject": "Known vendor",
+      "lead_id": "opp-known",
+      "sharepoint_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/00 Lead Intake",
+      "notes": "",
+      "latest_transmission_at": "2026-09-14T12:00:00Z",
+      "transmission_direction": "OUTBOUND",
+      "subject": "Known vendor",
+      "sender_source": "Tracker",
+      "message_preview": "",
+      "latest_event_id": "evt-opp-known",
+      "incoming_attention": false,
+      "open_source_url": "https://outlook.office.com/mail/?q=Known%20vendor"
     }
   ],
-  "pipeline": [{ "opportunity_id": "opp-known", "status": "WAITING" }],
+  "pipeline": [
+    {
+      "opportunity_id": "opp-known",
+      "status": "WAITING"
+    }
+  ],
   "orphan_emails": [
     {
       "id": "orphan-1",
@@ -42,5 +60,7 @@
       "recommended_fix": "Create or link tracker record after dedupe check",
       "open_source_url": null
     }
-  ]
+  ],
+  "sharepoint_root": "Shared Documents/General/TGT REVENUE COMMAND CENTER",
+  "dashboard_feed_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/10 Dashboard Feed"
 }

@@ -1,15 +1,15 @@
 {
-  "schema_version": "2.1",
-  "feed_updated_at": "2026-09-14T20:00:00Z",
-  "generated_at": "2026-09-14T20:00:00Z",
+  "schema_version": "2.2",
+  "feed_updated_at": "2026-09-15T21:00:00Z",
+  "generated_at": "2026-09-15T21:00:00Z",
   "feed_reachable": true,
   "pipeline_reachable": true,
   "pipeline_feed_agree": true,
   "integrity_verification_ok": true,
   "ui_sync_health": {
     "health_state": "GREEN",
-    "last_verified_at": "2026-09-14T20:00:00Z",
-    "last_full_audit_at": "2026-09-14T19:30:00Z",
+    "last_verified_at": "2026-09-15T21:00:00Z",
+    "last_full_audit_at": "2026-09-15T20:30:00Z",
     "orphan_email_count": 0,
     "orphan_record_count": 0,
     "duplicate_count": 0,
@@ -18,7 +18,7 @@
     "stale_record_count": 0,
     "verification_errors": [],
     "audit_summary": {
-      "last_run": "2026-09-14T19:30:00Z",
+      "last_run": "2026-09-15T20:30:00Z",
       "result": "PASS"
     }
   },
@@ -30,7 +30,7 @@
       "vendor": "Optus Staffing",
       "tier": 1,
       "status": "OWNER_ACTION",
-      "last_verified_at": "2026-09-14T18:00:00Z",
+      "last_verified_at": "2026-09-15T20:00:00Z",
       "source": "SharePoint: TGT_OPTUS_STAFFING_INSURANCE_READINESS_MASTER.md",
       "source_ref": "sp:optus-master",
       "owner_action_required": true,
@@ -40,7 +40,19 @@
       "most_recent_email": "Optus insurance readiness thread",
       "sync_state": "Verified",
       "thread_id": "thread-optus-1",
-      "thread_subject": "Optus Staffing insurance readiness"
+      "thread_subject": "Optus Staffing insurance readiness",
+      "lead_id": "opp-optus-coi",
+      "sharepoint_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/00 Lead Intake",
+      "notes": "Wait for Troy review of COI limits before reply. Packet is in 00 Lead Intake.",
+      "latest_transmission_at": "2026-09-15T18:40:00Z",
+      "transmission_direction": "INCOMING",
+      "subject": "RE: Optus Staffing insurance readiness \u2014 COI packet",
+      "sender_source": "operations@optusstaffing.example",
+      "message_preview": "Attached is the revised COI request. Please confirm limits.",
+      "latest_event_id": "evt-optus-incoming-0915",
+      "incoming_attention": true,
+      "open_source_url": "https://outlook.office.com/mail/deeplink/read/AAMkAGOptusDemoItemId",
+      "conversation_id": "AAQkAGOptusDemoConversationId=="
     },
     {
       "id": "opp-cisco-msp",
@@ -49,7 +61,7 @@
       "vendor": "Cisco",
       "tier": 1,
       "status": "ACCOUNT_SETUP",
-      "last_verified_at": "2026-09-14T17:45:00Z",
+      "last_verified_at": "2026-09-15T20:00:00Z",
       "source": "Outlook: Welcome to Cisco Secure MSP Center",
       "source_ref": "outlook:cisco-welcome-2026-09-14",
       "owner_action_required": true,
@@ -60,7 +72,18 @@
       "sync_state": "Verified",
       "thread_id": "thread-cisco-1",
       "thread_subject": "Cisco Secure MSP Program",
-      "account_evidence": "joined"
+      "account_evidence": "joined",
+      "lead_id": "opp-cisco-msp",
+      "sharepoint_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/00 Lead Intake",
+      "notes": "Account already joined. Continue SAML only \u2014 do not recreate.",
+      "latest_transmission_at": "2026-09-15T16:10:00Z",
+      "transmission_direction": "INCOMING",
+      "subject": "Cisco Secure MSP Center \u2014 next onboarding step",
+      "sender_source": "noreply@cisco.com",
+      "message_preview": "Your MSP Center workspace is ready. Complete SAML verification.",
+      "latest_event_id": "evt-cisco-incoming-0915",
+      "incoming_attention": true,
+      "open_source_url": "https://outlook.office.com/mail/deeplink/read/AAMkAGCiscoDemoItemId"
     },
     {
       "id": "opp-huntress",
@@ -69,17 +92,28 @@
       "vendor": "Huntress",
       "tier": 1,
       "status": "QUALIFYING",
-      "last_verified_at": "2026-09-14T10:10:00Z",
+      "last_verified_at": "2026-09-15T20:00:00Z",
       "source": "Outlook: [Huntress] Weekly Summary For TGT TECHNOLOGIES INC.",
       "source_ref": "outlook:huntress-weekly-2026-09-14",
       "owner_action_required": false,
       "next_action": "Continue NFR / Neighborhood Watch qualification",
-      "last_action": "Weekly summary received — agent/account active",
+      "last_action": "Weekly summary received \u2014 agent/account active",
       "most_recent_email": "[Huntress] Weekly Summary For TGT TECHNOLOGIES INC.",
       "sync_state": "Verified",
       "thread_id": "thread-huntress-1",
       "thread_subject": "Huntress Free MSP NFR",
-      "account_evidence": "active"
+      "account_evidence": "active",
+      "lead_id": "opp-huntress",
+      "sharepoint_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/00 Lead Intake",
+      "notes": "Incoming previously cleared; correspondence retained.",
+      "latest_transmission_at": "2026-09-14T10:06:41Z",
+      "transmission_direction": "INCOMING",
+      "subject": "[Huntress] Weekly Summary For TGT TECHNOLOGIES INC.",
+      "sender_source": "noreply@huntress.com",
+      "message_preview": "Weekly summary delivered \u2014 agent/account active.",
+      "latest_event_id": "evt-opp-huntress",
+      "incoming_attention": false,
+      "open_source_url": "https://outlook.office.com/mail/?q=Huntress%20Free%20MSP%20NFR"
     },
     {
       "id": "opp-cursor",
@@ -88,15 +122,26 @@
       "vendor": "Cursor",
       "tier": 2,
       "status": "WON",
-      "last_verified_at": "2026-09-14T12:00:00Z",
+      "last_verified_at": "2026-09-15T20:00:00Z",
       "source": "Active Cursor cloud agent session",
       "source_ref": "cursor:active",
       "owner_action_required": false,
-      "next_action": "None — already active",
+      "next_action": "None \u2014 already active",
       "last_action": "In production use",
       "sync_state": "Verified",
       "thread_id": "thread-cursor-1",
-      "thread_subject": "Cursor AI Troy/TGT automation"
+      "thread_subject": "Cursor AI Troy/TGT automation",
+      "lead_id": "opp-cursor",
+      "sharepoint_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/00 Lead Intake",
+      "notes": "",
+      "latest_transmission_at": "2026-09-14T12:00:00Z",
+      "transmission_direction": "OUTBOUND",
+      "subject": "Cursor AI Troy/TGT automation",
+      "sender_source": "Active Cursor cloud agent session",
+      "message_preview": "None \u2014 already active",
+      "latest_event_id": "evt-opp-cursor",
+      "incoming_attention": false,
+      "open_source_url": "https://outlook.office.com/mail/?q=Cursor%20AI%20Troy/TGT%20automation"
     },
     {
       "id": "opp-hennge",
@@ -105,14 +150,25 @@
       "vendor": "HENNGE",
       "tier": 2,
       "status": "CONTACTED",
-      "last_verified_at": "2026-09-14T09:00:00Z",
+      "last_verified_at": "2026-09-15T20:00:00Z",
       "source": "Vendor engagement thread",
       "source_ref": "outlook:hennge",
       "owner_action_required": false,
       "next_action": "Complete vendor scheduling / qualification",
       "sync_state": "Verified",
       "thread_id": "thread-hennge-1",
-      "thread_subject": "HENNGE MSP NFR"
+      "thread_subject": "HENNGE MSP NFR",
+      "lead_id": "opp-hennge",
+      "sharepoint_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/00 Lead Intake",
+      "notes": "Awaiting scheduling response.",
+      "latest_transmission_at": "2026-09-14T09:00:00Z",
+      "transmission_direction": "OUTBOUND",
+      "subject": "HENNGE MSP NFR",
+      "sender_source": "Vendor engagement thread",
+      "message_preview": "Complete vendor scheduling / qualification",
+      "latest_event_id": "evt-opp-hennge",
+      "incoming_attention": false,
+      "open_source_url": "https://outlook.office.com/mail/?q=HENNGE%20MSP%20NFR"
     },
     {
       "id": "opp-pass-demo",
@@ -126,22 +182,72 @@
       "next_action": "None",
       "sync_state": "Verified",
       "thread_id": "thread-pass-1",
-      "thread_subject": "Passed opportunity"
+      "thread_subject": "Passed opportunity",
+      "lead_id": "opp-pass-demo",
+      "sharepoint_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/00 Lead Intake",
+      "notes": "",
+      "latest_transmission_at": "2026-09-10T12:00:00Z",
+      "transmission_direction": "OUTBOUND",
+      "subject": "Passed opportunity",
+      "sender_source": "Tracker archive",
+      "message_preview": "None",
+      "latest_event_id": "evt-opp-pass-demo",
+      "incoming_attention": false,
+      "open_source_url": "https://outlook.office.com/mail/?q=Passed%20opportunity",
+      "legacy_path_probe": "Shared Documents/Shared Documents/TGT REVENUE COMMAND CENTER/archive"
     }
   ],
   "pipeline": [
-    { "opportunity_id": "opp-optus-coi", "status": "OWNER_ACTION" },
-    { "opportunity_id": "opp-cisco-msp", "status": "ACCOUNT_SETUP" },
-    { "opportunity_id": "opp-huntress", "status": "QUALIFYING" },
-    { "opportunity_id": "opp-cursor", "status": "WON" },
-    { "opportunity_id": "opp-hennge", "status": "CONTACTED" },
-    { "opportunity_id": "opp-pass-demo", "status": "PASS" }
+    {
+      "opportunity_id": "opp-optus-coi",
+      "status": "OWNER_ACTION"
+    },
+    {
+      "opportunity_id": "opp-cisco-msp",
+      "status": "ACCOUNT_SETUP"
+    },
+    {
+      "opportunity_id": "opp-huntress",
+      "status": "QUALIFYING"
+    },
+    {
+      "opportunity_id": "opp-cursor",
+      "status": "WON"
+    },
+    {
+      "opportunity_id": "opp-hennge",
+      "status": "CONTACTED"
+    },
+    {
+      "opportunity_id": "opp-pass-demo",
+      "status": "PASS"
+    }
   ],
   "software_checklist": [
-    { "id": "sw-cisco", "software": "Cisco / Duo MSP", "action": "Activate NFR/MSP", "source": "LIST SOFTWARE" },
-    { "id": "sw-huntress", "software": "Huntress", "action": "Complete partner setup", "source": "LIST SOFTWARE" },
-    { "id": "sw-cursor", "software": "Cursor", "action": "AI Troy/TGT automation — create account", "source": "LIST SOFTWARE" },
-    { "id": "sw-chinron", "software": "Chinron", "action": "Accept admin invite", "source": "LIST SOFTWARE" }
+    {
+      "id": "sw-cisco",
+      "software": "Cisco / Duo MSP",
+      "action": "Activate NFR/MSP",
+      "source": "LIST SOFTWARE"
+    },
+    {
+      "id": "sw-huntress",
+      "software": "Huntress",
+      "action": "Complete partner setup",
+      "source": "LIST SOFTWARE"
+    },
+    {
+      "id": "sw-cursor",
+      "software": "Cursor",
+      "action": "AI Troy/TGT automation \u2014 create account",
+      "source": "LIST SOFTWARE"
+    },
+    {
+      "id": "sw-chinron",
+      "software": "Chinron",
+      "action": "Accept admin invite",
+      "source": "LIST SOFTWARE"
+    }
   ],
   "orphan_emails": [],
   "orphan_records": [],
@@ -151,5 +257,7 @@
   "stale_statuses": [],
   "missing_source_evidence": [],
   "owner_actions_not_closed": [],
-  "software_checklist_mismatches": []
+  "software_checklist_mismatches": [],
+  "sharepoint_root": "Shared Documents/General/TGT REVENUE COMMAND CENTER",
+  "dashboard_feed_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/10 Dashboard Feed"
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * RCC sync-health acceptance tests (TEST 1–10).
+ * RCC sync-health + revenue-flow UI gate acceptance tests.
  * Runs Node-side logic against fixtures. No live SharePoint writes. No production deploy.
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -52,7 +52,21 @@ async function main() {
     reconcileSoftwareChecklist,
     parseListSoftwareBody,
   } = await loadMod('js/software-checklist.js');
-  const { ACTION_LOCK_MESSAGE } = await loadMod('js/constants.js');
+  const { ACTION_LOCK_MESSAGE, SCHEMA_VERSION } = await loadMod('js/constants.js');
+  const {
+    leadIdOf,
+    hasIncomingAttention,
+    clearIncomingAttention,
+    buildEmailThreadLink,
+    transmissionOf,
+  } = await loadMod('js/transmission.js');
+  const {
+    isMalformedSharePointPath,
+    normalizeSharePointPath,
+    auditMalformedPaths,
+    CANONICAL_RCC_ROOT,
+  } = await loadMod('js/paths.js');
+  const { cardViewModel } = await loadMod('js/opportunity-card.js');
 
   const green = loadJson('green.json');
   const yellow = loadJson('yellow-stale.json');
@@ -61,8 +75,13 @@ async function main() {
   const redDup = loadJson('red-duplicate.json');
   const redOrphan = loadJson('red-orphan-email.json');
 
-  const nowGreen = Date.parse('2026-09-14T20:30:00Z');
+  const nowGreen = Date.parse('2026-09-15T21:30:00Z');
   const nowStale = Date.parse('2026-09-14T20:30:00Z');
+
+  test('SCHEMA: constants declare 2.2 and green fixture matches', () => {
+    assert(SCHEMA_VERSION === '2.2', `expected 2.2 got ${SCHEMA_VERSION}`);
+    assert(green.schema_version === '2.2', `fixture schema ${green.schema_version}`);
+  });
 
   test('TEST 1: Feed current + no errors → GREEN', () => {
     const h = evaluateSyncHealth(green, { now: nowGreen });
@@ -158,13 +177,88 @@ async function main() {
     assert(cursor?.suppressed, 'Cursor new account must be overridden');
   });
 
-  test('TEST 10: Mobile layout CSS has no horizontal-scroll intent (overflow-x hidden + 2-col metrics)', () => {
+  test('TEST 10: Mobile layout CSS — overflow-x hidden, compact health, gate dismissible/hidden', () => {
     const css = readFileSync(join(root, 'css', 'rcc.css'), 'utf8');
     assert(/overflow-x:\s*hidden/.test(css), 'body must hide horizontal overflow');
     assert(/@media \(max-width:\s*640px\)/.test(css), 'mobile breakpoint required');
     assert(/grid-template-columns:\s*repeat\(2/.test(css), 'mobile 2-col metrics');
+    assert(/\.rcc-lead-id/.test(css), 'Lead ID styles required');
+    assert(/\.rcc-tx/.test(css), 'transmission styles required');
     const html = readFileSync(join(root, 'index.html'), 'utf8');
     assert(/viewport-fit=cover/.test(html), 'viewport meta for iPhone');
+    assert(/id="rccGate"[^>]*\bhidden\b/.test(html), 'gate must be hidden by default');
+    assert(/rcc-notes-block/.test(html), 'Notes block near top of opened card');
+    assert(/data-filter="incoming"/.test(html), 'Incoming tab required');
+  });
+
+  test('FLOW 1: Lead ID is permanent opportunity_id on every card view-model', () => {
+    for (const opp of green.opportunities) {
+      const vm = cardViewModel(opp, green.opportunities);
+      assert(vm.leadId, 'lead id required');
+      assert(
+        vm.leadId === String(opp.opportunity_id || opp.id),
+        `Lead ID must equal opportunity_id got ${vm.leadId}`,
+      );
+      assert(leadIdOf(opp) === vm.leadId);
+    }
+  });
+
+  test('FLOW 2: Email/thread link is a real https URL (not toast-only stub)', () => {
+    const optus = green.opportunities.find((o) => o.id === 'opp-optus-coi');
+    const link = buildEmailThreadLink(optus);
+    assert(link && /^https:\/\//i.test(link.href), `expected https link got ${JSON.stringify(link)}`);
+  });
+
+  test('FLOW 3: Latest transmission rendered under timestamp fields', () => {
+    const optus = green.opportunities.find((o) => o.id === 'opp-optus-coi');
+    const tx = transmissionOf(optus);
+    assert(tx.direction === 'INCOMING', tx.direction);
+    assert(tx.at, 'timestamp required');
+    assert(/COI/i.test(tx.subject), tx.subject);
+    assert(tx.preview, 'preview required');
+    assert(tx.eventId, 'event id required');
+  });
+
+  test('FLOW 4: Notes present for opened-card top placement', () => {
+    const optus = green.opportunities.find((o) => o.id === 'opp-optus-coi');
+    const vm = cardViewModel(optus, green.opportunities);
+    assert(/Troy review/i.test(vm.notes), `notes missing: ${vm.notes}`);
+  });
+
+  test('FLOW 5: Incoming filter uses incoming_attention', () => {
+    const incoming = green.opportunities.filter((o) => hasIncomingAttention(o));
+    assert(incoming.length >= 2, `expected >=2 incoming got ${incoming.length}`);
+    assert(incoming.every((o) => o.incoming_attention === true));
+  });
+
+  test('FLOW 6: Clear Incoming does not change status or delete correspondence', () => {
+    const before = structuredClone(green.opportunities.find((o) => o.id === 'opp-optus-coi'));
+    const result = clearIncomingAttention(before);
+    assert(result.ok, 'clear must succeed');
+    assert(result.opp.incoming_attention === false, 'attention cleared');
+    assert(result.opp.status === before.status, 'status must not change');
+    assert(result.opp.notes === before.notes, 'notes must remain');
+    assert(result.opp.latest_transmission_at === before.latest_transmission_at, 'tx retained');
+    assert(result.opp.message_preview === before.message_preview, 'preview retained');
+    assert(result.opp.open_source_url === before.open_source_url, 'email link retained');
+    assert(result.opp.lead_id === before.lead_id, 'lead id retained');
+  });
+
+  test('FLOW 7: Malformed Shared Documents/Shared Documents path detected + normalized', () => {
+    assert(
+      isMalformedSharePointPath('Shared Documents/Shared Documents/TGT REVENUE COMMAND CENTER'),
+      'must detect doubled Shared Documents',
+    );
+    const normalized = normalizeSharePointPath(
+      'Shared Documents/Shared Documents/General/TGT REVENUE COMMAND CENTER',
+    );
+    assert(
+      normalized === 'Shared Documents/General/TGT REVENUE COMMAND CENTER',
+      `got ${normalized}`,
+    );
+    const hits = auditMalformedPaths(green);
+    assert(hits.length >= 1, 'green fixture should include one legacy probe for audit');
+    assert(CANONICAL_RCC_ROOT.includes('General/TGT REVENUE COMMAND CENTER'));
   });
 
   test('BONUS: Dashboard sorting puts PASS/LOST at bottom; Tier1 owner first', () => {
@@ -183,6 +277,28 @@ async function main() {
       (f) => f.endsWith('.sqlite') || f.endsWith('.db') || f.includes('nedb'),
     );
     assert(banned.length === 0, `banned db files: ${banned.join(',')}`);
+  });
+
+  test('NON-NEGOTIABLE: app source has no live malformed Shared Documents route assignment', () => {
+    const files = [
+      'js/app.js',
+      'js/paths.js',
+      'js/constants.js',
+      'js/opportunity-card.js',
+      'js/transmission.js',
+      'index.html',
+      'feeds/README.md',
+    ];
+    for (const rel of files) {
+      const text = readFileSync(join(root, rel), 'utf8');
+      // Detection strings are allowed; live SoT assignment of the doubled path is not.
+      const lines = text.split('\n').filter((l) => /Shared Documents\/Shared Documents/.test(l));
+      for (const line of lines) {
+        if (/=\s*['"`]Shared Documents\/Shared Documents/.test(line) && !/legacy|probe|reject|malformed/i.test(line)) {
+          throw new Error(`${rel} still assigns malformed live path: ${line.trim()}`);
+        }
+      }
+    }
   });
 
   const failed = results.filter((r) => !r.ok);

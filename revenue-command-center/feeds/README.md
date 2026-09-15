@@ -3,9 +3,13 @@
 **Source of truth (do not replace):**
 
 - SharePoint site: `TEAM TGT MSP`
-- Path: `Shared Documents/General/TGT REVENUE COMMAND CENTER`
-- Feed: `10 Dashboard Feed / TGT_DASHBOARD_FEED_2026-09-10.json`
-- Schema: `2.1`
+- Canonical path: `Shared Documents/General/TGT REVENUE COMMAND CENTER`
+- Lead Intake: `…/00 Lead Intake`
+- Feed: `…/10 Dashboard Feed / TGT_DASHBOARD_FEED_2026-09-10.json`
+- Incoming queue: `…/10 Dashboard Feed / TGT_INCOMING_QUEUE_2026-09-15.csv`
+- Schema: `2.2`
+
+**Do not use** the malformed shell `Shared Documents/Shared Documents/...`.
 
 This folder is a **read path for local UI development only**.
 

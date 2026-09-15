@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.1",
+  "schema_version": "2.2",
   "feed_updated_at": "2026-09-14T20:00:00Z",
   "generated_at": "2026-09-14T20:00:00Z",
   "feed_reachable": true,
@@ -16,8 +16,12 @@
     "invalid_route_count": 0,
     "failed_write_count": 1,
     "stale_record_count": 0,
-    "verification_errors": ["Write to SharePoint record opp-x failed read-back"],
-    "audit_summary": { "result": "FAILED_WRITE" }
+    "verification_errors": [
+      "Write to SharePoint record opp-x failed read-back"
+    ],
+    "audit_summary": {
+      "result": "FAILED_WRITE"
+    }
   },
   "opportunities": [
     {
@@ -29,10 +33,26 @@
       "source": "Outlook",
       "owner_action_required": false,
       "thread_id": "thread-x",
-      "thread_subject": "Failed write thread"
+      "thread_subject": "Failed write thread",
+      "lead_id": "opp-x",
+      "sharepoint_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/00 Lead Intake",
+      "notes": "",
+      "latest_transmission_at": "2026-09-14T12:00:00Z",
+      "transmission_direction": "OUTBOUND",
+      "subject": "Failed write thread",
+      "sender_source": "Outlook",
+      "message_preview": "",
+      "latest_event_id": "evt-opp-x",
+      "incoming_attention": false,
+      "open_source_url": "https://outlook.office.com/mail/?q=Failed%20write%20thread"
     }
   ],
-  "pipeline": [{ "opportunity_id": "opp-x", "status": "CONTACTED" }],
+  "pipeline": [
+    {
+      "opportunity_id": "opp-x",
+      "status": "CONTACTED"
+    }
+  ],
   "failed_writes": [
     {
       "id": "fw-1",
@@ -42,5 +62,7 @@
       "status": "CONTACTED",
       "recommended_fix": "Re-run write + read-back verification"
     }
-  ]
+  ],
+  "sharepoint_root": "Shared Documents/General/TGT REVENUE COMMAND CENTER",
+  "dashboard_feed_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/10 Dashboard Feed"
 }

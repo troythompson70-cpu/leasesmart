@@ -1,4 +1,4 @@
-import { HEALTH, ACTION_LOCK_MESSAGE } from './constants.js';
+import { HEALTH, ACTION_LOCK_MESSAGE, SCHEMA_VERSION } from './constants.js';
 import { loadFeedFromUrl, getOpportunities } from './feed-loader.js';
 import { evaluateSyncHealth, formatMetric } from './sync-health.js';
 import { sortOpportunities, selectOwnerActionPanel } from './sorting.js';
@@ -8,12 +8,19 @@ import {
   parseListSoftwareBody,
 } from './software-checklist.js';
 import { saveAndVerify } from './save-verify.js';
+import { cardViewModel } from './opportunity-card.js';
 import {
-  cardBadges,
-  cardSyncState,
-  replyTimingMessage,
-  ownerActionYesNo,
-} from './opportunity-card.js';
+  clearIncomingAttention,
+  hasIncomingAttention,
+  buildEmailThreadLink,
+  leadIdOf,
+} from './transmission.js';
+import {
+  auditMalformedPaths,
+  CANONICAL_RCC_ROOT,
+  formatResolvedPath,
+  resolveRecordPath,
+} from './paths.js';
 
 const FIXTURES = {
   green: './fixtures/green.json',
@@ -37,8 +44,11 @@ const state = {
   health: null,
   loadError: null,
   fixtureKey: 'green',
+  filter: 'all',
   dismissedAudits: new Map(),
   repairLog: [],
+  openOppId: null,
+  pathAudit: [],
 };
 
 function $(id) {
@@ -96,6 +106,7 @@ function renderOwnerPanel() {
   list.innerHTML = items
     .map(
       (o) => `<div class="rcc-owner-item">
+      <div class="rcc-lead-id">Lead ID ${esc(leadIdOf(o))}</div>
       <strong>${esc(o.company || o.vendor)}</strong>
       <div>Status: ${esc(o.status)} · Category: ${esc(o.owner_action_category || 'other')}</div>
       <div>Next: ${esc(o.next_action || '—')}</div>
@@ -104,40 +115,91 @@ function renderOwnerPanel() {
     .join('');
 }
 
+function filteredOpportunities() {
+  const opps = sortOpportunities(getOpportunities(state.feed));
+  if (state.filter === 'incoming') {
+    return opps.filter((o) => hasIncomingAttention(o));
+  }
+  return opps;
+}
+
+function renderFilterTabs() {
+  const all = getOpportunities(state.feed);
+  const incomingCount = all.filter((o) => hasIncomingAttention(o)).length;
+  $('rccIncomingCount').textContent = String(incomingCount);
+  document.querySelectorAll('.rcc-tab').forEach((tab) => {
+    const on = tab.getAttribute('data-filter') === state.filter;
+    tab.classList.toggle('on', on);
+    tab.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  $('rccCardsTitle').textContent =
+    state.filter === 'incoming'
+      ? `Incoming queue (${incomingCount})`
+      : `Opportunities (${all.length})`;
+}
+
+function transmissionHtml(tx) {
+  if (!tx) {
+    return `<div class="rcc-tx muted">No transmission on record</div>`;
+  }
+  const dirClass =
+    tx.direction === 'INCOMING'
+      ? 'INCOMING'
+      : tx.direction === 'OUTBOUND'
+        ? 'OUTBOUND'
+        : '';
+  return `<div class="rcc-tx">
+    <div class="rcc-tx-row">
+      <span class="rcc-tx-dir ${dirClass}">${esc(tx.direction)}</span>
+      <span class="rcc-tx-at">${esc(tx.at || '—')}</span>
+    </div>
+    <div class="rcc-tx-subject">${esc(tx.subject || '—')}</div>
+    <div class="rcc-tx-sender">${esc(tx.sender || '—')}</div>
+    ${tx.preview ? `<div class="rcc-tx-preview">${esc(tx.preview)}</div>` : ''}
+    ${tx.eventId ? `<div class="rcc-tx-event">Event ${esc(tx.eventId)}</div>` : ''}
+  </div>`;
+}
+
 function renderCards() {
   const host = $('rccCards');
-  const opps = sortOpportunities(getOpportunities(state.feed));
+  const all = getOpportunities(state.feed);
+  const opps = filteredOpportunities();
+  renderFilterTabs();
   if (!opps.length) {
-    host.innerHTML = '<p class="rcc-section-title">No opportunities in feed.</p>';
+    host.innerHTML =
+      state.filter === 'incoming'
+        ? '<p class="rcc-section-title">No incoming attention items.</p>'
+        : '<p class="rcc-section-title">No opportunities in feed.</p>';
     return;
   }
   host.innerHTML = opps
     .map((opp) => {
-      const badges = cardBadges(opp, opps)
+      const vm = cardViewModel(opp, all);
+      const id = opp.id || opp.opportunity_id;
+      const badges = vm.badges
         .map((b) => `<span class="rcc-badge ${b.type}">${esc(b.label)}</span>`)
         .join('');
-      const sync = cardSyncState(opp);
-      const timing = replyTimingMessage(opp);
-      const id = opp.id || opp.opportunity_id;
       return `<article class="rcc-card" data-opp-id="${esc(id)}">
+        <div class="rcc-lead-id">Lead ID ${esc(vm.leadId)}</div>
         <h3>${esc(opp.company || opp.vendor || 'Opportunity')}</h3>
-        <div class="rcc-badges">${badges}<span class="rcc-badge OK">Sync: ${esc(sync)}</span></div>
+        <div class="rcc-badges">${badges}<span class="rcc-badge OK">Sync: ${esc(vm.sync)}</span></div>
         <dl class="rcc-card-meta">
           <div><dt>Tier</dt><dd>${esc(opp.tier)}</dd></div>
           <div><dt>Status</dt><dd>${esc(opp.status)}</dd></div>
           <div><dt>Last verified</dt><dd>${esc(opp.last_verified_at || '—')}</dd></div>
-          <div><dt>Source</dt><dd>${esc(opp.source || opp.source_ref || '—')}</dd></div>
-          <div><dt>Owner action required</dt><dd>${esc(ownerActionYesNo(opp))}</dd></div>
-          <div><dt>Next action</dt><dd>${esc(opp.next_action || '—')}</dd></div>
+          <div><dt>Owner action</dt><dd>${esc(vm.ownerYesNo)}</dd></div>
         </dl>
-        ${timing ? `<div class="rcc-timing">${esc(timing)}</div>` : ''}
+        ${transmissionHtml(vm.transmission)}
+        ${vm.timing ? `<div class="rcc-timing">${esc(vm.timing)}</div>` : ''}
         <div class="rcc-card-actions">
+          <button type="button" class="rcc-btn primary" data-action="open-card" data-id="${esc(id)}">Open</button>
+          ${
+            vm.incoming
+              ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
+              : ''
+          }
           <button type="button" class="rcc-btn" data-lockable="1" data-action="followup" data-id="${esc(id)}">Send Follow-up</button>
-          <button type="button" class="rcc-btn" data-lockable="1" data-action="done" data-id="${esc(id)}">Mark Done</button>
-          <button type="button" class="rcc-btn" data-lockable="1" data-action="pass" data-id="${esc(id)}">Close/Pass</button>
-          <button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Source Email</button>
-          <button type="button" class="rcc-btn" data-action="open-sp" data-id="${esc(id)}">Open SharePoint Record</button>
-          <button type="button" class="rcc-btn" data-action="repair" data-id="${esc(id)}">Repair Record</button>
+          <button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Email Thread</button>
         </div>
       </article>`;
     })
@@ -166,6 +228,7 @@ function renderAuditDrawer() {
   const rows = (state.health?.auditRows || []).filter(
     (r) => !state.dismissedAudits.has(r.id),
   );
+  const pathHits = state.pathAudit || [];
   const sections = [
     'Orphan Emails',
     'Orphan Records',
@@ -176,10 +239,21 @@ function renderAuditDrawer() {
     'Missing Source Evidence',
     'Owner Actions Not Closed',
     'Software Checklist Mismatches',
+    'Malformed SharePoint Paths',
   ];
   host.innerHTML = sections
     .map((section) => {
-      const items = rows.filter((r) => r.section === section);
+      let items = rows.filter((r) => r.section === section);
+      if (section === 'Malformed SharePoint Paths') {
+        items = pathHits.map((h, i) => ({
+          id: `path-${i}`,
+          company: h.path,
+          problem: 'Malformed Shared Documents/Shared Documents (or Documents/Documents) path',
+          source: h.value,
+          status: 'REJECT',
+          recommended_fix: `Use canonical ${CANONICAL_RCC_ROOT}`,
+        }));
+      }
       const body = items.length
         ? items
             .map(
@@ -211,6 +285,70 @@ function esc(v) {
     .replace(/"/g, '&quot;');
 }
 
+function findOpp(id) {
+  return getOpportunities(state.feed).find(
+    (o) => String(o.id || o.opportunity_id) === String(id),
+  );
+}
+
+function patchOpp(id, patcher) {
+  if (!state.feed) return null;
+  const opps = getOpportunities(state.feed).map((o) => {
+    if (String(o.id || o.opportunity_id) !== String(id)) return o;
+    return patcher(o);
+  });
+  state.feed = { ...state.feed, opportunities: opps };
+  return findOpp(id);
+}
+
+function openDetail(id) {
+  const opp = findOpp(id);
+  if (!opp) return;
+  state.openOppId = id;
+  const vm = cardViewModel(opp, getOpportunities(state.feed));
+  $('rccDetailLeadId').textContent = `Lead ID ${vm.leadId}`;
+  $('rccDetailTitle').textContent = opp.company || opp.vendor || 'Opportunity';
+  $('rccDetailNotes').textContent = vm.notes || 'No notes yet.';
+  const path = formatResolvedPath(resolveRecordPath(opp));
+  $('rccDetailBody').innerHTML = `
+    <dl class="rcc-card-meta">
+      <div><dt>Status</dt><dd>${esc(opp.status)}</dd></div>
+      <div><dt>Tier</dt><dd>${esc(opp.tier)}</dd></div>
+      <div><dt>Last verified</dt><dd>${esc(opp.last_verified_at || '—')}</dd></div>
+      <div><dt>SharePoint</dt><dd>${esc(path)}</dd></div>
+      <div><dt>Next action</dt><dd>${esc(opp.next_action || '—')}</dd></div>
+      <div><dt>Source</dt><dd>${esc(opp.source || opp.source_ref || '—')}</dd></div>
+    </dl>
+    <h3 class="rcc-detail-sub">Latest transmission</h3>
+    ${transmissionHtml(vm.transmission)}
+  `;
+  const email = buildEmailThreadLink(opp);
+  $('rccDetailActions').innerHTML = `
+    ${
+      vm.incoming
+        ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
+        : ''
+    }
+    ${
+      email
+        ? `<a class="rcc-btn primary" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer">Open Email Thread</a>`
+        : `<button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Email Thread</button>`
+    }
+    <button type="button" class="rcc-btn" data-action="open-sp" data-id="${esc(id)}">Open SharePoint Record</button>
+    <button type="button" class="rcc-btn" data-lockable="1" data-action="followup" data-id="${esc(id)}">Send Follow-up</button>
+    <button type="button" class="rcc-btn" data-lockable="1" data-action="done" data-id="${esc(id)}">Mark Done</button>
+    <button type="button" class="rcc-btn" data-lockable="1" data-action="pass" data-id="${esc(id)}">Close/Pass</button>
+    <button type="button" class="rcc-btn" data-action="repair" data-id="${esc(id)}">Repair Record</button>
+  `;
+  $('rccDetailBackdrop').classList.add('on');
+  setLocked(!!state.health?.actionsLocked);
+}
+
+function closeDetail() {
+  state.openOppId = null;
+  $('rccDetailBackdrop').classList.remove('on');
+}
+
 function recompute(runtime = {}) {
   if (!state.feed) {
     state.health = evaluateSyncHealth(null, {
@@ -218,8 +356,10 @@ function recompute(runtime = {}) {
       feedError: state.loadError || 'Dashboard Feed cannot be read',
       runtime,
     });
+    state.pathAudit = [];
   } else {
     state.health = evaluateSyncHealth(state.feed, { runtime });
+    state.pathAudit = auditMalformedPaths(state.feed);
   }
   if (runtime.verificationFailed || runtime.unverifiedFailedWrite) {
     state.health = {
@@ -240,6 +380,7 @@ function recompute(runtime = {}) {
   renderCards();
   renderChecklist();
   renderAuditDrawer();
+  if (state.openOppId) openDetail(state.openOppId);
 }
 
 async function loadFixture(key) {
@@ -262,8 +403,9 @@ function openDrawer(on) {
 }
 
 function openExistingModal(opp) {
-  const m = $('rccExistingModal');
+  const m = $('rccModalBackdrop');
   $('rccExistingBody').innerHTML = `
+    <p><strong>Lead ID:</strong> ${esc(leadIdOf(opp))}</p>
     <p><strong>Company:</strong> ${esc(opp.company || opp.vendor)}</p>
     <p><strong>Status:</strong> ${esc(opp.status)}</p>
     <p><strong>Last action:</strong> ${esc(opp.last_action || '—')}</p>
@@ -271,7 +413,7 @@ function openExistingModal(opp) {
     <p><strong>Most recent email:</strong> ${esc(opp.most_recent_email || '—')}</p>
   `;
   m.dataset.oppId = opp.id || opp.opportunity_id;
-  $('rccModalBackdrop').classList.add('on');
+  m.classList.add('on');
 }
 
 function closeModal() {
@@ -286,8 +428,55 @@ function guardLockedAction() {
   return false;
 }
 
+function openEmailThread(opp) {
+  const link = buildEmailThreadLink(opp);
+  if (!link) {
+    toast('No email/thread link available for this Lead ID', true);
+    return;
+  }
+  window.open(link.href, '_blank', 'noopener,noreferrer');
+}
+
+function onClearIncoming(id) {
+  const before = findOpp(id);
+  if (!before) return;
+  const statusBefore = before.status;
+  const notesBefore = before.notes;
+  const txBefore = before.latest_transmission_at;
+  const previewBefore = before.message_preview;
+  const result = clearIncomingAttention(before);
+  if (!result.ok) {
+    toast(result.error || 'Clear Incoming failed', true);
+    return;
+  }
+  patchOpp(id, () => result.opp);
+  const after = findOpp(id);
+  const ok =
+    after &&
+    after.incoming_attention === false &&
+    after.status === statusBefore &&
+    after.notes === notesBefore &&
+    after.latest_transmission_at === txBefore &&
+    after.message_preview === previewBefore;
+  toast(
+    ok
+      ? `Incoming cleared for Lead ID ${leadIdOf(after)} — status unchanged`
+      : 'Clear Incoming violated permanence rules',
+    !ok,
+  );
+  recompute();
+}
+
 function onCardAction(action, id) {
   if (['followup', 'done', 'pass', 'bulk'].includes(action) && guardLockedAction()) {
+    return;
+  }
+  if (action === 'open-card') {
+    openDetail(id);
+    return;
+  }
+  if (action === 'clear-incoming') {
+    onClearIncoming(id);
     return;
   }
   if (action === 'followup' || action === 'done' || action === 'pass') {
@@ -309,8 +498,19 @@ function onCardAction(action, id) {
     );
     return;
   }
-  if (action === 'open-source' || action === 'open-sp') {
-    toast(action === 'open-source' ? 'Open Source Email (read-only link)' : 'Open SharePoint Record (SoT)');
+  if (action === 'open-source') {
+    openEmailThread(findOpp(id));
+    return;
+  }
+  if (action === 'open-sp') {
+    const opp = findOpp(id);
+    const resolved = resolveRecordPath(opp);
+    const path = formatResolvedPath(resolved);
+    if (resolved.malformedRejected) {
+      toast(`Rejected malformed path — using ${path}`, true);
+    } else {
+      toast(`SharePoint SoT: ${path}`);
+    }
     return;
   }
   if (action === 'repair') {
@@ -332,6 +532,21 @@ function wireEvents() {
   $('rccCloseAudit').addEventListener('click', () => openDrawer(false));
   $('rccDrawerBackdrop').addEventListener('click', () => openDrawer(false));
   $('rccRefresh').addEventListener('click', () => loadFixture(state.fixtureKey));
+  $('rccCloseDetail').addEventListener('click', closeDetail);
+  $('rccDetailBackdrop').addEventListener('click', (e) => {
+    if (e.target === $('rccDetailBackdrop')) closeDetail();
+  });
+  $('rccGateDismiss')?.addEventListener('click', () => {
+    $('rccGate').hidden = true;
+  });
+
+  document.querySelectorAll('.rcc-tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      state.filter = tab.getAttribute('data-filter') || 'all';
+      renderCards();
+    });
+  });
+
   $('rccCreateOpp').addEventListener('click', () => {
     if (guardLockedAction()) return;
     const company = prompt('Company name?');
@@ -387,6 +602,12 @@ function wireEvents() {
     onCardAction(btn.getAttribute('data-action'), btn.getAttribute('data-id'));
   });
 
+  $('rccDetailActions').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    onCardAction(btn.getAttribute('data-action'), btn.getAttribute('data-id'));
+  });
+
   $('rccAuditSections').addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-audit]');
     if (!btn) return;
@@ -418,12 +639,13 @@ function wireEvents() {
 
 export async function boot() {
   wireEvents();
+  // Obstructive banner stays hidden by default on mobile-first flow UI.
   await loadFixture('green');
 }
 
 boot();
 
-// Expose for QA / playwright-less browser console tests
+// Expose for QA / browser console tests
 window.RCC = {
   state,
   loadFixture,
@@ -432,5 +654,12 @@ window.RCC = {
   saveAndVerify,
   reconcileSoftwareChecklist,
   parseListSoftwareBody,
+  clearIncomingAttention,
+  hasIncomingAttention,
+  buildEmailThreadLink,
+  leadIdOf,
+  auditMalformedPaths,
+  SCHEMA_VERSION,
   ACTION_LOCK_MESSAGE,
+  CANONICAL_RCC_ROOT,
 };
