@@ -21,6 +21,20 @@ import {
   formatResolvedPath,
   resolveRecordPath,
 } from './paths.js';
+import { processDiscovery } from './discovery-pipeline.js';
+import {
+  acknowledgeActivity,
+  classifyActivity,
+  countUnreadActivity,
+  isUnreadActivity,
+  mergePersistedActivity,
+} from './new-activity.js';
+import {
+  reconcileOrphanDiscoveries,
+  comparePipelineToDashboard,
+} from './orphan-reconcile.js';
+import { enforceReportIntegrity, buildSixPmReportView } from './report-integrity.js';
+import { runMailboxBackfill, assertBackfillIdempotent } from './mailbox-backfill.js';
 
 const FIXTURES = {
   green: './fixtures/green.json',
@@ -49,6 +63,7 @@ const state = {
   repairLog: [],
   openOppId: null,
   pathAudit: [],
+  lastOrphanReport: null,
 };
 
 function $(id) {
@@ -85,11 +100,20 @@ function renderHealth() {
   $('mLastVerified').textContent = h.lastVerifiedAt || '—';
   $('mFeedUpdated').textContent = h.feedUpdatedAt || '—';
   $('mOrphanEmail').textContent = formatMetric(h.metrics.orphan_email_count);
-  $('mOrphanRecord').textContent = formatMetric(h.metrics.orphan_record_count);
+  $('mOrphanRecord').textContent = formatMetric(
+    h.metrics.orphan_discovery_count ?? h.metrics.orphan_record_count,
+  );
   $('mDuplicate').textContent = formatMetric(h.metrics.duplicate_count);
   $('mInvalidRoute').textContent = formatMetric(h.metrics.invalid_route_count);
   $('mFailedWrite').textContent = formatMetric(h.metrics.failed_write_count);
   $('mStale').textContent = formatMetric(h.metrics.stale_record_count);
+  const warn = $('rccMailboxWarn');
+  if (warn) {
+    const show = !h.mailboxCoverageVerified;
+    warn.classList.toggle('on', show);
+    warn.textContent =
+      h.mailboxCoverageWarning || 'Full mailbox coverage is not verified.';
+  }
   setLocked(!!h.actionsLocked);
 }
 
@@ -106,7 +130,7 @@ function renderOwnerPanel() {
   list.innerHTML = items
     .map(
       (o) => `<div class="rcc-owner-item">
-      <div class="rcc-lead-id">Lead ID ${esc(leadIdOf(o))}</div>
+      <div class="rcc-lead-id">Opportunity ID ${esc(leadIdOf(o))}</div>
       <strong>${esc(o.company || o.vendor)}</strong>
       <div>Status: ${esc(o.status)} · Category: ${esc(o.owner_action_category || 'other')}</div>
       <div>Next: ${esc(o.next_action || '—')}</div>
@@ -120,22 +144,34 @@ function filteredOpportunities() {
   if (state.filter === 'incoming') {
     return opps.filter((o) => hasIncomingAttention(o));
   }
+  if (state.filter === 'new-activity') {
+    return opps.filter((o) => isUnreadActivity(o));
+  }
   return opps;
 }
 
 function renderFilterTabs() {
   const all = getOpportunities(state.feed);
   const incomingCount = all.filter((o) => hasIncomingAttention(o)).length;
+  const newActivityCount = countUnreadActivity(all);
   $('rccIncomingCount').textContent = String(incomingCount);
+  const nac = $('rccNewActivityCount');
+  if (nac) {
+    nac.textContent = String(newActivityCount);
+    nac.classList.toggle('hot', newActivityCount > 0);
+  }
   document.querySelectorAll('.rcc-tab').forEach((tab) => {
     const on = tab.getAttribute('data-filter') === state.filter;
     tab.classList.toggle('on', on);
     tab.setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  $('rccCardsTitle').textContent =
-    state.filter === 'incoming'
-      ? `Incoming queue (${incomingCount})`
-      : `Opportunities (${all.length})`;
+  if (state.filter === 'incoming') {
+    $('rccCardsTitle').textContent = `Incoming queue (${incomingCount})`;
+  } else if (state.filter === 'new-activity') {
+    $('rccCardsTitle').textContent = `New Activity / Unread (${newActivityCount})`;
+  } else {
+    $('rccCardsTitle').textContent = `Opportunities (${all.length})`;
+  }
 }
 
 function transmissionHtml(tx) {
@@ -169,7 +205,9 @@ function renderCards() {
     host.innerHTML =
       state.filter === 'incoming'
         ? '<p class="rcc-section-title">No incoming attention items.</p>'
-        : '<p class="rcc-section-title">No opportunities in feed.</p>';
+        : state.filter === 'new-activity'
+          ? '<p class="rcc-section-title">No unacknowledged new activity.</p>'
+          : '<p class="rcc-section-title">No opportunities in feed.</p>';
     return;
   }
   host.innerHTML = opps
@@ -179,27 +217,52 @@ function renderCards() {
       const badges = vm.badges
         .map((b) => `<span class="rcc-badge ${b.type}">${esc(b.label)}</span>`)
         .join('');
-      return `<article class="rcc-card" data-opp-id="${esc(id)}">
-        <div class="rcc-lead-id">Lead ID ${esc(vm.leadId)}</div>
-        <h3>${esc(opp.company || opp.vendor || 'Opportunity')}</h3>
-        <div class="rcc-badges">${badges}<span class="rcc-badge OK">Sync: ${esc(vm.sync)}</span></div>
+      const unreadBadge = vm.unread
+        ? '<span class="rcc-badge UNREAD">UNREAD</span>'
+        : '';
+      const email = vm.emailLink;
+      return `<article class="rcc-card ${vm.unread ? 'unread' : ''}" data-opp-id="${esc(id)}">
+        <div class="rcc-lead-id">Opportunity ID ${esc(vm.opportunityId || vm.leadId)}</div>
+        <h3>${esc(vm.company || 'Opportunity')}</h3>
+        <div class="rcc-card-opp">${esc(vm.opportunity || '—')}</div>
+        <div class="rcc-badges">
+          <span class="rcc-tier-lg">Tier ${esc(vm.tier)}</span>
+          <span class="rcc-status-lg">${esc(vm.status)}</span>
+          <span class="rcc-owner-lg ${vm.ownerYesNo === 'Yes' ? 'yes' : ''}">OWNER ACTION: ${esc(vm.ownerYesNo)}</span>
+          ${unreadBadge}${badges}<span class="rcc-badge OK">Sync: ${esc(vm.sync)}</span>
+        </div>
         <dl class="rcc-card-meta">
-          <div><dt>Tier</dt><dd>${esc(opp.tier)}</dd></div>
-          <div><dt>Status</dt><dd>${esc(opp.status)}</dd></div>
-          <div><dt>Last verified</dt><dd>${esc(opp.last_verified_at || '—')}</dd></div>
-          <div><dt>Owner action</dt><dd>${esc(vm.ownerYesNo)}</dd></div>
+          <div><dt>Owner</dt><dd>${esc(vm.owner)}</dd></div>
+          <div><dt>Source</dt><dd>${esc(vm.source || '—')}</dd></div>
+          <div><dt>Source / thread</dt><dd>${esc(vm.sourceRef || '—')}</dd></div>
+          <div><dt>Last activity</dt><dd>${esc(vm.lastActivity || '—')}</dd></div>
+          <div><dt>Next action</dt><dd>${esc(vm.nextAction || '—')}</dd></div>
+          <div><dt>Follow-up</dt><dd>${esc(vm.followUp || '—')}</dd></div>
+          <div><dt>Ack</dt><dd>${esc(vm.acknowledgement)}</dd></div>
+          <div><dt>Classification</dt><dd>${esc(vm.classification)}</dd></div>
+          <div><dt>Last verified</dt><dd>${esc(vm.lastVerified || '—')}</dd></div>
+          <div><dt>Revenue</dt><dd>${esc(vm.revenue || '—')}</dd></div>
         </dl>
         ${transmissionHtml(vm.transmission)}
         ${vm.timing ? `<div class="rcc-timing">${esc(vm.timing)}</div>` : ''}
         <div class="rcc-card-actions">
+          ${
+            vm.unread
+              ? `<button type="button" class="rcc-btn rcc-ack-btn" data-action="acknowledge" data-id="${esc(id)}">Acknowledge (does not classify)</button>`
+              : ''
+          }
           <button type="button" class="rcc-btn primary" data-action="open-card" data-id="${esc(id)}">Open</button>
           ${
             vm.incoming
               ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
               : ''
           }
+          ${
+            email
+              ? `<a class="rcc-btn" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer">Open Email Thread</a>`
+              : `<button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Email Thread</button>`
+          }
           <button type="button" class="rcc-btn" data-lockable="1" data-action="followup" data-id="${esc(id)}">Send Follow-up</button>
-          <button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Email Thread</button>
         </div>
       </article>`;
     })
@@ -230,6 +293,7 @@ function renderAuditDrawer() {
   );
   const pathHits = state.pathAudit || [];
   const sections = [
+    'Orphan Discoveries',
     'Orphan Emails',
     'Orphan Records',
     'Duplicate Threads',
@@ -306,7 +370,7 @@ function openDetail(id) {
   if (!opp) return;
   state.openOppId = id;
   const vm = cardViewModel(opp, getOpportunities(state.feed));
-  $('rccDetailLeadId').textContent = `Lead ID ${vm.leadId}`;
+  $('rccDetailLeadId').textContent = `Opportunity ID ${vm.opportunityId || vm.leadId}`;
   $('rccDetailTitle').textContent = opp.company || opp.vendor || 'Opportunity';
   $('rccDetailNotes').textContent = vm.notes || 'No notes yet.';
   const path = formatResolvedPath(resolveRecordPath(opp));
@@ -314,6 +378,8 @@ function openDetail(id) {
     <dl class="rcc-card-meta">
       <div><dt>Status</dt><dd>${esc(opp.status)}</dd></div>
       <div><dt>Tier</dt><dd>${esc(opp.tier)}</dd></div>
+      <div><dt>Ack</dt><dd>${esc(vm.acknowledgement)}</dd></div>
+      <div><dt>Classification</dt><dd>${esc(vm.classification)}</dd></div>
       <div><dt>Last verified</dt><dd>${esc(opp.last_verified_at || '—')}</dd></div>
       <div><dt>SharePoint</dt><dd>${esc(path)}</dd></div>
       <div><dt>Next action</dt><dd>${esc(opp.next_action || '—')}</dd></div>
@@ -324,6 +390,14 @@ function openDetail(id) {
   `;
   const email = buildEmailThreadLink(opp);
   $('rccDetailActions').innerHTML = `
+    ${
+      vm.unread
+        ? `<button type="button" class="rcc-btn rcc-ack-btn" data-action="acknowledge" data-id="${esc(id)}">Acknowledge (does not classify)</button>`
+        : ''
+    }
+    <button type="button" class="rcc-btn" data-action="classify-valid" data-id="${esc(id)}">Classify VALID</button>
+    <button type="button" class="rcc-btn" data-action="classify-invalid" data-id="${esc(id)}">Classify INVALID</button>
+    <button type="button" class="rcc-btn" data-action="classify-unsure" data-id="${esc(id)}">Classify UNSURE</button>
     ${
       vm.incoming
         ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
@@ -367,6 +441,7 @@ function recompute(runtime = {}) {
       state: HEALTH.RED,
       label: 'SYSTEM OUT OF SYNC — REVIEW AUDIT BEFORE ACTING',
       actionsLocked: true,
+      finalSyncState: 'OUT OF SYNC — BLOCKERS REMAIN',
       reasons: [
         ...(state.health.reasons || []),
         runtime.verificationFailed
@@ -391,7 +466,7 @@ async function loadFixture(key) {
     state.feed = null;
     state.loadError = loaded.error;
   } else {
-    state.feed = loaded.feed;
+    state.feed = mergePersistedActivity(loaded.feed);
     state.loadError = null;
   }
   recompute();
@@ -405,7 +480,7 @@ function openDrawer(on) {
 function openExistingModal(opp) {
   const m = $('rccModalBackdrop');
   $('rccExistingBody').innerHTML = `
-    <p><strong>Lead ID:</strong> ${esc(leadIdOf(opp))}</p>
+    <p><strong>Opportunity ID:</strong> ${esc(leadIdOf(opp))}</p>
     <p><strong>Company:</strong> ${esc(opp.company || opp.vendor)}</p>
     <p><strong>Status:</strong> ${esc(opp.status)}</p>
     <p><strong>Last action:</strong> ${esc(opp.last_action || '—')}</p>
@@ -431,7 +506,7 @@ function guardLockedAction() {
 function openEmailThread(opp) {
   const link = buildEmailThreadLink(opp);
   if (!link) {
-    toast('No email/thread link available for this Lead ID', true);
+    toast('No email/thread link available for this Opportunity ID', true);
     return;
   }
   window.open(link.href, '_blank', 'noopener,noreferrer');
@@ -460,11 +535,63 @@ function onClearIncoming(id) {
     after.message_preview === previewBefore;
   toast(
     ok
-      ? `Incoming cleared for Lead ID ${leadIdOf(after)} — status unchanged`
+      ? `Incoming cleared for Opportunity ID ${leadIdOf(after)} — status unchanged`
       : 'Clear Incoming violated permanence rules',
     !ok,
   );
   recompute();
+}
+
+function onAcknowledge(id) {
+  const before = findOpp(id);
+  if (!before) return;
+  const statusBefore = before.status;
+  const classBefore = before.classification || 'UNSURE';
+  const result = acknowledgeActivity(before);
+  if (!result.ok) {
+    toast(result.error || 'Acknowledge failed', true);
+    return;
+  }
+  patchOpp(id, () => result.opp);
+  const after = findOpp(id);
+  const ok =
+    after &&
+    after.acknowledgement_state === 'ACKNOWLEDGED' &&
+    after.status === statusBefore &&
+    (after.classification || 'UNSURE') === classBefore;
+  toast(
+    ok
+      ? `Acknowledged ${leadIdOf(after)} — status/classification unchanged`
+      : 'Acknowledge violated permanence rules',
+    !ok,
+  );
+  recompute();
+}
+
+function onClassify(id, classification) {
+  const before = findOpp(id);
+  if (!before) return;
+  const result = classifyActivity(before, classification);
+  if (!result.ok) {
+    toast(result.error || 'Classify failed', true);
+    return;
+  }
+  patchOpp(id, () => result.opp);
+  toast(`Classification set to ${classification} — status unchanged`);
+  recompute();
+}
+
+function runOrphanReconcileNow() {
+  if (!state.feed) return;
+  const report = reconcileOrphanDiscoveries(state.feed);
+  state.feed = report.feed;
+  state.lastOrphanReport = report;
+  toast(
+    `Orphans found ${report.ORPHAN_DISCOVERIES_FOUND} · repaired ${report.ORPHAN_DISCOVERIES_REPAIRED} · unresolved ${report.UNRESOLVED_ORPHANS}`,
+    report.UNRESOLVED_ORPHANS > 0,
+  );
+  recompute();
+  return report;
 }
 
 function onCardAction(action, id) {
@@ -473,6 +600,22 @@ function onCardAction(action, id) {
   }
   if (action === 'open-card') {
     openDetail(id);
+    return;
+  }
+  if (action === 'acknowledge') {
+    onAcknowledge(id);
+    return;
+  }
+  if (action === 'classify-valid') {
+    onClassify(id, 'VALID');
+    return;
+  }
+  if (action === 'classify-invalid') {
+    onClassify(id, 'INVALID');
+    return;
+  }
+  if (action === 'classify-unsure') {
+    onClassify(id, 'UNSURE');
     return;
   }
   if (action === 'clear-incoming') {
@@ -531,7 +674,16 @@ function wireEvents() {
   $('rccOpenAudit').addEventListener('click', () => openDrawer(true));
   $('rccCloseAudit').addEventListener('click', () => openDrawer(false));
   $('rccDrawerBackdrop').addEventListener('click', () => openDrawer(false));
-  $('rccRefresh').addEventListener('click', () => loadFixture(state.fixtureKey));
+  $('rccRefresh').addEventListener('click', () => {
+    // Refresh merges persisted NEW ACTIVITY and re-runs orphan reconcile on current feed side-channels.
+    if (state.feed) {
+      state.feed = mergePersistedActivity(state.feed);
+      runOrphanReconcileNow();
+    } else {
+      loadFixture(state.fixtureKey);
+    }
+  });
+  $('rccRunOrphanReconcile')?.addEventListener('click', () => runOrphanReconcileNow());
   $('rccCloseDetail').addEventListener('click', closeDetail);
   $('rccDetailBackdrop').addEventListener('click', (e) => {
     if (e.target === $('rccDetailBackdrop')) closeDetail();
@@ -562,7 +714,21 @@ function wireEvents() {
       openExistingModal(found.match);
       return;
     }
-    toast('No matching active record — create would proceed against SharePoint SoT (not local DB).');
+    const result = processDiscovery(state.feed, {
+      company,
+      subject,
+      thread_subject: subject,
+      thread_id: threadId,
+      source: 'MANUAL_ENTRY',
+    });
+    state.feed = result.feed;
+    toast(
+      result.ok
+        ? `SAVED + VERIFIED — ${result.opportunity?.opportunity_id}`
+        : result.error || 'Discovery write blocked',
+      !result.ok,
+    );
+    recompute(result.ok ? {} : { unverifiedFailedWrite: true });
   });
   $('rccBulkStatus').addEventListener('click', () => {
     if (guardLockedAction()) return;
@@ -624,7 +790,8 @@ function wireEvents() {
     }
     if (kind === 'repair') {
       state.repairLog.push({ at: new Date().toISOString(), id, action: 'repair' });
-      toast('Repair logged — preserve historical evidence.');
+      runOrphanReconcileNow();
+      toast('Repair + orphan reconcile executed.');
       return;
     }
     toast('Open Source (SoT / Outlook)');
@@ -652,6 +819,18 @@ window.RCC = {
   evaluateSyncHealth,
   findExistingOpportunity,
   saveAndVerify,
+  processDiscovery,
+  reconcileOrphanDiscoveries,
+  comparePipelineToDashboard,
+  enforceReportIntegrity,
+  buildSixPmReportView,
+  runMailboxBackfill,
+  assertBackfillIdempotent,
+  acknowledgeActivity,
+  classifyActivity,
+  countUnreadActivity,
+  isUnreadActivity,
+  mergePersistedActivity,
   reconcileSoftwareChecklist,
   parseListSoftwareBody,
   clearIncomingAttention,

@@ -481,10 +481,61 @@ a.rcc-btn {
   font-size: 11px;
 }
 
+.rcc-mailbox-warn {
+  display: none;
+  margin-top: 8px;
+  background: rgba(0,0,0,.35);
+  border: 1px solid #c49212;
+  color: #ffd76a;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.rcc-mailbox-warn.on { display: block; }
+
+.rcc-card.unread {
+  border-color: #3d8bfd;
+  box-shadow: inset 3px 0 0 #3d8bfd;
+}
+.rcc-card-opp {
+  font-size: 14px;
+  font-weight: 700;
+  color: #c9d6e3;
+  margin: -4px 0 8px;
+  overflow-wrap: anywhere;
+}
+.rcc-status-lg, .rcc-tier-lg, .rcc-owner-lg {
+  display: inline-block;
+  font-family: var(--rcc-display);
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: .3px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #243040;
+  margin-right: 6px;
+  margin-bottom: 4px;
+}
+.rcc-owner-lg.yes { background: #4a1418; color: #ff9a9a; }
+.rcc-ack-btn {
+  min-height: 48px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  flex: 1 1 100%;
+  background: #1a3a55 !important;
+  border-color: #3d8bfd !important;
+}
+.rcc-badge.UNREAD { background: #1a3a55; color: #9ec5ff; border-color: #3d8bfd; }
+.rcc-tab-count.hot {
+  background: #3d8bfd;
+  color: #041018;
+}
+
 @media (max-width: 640px) {
   /* Compact sticky health strip — do not dominate first viewport */
   .rcc-health { padding: 6px 10px 8px; }
-  .rcc-health-title { font-size: 13px; margin-bottom: 4px; }
+  .rcc-health-title { font-size: 14px; margin-bottom: 4px; font-weight: 900; }
   .rcc-health-metrics {
     display: flex;
     flex-wrap: nowrap;
@@ -504,15 +555,22 @@ a.rcc-btn {
   .rcc-head p { font-size: 11px; line-height: 1.35; }
   .rcc-fixture-bar { padding: 8px; margin-bottom: 10px; }
   .rcc-toolbar { gap: 6px; margin: 10px 0; }
-  .rcc-card { padding: 10px; border-radius: 10px; }
-  .rcc-card h3 { font-size: 15px; }
-  .rcc-lead-id { font-size: 13px; color: #9ec5ff; }
-  .rcc-card-meta { grid-template-columns: 1fr; font-size: 12px; }
-  .rcc-card-actions .rcc-btn { font-size: 12px; min-height: 40px; flex: 1 1 calc(50% - 6px); }
+  .rcc-card { padding: 14px; border-radius: 10px; }
+  .rcc-card h3 { font-size: 20px; font-weight: 900; line-height: 1.2; }
+  .rcc-card-opp { font-size: 16px; font-weight: 800; }
+  .rcc-lead-id { font-size: 16px; color: #9ec5ff; font-weight: 900; }
+  .rcc-status-lg, .rcc-tier-lg, .rcc-owner-lg { font-size: 16px; padding: 6px 12px; }
+  .rcc-card-meta { grid-template-columns: 1fr; font-size: 14px; }
+  .rcc-card-meta dd { font-size: 15px; font-weight: 800; }
+  .rcc-card-actions .rcc-btn { font-size: 13px; min-height: 44px; flex: 1 1 calc(50% - 6px); }
+  .rcc-ack-btn { flex: 1 1 100%; min-height: 52px !important; font-size: 16px !important; }
   .rcc-toolbar .rcc-btn { font-size: 12px; min-height: 40px; padding: 8px 10px; }
-  .rcc-tab { font-size: 12px; padding: 8px 12px; }
-  .rcc-tx { font-size: 12px; }
+  .rcc-tab { font-size: 13px; padding: 10px 14px; }
+  .rcc-tx { font-size: 14px; }
+  .rcc-tx-preview { font-size: 14px; line-height: 1.45; }
+  .rcc-tx-dir { font-size: 13px; }
   .rcc-gate { font-size: 10px; padding: 5px 34px 5px 10px; }
   .rcc-panel-owner { padding: 10px; margin: 8px 0 12px; }
   .rcc-panel-owner h2 { font-size: 14px; }
 }
+

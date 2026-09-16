@@ -30,6 +30,7 @@
     <div class="rcc-metric"><span>Stale records</span><strong id="mStale">—</strong></div>
   </div>
   <div id="rccLockBanner" class="rcc-lock-banner"></div>
+  <div id="rccMailboxWarn" class="rcc-mailbox-warn">Full mailbox coverage is not verified.</div>
 </div>
 
 <main class="rcc-shell">
@@ -52,12 +53,14 @@
 
   <nav class="rcc-tabs" role="tablist" aria-label="Opportunity filters">
     <button type="button" class="rcc-tab on" role="tab" aria-selected="true" data-filter="all" id="rccTabAll">All</button>
+    <button type="button" class="rcc-tab" role="tab" aria-selected="false" data-filter="new-activity" id="rccTabNewActivity">New Activity <span class="rcc-tab-count" id="rccNewActivityCount">0</span></button>
     <button type="button" class="rcc-tab" role="tab" aria-selected="false" data-filter="incoming" id="rccTabIncoming">Incoming <span class="rcc-tab-count" id="rccIncomingCount">0</span></button>
   </nav>
 
   <div class="rcc-toolbar">
     <button type="button" class="rcc-btn primary" id="rccOpenAudit">Open Integrity Audit</button>
     <button type="button" class="rcc-btn" id="rccRefresh">Refresh/Reconcile</button>
+    <button type="button" class="rcc-btn" id="rccRunOrphanReconcile">Reconcile Orphans</button>
     <button type="button" class="rcc-btn" data-lockable="1" id="rccCreateOpp">Create New Opportunity</button>
     <button type="button" class="rcc-btn" data-lockable="1" id="rccBulkStatus">Bulk Status Change</button>
     <button type="button" class="rcc-btn" id="rccSimSaveOk">Demo: SAVED + VERIFIED</button>
