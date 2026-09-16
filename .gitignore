@@ -17,3 +17,5 @@ master-vault/morning/launchd-err.log
 *.working-stack
 node_modules/
 sot/
+__pycache__/
+*.pyc
