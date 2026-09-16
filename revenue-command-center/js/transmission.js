@@ -95,8 +95,26 @@ export function clearIncomingAttention(opp) {
 }
 
 /**
+ * Detect a placeholder / demo email link so the UI can label it clearly.
+ * Demo signals: the literal token "Demo" in the href (our fixtures embed it),
+ * or an Outlook subject-search link (outlook.office.com/mail/?q=…) which is a
+ * best-effort search stub rather than a real thread deep link.
+ * Real deep links from a live feed return false.
+ * @param {string|null|undefined} href
+ * @returns {boolean}
+ */
+export function isDemoEmailLink(href) {
+  if (!href) return false;
+  const s = String(href);
+  if (/Demo/i.test(s)) return true;
+  if (/outlook\.office\.com\/mail\/\?q=/i.test(s)) return true;
+  return false;
+}
+
+/**
  * Build a usable Outlook / email deep link from feed fields.
  * Prefers explicit open_source_url; otherwise constructs Outlook deep links.
+ * The returned object carries `isDemo` so callers can visibly mark demo links.
  */
 export function buildEmailThreadLink(opp) {
   if (!opp) return null;
@@ -108,7 +126,7 @@ export function buildEmailThreadLink(opp) {
     opp.web_link ||
     null;
   if (explicit && /^https?:\/\//i.test(String(explicit))) {
-    return { href: String(explicit), kind: 'explicit' };
+    return { href: String(explicit), kind: 'explicit', isDemo: isDemoEmailLink(explicit) };
   }
 
   const conversationId =
@@ -124,36 +142,29 @@ export function buildEmailThreadLink(opp) {
   // Outlook Web deep-link patterns (read-only open).
   if (itemId) {
     const encoded = encodeURIComponent(String(itemId));
-    return {
-      href: `https://outlook.office.com/mail/deeplink/read/${encoded}`,
-      kind: 'outlook_item',
-    };
+    const href = `https://outlook.office.com/mail/deeplink/read/${encoded}`;
+    return { href, kind: 'outlook_item', isDemo: isDemoEmailLink(href) };
   }
   if (conversationId) {
     const encoded = encodeURIComponent(String(conversationId));
-    return {
-      href: `https://outlook.office.com/mail/deeplink/read/${encoded}`,
-      kind: 'outlook_conversation',
-    };
+    const href = `https://outlook.office.com/mail/deeplink/read/${encoded}`;
+    return { href, kind: 'outlook_conversation', isDemo: isDemoEmailLink(href) };
   }
 
-  // Search fallback by subject — still a real navigable link (not a toast stub).
+  // Search fallback by subject — still a real navigable link (not a toast stub),
+  // but a subject search, not a true thread deep link → mark as demo.
   const subject = opp.thread_subject || opp.subject || opp.most_recent_email;
   if (subject) {
     const q = encodeURIComponent(String(subject));
-    return {
-      href: `https://outlook.office.com/mail/?q=${q}`,
-      kind: 'outlook_search',
-    };
+    const href = `https://outlook.office.com/mail/?q=${q}`;
+    return { href, kind: 'outlook_search', isDemo: true };
   }
 
   const threadId = opp.thread_id;
   if (threadId && String(threadId).startsWith('AAMk')) {
     const encoded = encodeURIComponent(String(threadId));
-    return {
-      href: `https://outlook.office.com/mail/deeplink/read/${encoded}`,
-      kind: 'outlook_thread_id',
-    };
+    const href = `https://outlook.office.com/mail/deeplink/read/${encoded}`;
+    return { href, kind: 'outlook_thread_id', isDemo: isDemoEmailLink(href) };
   }
 
   return null;

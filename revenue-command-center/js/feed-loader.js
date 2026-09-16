@@ -122,6 +122,85 @@ export async function loadFeedFromUrl(url) {
 }
 
 /**
+ * Candidate live-feed export locations under ./feeds/. The exact dated filename
+ * varies (Troy syncs it from SharePoint), so we try a manifest first, then a
+ * few known/dated names. This is a READ path for local UI dev only — never a
+ * second database, and never fabricated GREEN when absent.
+ */
+export const LIVE_FEED_CANDIDATES = Object.freeze([
+  './feeds/TGT_DASHBOARD_FEED_2026-09-10.json',
+  './feeds/TGT_DASHBOARD_FEED_LATEST.json',
+  './feeds/latest.json',
+]);
+
+/**
+ * Attempt to load a live dashboard feed export from ./feeds/.
+ * Order: optional manifest (feeds/index.json → { feed: "<name>" } or an array
+ * of names) then the known candidate list. Returns the first readable feed.
+ * When none are present/readable, returns an emptyFeedError — the caller must
+ * surface YELLOW-incomplete (never GREEN), per feeds/README.md.
+ *
+ * @param {string} [baseDir='./feeds']
+ * @returns {Promise<{ok:boolean, feed:object|null, error:string|null, sourceUrl?:string}>}
+ */
+export async function loadLiveDashboardFeed(baseDir = './feeds') {
+  const tried = [];
+  const candidates = [];
+
+  // 1) Optional manifest so a single index file can point at the live export.
+  try {
+    const manifestUrl = `${baseDir}/index.json`;
+    const res = await fetch(manifestUrl, { cache: 'no-store' });
+    if (res.ok) {
+      const manifest = await res.json();
+      const names = Array.isArray(manifest)
+        ? manifest
+        : Array.isArray(manifest?.feeds)
+          ? manifest.feeds
+          : manifest?.feed
+            ? [manifest.feed]
+            : [];
+      for (const n of names) {
+        if (typeof n === 'string' && n.trim()) {
+          candidates.push(/^\.?\//.test(n) ? n : `${baseDir}/${n}`);
+        }
+      }
+    }
+  } catch {
+    /* no manifest — fall back to known candidates */
+  }
+
+  for (const c of LIVE_FEED_CANDIDATES) candidates.push(c);
+
+  for (const url of candidates) {
+    tried.push(url);
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) continue;
+      const feed = await res.json();
+      if (feed && typeof feed === 'object') {
+        return {
+          ok: true,
+          error: null,
+          feed,
+          loadedAt: new Date().toISOString(),
+          sourceUrl: url,
+          schemaVersion: feed?.schema_version || null,
+          schemaExpected: SCHEMA_VERSION,
+        };
+      }
+    } catch {
+      /* try the next candidate */
+    }
+  }
+
+  return emptyFeedError(
+    `No live Dashboard Feed export found under ${baseDir}/ (tried ${tried.length} location(s)). ` +
+      'Showing YELLOW — incomplete; place a TGT_DASHBOARD_FEED_*.json export here when Troy syncs it.',
+  );
+}
+
+/**
  * Parse feed from raw JSON string (tests / paste).
  */
 export function loadFeedFromJson(jsonText) {
