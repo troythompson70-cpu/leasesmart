@@ -1,5 +1,10 @@
 import { HEALTH, ACTION_LOCK_MESSAGE, SCHEMA_VERSION } from './constants.js';
-import { loadFeedFromUrl, getOpportunities } from './feed-loader.js';
+import {
+  loadFeedFromUrl,
+  loadLiveDashboardFeed,
+  getOpportunities,
+} from './feed-loader.js';
+import { buildLocalRecap, runAiRecap } from './ai-recap.js';
 import { evaluateSyncHealth, formatMetric } from './sync-health.js';
 import { sortOpportunities, selectOwnerActionPanel } from './sorting.js';
 import { findExistingOpportunity } from './dedupe.js';
@@ -13,6 +18,7 @@ import {
   clearIncomingAttention,
   hasIncomingAttention,
   buildEmailThreadLink,
+  isDemoEmailLink,
   leadIdOf,
 } from './transmission.js';
 import {
@@ -51,6 +57,10 @@ const state = {
   pathAudit: [],
   // Session-only "removed from active view" set. Never deletes SoT correspondence.
   removedIds: new Set(),
+  // AI recap results by opportunity id (session memory only — never persisted).
+  aiRecapById: new Map(),
+  // Optional AI keys held ONLY in memory. Never written to localStorage/disk/git.
+  aiKeys: { claude: '', openai: '', gemini: '' },
 };
 
 function $(id) {
@@ -170,10 +180,17 @@ function transmissionHtml(tx) {
   </div>`;
 }
 
+function demoLinkTag(link) {
+  // Visibly mark placeholder/demo links so empty threads read as demo data, not a bug.
+  return link && link.isDemo
+    ? `<span class="rcc-demo-tag" title="Demo data — subject-search/placeholder link, not a real thread deep link">demo link</span>`
+    : '';
+}
+
 function emailThreadControl(vm, id) {
   // Prefer a real navigable link so "Open Email Thread" never silently fails.
   if (vm.emailLink && vm.emailLink.href) {
-    return `<a class="rcc-btn" href="${esc(vm.emailLink.href)}" target="_blank" rel="noopener noreferrer">Open Email Thread</a>`;
+    return `<a class="rcc-btn" href="${esc(vm.emailLink.href)}" target="_blank" rel="noopener noreferrer">Open Email Thread</a>${demoLinkTag(vm.emailLink)}`;
   }
   return `<button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Email Thread</button>`;
 }
@@ -213,6 +230,7 @@ function renderCards() {
         ${vm.timing ? `<div class="rcc-timing">${esc(vm.timing)}</div>` : ''}
         <div class="rcc-card-actions">
           <button type="button" class="rcc-btn primary" data-action="open-card" data-id="${esc(id)}">Open</button>
+          <button type="button" class="rcc-btn rcc-ai-btn" data-action="ai-recap" data-id="${esc(id)}">AI Recap</button>
           ${
             vm.incoming
               ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
@@ -335,6 +353,8 @@ function openDetail(id) {
   $('rccDetailTitle').textContent = opp.company || opp.vendor || 'Opportunity';
   $('rccDetailNotes').textContent = vm.notes || 'No notes yet.';
   const path = formatResolvedPath(resolveRecordPath(opp));
+  const email = buildEmailThreadLink(opp);
+  const k = state.aiKeys;
   $('rccDetailBody').innerHTML = `
     <dl class="rcc-card-meta">
       <div><dt>Status</dt><dd>${esc(opp.status)}</dd></div>
@@ -346,17 +366,31 @@ function openDetail(id) {
     </dl>
     <h3 class="rcc-detail-sub">Latest transmission</h3>
     ${transmissionHtml(vm.transmission)}
+    <section class="rcc-ai-recap" aria-label="AI Recap">
+      <div class="rcc-ai-recap-head">
+        <h3 class="rcc-detail-sub">AI Recap</h3>
+        <button type="button" class="rcc-btn rcc-ai-btn" data-action="ai-recap" data-id="${esc(id)}">Run AI Recap</button>
+      </div>
+      <div id="rccAiRecapBody" class="rcc-ai-recap-body"></div>
+      <details class="rcc-ai-keys">
+        <summary>AI keys (optional, stored in memory only)</summary>
+        <p class="rcc-ai-keys-note">Keys stay in this browser session only — never saved to disk, localStorage, or git. Leave blank to use the built-in demo recap.</p>
+        <label>Claude<input type="password" class="rcc-ai-key" data-provider="claude" autocomplete="off" spellcheck="false" value="${esc(k.claude)}" placeholder="sk-ant-…"/></label>
+        <label>OpenAI<input type="password" class="rcc-ai-key" data-provider="openai" autocomplete="off" spellcheck="false" value="${esc(k.openai)}" placeholder="sk-…"/></label>
+        <label>Gemini<input type="password" class="rcc-ai-key" data-provider="gemini" autocomplete="off" spellcheck="false" value="${esc(k.gemini)}" placeholder="AIza…"/></label>
+      </details>
+    </section>
   `;
-  const email = buildEmailThreadLink(opp);
   $('rccDetailActions').innerHTML = `
     ${
       vm.incoming
         ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
         : ''
     }
+    <button type="button" class="rcc-btn rcc-ai-btn" data-action="ai-recap" data-id="${esc(id)}">AI Recap</button>
     ${
       email
-        ? `<a class="rcc-btn primary" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer">Open Email Thread</a>`
+        ? `<a class="rcc-btn primary" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer">Open Email Thread</a>${demoLinkTag(email)}`
         : `<button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Email Thread</button>`
     }
     <button type="button" class="rcc-btn" data-action="open-sp" data-id="${esc(id)}">Open SharePoint Record</button>
@@ -366,8 +400,82 @@ function openDetail(id) {
     <button type="button" class="rcc-btn" data-action="repair" data-id="${esc(id)}">Repair Record</button>
     <button type="button" class="rcc-btn danger" data-lockable="1" data-action="delete" data-id="${esc(id)}">Delete</button>
   `;
+  renderAiRecapInto(id);
   $('rccDetailBackdrop').classList.add('on');
   setLocked(!!state.health?.actionsLocked);
+}
+
+function aiModeLabel(mode) {
+  return mode === 'demo' ? 'demo (no API key)' : `live · ${mode}`;
+}
+
+function renderAiRecapInto(id) {
+  const body = $('rccAiRecapBody');
+  if (!body) return;
+  const result = state.aiRecapById.get(String(id));
+  if (!result) {
+    body.innerHTML =
+      '<p class="rcc-ai-hint">No recap yet — click <strong>Run AI Recap</strong> for a synthesized summary, risk, and next step.</p>';
+    return;
+  }
+  const badgeClass = result.mode === 'demo' ? 'demo' : 'live';
+  body.innerHTML = `
+    <div class="rcc-ai-mode ${badgeClass}">${esc(aiModeLabel(result.mode))}</div>
+    <div class="rcc-ai-field"><span>Recap</span><p>${esc(result.recap)}</p></div>
+    <div class="rcc-ai-field"><span>Risk</span><p>${esc(result.risk)}</p></div>
+    <div class="rcc-ai-field"><span>Next step</span><p>${esc(result.nextStep)}</p></div>
+  `;
+}
+
+function readAiKeysFromInputs() {
+  document.querySelectorAll('.rcc-ai-key').forEach((input) => {
+    const provider = input.getAttribute('data-provider');
+    if (provider === 'claude' || provider === 'openai' || provider === 'gemini') {
+      state.aiKeys[provider] = (input.value || '').trim();
+    }
+  });
+}
+
+function onToolbarAiRecap() {
+  // Prefer the currently-open card; else the first card in the filtered set.
+  if (state.openOppId && findOpp(state.openOppId)) {
+    onAiRecap(state.openOppId);
+    return;
+  }
+  const set = filteredOpportunities();
+  if (!set.length) {
+    toast('No opportunities to recap in the current view', true);
+    return;
+  }
+  const first = set[0];
+  onAiRecap(first.id || first.opportunity_id);
+}
+
+async function onAiRecap(id) {
+  const opp = findOpp(id);
+  if (!opp) {
+    toast('No opportunity available to recap', true);
+    return;
+  }
+  // Always make output visible: open the detail modal for this card.
+  if (String(state.openOppId) !== String(id)) openDetail(id);
+  readAiKeysFromInputs();
+  const body = $('rccAiRecapBody');
+  if (body) body.innerHTML = '<p class="rcc-ai-loading">Generating recap…</p>';
+  let result;
+  try {
+    result = await runAiRecap(opp, state.aiKeys);
+  } catch {
+    // runAiRecap never throws, but guard anyway so the UI is never a silent no-op.
+    result = buildLocalRecap(opp);
+  }
+  state.aiRecapById.set(String(id), result);
+  renderAiRecapInto(id);
+  toast(
+    result.mode === 'demo'
+      ? `AI Recap ready (demo — no API key) for Lead ID ${leadIdOf(opp)}`
+      : `AI Recap ready (${result.mode}) for Lead ID ${leadIdOf(opp)}`,
+  );
 }
 
 function closeDetail() {
@@ -421,6 +529,26 @@ async function loadFixture(key) {
     state.loadError = null;
   }
   recompute();
+}
+
+async function loadLiveFeed() {
+  toast('Looking for a live Dashboard Feed export under feeds/…');
+  const loaded = await loadLiveDashboardFeed('./feeds');
+  if (loaded.ok) {
+    state.feed = loaded.feed;
+    state.loadError = null;
+    state.fixtureKey = 'live';
+    recompute();
+    toast(`Live feed loaded from ${loaded.sourceUrl}`);
+    return;
+  }
+  // Absent/unreadable → surface YELLOW-incomplete, never fabricate GREEN.
+  // An empty feed object has no verified health fields → evaluated as YELLOW incomplete.
+  state.feed = { schema_version: SCHEMA_VERSION, live_feed_absent: true };
+  state.loadError = loaded.error;
+  state.fixtureKey = 'live-absent';
+  recompute();
+  toast(loaded.error, true);
 }
 
 function openDrawer(on) {
@@ -526,6 +654,10 @@ function onCardAction(action, id) {
     openDetail(id);
     return;
   }
+  if (action === 'ai-recap') {
+    onAiRecap(id);
+    return;
+  }
   if (action === 'delete') {
     onDelete(id);
     return;
@@ -584,6 +716,8 @@ function wireEvents() {
     loadFixture(e.target.value);
   });
   $('rccOpenAudit').addEventListener('click', () => openDrawer(true));
+  $('rccLoadLiveFeed').addEventListener('click', () => loadLiveFeed());
+  $('rccToolbarAiRecap').addEventListener('click', () => onToolbarAiRecap());
   $('rccCloseAudit').addEventListener('click', () => openDrawer(false));
   $('rccDrawerBackdrop').addEventListener('click', () => openDrawer(false));
   $('rccRefresh').addEventListener('click', () => loadFixture(state.fixtureKey));
@@ -663,6 +797,23 @@ function wireEvents() {
     onCardAction(btn.getAttribute('data-action'), btn.getAttribute('data-id'));
   });
 
+  // AI Recap "Run" button lives inside the detail body; delegate it too.
+  $('rccDetailBody').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action="ai-recap"]');
+    if (!btn) return;
+    onCardAction('ai-recap', btn.getAttribute('data-id'));
+  });
+
+  // Keep in-memory AI keys in sync as the user types (never persisted).
+  $('rccDetailBody').addEventListener('input', (e) => {
+    const input = e.target.closest('.rcc-ai-key');
+    if (!input) return;
+    const provider = input.getAttribute('data-provider');
+    if (provider === 'claude' || provider === 'openai' || provider === 'gemini') {
+      state.aiKeys[provider] = (input.value || '').trim();
+    }
+  });
+
   $('rccAuditSections').addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-audit]');
     if (!btn) return;
@@ -712,8 +863,13 @@ window.RCC = {
   clearIncomingAttention,
   hasIncomingAttention,
   buildEmailThreadLink,
+  isDemoEmailLink,
   leadIdOf,
   auditMalformedPaths,
+  buildLocalRecap,
+  runAiRecap,
+  loadLiveFeed,
+  onAiRecap,
   SCHEMA_VERSION,
   ACTION_LOCK_MESSAGE,
   CANONICAL_RCC_ROOT,
