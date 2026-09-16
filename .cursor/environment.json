@@ -1,14 +1,20 @@
 {
   "name": "LeaseSmart",
-  "install": "npm --prefix _qa install && { [ -f config.js ] || cp config.example.js config.js; }",
+  "install": "npm --prefix _qa install && npm --prefix tgt-website install && { [ -f config.js ] || cp config.example.js config.js; }",
   "terminals": [
     {
       "name": "web",
       "command": "python3 -m http.server 8080 --bind 0.0.0.0",
       "description": "Static file server for the LeaseSmart single-page app (index.html + _data seeds). Open http://localhost:8080/ — runs in demo/sandbox mode without Supabase credentials."
+    },
+    {
+      "name": "tgt-website",
+      "command": "cd tgt-website && npm run dev",
+      "description": "Vite dev server for the tgt-website conversion homepage, including the local-mock /api/intake endpoint (X-TGT-Intake-Mode: local-mock-no-smtp, never live SMTP). Open http://localhost:5173/."
     }
   ],
   "ports": [
-    { "name": "web", "port": 8080 }
+    { "name": "web", "port": 8080 },
+    { "name": "tgt-website", "port": 5173 }
   ]
 }
