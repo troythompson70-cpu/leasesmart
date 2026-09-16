@@ -6,6 +6,9 @@
   "pipeline_reachable": true,
   "pipeline_feed_agree": true,
   "integrity_verification_ok": true,
+  "mailbox_coverage_verified": true,
+  "mailbox_coverage_warning": null,
+  "orphan_discoveries": [],
   "ui_sync_health": {
     "health_state": "GREEN",
     "last_verified_at": "2026-09-15T21:00:00Z",

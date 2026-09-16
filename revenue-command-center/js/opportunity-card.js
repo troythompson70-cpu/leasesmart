@@ -78,8 +78,31 @@ export function cardViewModel(opp, allOpps, now = Date.now()) {
   const tx = transmissionOf(opp);
   const email = buildEmailThreadLink(opp);
   const pathResolved = resolveRecordPath(opp);
+  const ack = String(opp.acknowledgement_state || '').toUpperCase();
+  const unread =
+    ack === 'UNREAD' ||
+    opp.new_activity === true ||
+    (hasIncomingAttention(opp) && ack !== 'ACKNOWLEDGED' && ack !== 'READ');
   return {
     leadId,
+    opportunityId: opp.opportunity_id || opp.id || leadId,
+    company: opp.company || opp.vendor || '',
+    opportunity: opp.opportunity || opp.thread_subject || opp.subject || '',
+    tier: opp.tier,
+    status: opp.status,
+    owner: opp.owner || 'Troy',
+    ownerYesNo: ownerActionYesNo(opp),
+    source: opp.source || opp.source_ref || '',
+    sourceRef: opp.source_ref || opp.thread_id || opp.message_id || '',
+    lastActivity: opp.last_activity_at || opp.latest_transmission_at || '',
+    nextAction: opp.next_action || '',
+    followUp: opp.follow_up_date || opp.followup_date || '',
+    blocker: opp.blocker || '',
+    revenue: opp.revenue_potential || opp.value || '',
+    acknowledgement: ack || (unread ? 'UNREAD' : '—'),
+    classification: opp.classification || 'UNSURE',
+    lastVerified: opp.last_verified_at || '',
+    unread,
     transmission: tx,
     emailLink: email,
     sharePointPath: formatResolvedPath(pathResolved),
@@ -89,7 +112,6 @@ export function cardViewModel(opp, allOpps, now = Date.now()) {
     timing: replyTimingMessage(opp, now),
     incoming: hasIncomingAttention(opp),
     notes: opp.notes || opp.operator_notes || '',
-    ownerYesNo: ownerActionYesNo(opp),
   };
 }
 

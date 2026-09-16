@@ -43,6 +43,14 @@ function collectAuditRows(feed, health) {
 
   (feed.orphan_emails || []).forEach((i) => push('Orphan Emails', i));
   (feed.orphan_records || []).forEach((i) => push('Orphan Records', i));
+  (feed.orphan_discoveries || []).forEach((i) =>
+    push('Orphan Discoveries', {
+      ...i,
+      problem: i.problem || i.error || 'ORPHAN_DISCOVERY — known to AI, missing durable Command Center write',
+      recommended_fix:
+        i.recommended_fix || 'Retry DISCOVER→SAVE+VERIFY before reporting',
+    }),
+  );
   (feed.duplicates || feed.duplicate_threads || []).forEach((i) =>
     push('Duplicate Threads', i),
   );
@@ -159,6 +167,12 @@ export function evaluateSyncHealth(feed, opts = {}) {
   if (num(metrics.orphan_email_count, 0) > 0) {
     reasons.push('Meaningful Outlook activity exists with no corresponding tracker record');
   }
+  if (num(metrics.orphan_discovery_count, 0) > 0) {
+    reasons.push('Unprocessed ORPHAN_DISCOVERY — AI-known lead missing durable Command Center record');
+  }
+  if (Array.isArray(feed.orphan_discoveries) && feed.orphan_discoveries.length > 0) {
+    reasons.push('Orphan discovery queue is not empty');
+  }
   if (feed.pipeline_feed_agree === false) {
     reasons.push('Tracker and feed materially disagree');
   }
@@ -210,7 +224,13 @@ export function evaluateSyncHealth(feed, opts = {}) {
     yellowReasons.push('Health verification incomplete.');
   }
 
-  // Integrity verification required for GREEN
+  const mailboxCoverageVerified = feed.mailbox_coverage_verified === true;
+  if (!mailboxCoverageVerified) {
+    yellowReasons.push('Full mailbox coverage is not verified.');
+  }
+
+  // Integrity verification required for GREEN / SYNCED
+  // SYNCED means: reconciled + email ingestion checked + no failed writes + no orphans + verified.
   const integrityOk =
     feed.integrity_verification_ok === true ||
     health.integrity_verification_ok === true ||
@@ -228,6 +248,10 @@ export function evaluateSyncHealth(feed, opts = {}) {
   } else if (incompleteHealthFields) {
     state = HEALTH.YELLOW;
     message = 'Health verification incomplete.';
+  } else if (!mailboxCoverageVerified) {
+    // Do not claim SYSTEM SYNCED until mailbox coverage/backfill is proven.
+    state = HEALTH.YELLOW;
+    message = 'REVIEW REQUIRED — Full mailbox coverage is not verified.';
   } else if (yellowReasons.length || !integrityOk) {
     state = HEALTH.YELLOW;
     message = HEALTH_LABELS.YELLOW;
@@ -235,14 +259,16 @@ export function evaluateSyncHealth(feed, opts = {}) {
       yellowReasons.push('Last full integrity verification incomplete');
     }
   } else if (
-    // Explicit GREEN only when all green gates pass
+    // Explicit GREEN only when all green gates pass — including mailbox coverage
     feed.feed_reachable !== false &&
     feed.pipeline_reachable !== false &&
     feed.pipeline_feed_agree !== false &&
     num(metrics.failed_write_count, 0) === 0 &&
     num(metrics.duplicate_count, 0) === 0 &&
     num(metrics.orphan_email_count, 0) === 0 &&
+    num(metrics.orphan_discovery_count, 0) === 0 &&
     num(metrics.invalid_route_count, 0) === 0 &&
+    mailboxCoverageVerified &&
     integrityOk
   ) {
     state = HEALTH.GREEN;
@@ -279,6 +305,14 @@ export function evaluateSyncHealth(feed, opts = {}) {
     lastVerifiedAt: health.last_verified_at || null,
     feedUpdatedAt: feed.feed_updated_at || feed.generated_at || null,
     actionsLocked: state === HEALTH.RED,
+    mailboxCoverageVerified,
+    mailboxCoverageWarning: mailboxCoverageVerified
+      ? null
+      : 'Full mailbox coverage is not verified.',
+    finalSyncState:
+      state === HEALTH.GREEN && mailboxCoverageVerified && reasons.length === 0
+        ? 'VERIFIED SYNCED'
+        : 'OUT OF SYNC — BLOCKERS REMAIN',
   };
 }
 
@@ -286,6 +320,7 @@ function zeroMetrics() {
   return {
     orphan_email_count: null,
     orphan_record_count: null,
+    orphan_discovery_count: null,
     duplicate_count: null,
     invalid_route_count: null,
     failed_write_count: null,
@@ -303,6 +338,10 @@ function metricsFromFeed(feed, health, runtime = {}) {
     orphan_record_count:
       num(health.orphan_record_count, null) ??
       fromList(feed.orphan_records) ??
+      0,
+    orphan_discovery_count:
+      num(health.orphan_discovery_count, null) ??
+      fromList(feed.orphan_discoveries) ??
       0,
     duplicate_count:
       num(health.duplicate_count, null) ??
