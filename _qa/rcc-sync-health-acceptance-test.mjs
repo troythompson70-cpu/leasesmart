@@ -111,6 +111,9 @@ async function main() {
     CANONICAL_RCC_ROOT,
   } = await loadMod('js/paths.js');
   const { cardViewModel } = await loadMod('js/opportunity-card.js');
+  const { isDemoEmailLink } = await loadMod('js/transmission.js');
+  const { loadLiveDashboardFeed, LIVE_FEED_CANDIDATES } = await loadMod('js/feed-loader.js');
+  const { buildLocalRecap, runAiRecap } = await loadMod('js/ai-recap.js');
 
   /* ---- fixtures ---- */
   const green = loadJson('green.json');
@@ -557,6 +560,153 @@ async function main() {
         }
       }
     }
+  });
+
+  /* =====================================================================
+   * SECTION J — AI recap (pure module) + demo-link + live-feed contract
+   *
+   * Self-contained, client-side AI feature only. buildLocalRecap must be PURE
+   * (no network) and useful; runAiRecap must fall back to demo without keys and
+   * never throw. Demo email links must be detectable; a live-feed load path and
+   * its UI wiring must exist.
+   * ===================================================================== */
+
+  const nowRecap = Date.parse('2026-09-16T00:00:00Z');
+
+  test('ai-recap.buildLocalRecap: returns recap/risk/nextStep (mode demo) for a green.json opp', () => {
+    const cursor = green.opportunities.find((o) => o.id === 'opp-cursor');
+    const r = buildLocalRecap(cursor, nowRecap);
+    assert(r && typeof r === 'object', 'recap object required');
+    assert(typeof r.recap === 'string' && r.recap.length > 0, 'recap text required');
+    assert(typeof r.risk === 'string' && r.risk.length > 0, 'risk text required');
+    assert(typeof r.nextStep === 'string' && r.nextStep.length > 0, 'nextStep text required');
+    assert(r.mode === 'demo', `mode must be demo got ${r.mode}`);
+    assert(/Cursor/.test(r.recap), 'recap should mention the company');
+    assert(/WON/.test(r.recap), 'recap should reflect the status');
+  });
+
+  test('ai-recap.buildLocalRecap: is PURE — same input yields identical output', () => {
+    const optus = green.opportunities.find((o) => o.id === 'opp-optus-coi');
+    const a = buildLocalRecap(optus, nowRecap);
+    const b = buildLocalRecap(optus, nowRecap);
+    assert(JSON.stringify(a) === JSON.stringify(b), 'buildLocalRecap must be deterministic');
+  });
+
+  test('ai-recap.buildLocalRecap: risk flags an incoming + owner-action opp', () => {
+    const optus = green.opportunities.find((o) => o.id === 'opp-optus-coi');
+    const r = buildLocalRecap(optus, nowRecap);
+    assert(/owner action/i.test(r.risk), `risk must flag owner action, got: ${r.risk}`);
+    assert(/incoming/i.test(r.risk), `risk must flag incoming awaiting response, got: ${r.risk}`);
+    // next step echoes the record's next_action
+    assert(
+      r.nextStep === optus.next_action,
+      `nextStep should echo next_action, got: ${r.nextStep}`,
+    );
+  });
+
+  test('ai-recap.buildLocalRecap: clean WON opp reports no blocking risk', () => {
+    const cursor = green.opportunities.find((o) => o.id === 'opp-cursor');
+    const r = buildLocalRecap(cursor, nowRecap);
+    assert(/no blocking risks/i.test(r.risk), `expected no-risk message, got: ${r.risk}`);
+  });
+
+  test('ai-recap.buildLocalRecap: null-safe (never throws)', () => {
+    const r = buildLocalRecap(null);
+    assert(r && r.mode === 'demo', 'null opp yields a safe demo recap');
+    assert(r.recap && r.risk && r.nextStep, 'safe recap still has all fields');
+  });
+
+  // Precompute async results so the synchronous test harness can assert them.
+  const optusForAi = green.opportunities.find((o) => o.id === 'opp-optus-coi');
+  const aiNoKey = await runAiRecap(optusForAi, {});
+  const aiEmptyKeys = await runAiRecap(optusForAi, { claude: '', openai: '', gemini: '' });
+  const aiNoArg = await runAiRecap(optusForAi);
+  const liveAbsent = await loadLiveDashboardFeed('./feeds');
+
+  test('ai-recap.runAiRecap: falls back to demo when no key is provided (never throws)', () => {
+    assert(aiNoKey.mode === 'demo', `no key must be demo got ${aiNoKey.mode}`);
+    assert(aiEmptyKeys.mode === 'demo', `empty keys must be demo got ${aiEmptyKeys.mode}`);
+    assert(aiNoArg.mode === 'demo', 'missing keys arg must be demo');
+    assert(aiNoKey.recap && aiNoKey.risk && aiNoKey.nextStep, 'demo recap has all fields');
+  });
+
+  test('ai-recap.js: never persists keys (no localStorage/disk writes in the module)', () => {
+    const src = readSrc('js/ai-recap.js');
+    assert(!/localStorage\s*[.\[]/.test(src), 'ai-recap.js must not touch localStorage');
+    assert(!/sessionStorage\s*[.\[]/.test(src), 'ai-recap.js must not touch sessionStorage');
+    assert(!/console\.(log|info|warn|error)/.test(src), 'ai-recap.js must not log (could leak keys)');
+    // Client-side only: no server-side agent loop / extract pipeline / apply-plan invocations.
+    assert(!/\bai\.run\s*\(/.test(src), 'no server-side ai.run agent loop in ai-recap.js');
+    assert(!/\bai\.extract\s*\(/.test(src), 'no ai.extract pipeline in ai-recap.js');
+    assert(!/while\s*\(\s*true\s*\)/.test(src), 'no unbounded agent loop in ai-recap.js');
+  });
+
+  test('transmission.isDemoEmailLink: detects Demo tokens and subject-search links', () => {
+    assert(
+      isDemoEmailLink('https://outlook.office.com/mail/deeplink/read/AAMkAGOptusDemoItemId') === true,
+      'Demo token must be detected',
+    );
+    assert(
+      isDemoEmailLink('https://outlook.office.com/mail/?q=Huntress%20Free%20MSP%20NFR') === true,
+      'subject-search link must be flagged as demo',
+    );
+    assert(
+      isDemoEmailLink('https://outlook.office.com/mail/deeplink/read/AAMkRealThreadId') === false,
+      'a real deep link must NOT be flagged demo',
+    );
+    assert(isDemoEmailLink('') === false && isDemoEmailLink(null) === false, 'null/empty safe');
+  });
+
+  test('transmission.buildEmailThreadLink: carries an isDemo flag', () => {
+    const huntress = green.opportunities.find((o) => o.id === 'opp-huntress');
+    const link = buildEmailThreadLink(huntress);
+    assert(link && link.isDemo === true, 'huntress subject-search link should be marked demo');
+  });
+
+  test('feed-loader.loadLiveDashboardFeed: absent export yields YELLOW-incomplete (not GREEN)', () => {
+    assert(Array.isArray(LIVE_FEED_CANDIDATES) && LIVE_FEED_CANDIDATES.length >= 1, 'candidate list present');
+    // In Node there is no fetch server for ./feeds — must return ok:false, never fabricate a feed.
+    assert(liveAbsent && liveAbsent.ok === false, 'absent live feed must not report ok');
+    assert(liveAbsent.feed === null, 'absent live feed must not fabricate a feed object');
+    assert(/YELLOW|incomplete/i.test(liveAbsent.error), `error must signal YELLOW/incomplete, got: ${liveAbsent.error}`);
+  });
+
+  test('app.js CONTRACT: renders a data-action="ai-recap" affordance (card + detail)', () => {
+    assert(dataActionRe('ai-recap').test(appSrc), 'missing data-action="ai-recap" in app.js');
+    const count = (appSrc.match(dataActionRe('ai-recap')) ? appSrc.split('data-action="ai-recap"').length - 1 : 0);
+    assert(count >= 2, `expected AI Recap on both card and detail, found ${count}`);
+  });
+
+  test('app.js CONTRACT: dispatch handles the "ai-recap" action', () => {
+    assert(dispatchBranchRe('ai-recap').test(appSrc), 'dispatch has no branch for "ai-recap"');
+    assert(/onAiRecap\s*\(/.test(appSrc), 'app.js must invoke an AI recap handler');
+  });
+
+  test('app.js CONTRACT: renders the AI Recap result section + demo-mode label', () => {
+    assert(/rccAiRecapBody/.test(appSrc), 'app.js must render an AI recap result container');
+    assert(/demo \(no API key\)/i.test(appSrc), 'app.js must label demo (no API key) mode clearly');
+  });
+
+  test('app.js CONTRACT: AI keys are memory-only (never persisted)', () => {
+    assert(/rcc-ai-key/.test(appSrc), 'app.js must render the AI key affordance');
+    assert(/stored in memory only/i.test(appSrc), 'app.js must state keys are memory-only');
+    assert(!/localStorage\s*[.\[]/.test(appSrc), 'app.js must not persist keys to localStorage');
+    assert(!/sessionStorage\s*[.\[]/.test(appSrc), 'app.js must not persist keys to sessionStorage');
+  });
+
+  test('app.js CONTRACT: a live-feed load path is wired', () => {
+    assert(/loadLiveDashboardFeed/.test(appSrc), 'app.js must call loadLiveDashboardFeed');
+    assert(listenerRe('rccLoadLiveFeed').test(appSrc), 'no click listener wired to #rccLoadLiveFeed');
+  });
+
+  test('app.js CONTRACT: demo email links are visibly tagged', () => {
+    assert(/rcc-demo-tag/.test(appSrc), 'app.js must render a demo-link tag for placeholder links');
+  });
+
+  test('index.html: toolbar exposes an AI Recap control and a Load live feed control', () => {
+    const html = readFileSync(join(root, 'index.html'), 'utf8');
+    assert(/rccToolbarAiRecap/.test(html), 'index.html must include the toolbar AI Recap button');
+    assert(/rccLoadLiveFeed/.test(html), 'index.html must include the Load live feed button');
   });
 
   /* ---- summary ---- */
