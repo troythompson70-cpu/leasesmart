@@ -49,6 +49,8 @@ const state = {
   repairLog: [],
   openOppId: null,
   pathAudit: [],
+  // Session-only "removed from active view" set. Never deletes SoT correspondence.
+  removedIds: new Set(),
 };
 
 function $(id) {
@@ -115,8 +117,16 @@ function renderOwnerPanel() {
     .join('');
 }
 
+function notRemoved(o) {
+  return !state.removedIds.has(String(o.id || o.opportunity_id));
+}
+
+function visibleOpportunities() {
+  return getOpportunities(state.feed).filter(notRemoved);
+}
+
 function filteredOpportunities() {
-  const opps = sortOpportunities(getOpportunities(state.feed));
+  const opps = sortOpportunities(visibleOpportunities());
   if (state.filter === 'incoming') {
     return opps.filter((o) => hasIncomingAttention(o));
   }
@@ -124,7 +134,7 @@ function filteredOpportunities() {
 }
 
 function renderFilterTabs() {
-  const all = getOpportunities(state.feed);
+  const all = visibleOpportunities();
   const incomingCount = all.filter((o) => hasIncomingAttention(o)).length;
   $('rccIncomingCount').textContent = String(incomingCount);
   document.querySelectorAll('.rcc-tab').forEach((tab) => {
@@ -160,9 +170,17 @@ function transmissionHtml(tx) {
   </div>`;
 }
 
+function emailThreadControl(vm, id) {
+  // Prefer a real navigable link so "Open Email Thread" never silently fails.
+  if (vm.emailLink && vm.emailLink.href) {
+    return `<a class="rcc-btn" href="${esc(vm.emailLink.href)}" target="_blank" rel="noopener noreferrer">Open Email Thread</a>`;
+  }
+  return `<button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Email Thread</button>`;
+}
+
 function renderCards() {
   const host = $('rccCards');
-  const all = getOpportunities(state.feed);
+  const all = visibleOpportunities();
   const opps = filteredOpportunities();
   renderFilterTabs();
   if (!opps.length) {
@@ -187,7 +205,9 @@ function renderCards() {
           <div><dt>Tier</dt><dd>${esc(opp.tier)}</dd></div>
           <div><dt>Status</dt><dd>${esc(opp.status)}</dd></div>
           <div><dt>Last verified</dt><dd>${esc(opp.last_verified_at || '—')}</dd></div>
-          <div><dt>Owner action</dt><dd>${esc(vm.ownerYesNo)}</dd></div>
+          <div><dt>Source</dt><dd>${esc(opp.source || opp.source_ref || '—')}</dd></div>
+          <div><dt>Owner action required</dt><dd>${esc(vm.ownerYesNo)}</dd></div>
+          <div><dt>Next action</dt><dd>${esc(opp.next_action || '—')}</dd></div>
         </dl>
         ${transmissionHtml(vm.transmission)}
         ${vm.timing ? `<div class="rcc-timing">${esc(vm.timing)}</div>` : ''}
@@ -199,7 +219,12 @@ function renderCards() {
               : ''
           }
           <button type="button" class="rcc-btn" data-lockable="1" data-action="followup" data-id="${esc(id)}">Send Follow-up</button>
-          <button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Email Thread</button>
+          <button type="button" class="rcc-btn" data-lockable="1" data-action="done" data-id="${esc(id)}">Mark Done</button>
+          <button type="button" class="rcc-btn" data-lockable="1" data-action="pass" data-id="${esc(id)}">Close/Pass</button>
+          ${emailThreadControl(vm, id)}
+          <button type="button" class="rcc-btn" data-action="open-sp" data-id="${esc(id)}">Open SharePoint Record</button>
+          <button type="button" class="rcc-btn" data-action="repair" data-id="${esc(id)}">Repair Record</button>
+          <button type="button" class="rcc-btn danger" data-lockable="1" data-action="delete" data-id="${esc(id)}">Delete</button>
         </div>
       </article>`;
     })
@@ -339,6 +364,7 @@ function openDetail(id) {
     <button type="button" class="rcc-btn" data-lockable="1" data-action="done" data-id="${esc(id)}">Mark Done</button>
     <button type="button" class="rcc-btn" data-lockable="1" data-action="pass" data-id="${esc(id)}">Close/Pass</button>
     <button type="button" class="rcc-btn" data-action="repair" data-id="${esc(id)}">Repair Record</button>
+    <button type="button" class="rcc-btn danger" data-lockable="1" data-action="delete" data-id="${esc(id)}">Delete</button>
   `;
   $('rccDetailBackdrop').classList.add('on');
   setLocked(!!state.health?.actionsLocked);
@@ -434,7 +460,11 @@ function openEmailThread(opp) {
     toast('No email/thread link available for this Lead ID', true);
     return;
   }
-  window.open(link.href, '_blank', 'noopener,noreferrer');
+  const win = window.open(link.href, '_blank', 'noopener,noreferrer');
+  // If a popup blocker prevented the window, surface the link instead of failing silently.
+  if (!win) {
+    toast(`Email thread: ${link.href}`);
+  }
 }
 
 function onClearIncoming(id) {
@@ -467,12 +497,37 @@ function onClearIncoming(id) {
   recompute();
 }
 
+function onDelete(id) {
+  const opp = findOpp(id);
+  const label = opp ? opp.company || opp.vendor || id : id;
+  const ok = window.confirm(
+    `Delete "${label}" from the active dashboard view?\n\n` +
+      'Correspondence and the SharePoint SoT record are preserved — this only ' +
+      'removes it from the working queue and logs an auditable delete request.',
+  );
+  if (!ok) return;
+  state.removedIds.add(String(id));
+  state.repairLog.push({
+    at: new Date().toISOString(),
+    opportunityId: id,
+    action: 'delete',
+    note: 'Delete requested from UI — auditable; correspondence preserved',
+  });
+  if (state.openOppId === String(id) || state.openOppId === id) closeDetail();
+  toast(`Deleted "${label}" from active view (auditable — correspondence preserved)`);
+  recompute();
+}
+
 function onCardAction(action, id) {
-  if (['followup', 'done', 'pass', 'bulk'].includes(action) && guardLockedAction()) {
+  if (['followup', 'done', 'pass', 'bulk', 'delete'].includes(action) && guardLockedAction()) {
     return;
   }
   if (action === 'open-card') {
     openDetail(id);
+    return;
+  }
+  if (action === 'delete') {
+    onDelete(id);
     return;
   }
   if (action === 'clear-incoming') {
