@@ -11,6 +11,7 @@ cp "$SCRIPT_DIR/queue_engine.py" "$ROOT/queue_engine.py"
 cp "$SCRIPT_DIR/state_machine.py" "$ROOT/state_machine.py"
 cp "$SCRIPT_DIR/evidence.py" "$ROOT/evidence.py"
 cp "$SCRIPT_DIR/audit_log.py" "$ROOT/audit_log.py"
+cp "$SCRIPT_DIR/checkpoint.py" "$ROOT/checkpoint.py"
 mkdir -p "$ROOT/tests/fixtures"
 if [[ -d "$SCRIPT_DIR/tests" ]]; then
   cp -R "$SCRIPT_DIR/tests/." "$ROOT/tests/"
@@ -84,9 +85,22 @@ EOF
     systemctl --user enable --now tgt-orchestrator.timer
     echo "TGT orchestrator installed (systemd user timer, every 5 minutes)."
   elif command -v crontab >/dev/null 2>&1; then
-    CRON_LINE="*/5 * * * * . $ENV_FILE 2>/dev/null; /usr/bin/env python3 $ROOT/tgt_orchestrator.py run-once >> $ROOT/orchestrator.log 2>> $ROOT/orchestrator.err"
-    (crontab -l 2>/dev/null | grep -v 'tgt_orchestrator.py' || true; echo "$CRON_LINE") | crontab -
-    echo "TGT orchestrator installed (crontab every 5 minutes)."
+    # Overlap guard: flock on a lockfile before run-once (AIWO-007 fix #4).
+    cat > "$ROOT/run_once_guarded.sh" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+source "$ENV_FILE" 2>/dev/null || true
+exec 9>"$ROOT/run-once.lock"
+if ! flock -n 9; then
+  echo "[\$(date -Iseconds)] run-once skipped: already running" >> "$ROOT/orchestrator.log"
+  exit 0
+fi
+/usr/bin/env python3 "$ROOT/tgt_orchestrator.py" run-once >> "$ROOT/orchestrator.log" 2>> "$ROOT/orchestrator.err"
+EOF
+    chmod +x "$ROOT/run_once_guarded.sh"
+    CRON_LINE="*/5 * * * * $ROOT/run_once_guarded.sh"
+    (crontab -l 2>/dev/null | grep -v 'tgt_orchestrator.py' | grep -v 'run_once_guarded.sh' || true; echo "$CRON_LINE") | crontab -
+    echo "TGT orchestrator installed (crontab every 5 minutes, flock overlap guard)."
   else
     cat > "$ROOT/run_loop.sh" <<EOF
 #!/usr/bin/env bash

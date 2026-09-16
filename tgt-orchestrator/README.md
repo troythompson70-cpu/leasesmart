@@ -15,10 +15,11 @@ Workers never mark their own work `VERIFIED`.
 |------|------|
 | `state_machine.py` | Legal status transitions; blocks worker self-verify |
 | `queue_engine.py` | Atomic claim/lock, heartbeat, stale recovery, retry, handoff |
-| `evidence.py` | Evidence write + read-back proof |
+| `checkpoint.py` | ERR-ORCH-006/007 progress checkpoint + completion evidence guards |
+| `evidence.py` | Evidence write + read-back proof + sha256 audit pin |
 | `audit_log.py` | Append-only `queue_audit.jsonl` |
-| `tgt_orchestrator.py` | CLI entry |
-| `install_tgt_orchestrator.sh` | macOS LaunchAgent or Linux systemd/cron (5 min) |
+| `tgt_orchestrator.py` | CLI entry (run-once overlap lock + in-agent heartbeats) |
+| `install_tgt_orchestrator.sh` | macOS LaunchAgent or Linux systemd/cron (5 min, flock guard) |
 
 ## Install (one-time)
 

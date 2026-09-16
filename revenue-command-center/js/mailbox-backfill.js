@@ -39,12 +39,17 @@ function conversationKey(msg) {
  */
 export function messageToCandidate(msg) {
   const subject = String(msg.subject || msg.thread_subject || '').trim();
+  const fromEmail =
+    msg.from_email ||
+    msg.sender_email ||
+    msg.from?.emailAddress?.address ||
+    msg.sender_source ||
+    '';
   const company = String(
     msg.company ||
       msg.from_domain_company ||
       msg.sender_company ||
-      msg.from_name ||
-      'Unknown sender',
+      '',
   ).trim();
   return {
     company,
@@ -58,16 +63,32 @@ export function messageToCandidate(msg) {
       `mailbox:${messageKey(msg) || conversationKey(msg) || subject}`,
     thread_id: conversationKey(msg) || messageKey(msg),
     message_id: messageKey(msg),
-    conversation_id: conversationKey(msg) || null,
+    source_message_id: messageKey(msg),
+    conversation_id: conversationKey(msg) || msg.conversationId || null,
+    from_email: fromEmail,
+    sender_email: fromEmail,
+    sender_source: fromEmail || msg.from?.emailAddress?.name || '',
+    contact_name: msg.from_name || msg.from?.emailAddress?.name || msg.sender || '',
+    recipient:
+      msg.recipient ||
+      msg.to_email ||
+      (Array.isArray(msg.toRecipients)
+        ? msg.toRecipients[0]?.emailAddress?.address
+        : '') ||
+      '',
     transmission_direction: msg.direction === 'OUTBOUND' ? 'OUTBOUND' : 'INCOMING',
-    latest_transmission_at: msg.received_at || msg.sent_at || msg.at || isoNow(),
-    message_preview: msg.body_preview || msg.preview || subject,
+    latest_transmission_at:
+      msg.received_at || msg.receivedDateTime || msg.sent_at || msg.at || isoNow(),
+    received_at: msg.received_at || msg.receivedDateTime || msg.at,
+    message_preview: msg.body_preview || msg.bodyPreview || msg.preview || subject,
+    body_preview: msg.body_preview || msg.bodyPreview || msg.preview || subject,
     tier: msg.tier != null ? String(msg.tier) : '2',
     status: 'NEW',
     owner: 'Troy',
     next_action: 'Classify mailbox candidate',
     follow_up_date: defaultFollowUp(),
-    open_source_url: msg.web_link || msg.open_source_url || null,
+    open_source_url: msg.web_link || msg.webLink || msg.open_source_url || null,
+    web_link: msg.web_link || msg.webLink || msg.open_source_url || null,
   };
 }
 
@@ -112,7 +133,11 @@ export function runMailboxBackfill(feed, messages = [], opts = {}) {
     }
 
     const candidate = messageToCandidate(msg);
-    const existing = findExistingOpportunity(working.opportunities || [], candidate);
+    const existing = findExistingOpportunity(
+      working.opportunities || [],
+      candidate,
+      working,
+    );
     const result = processDiscovery(working, candidate);
 
     if (!result.ok) {

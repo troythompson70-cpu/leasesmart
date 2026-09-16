@@ -16,7 +16,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 # Allow running as script from this directory or installed copy.
 _HERE = Path(__file__).resolve().parent
@@ -164,7 +164,7 @@ def build_prompt(os_root: Path, row: dict) -> str:
     )
 
 
-def run_agent(owner: str, repo: Path, prompt: str) -> Tuple[int, str]:
+def run_agent(owner: str, repo: Path, prompt: str, *, heartbeat_cb=None) -> Tuple[int, str]:
     if owner == "Cursor":
         bin_name = "agent"
         cmd = ["agent", "-p", prompt, "--output-format", "text"]
@@ -175,9 +175,57 @@ def run_agent(owner: str, repo: Path, prompt: str) -> Tuple[int, str]:
         return 2, f"Unsupported owner_ai={owner}"
     if not which_cli(bin_name):
         return 127, f"{bin_name} CLI not found on PATH"
-    proc = subprocess.run(cmd, cwd=repo, text=True, capture_output=True)
-    out = (proc.stdout or "") + "\n--- STDERR ---\n" + (proc.stderr or "")
-    return proc.returncode, out
+
+    import threading
+
+    stop = threading.Event()
+
+    def _hb_loop():
+        while not stop.wait(60):
+            if heartbeat_cb:
+                try:
+                    heartbeat_cb("agent_running_heartbeat")
+                except Exception:
+                    pass
+
+    thr = threading.Thread(target=_hb_loop, name="tgt-orch-heartbeat", daemon=True)
+    thr.start()
+    try:
+        proc = subprocess.run(cmd, cwd=repo, text=True, capture_output=True)
+        out = (proc.stdout or "") + "\n--- STDERR ---\n" + (proc.stderr or "")
+        return proc.returncode, out
+    finally:
+        stop.set()
+
+
+def acquire_run_once_lock(repo: Path) -> Optional[Any]:
+    """Prevent overlapping run-once invocations (crontab overlap guard)."""
+    lock_path = Path(os.getenv("TGT_RUN_ONCE_LOCK", str(repo / ".tgt-orchestrator.runonce.lock")))
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    lf = lock_path.open("a+", encoding="utf-8")
+    try:
+        import fcntl
+
+        fcntl.flock(lf.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        lf.close()
+        return None
+    lf.seek(0)
+    lf.truncate()
+    lf.write(f"pid={os.getpid()} at={iso_now()}\n")
+    lf.flush()
+    return lf
+
+
+def release_run_once_lock(handle) -> None:
+    if handle is None:
+        return
+    try:
+        import fcntl
+
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    finally:
+        handle.close()
 
 
 def cmd_validate(_: argparse.Namespace) -> int:
@@ -211,6 +259,8 @@ def cmd_claim(args: argparse.Namespace) -> int:
             owner=args.owner,
             os_root=os_root,
             force=args.force,
+            force_reclaim_review=getattr(args, "force_reclaim_review", False),
+            present_lock_token=getattr(args, "lock_token", None),
         )
     except (ClaimDenied, DuplicateExecution, KeyError) as e:
         print(json.dumps({"ok": False, "error": str(e)}), file=sys.stderr)
@@ -246,123 +296,157 @@ def cmd_run_once(args: argparse.Namespace) -> int:
     repo = find_repo(args.repo)
     qpath = queue_path_for(os_root)
     env_report = validate_environment(os_root, repo)
-    append_audit(os_root, {"event": "run_once_start", **env_report})
-
-    with queue_lock(qpath):
-        rows = load_queue(qpath)
-        recover_stale_locks(rows, os_root=os_root)
-        save_queue(qpath, rows)
-        nxt = select_next_eligible(rows)
-
-    if not nxt:
-        print(json.dumps({"ok": True, "message": "No eligible work", "env": env_report}, indent=2))
-        return 0
-
-    wid = nxt["work_order_id"]
-    owner = nxt["owner_ai"]
-    try:
-        claimed = claim_work_order(qpath, wid, owner=owner, os_root=os_root)
-    except (ClaimDenied, DuplicateExecution) as e:
-        print(json.dumps({"ok": False, "error": str(e), "work_order_id": wid}, indent=2))
-        return 2
-
-    lock_token = claimed["lock_token"]
-    heartbeat(
-        qpath,
-        wid,
-        lock_token=lock_token,
-        last_completed_action="Claim acquired",
-        next_required_action="Execute agent",
-        current_state="EXECUTING",
-        os_root=os_root,
-    )
-
-    if args.dry_run or args.foundation_only:
-        # Foundation self-test path: do not invoke external CLIs.
-        evidence = write_evidence(
-            os_root,
-            wid,
-            owner,
-            {
-                "mode": "foundation_dry_run",
-                "work_order_id": wid,
-                "claimed_by": claimed["claimed_by"],
-                "env": env_report,
-                "note": "Automation foundation claimed/locked/heartbeat without external agent spawn",
-            },
-        )
-        rb = read_back(evidence)
-        complete_ready_for_review(
-            qpath,
-            wid,
-            lock_token=lock_token,
-            evidence_location=relative_to_os(os_root, evidence),
-            last_completed_action="Foundation dry-run claim/lock/heartbeat/evidence complete",
-            next_required_action="Claude review of automation foundation",
-            os_root=os_root,
-        )
+    run_lock = acquire_run_once_lock(repo)
+    if run_lock is None:
         print(
             json.dumps(
                 {
-                    "ok": True,
-                    "work_order_id": wid,
-                    "status": "READY_FOR_REVIEW",
-                    "evidence": rb,
+                    "ok": False,
+                    "error": "run-once already in progress (overlap guard)",
+                    "env": env_report,
                 },
                 indent=2,
             )
         )
-        return 0
+        return 3
+    try:
+        append_audit(os_root, {"event": "run_once_start", **env_report})
 
-    prompt = build_prompt(os_root, claimed)
-    heartbeat(
-        qpath,
-        wid,
-        lock_token=lock_token,
-        last_completed_action="Prompt built",
-        next_required_action=f"Run {owner} CLI",
-        current_state="AGENT_RUNNING",
-        os_root=os_root,
-    )
-    rc, output = run_agent(owner, repo, prompt)
-    evidence = write_evidence(os_root, wid, owner, output, suffix="txt")
-    rb = read_back(evidence)
-    rel = relative_to_os(os_root, evidence)
-    if rc == 0:
-        complete_ready_for_review(
+        with queue_lock(qpath):
+            rows = load_queue(qpath)
+            recover_stale_locks(rows, os_root=os_root)
+            save_queue(qpath, rows)
+            nxt = select_next_eligible(rows)
+
+        if not nxt:
+            print(json.dumps({"ok": True, "message": "No eligible work", "env": env_report}, indent=2))
+            return 0
+
+        wid = nxt["work_order_id"]
+        owner = nxt["owner_ai"]
+        try:
+            claimed = claim_work_order(qpath, wid, owner=owner, os_root=os_root)
+        except (ClaimDenied, DuplicateExecution) as e:
+            print(json.dumps({"ok": False, "error": str(e), "work_order_id": wid}, indent=2))
+            return 2
+
+        lock_token = claimed["lock_token"]
+        heartbeat(
             qpath,
             wid,
             lock_token=lock_token,
-            evidence_location=rel,
-            last_completed_action=f"{owner} execution completed rc=0",
+            last_completed_action="Claim acquired",
+            next_required_action="Execute agent",
+            current_state="EXECUTING",
             os_root=os_root,
         )
-        status = "READY_FOR_REVIEW"
-    else:
-        fail_blocked(
+
+        if args.dry_run or args.foundation_only:
+            # Foundation self-test path: do not invoke external CLIs.
+            evidence = write_evidence(
+                os_root,
+                wid,
+                owner,
+                {
+                    "mode": "foundation_dry_run",
+                    "work_order_id": wid,
+                    "claimed_by": claimed["claimed_by"],
+                    "env": env_report,
+                    "note": "Automation foundation claimed/locked/heartbeat/evidence without external agent spawn",
+                },
+            )
+            rb = read_back(evidence)
+            from evidence import evidence_sha256_of
+
+            complete_ready_for_review(
+                qpath,
+                wid,
+                lock_token=lock_token,
+                evidence_location=str(evidence),
+                last_completed_action="Foundation dry-run claim/lock/heartbeat/evidence complete",
+                next_required_action="Claude review of automation foundation",
+                os_root=os_root,
+                evidence_sha256=evidence_sha256_of(evidence),
+            )
+            print(
+                json.dumps(
+                    {
+                        "ok": True,
+                        "work_order_id": wid,
+                        "status": "READY_FOR_REVIEW",
+                        "evidence": rb,
+                    },
+                    indent=2,
+                )
+            )
+            return 0
+
+        prompt = build_prompt(os_root, claimed)
+        heartbeat(
             qpath,
             wid,
             lock_token=lock_token,
-            error=f"EXECUTION_FAILED_RC_{rc}",
-            evidence_location=rel,
-            retryable=rc not in (2,),
+            last_completed_action="Prompt built",
+            next_required_action=f"Run {owner} CLI",
+            current_state="AGENT_RUNNING",
             os_root=os_root,
         )
-        status = "BLOCKED_OR_RETRY"
-    print(
-        json.dumps(
-            {
-                "ok": rc == 0,
-                "work_order_id": wid,
-                "rc": rc,
-                "status": status,
-                "evidence": rb,
-                "env": env_report,
-            },
-            indent=2,
+
+        def _hb(msg: str) -> None:
+            heartbeat(
+                qpath,
+                wid,
+                lock_token=lock_token,
+                last_completed_action=msg,
+                next_required_action=f"Run {owner} CLI",
+                current_state="AGENT_RUNNING",
+                os_root=os_root,
+            )
+
+        rc, output = run_agent(owner, repo, prompt, heartbeat_cb=_hb)
+        evidence = write_evidence(os_root, wid, owner, output, suffix="txt")
+        rb = read_back(evidence)
+        rel = relative_to_os(os_root, evidence)
+        from evidence import evidence_sha256_of
+
+        if rc == 0:
+            complete_ready_for_review(
+                qpath,
+                wid,
+                lock_token=lock_token,
+                evidence_location=str(evidence),
+                last_completed_action=f"{owner} execution completed rc=0",
+                os_root=os_root,
+                evidence_sha256=evidence_sha256_of(evidence),
+            )
+            status = "READY_FOR_REVIEW"
+        else:
+            fail_blocked(
+                qpath,
+                wid,
+                lock_token=lock_token,
+                error=f"EXECUTION_FAILED_RC_{rc}",
+                evidence_location=rel,
+                retryable=rc not in (2,),
+                os_root=os_root,
+            )
+            status = "BLOCKED_OR_RETRY"
+        print(
+            json.dumps(
+                {
+                    "ok": rc == 0,
+                    "work_order_id": wid,
+                    "rc": rc,
+                    "status": status,
+                    "evidence": rb,
+                    "env": env_report,
+                },
+                indent=2,
+            )
         )
-    )
-    return 0 if rc == 0 else 1
+        return 0 if rc == 0 else 1
+    finally:
+        release_run_once_lock(run_lock)
 
 
 def cmd_selftest(args: argparse.Namespace) -> int:
@@ -426,7 +510,7 @@ def cmd_selftest(args: argparse.Namespace) -> int:
             qpath,
             "AIWO-006",
             lock_token=token,
-            evidence_location=relative_to_os(root, evidence),
+            evidence_location=str(evidence),
             last_completed_action="selftest complete",
             os_root=root,
         )
@@ -467,7 +551,13 @@ def cmd_selftest(args: argparse.Namespace) -> int:
         assert seven["status"] == "READY"
         assert seven["lock_token"] == ""
 
-        # Failure / retry
+        # Failure / retry — AIWO-007 requires VERIFIED before dependents claim.
+        with queue_lock(qpath):
+            rows = load_queue(qpath)
+            six = next(r for r in rows if r["work_order_id"] == "AIWO-006")
+            six["status"] = "VERIFIED"
+            six["audit_status"] = "VERIFIED_BY_AUDITOR_SELFTEST"
+            save_queue(qpath, rows)
         claimed7 = claim_work_order(qpath, "AIWO-007", owner="Claude", os_root=root)
         fail_blocked(
             qpath,
@@ -511,6 +601,16 @@ def build_parser() -> argparse.ArgumentParser:
     c.add_argument("work_order_id")
     c.add_argument("--owner", default="Cursor")
     c.add_argument("--force", action="store_true")
+    c.add_argument(
+        "--force-reclaim-review",
+        action="store_true",
+        help="Audited reclaim of READY_FOR_REVIEW (bare --force is insufficient)",
+    )
+    c.add_argument(
+        "--lock-token",
+        default=None,
+        help="Required to refresh an in-flight claim for the same agent",
+    )
     c.set_defaults(func=cmd_claim)
 
     h = sub.add_parser("heartbeat")

@@ -10,6 +10,7 @@ import {
   buildEmailThreadLink,
 } from './transmission.js';
 import { formatResolvedPath, resolveRecordPath } from './paths.js';
+import { recentEmailOf, conversationSnapshotOf } from './email-snapshot.js';
 
 function parseTime(v) {
   if (!v) return null;
@@ -104,6 +105,8 @@ export function cardViewModel(opp, allOpps, now = Date.now()) {
     lastVerified: opp.last_verified_at || '',
     unread,
     transmission: tx,
+    recentEmail: recentEmailOf(opp),
+    conversationSnapshot: conversationSnapshotOf(opp),
     emailLink: email,
     sharePointPath: formatResolvedPath(pathResolved),
     pathMalformedRejected: !!(pathResolved && pathResolved.malformedRejected),
@@ -112,6 +115,8 @@ export function cardViewModel(opp, allOpps, now = Date.now()) {
     timing: replyTimingMessage(opp, now),
     incoming: hasIncomingAttention(opp),
     notes: opp.notes || opp.operator_notes || '',
+    contacts: opp.contacts || [],
+    domain: opp.email_domain || (opp.domains && opp.domains[0]) || '',
   };
 }
 

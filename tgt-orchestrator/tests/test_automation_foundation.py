@@ -18,6 +18,7 @@ from queue_engine import (  # noqa: E402
     DuplicateExecution,
     claim_work_order,
     complete_ready_for_review,
+    dependencies_satisfied,
     fail_blocked,
     heartbeat,
     load_queue,
@@ -25,6 +26,7 @@ from queue_engine import (  # noqa: E402
     recover_stale_locks,
     save_queue,
     select_next_eligible,
+    _is_stale,
 )
 from state_machine import (  # noqa: E402
     IllegalTransition,
@@ -154,12 +156,16 @@ class QueueEngineTests(unittest.TestCase):
 
     def test_select_next_respects_dependencies(self):
         rows = load_queue(self.qpath)
-        # AIWO-007 waiting on AIWO-006
+        # AIWO-007 waiting on AIWO-006 — READY_FOR_REVIEW must NOT unlock (AIWO-007 fix #5)
         nxt = select_next_eligible(rows, owners=("Claude",), order=["AIWO-007"])
         self.assertIsNone(nxt)
-        # Mark 006 done
         six = next(r for r in rows if r["work_order_id"] == "AIWO-006")
         six["status"] = "READY_FOR_REVIEW"
+        self.assertFalse(dependencies_satisfied(rows, next(r for r in rows if r["work_order_id"] == "AIWO-007")))
+        nxt = select_next_eligible(rows, owners=("Claude",), order=["AIWO-007"])
+        self.assertIsNone(nxt)
+        six["status"] = "VERIFIED"
+        self.assertTrue(dependencies_satisfied(rows, next(r for r in rows if r["work_order_id"] == "AIWO-007")))
         nxt = select_next_eligible(rows, owners=("Claude",), order=["AIWO-007"])
         self.assertIsNotNone(nxt)
         self.assertEqual(nxt["work_order_id"], "AIWO-007")

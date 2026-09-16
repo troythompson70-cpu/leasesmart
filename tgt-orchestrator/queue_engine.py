@@ -55,8 +55,11 @@ QUEUE_FIELDS = [
     "blocker",
 ]
 
-DEFAULT_STALE_SECONDS = int(os.getenv("TGT_STALE_HEARTBEAT_SECONDS", "1200"))  # 20 min
+# AIWO-007 fix #3: stale window must not undercut the stated lock lease.
 DEFAULT_LOCK_SECONDS = int(os.getenv("TGT_LOCK_SECONDS", "1800"))  # 30 min
+DEFAULT_STALE_SECONDS = int(
+    os.getenv("TGT_STALE_HEARTBEAT_SECONDS", str(DEFAULT_LOCK_SECONDS))
+)
 DEFAULT_MAX_RETRIES = int(os.getenv("TGT_MAX_RETRIES", "3"))
 
 HANDOFF_PROMOTIONS = {
@@ -152,8 +155,9 @@ def _is_stale(row: Mapping[str, str], *, now: Optional[datetime] = None) -> bool
     lock_exp = _parse_ts(row.get("lock_expires_at"))
     if lock_exp and lock_exp.tzinfo is None:
         lock_exp = lock_exp.replace(tzinfo=now.tzinfo)
-    if lock_exp and now > lock_exp:
-        return True
+    # Honor the stated lease: do not reclaim via heartbeat-age while lock_expires_at is future.
+    if lock_exp is not None:
+        return now > lock_exp
     hb = _parse_ts(row.get("heartbeat_at")) or _parse_ts(row.get("claimed_at"))
     if hb is None:
         return True
@@ -197,6 +201,11 @@ def recover_stale_locks(
 
 
 def dependencies_satisfied(rows: List[Dict[str, str]], row: Mapping[str, str]) -> bool:
+    """Dependents unlock only after Auditor VERIFIED (AIWO-007 fix #5).
+
+    READY_FOR_REVIEW / READY_FOR_AUDIT deliberately do NOT satisfy dependencies —
+    that was the self-verify-adjacent governance bypass.
+    """
     deps = (row.get("dependencies") or "").strip()
     if not deps or deps.lower() in {"none", "n/a", "-"}:
         return True
@@ -211,15 +220,8 @@ def dependencies_satisfied(rows: List[Dict[str, str]], row: Mapping[str, str]) -
         other = by_id.get(dep)
         if not other:
             return False
-        if normalize_status(other.get("status")) not in TERMINAL_SUCCESS | {"VERIFIED"}:
-            # WAITING reviews may also unblock when READY_FOR_REVIEW
-            if normalize_status(other.get("status")) not in {
-                "READY_FOR_REVIEW",
-                "READY_FOR_AUDIT",
-                "COMPLETED",
-                "VERIFIED",
-            }:
-                return False
+        if normalize_status(other.get("status")) != "VERIFIED":
+            return False
     return True
 
 
@@ -230,8 +232,16 @@ def claim_work_order(
     owner: str,
     os_root: Optional[Path] = None,
     force: bool = False,
+    force_reclaim_review: bool = False,
+    present_lock_token: Optional[str] = None,
 ) -> Dict[str, str]:
-    """Atomically claim a work order. Raises ClaimDenied / DuplicateExecution."""
+    """Atomically claim a work order. Raises ClaimDenied / DuplicateExecution.
+
+    AIWO-007 fixes applied:
+    - owner must match row owner_ai (unless audited force_reclaim_review)
+    - same-agent refresh requires present_lock_token (no lock_token leak via spoofed TGT_AGENT_ID)
+    - READY_FOR_REVIEW cannot be force-pulled without force_reclaim_review + distinct audit event
+    """
     identity = agent_identity(owner)
     with queue_lock(queue_path):
         rows = load_queue(queue_path)
@@ -241,21 +251,41 @@ def claim_work_order(
             raise KeyError(work_order_id)
 
         status = normalize_status(row.get("status"))
+        row_owner = (row.get("owner_ai") or "").strip()
+        if row_owner and owner and row_owner.lower() != owner.lower():
+            if not (force and force_reclaim_review):
+                raise ClaimDenied(
+                    f"{work_order_id} owner_ai={row_owner} rejects claimant owner={owner}"
+                )
+
         if status in TERMINAL_SUCCESS and not force:
             raise DuplicateExecution(
                 f"{work_order_id} already in terminal state {status}; refusing duplicate execution"
             )
 
+        if status == "READY_FOR_REVIEW" and force and not force_reclaim_review:
+            raise ClaimDenied(
+                f"{work_order_id} is READY_FOR_REVIEW; use force_reclaim_review=True "
+                "(audited) to deliberately reclaim — bare --force is insufficient"
+            )
+
         if status in IN_FLIGHT and not _is_stale(row):
             if row.get("claimed_by") == identity and row.get("lock_token"):
-                # Same agent refresh.
+                # Same agent refresh — requires presenting the existing lock_token.
+                # Spoofing TGT_AGENT_ID alone must NOT leak or refresh the lease.
+                if not present_lock_token or present_lock_token != row.get("lock_token"):
+                    raise ClaimDenied(
+                        f"{work_order_id} in-flight; refresh requires matching present_lock_token"
+                    )
                 row["heartbeat_at"] = iso_now()
                 row["lock_expires_at"] = (
                     datetime.now(timezone.utc).astimezone()
                     + timedelta(seconds=DEFAULT_LOCK_SECONDS)
                 ).isoformat(timespec="seconds")
                 save_queue(queue_path, rows)
-                return dict(row)
+                out = dict(row)
+                # Caller already holds the token; do not amplify leak surface.
+                return out
             raise ClaimDenied(
                 f"{work_order_id} locked by {row.get('claimed_by')} until "
                 f"{row.get('lock_expires_at') or row.get('heartbeat_at')}"
@@ -264,7 +294,7 @@ def claim_work_order(
         if status not in CLAIMABLE and status not in IN_FLIGHT and not force:
             raise ClaimDenied(f"{work_order_id} status={status} is not claimable")
 
-        if not dependencies_satisfied(rows, row) and not force:
+        if not dependencies_satisfied(rows, row) and not (force and force_reclaim_review):
             raise ClaimDenied(f"{work_order_id} dependencies not satisfied: {row.get('dependencies')}")
 
         assert_transition(status if status not in IN_FLIGHT else "CLAIMED", "IN_PROGRESS", role="worker")
@@ -295,15 +325,16 @@ def claim_work_order(
             row["retry_count"] = "0"
         save_queue(queue_path, rows)
         if os_root:
-            append_audit(
-                os_root,
-                {
-                    "event": "claimed",
-                    "work_order_id": work_order_id,
-                    "claimed_by": identity,
-                    "lock_token": token,
-                },
-            )
+            event = {
+                "event": "claimed",
+                "work_order_id": work_order_id,
+                "claimed_by": identity,
+                "lock_token_fingerprint": token[:8],
+            }
+            if force and force_reclaim_review:
+                event["event"] = "force_reclaim_review"
+                event["previous_status"] = status
+            append_audit(os_root, event)
         return dict(row)
 
 
@@ -360,6 +391,7 @@ def complete_ready_for_review(
     last_completed_action: str,
     next_required_action: str = "Claude / AI Auditor review",
     os_root: Optional[Path] = None,
+    evidence_sha256: str = "",
 ) -> Dict[str, str]:
     with queue_lock(queue_path):
         rows = load_queue(queue_path)
@@ -368,6 +400,19 @@ def complete_ready_for_review(
             raise KeyError(work_order_id)
         if row.get("lock_token") != lock_token:
             raise ClaimDenied("complete rejected: lock_token mismatch")
+        # ERR-ORCH-007: evidence path must exist when absolute/resolvable.
+        if evidence_location:
+            candidate = Path(evidence_location)
+            if not candidate.is_file() and os_root is not None:
+                candidate = os_root / evidence_location
+            if not candidate.is_file():
+                raise ClaimDenied(
+                    f"ERR-ORCH-007: evidence file missing or unreadable: {evidence_location}"
+                )
+            if not evidence_sha256:
+                from evidence import sha256_text
+
+                evidence_sha256 = sha256_text(candidate.read_text(encoding="utf-8"))
         try:
             assert_transition(row.get("status") or "IN_PROGRESS", "READY_FOR_REVIEW", role="worker")
         except SelfVerifyForbidden:
@@ -410,6 +455,7 @@ def complete_ready_for_review(
                     "event": "ready_for_review",
                     "work_order_id": work_order_id,
                     "evidence_location": evidence_location,
+                    "evidence_sha256": evidence_sha256,
                     "promoted": promo[0] if promo else None,
                 },
             )

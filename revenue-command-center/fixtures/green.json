@@ -1,7 +1,7 @@
 {
   "schema_version": "2.2",
-  "feed_updated_at": "2026-09-15T21:00:00Z",
-  "generated_at": "2026-09-15T21:00:00Z",
+  "feed_updated_at": "2026-09-16T18:30:00Z",
+  "generated_at": "2026-09-16T18:30:00Z",
   "feed_reachable": true,
   "pipeline_reachable": true,
   "pipeline_feed_agree": true,
@@ -198,6 +198,103 @@
       "incoming_attention": false,
       "open_source_url": "https://outlook.office.com/mail/?q=Passed%20opportunity",
       "legacy_path_probe": "Shared Documents/Shared Documents/TGT REVENUE COMMAND CENTER/archive"
+    },
+    {
+      "id": "SW-DUO-CISCO",
+      "opportunity_id": "SW-DUO-CISCO",
+      "company": "Cisco",
+      "vendor": "Cisco",
+      "tier": 1,
+      "status": "ACCOUNT_SETUP",
+      "last_verified_at": "2026-09-16T18:30:00Z",
+      "source": "Outlook: Duo MSP / NFR License",
+      "source_ref": "outlook:cisco-duo-jared",
+      "owner_action_required": true,
+      "owner_action_category": "nfr_license",
+      "next_action": "Complete Duo MSP NFR onboarding with Jared",
+      "last_action": "Awaiting Duo trial completion",
+      "most_recent_email": "Re: [Duo MSP] Re: TGT Technologies Inc. \u2014 Secure MSP Center + NFR License Inquiry",
+      "sync_state": "Verified",
+      "thread_id": "AAQkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQAQAChezebRSQdAhDY2cjgSBnM=",
+      "conversation_id": "AAQkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQAQAChezebRSQdAhDY2cjgSBnM=",
+      "thread_subject": "Duo MSP / NFR License",
+      "lead_id": "SW-DUO-CISCO",
+      "sharepoint_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/00 Lead Intake",
+      "notes": "Live regression: Jared Millikan thread \u2014 do not reply from agents.",
+      "latest_transmission_at": "2026-09-16T18:21:50Z",
+      "last_inbound_at": "2026-09-16T18:21:50Z",
+      "transmission_direction": "INCOMING",
+      "subject": "Re: [Duo MSP] Re: TGT Technologies Inc. \u2014 Secure MSP Center + NFR License Inquiry",
+      "sender_source": "jmillika@cisco.com",
+      "contact_name": "Jared Millikan",
+      "recipient": "tgates@tgttechnologies.com",
+      "message_preview": "Hey Troy,\n\nWould love to get this taken care of for you sooner rather than later so you can use!",
+      "message_body": "Hey Troy,\n\nWould love to get this taken care of for you sooner rather than later so you can use!",
+      "message_id": "AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM-p-pNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU-Qgn6UINAAAAAAEMAAB2LmLWh7LLR6NU-Qgn6UINAAVimj-yAAA=",
+      "source_message_id": "AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM-p-pNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU-Qgn6UINAAAAAAEMAAB2LmLWh7LLR6NU-Qgn6UINAAVimj-yAAA=",
+      "latest_event_id": "AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM-p-pNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU-Qgn6UINAAAAAAEMAAB2LmLWh7LLR6NU-Qgn6UINAAVimj-yAAA=",
+      "incoming_attention": true,
+      "acknowledgement_state": "UNREAD",
+      "new_activity": true,
+      "email_domain": "cisco.com",
+      "domains": [
+        "cisco.com"
+      ],
+      "open_source_url": "https://outlook.office365.com/owa/?ItemID=AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM%2Fp%2FpNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU%2FQgn6UINAAAAAAEMAAB2LmLWh7LLR6NU%2FQgn6UINAAVimj%2FyAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM%2Fp%2FpNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU%2FQgn6UINAAAAAAEMAAB2LmLWh7LLR6NU%2FQgn6UINAAVimj%2FyAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "contacts": [
+        {
+          "name": "Jared Millikan",
+          "email": "jmillika@cisco.com"
+        }
+      ]
+    },
+    {
+      "id": "SW-016",
+      "opportunity_id": "SW-016",
+      "company": "PC Matic",
+      "vendor": "PC Matic",
+      "tier": 1,
+      "status": "QUALIFYING",
+      "last_verified_at": "2026-09-16T12:00:00Z",
+      "source": "Outlook: MSP NFR / 60-Day Evaluation",
+      "source_ref": "outlook:pcmatic-sw016",
+      "owner_action_required": true,
+      "owner_action_category": "nfr_license",
+      "next_action": "Connect with PC Matic onboarding colleague",
+      "most_recent_email": "Re: TGT Technologies Inc. \u2014 MSP NFR / 60-Day Evaluation Qualification",
+      "sync_state": "Verified",
+      "thread_id": "thread-pcmatic-sw016",
+      "thread_subject": "TGT Technologies Inc. \u2014 MSP NFR / 60-Day Evaluation Qualification",
+      "lead_id": "SW-016",
+      "sharepoint_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/00 Lead Intake",
+      "notes": "PC Matic acceptance fixture SW-016",
+      "latest_transmission_at": "2026-09-16T02:23:15Z",
+      "last_inbound_at": "2026-09-16T02:23:15Z",
+      "transmission_direction": "INCOMING",
+      "subject": "Re: TGT Technologies Inc. \u2014 MSP NFR / 60-Day Evaluation Qualification",
+      "sender_source": "smensah@pcmatic.com",
+      "contact_name": "Sylvanus Mensah",
+      "recipient": "tgates@tgttechnologies.com",
+      "message_preview": "Troy, my apologies for the late reply. I've been out because of a family emergency\u2026 I'll connect you with a colleague of mine to help you with the onboarding process. To answer your question, yes, we do not have any minimums to be a partner.",
+      "message_body": "Troy, my apologies for the late reply. I've been out because of a family emergency\u2026 I'll connect you with a colleague of mine to help you with the onboarding process. To answer your question, yes, we do not have any minimums to be a partner.",
+      "message_id": "AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM-p-pNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU-Qgn6UINAAAAAAEMAAB2LmLWh7LLR6NU-Qgn6UINAAVimj-UAAA=",
+      "source_message_id": "AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM-p-pNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU-Qgn6UINAAAAAAEMAAB2LmLWh7LLR6NU-Qgn6UINAAVimj-UAAA=",
+      "incoming_attention": true,
+      "acknowledgement_state": "UNREAD",
+      "new_activity": true,
+      "email_domain": "pcmatic.com",
+      "domains": [
+        "pcmatic.com"
+      ],
+      "open_source_url": "https://outlook.office.com/mail/deeplink/read/AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM-p-pNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU-Qgn6UINAAAAAAEMAAB2LmLWh7LLR6NU-Qgn6UINAAVimj-UAAA%3D",
+      "web_link": "https://outlook.office.com/mail/deeplink/read/AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM-p-pNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU-Qgn6UINAAAAAAEMAAB2LmLWh7LLR6NU-Qgn6UINAAVimj-UAAA%3D",
+      "contacts": [
+        {
+          "name": "Sylvanus Mensah",
+          "email": "smensah@pcmatic.com"
+        }
+      ]
     }
   ],
   "pipeline": [
@@ -224,6 +321,14 @@
     {
       "opportunity_id": "opp-pass-demo",
       "status": "PASS"
+    },
+    {
+      "opportunity_id": "SW-DUO-CISCO",
+      "status": "ACCOUNT_SETUP"
+    },
+    {
+      "opportunity_id": "SW-016",
+      "status": "QUALIFYING"
     }
   ],
   "software_checklist": [
@@ -262,5 +367,117 @@
   "owner_actions_not_closed": [],
   "software_checklist_mismatches": [],
   "sharepoint_root": "Shared Documents/General/TGT REVENUE COMMAND CENTER",
-  "dashboard_feed_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/10 Dashboard Feed"
+  "dashboard_feed_path": "Shared Documents/General/TGT REVENUE COMMAND CENTER/10 Dashboard Feed",
+  "new_replies": [
+    {
+      "new_reply_id": "nr-jared-20260916",
+      "source_system": "OUTLOOK",
+      "source_message_id": "AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM-p-pNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU-Qgn6UINAAAAAAEMAAB2LmLWh7LLR6NU-Qgn6UINAAVimj-yAAA=",
+      "thread_id": "AAQkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQAQAChezebRSQdAhDY2cjgSBnM=",
+      "opportunity_id": "SW-DUO-CISCO",
+      "company": "Cisco",
+      "received_at": "2026-09-16T18:21:50Z",
+      "body_preview": "Hey Troy,\n\nWould love to get this taken care of for you sooner rather than later so you can use!",
+      "subject": "Re: [Duo MSP] Re: TGT Technologies Inc. \u2014 Secure MSP Center + NFR License Inquiry",
+      "sender": "Jared Millikan",
+      "sender_email": "jmillika@cisco.com",
+      "recipient": "tgates@tgttechnologies.com",
+      "direction": "INCOMING",
+      "lane": "Software/NFR",
+      "web_link": "https://outlook.office365.com/owa/?ItemID=AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM%2Fp%2FpNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU%2FQgn6UINAAAAAAEMAAB2LmLWh7LLR6NU%2FQgn6UINAAVimj%2FyAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+      "ack_status": "UNACKNOWLEDGED",
+      "disposition": null,
+      "highlighted": true,
+      "created_at": "2026-09-16T18:22:00Z",
+      "updated_at": "2026-09-16T18:22:00Z",
+      "next_action": "Review Duo MSP reply"
+    },
+    {
+      "new_reply_id": "nr-pcmatic-20260916",
+      "source_system": "OUTLOOK",
+      "source_message_id": "AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM-p-pNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU-Qgn6UINAAAAAAEMAAB2LmLWh7LLR6NU-Qgn6UINAAVimj-UAAA=",
+      "thread_id": "thread-pcmatic-sw016",
+      "opportunity_id": "SW-016",
+      "company": "PC Matic",
+      "received_at": "2026-09-16T02:23:15Z",
+      "body_preview": "Troy, my apologies for the late reply. I've been out because of a family emergency\u2026 I'll connect you with a colleague of mine to help you with the onboarding process. To answer your question, yes, we do not have any minimums to be a partner.",
+      "subject": "Re: TGT Technologies Inc. \u2014 MSP NFR / 60-Day Evaluation Qualification",
+      "sender": "Sylvanus Mensah",
+      "sender_email": "smensah@pcmatic.com",
+      "recipient": "tgates@tgttechnologies.com",
+      "direction": "INCOMING",
+      "lane": "Software/NFR",
+      "web_link": "https://outlook.office.com/mail/deeplink/read/AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM-p-pNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU-Qgn6UINAAAAAAEMAAB2LmLWh7LLR6NU-Qgn6UINAAVimj-UAAA%3D",
+      "ack_status": "UNACKNOWLEDGED",
+      "disposition": null,
+      "highlighted": true,
+      "created_at": "2026-09-16T02:24:00Z",
+      "updated_at": "2026-09-16T02:24:00Z",
+      "next_action": "Review PC Matic onboarding handoff"
+    }
+  ],
+  "companies": [
+    {
+      "company_id": "co-cisco",
+      "canonical_name": "Cisco",
+      "company": "Cisco",
+      "domain": "cisco.com",
+      "website": "https://www.cisco.com",
+      "domains": [
+        "cisco.com"
+      ],
+      "contacts": [
+        {
+          "name": "Jared Millikan",
+          "email": "jmillika@cisco.com"
+        }
+      ],
+      "related_opportunities": [
+        "SW-DUO-CISCO",
+        "opp-cisco-msp"
+      ],
+      "conversation_history": [],
+      "last_inbound": "2026-09-16T18:21:50Z",
+      "last_outbound": null,
+      "next_action": "Complete Duo MSP NFR"
+    },
+    {
+      "company_id": "co-pcmatic",
+      "canonical_name": "PC Matic",
+      "company": "PC Matic",
+      "domain": "pcmatic.com",
+      "website": "https://www.pcmatic.com",
+      "domains": [
+        "pcmatic.com"
+      ],
+      "contacts": [
+        {
+          "name": "Sylvanus Mensah",
+          "email": "smensah@pcmatic.com"
+        }
+      ],
+      "related_opportunities": [
+        "SW-016"
+      ],
+      "last_inbound": "2026-09-16T02:23:15Z",
+      "last_outbound": null,
+      "next_action": "Connect with onboarding colleague"
+    }
+  ],
+  "company_domains": [
+    {
+      "domain": "cisco.com",
+      "company": "Cisco",
+      "canonical_name": "Cisco",
+      "website": "https://www.cisco.com",
+      "company_id": "co-cisco"
+    },
+    {
+      "domain": "pcmatic.com",
+      "company": "PC Matic",
+      "canonical_name": "PC Matic",
+      "website": "https://www.pcmatic.com",
+      "company_id": "co-pcmatic"
+    }
+  ]
 }

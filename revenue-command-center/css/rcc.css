@@ -574,3 +574,156 @@ a.rcc-btn {
   .rcc-panel-owner h2 { font-size: 14px; }
 }
 
+
+/* AIWO-008/009 — readable email blocks, action grid, light+dark contrast */
+:root {
+  --rcc-muted: #b7c6d6;
+}
+.rcc-action-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+.rcc-action-grid .rcc-btn,
+.rcc-action-grid a.rcc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  min-height: 44px;
+  width: 100%;
+  margin: 0;
+  flex: none !important;
+}
+.rcc-action-grid .rcc-ack-btn {
+  grid-column: 1 / -1;
+}
+.rcc-email-block {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--rcc-border);
+  border-radius: 12px;
+  background: rgba(0,0,0,.22);
+}
+.rcc-email-block h4 {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: #d7e6f5;
+  margin-bottom: 8px;
+}
+.rcc-tx-preview {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--rcc-text);
+  margin-top: 6px;
+  white-space: pre-wrap;
+}
+.rcc-tx-subject {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--rcc-text);
+  margin-top: 4px;
+}
+.rcc-tx-sender { color: #d0dde9; font-size: 13px; }
+.rcc-tx-at { color: #c5d5e5; }
+.rcc-snap-item + .rcc-snap-item {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.rcc-new-reply-card {
+  border-color: #3d8bfd;
+  box-shadow: 0 0 0 1px rgba(61,139,253,.35);
+}
+.rcc-disposition-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+.rcc-disposition-row[hidden] { display: none !important; }
+.rcc-btn.disposition.red { background: #4a1418; border-color: #c4474f; }
+.rcc-btn.disposition.yellow { background: #3a3010; border-color: #c49212; }
+.rcc-btn.disposition.green { background: #123528; border-color: #1f9d63; }
+.rcc-btn.disposition.pass { background: #243040; border-color: #6a7f94; }
+.rcc-checklist-item {
+  color: var(--rcc-text);
+  background: var(--rcc-surface-2);
+  border: 1px solid var(--rcc-border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.rcc-checklist-item strong {
+  color: #f2f7fc;
+  font-size: 15px;
+}
+.rcc-checklist-item div {
+  color: #d5e2ef;
+  font-size: 14px;
+}
+/* Vendor / software capability rows — explicit contrast in dark mode */
+.rcc-section-title,
+.rcc-card-opp,
+.rcc-owner-item,
+.rcc-metric strong {
+  color: #f1f6fb;
+}
+.rcc-metric span,
+.rcc-card-meta dt,
+.rcc-head p,
+.rcc-card-meta dd {
+  color: #c2d1e0;
+}
+.rcc-owner-item,
+.rcc-metric {
+  background: var(--rcc-surface);
+  border-color: var(--rcc-border);
+  color: var(--rcc-text);
+}
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+  :root {
+    --rcc-bg: #f4f7fb;
+    --rcc-surface: #ffffff;
+    --rcc-surface-2: #eef3f8;
+    --rcc-border: #c7d3e0;
+    --rcc-text: #122033;
+    --rcc-muted: #44586c;
+  }
+  html, body {
+    background:
+      radial-gradient(1000px 420px at 8% -8%, #d9e8f7 0%, transparent 55%),
+      linear-gradient(180deg, #f7fafc 0%, #e8eef5 100%);
+    color: var(--rcc-text);
+  }
+  .rcc-card, .rcc-email-block, .rcc-metric, .rcc-owner-item {
+    background: #fff;
+    color: var(--rcc-text);
+  }
+  .rcc-email-block h4,
+  .rcc-tx-subject,
+  .rcc-checklist-item strong { color: #102033; }
+  .rcc-tx-sender, .rcc-tx-preview, .rcc-checklist-item div { color: #24384c; }
+  .rcc-card-opp, .rcc-section-title { color: #1b3146; }
+  .rcc-btn { background: #e8eef5; color: #102033; }
+  .rcc-btn.primary { color: #04140c; }
+  .rcc-status-lg, .rcc-tier-lg, .rcc-owner-lg { background: #e1eaf3; color: #102033; }
+  .rcc-drawer { background: #f8fbfe; color: #122033; }
+}
+
+@media (max-width: 640px) {
+  .rcc-action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rcc-email-block { padding: 14px; }
+  .rcc-email-block h4 { font-size: 14px; }
+  .rcc-tx-preview { font-size: 16px; line-height: 1.55; }
+  .rcc-tx-subject { font-size: 17px; }
+  .rcc-disposition-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .rcc-action-grid { grid-template-columns: 1fr; }
+}

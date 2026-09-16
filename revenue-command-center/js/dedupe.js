@@ -1,7 +1,13 @@
 /**
  * Deduplication — never create a second active record for the same thread.
+ * Also matches by email domain → company so Contact A → Contact B keeps one company.
  */
 import { CLOSED_STATUSES } from './constants.js';
+import {
+  companyKey as domainCompanyKey,
+  extractEmailDomain,
+  resolveCompanyFromDomain,
+} from './company-domain.js';
 
 function norm(s) {
   return String(s || '')
@@ -12,24 +18,45 @@ function norm(s) {
 }
 
 function companyKey(s) {
-  return norm(s).replace(/[^a-z0-9]+/g, '');
+  return domainCompanyKey(s);
 }
 
 function isActive(opp) {
   return !CLOSED_STATUSES.includes(String(opp.status || '').toUpperCase());
 }
 
+function candidateDomain(candidate) {
+  return (
+    extractEmailDomain(
+      candidate.email_domain ||
+        candidate.from_email ||
+        candidate.sender_email ||
+        candidate.sender_source ||
+        candidate.email ||
+        '',
+    ) || ''
+  );
+}
+
 /**
  * Find matching active opportunity before create.
+ * Domain alone must NOT merge distinct opportunities at the same company
+ * (e.g. Cisco Secure MSP vs Cisco Duo NFR). Prefer thread / bound domain / company+subject.
  * @returns {{ match: object|null, reason: string|null }}
  */
-export function findExistingOpportunity(opportunities, candidate) {
+export function findExistingOpportunity(opportunities, candidate, feed = null) {
   const list = (opportunities || []).filter(isActive);
   const cCompany = companyKey(candidate.company || candidate.vendor);
   const cSubject = norm(candidate.thread_subject || candidate.subject);
-  const cThread = String(candidate.thread_id || candidate.message_id || '').trim();
+  const cThread = String(
+    candidate.thread_id || candidate.conversation_id || candidate.message_id || '',
+  ).trim();
   const cOppId = String(candidate.opportunity_id || candidate.id || '').trim();
+  const cDomain = candidateDomain(candidate);
+  const resolved = cDomain ? resolveCompanyFromDomain(cDomain, feed) : null;
+  const resolvedCompanyKey = resolved ? companyKey(resolved.company) : '';
 
+  // Pass 1 — strong identity keys
   for (const opp of list) {
     if (cOppId && String(opp.opportunity_id || opp.id) === cOppId) {
       return { match: opp, reason: 'opportunity_id' };
@@ -37,14 +64,57 @@ export function findExistingOpportunity(opportunities, candidate) {
     if (
       cThread &&
       (String(opp.thread_id || '') === cThread ||
-        String(opp.message_id || '') === cThread)
+        String(opp.conversation_id || '') === cThread ||
+        String(opp.message_id || '') === cThread ||
+        String(opp.source_message_id || '') === cThread)
     ) {
       return { match: opp, reason: 'thread_id' };
     }
+  }
+
+  // Pass 2 — domain already bound on the opportunity (Contact A → Contact B same deal)
+  if (cDomain) {
+    for (const opp of list) {
+      const oDomains = [
+        ...(opp.domains || []),
+        extractEmailDomain(opp.email_domain || ''),
+        extractEmailDomain(opp.sender_source || ''),
+      ]
+        .map((d) => String(d || '').toLowerCase())
+        .filter(Boolean);
+      if (oDomains.includes(cDomain)) {
+        // If subject clearly differs and no shared thread, do not merge distinct deals.
+        const oSubject = norm(opp.thread_subject || opp.subject);
+        if (cSubject && oSubject && cSubject !== oSubject) {
+          const shared =
+            cSubject.includes(oSubject.slice(0, 24)) ||
+            oSubject.includes(cSubject.slice(0, 24)) ||
+            (cSubject.includes('duo') && oSubject.includes('duo')) ||
+            (cSubject.includes('msp') && oSubject.includes('msp') && cSubject.includes('nfr') === oSubject.includes('nfr'));
+          if (!shared) continue;
+        }
+        return { match: opp, reason: 'email_domain' };
+      }
+    }
+  }
+
+  // Pass 3 — company + subject / company + thread
+  for (const opp of list) {
     const oCompany = companyKey(opp.company || opp.vendor);
     const oSubject = norm(opp.thread_subject || opp.subject);
-    if (cCompany && oCompany && cCompany === oCompany && cSubject && oSubject === cSubject) {
+    const companyMatch =
+      (cCompany && oCompany && cCompany === oCompany) ||
+      (resolvedCompanyKey && oCompany && resolvedCompanyKey === oCompany);
+    if (companyMatch && cSubject && oSubject === cSubject) {
       return { match: opp, reason: 'company+subject' };
+    }
+    if (companyMatch && cThread) {
+      if (
+        String(opp.thread_id || '') === cThread ||
+        String(opp.conversation_id || '') === cThread
+      ) {
+        return { match: opp, reason: 'company+thread' };
+      }
     }
   }
   return { match: null, reason: null };

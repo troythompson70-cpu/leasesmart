@@ -23,6 +23,9 @@ def sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+_SHA_CACHE: dict[str, str] = {}
+
+
 def write_evidence(
     os_root: Path,
     work_order_id: str,
@@ -31,24 +34,55 @@ def write_evidence(
     *,
     suffix: str = "md",
 ) -> Path:
-    """Write evidence under AGENT EVIDENCE and return absolute path."""
+    """Write evidence under AGENT EVIDENCE and return absolute path.
+
+    Also appends sha256 into the markdown header so audit can pin the hash at write time.
+    """
     dest_dir = evidence_dir(os_root)
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     path = dest_dir / f"{work_order_id}_{owner}_{stamp}.{suffix}"
     if isinstance(payload, Mapping):
-        body = json.dumps(dict(payload), indent=2, sort_keys=True, default=str)
+        body_core = json.dumps(dict(payload), indent=2, sort_keys=True, default=str)
+        core_digest = sha256_text(body_core)
         if suffix == "md":
             body = (
                 f"# Evidence — {work_order_id}\n\n"
                 f"- owner: `{owner}`\n"
                 f"- written_at: `{iso_now()}`\n"
-                f"- sha256: `{sha256_text(body)}`\n\n"
-                f"```json\n{body}\n```\n"
+                f"- sha256_payload: `{core_digest}`\n\n"
+                f"```json\n{body_core}\n```\n"
             )
+        else:
+            body = body_core
     else:
         body = str(payload)
     path.write_text(body, encoding="utf-8")
+    digest = sha256_text(body)
+    _SHA_CACHE[str(path.resolve())] = digest
+    # Best-effort audit pin (AIWO-007 fix #7) — hash of final on-disk bytes.
+    try:
+        from audit_log import append_audit
+
+        append_audit(
+            os_root,
+            {
+                "event": "evidence_written",
+                "work_order_id": work_order_id,
+                "owner": owner,
+                "evidence_location": str(path),
+                "evidence_sha256": digest,
+            },
+        )
+    except Exception:
+        pass
     return path
+
+
+def evidence_sha256_of(path: Path) -> str:
+    key = str(path.resolve())
+    if key in _SHA_CACHE:
+        return _SHA_CACHE[key]
+    return sha256_text(path.read_text(encoding="utf-8"))
 
 
 def read_back(path: Path) -> dict[str, Any]:
