@@ -8,6 +8,7 @@ import {
   transmissionOf,
   hasIncomingAttention,
   buildEmailThreadLink,
+  isDemoEmailLink,
 } from './transmission.js';
 import { formatResolvedPath, resolveRecordPath } from './paths.js';
 
@@ -93,4 +94,10 @@ export function cardViewModel(opp, allOpps, now = Date.now()) {
   };
 }
 
-export { leadIdOf, transmissionOf, hasIncomingAttention, buildEmailThreadLink };
+export {
+  leadIdOf,
+  transmissionOf,
+  hasIncomingAttention,
+  buildEmailThreadLink,
+  isDemoEmailLink,
+};
