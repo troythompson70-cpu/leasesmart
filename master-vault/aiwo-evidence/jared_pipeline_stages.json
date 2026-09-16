@@ -1,0 +1,24 @@
+{
+  "stages": {
+    "DISCOVERED": true,
+    "CANONICAL_WRITTEN": true,
+    "COMMAND_CENTER_INGESTED": true,
+    "VISIBLE_READBACK": true,
+    "CAPTURED_VISIBLE": true
+  },
+  "imported": 1,
+  "matched": 1,
+  "failures": [],
+  "new_replies_count": 2,
+  "recent_preview": "Hey Troy,\r\n\r\nWould love to get this taken care of for you sooner rather than later so you can use!",
+  "opportunity_id": "SW-DUO-CISCO",
+  "source_message_id": "AAMkADU4ZWEzOTBmLTY3NzItNGMzOC05ZDRhLWU2MmQ0OGYwNWI0YQBGAAAAAABM-p-pNO4PQqCbYv78AJTcBwB2LmLWh7LLR6NU-Qgn6UINAAAAAAEMAAB2LmLWh7LLR6NU-Qgn6UINAAVimj-yAAA=",
+  "company": "Cisco",
+  "email_domain": "cisco.com",
+  "screenshots": [
+    "master-vault/aiwo-evidence/screenshots/aiwo008_new_replies_jared.webp",
+    "master-vault/aiwo-evidence/screenshots/aiwo008_jared_recent_email_readback.webp",
+    "master-vault/aiwo-evidence/screenshots/aiwo008_jared_opp_detail_full.webp",
+    "master-vault/aiwo-evidence/screenshots/aiwo008_jared_mobile_390.webp"
+  ]
+}

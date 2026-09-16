@@ -51,6 +51,7 @@ const FIXTURES = {
   'red-failed-write': './fixtures/red-failed-write.json',
   'red-duplicate': './fixtures/red-duplicate.json',
   'red-orphan-email': './fixtures/red-orphan-email.json',
+  'jared-live-ingested': './fixtures/jared-live-ingested.json',
 };
 
 /** LIST SOFTWARE body excerpt (Outlook 2026-09-14) for checklist reconciliation demos. */
