@@ -1,37 +1,40 @@
-# Morning Review — Tuesday, September 8, 2026
+# Morning Review — Tuesday, September 15, 2026
 
 **LeaseSmart · TGT Technologies Inc.**
-**Build ID:** 20260908-stop-live-email-tests-intake · **Branch:** cursor/stop-live-email-tests-intake-67c5
+**Build ID:** 20260915-tgt-os-outlook-audit-vault · **Branch:** cursor/tgt-os-outlook-audit-vault-9057
 
 > Read this in under 2 minutes. Upload `master-vault/` files to Microsoft 365 Master Vault.
 
-## Dashboard status — email probe ban + intake
+## Dashboard status — TGT OS Outlook audit
 
 | Check | Result |
 |---|---|
-| Claude Outlook verify (Tips “PASS — no Outlook”) | **FAIL / contradicted** — production Tips still fires Exchange + NDRs |
-| Live Exchange probes from Cursor/CI | **BANNED** (rule + client guard + policy test) |
-| Laptop inquire → `/api/intake` (repo) | **DONE** |
-| Tips signup → `/api/intake` (repo) | **DONE** (was mailto in this tree) |
-| Mailto `+` encoding bug | **Documented + tested** (`encodeURIComponent` only) |
-| Intake validation + policy suite | **PASS** |
-| Live ChatGPT apex cutover | **PENDING Troy** |
+| AppDeploy TGT OS receiving-side fixes | **REPORTED FIXED + DEPLOYED** (outside leasesmart) |
+| `OUTLOOK_INGEST_KEY` on production | **REPORTED CONFIGURED** |
+| Email body / object parse / realtime / drawer rebind / reconciliation | **REPORTED FIXED** |
+| Deploy QA (AppDeploy) | **REPORTED READY** (0 FE / 0 BE / 0 network) |
+| M365 `TGT - Email Intake` POSTs | **NEEDS LIVE VERIFY** |
+| Historical missing bodies | **BACKFILL OPTIONAL** |
+| leasesmart contains TGT OS ingest code | **NO** |
+| Strong e2e candidate in Inbox | **YES** — Max Farrell / NinjaOne 15:59Z |
 
-Full reports:
-- `master-vault/cursor-reports/EMAIL-LIVE-TEST-BAN-2026-09-08.md`
-- `master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md`
+Full report: `master-vault/cursor-reports/TGT-OS-OUTLOOK-INGESTION-AUDIT-2026-09-15.md`
 
-## What was built
-- Hard ban: never POST fabricated emails to production `/api/intake`
-- Probe-email guard on production hosts; local Vite intake remains mock / no SMTP
-- Tips + laptop forms in `tgt-website` use protected intake (no Outlook compose)
+## What Troy should do next (2 minutes)
 
-## What needs Troy
-- Apply laptop mailto → intake on live ChatGPT custom-domain site **or** cut DNS to this deploy
-- Aikido MCP sign-in (SAST still blocked for this agent)
+1. Open TGT Operating System.
+2. Check NinjaOne / Max Farrell card for LAST RECEIVED + body from today’s time-slot reply.
+3. In Power Automate, confirm `TGT - Email Intake` is On and ran for that message.
+
+## What Cursor did here
+
+- Vaulted the AppDeploy audit + live-verify checklist
+- Graph mailbox scan for real e2e candidates (no fabricated probes)
+- Could not open AppDeploy UI (no URL in repo; Lovable MCP needs auth)
 
 ## Ready for commit
-- Code + vault docs on `cursor/stop-live-email-tests-intake-67c5`
+
+- Docs only on `cursor/tgt-os-outlook-audit-vault-9057`
 
 ---
 
