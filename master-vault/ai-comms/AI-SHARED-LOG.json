@@ -4,6 +4,16 @@
   "description": "LeaseSmart AI shared sprint log \u2014 append-only, sanitized via ai-comms-bridge.mjs",
   "entries": [
     {
+      "timestamp": "2026-09-15T16:15:00.000Z",
+      "sprint": "TGT-OS-OUTLOOK-INGESTION-AUDIT",
+      "phase": "report",
+      "source": "cursor",
+      "type": "report",
+      "content": "Vaulted AppDeploy TGT OS Outlook ingestion audit. Receiving side reported FIXED+DEPLOYED. Item 14 M365 flow delivery needs live verify via Max Farrell/NinjaOne 15:59Z mail. leasesmart has no AppDeploy ingest code. Handoff: master-vault/morning/HANDOFF-latest.html",
+      "verdict": "PENDING_LIVE_VERIFY",
+      "commit_phrase_required": false
+    },
+    {
       "timestamp": "2026-05-26T12:00:00.000Z",
       "sprint": "F1",
       "phase": "build",
@@ -70,6 +80,16 @@
       "source": "cursor",
       "type": "report",
       "content": "Merged PRs #1,#3,#4,#2. Live build 20260902-v2.14.1-authcfg. OVERALL_AUTH PASS (otp 200, config from index.html). Pages workflow/CNAME removed; Pages site disable needs Troy (API 403). DOMAIN-SETUP-GUIDE Netlify. Append EXECUTION-HANDOFF-2026-09-03.md to Agent Inbox AI_HANDOFF.md.",
+      "verdict": "GO",
+      "commit_phrase_required": false
+    },
+    {
+      "timestamp": "2026-09-08T14:14:05.071Z",
+      "sprint": "LAPTOP-INTAKE-API",
+      "phase": "build",
+      "source": "cursor",
+      "type": "report",
+      "content": "Claude GO: laptop mailto \u2192 /api/intake. Implemented in tgt-website with laptop_inquiry + assessment fallback. Validation 5/5 PASS; local UI success without Outlook. Live apex still ChatGPT custom-domains \u2014 cutover pending Troy. Report: master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md",
       "verdict": "GO",
       "commit_phrase_required": false
     }

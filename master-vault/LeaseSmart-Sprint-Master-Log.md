@@ -6,6 +6,13 @@ This log records sprint commands, Claude reviews, GO/NO-GO decisions, and Cursor
 Secrets are stripped automatically — never paste API keys or passwords here.
 
 ---
+## 2026-09-15 — TGT-OS-OUTLOOK-INGESTION-AUDIT — Cursor Report
+
+**Build ID:** 20260915-tgt-os-outlook-audit-vault
+
+Vaulted AppDeploy TGT OS Outlook ingestion audit (items 1–15). Receiving-side fixes reported deployed outside leasesmart. Item 14 (M365 Email Intake flow delivery) still needs Troy live verify; Max Farrell/NinjaOne 15:59Z Inbox message is the primary e2e candidate. No AppDeploy code changes in this repo. Report: `master-vault/cursor-reports/TGT-OS-OUTLOOK-INGESTION-AUDIT-2026-09-15.md`.
+
+---
 ## 2026-09-04 — AI Review Routing Note
 
 **Active reviewer:** ChatGPT (Claude at usage limit)  
@@ -185,3 +192,15 @@ Merged PRs #1, #3, #4, #2 to `main`. Netlify live. OVERALL_AUTH **PASS** (config
 **Build ID:** 20260902-v2.14.1-authcfg
 
 **Verdict:** GO (deployed) — Cursor lane complete. Troy: disable GitHub Pages; vault append; DNS/SMTP items as listed in execution handoff.
+
+---
+## 2026-09-08 — LAPTOP-INTAKE-API — Cursor Report
+
+**Build ID:** 20260908-laptop-intake-api
+
+Claude GO accepted: convert laptop mailto → `/api/intake`.
+
+Implemented in `tgt-website/`: laptop modal posts `laptop_inquiry` (assessment fallback). Dev/preview `/api/intake` middleware. Validation 5/5 PASS. Manual UI: success with **no Outlook**. Live ChatGPT custom-domain apex cutover still Troy-owned.
+
+Full record: `master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md`.
+

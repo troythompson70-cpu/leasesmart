@@ -32,7 +32,7 @@ function App() {
         <BottomSignup />
       </main>
       <SiteFooter />
-      <LaptopInquiryModal open={laptopOpen} onClose={() => setLaptopOpen(false)} />
+      {laptopOpen ? <LaptopInquiryModal onClose={() => setLaptopOpen(false)} /> : null}
     </>
   )
 }

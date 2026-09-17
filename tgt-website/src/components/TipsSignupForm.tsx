@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { tipTopics, type TipTopicId } from '../content'
-import { openMailto } from '../lib/mailto'
+import { submitNewsletterSignup } from '../lib/intake'
 import { track } from '../lib/track'
 
 type TipsSignupFormProps = {
@@ -18,7 +18,7 @@ export function TipsSignupForm({
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [topics, setTopics] = useState<TipTopicId[]>([])
-  const [status, setStatus] = useState<'idle' | 'ok' | 'error'>('idle')
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'ok' | 'error'>('idle')
   const [message, setMessage] = useState('')
 
   function toggleTopic(topic: TipTopicId) {
@@ -29,7 +29,7 @@ export function TipsSignupForm({
     )
   }
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     track('signup_click', { location: id })
 
@@ -53,19 +53,29 @@ export function TipsSignupForm({
       topics: topicLabels,
     })
 
-    openMailto({
-      subject: 'TGT Tips newsletter signup',
-      body: [
-        `Please add ${trimmedEmail} to the TGT Tips newsletter.`,
-        `Name: ${trimmedName}`,
-        `Topics: ${topicLabels}`,
-        '',
-        'Consent: I want TGT Technologies tips by email. I can unsubscribe at any time.',
-      ].join('\n'),
+    setStatus('submitting')
+    setMessage('Submitting…')
+
+    const result = await submitNewsletterSignup({
+      name: trimmedName,
+      email: trimmedEmail,
+      topics,
+      source: id === 'signup-bottom' ? 'tgt-website-newsletter-repeat' : 'tgt-website-newsletter',
     })
 
+    if (!result.ok) {
+      track('signup_error', { location: id })
+      setStatus('error')
+      setMessage(result.error)
+      return
+    }
+
+    track('signup_success', { location: id, method: result.method })
     setStatus('ok')
-    setMessage('Opening your email app to finish signup…')
+    setMessage("Thank you — you're signed up for TGT Tips.")
+    setName('')
+    setEmail('')
+    setTopics([])
   }
 
   const labelClass = dark ? 'text-blue-100' : 'text-navy-900'
@@ -74,11 +84,12 @@ export function TipsSignupForm({
     ? 'border-white/25 bg-navy-950/40 text-white'
     : 'border-slate-line bg-white text-navy-900'
   const chipActive = 'border-brand-blue bg-brand-blue text-white'
+  const busy = status === 'submitting'
 
   return (
     <form
       id={id}
-      onSubmit={onSubmit}
+      onSubmit={(event) => void onSubmit(event)}
       className={`rounded-2xl border p-5 shadow-[0_18px_50px_-24px_rgba(6,16,31,0.45)] sm:p-6 ${
         dark
           ? 'border-white/15 bg-white/10 backdrop-blur-md'
@@ -106,6 +117,7 @@ export function TipsSignupForm({
             value={name}
             onChange={(event) => setName(event.target.value)}
             required
+            disabled={busy}
           />
         </label>
         <label className="grid gap-1.5 text-sm font-medium">
@@ -118,6 +130,7 @@ export function TipsSignupForm({
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
+            disabled={busy}
           />
         </label>
       </div>
@@ -138,6 +151,7 @@ export function TipsSignupForm({
                   active ? chipActive : chipIdle
                 }`}
                 aria-pressed={active}
+                disabled={busy}
               >
                 {topic.label}
               </button>
@@ -146,8 +160,8 @@ export function TipsSignupForm({
         </div>
       </fieldset>
 
-      <button className="btn-primary mt-5 w-full sm:w-auto" type="submit">
-        SIGN ME UP
+      <button className="btn-primary mt-5 w-full sm:w-auto" type="submit" disabled={busy}>
+        {busy ? 'SIGNING UP…' : 'SIGN ME UP'}
       </button>
 
       {message ? (
@@ -161,11 +175,7 @@ export function TipsSignupForm({
 
       <p className={`mt-3 text-xs leading-relaxed ${helpClass}`}>
         By selecting Sign Me Up, you agree to receive tips by email. Unsubscribe
-        anytime. Messages go to{' '}
-        <a className="underline" href="mailto:info@tgttechnologies.com">
-          info@tgttechnologies.com
-        </a>
-        .
+        anytime. Submits through TGT&apos;s protected intake route — no email app required.
       </p>
     </form>
   )
