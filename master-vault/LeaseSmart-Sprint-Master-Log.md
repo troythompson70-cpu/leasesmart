@@ -204,3 +204,10 @@ Implemented in `tgt-website/`: laptop modal posts `laptop_inquiry` (assessment f
 
 Full record: `master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md`.
 
+## 2026-09-18 14:26 UTC — TGT-OS-GRAPH-INTEGRATION — Cursor Report
+
+**Build ID:** 20260902-v2.14.1-authcfg
+
+Audited TGT OS Graph production boundary (v44 intact). Built portable tgt-os-graph candidate (18/18 tests). AppDeploy API 402; GRAPH_* secrets missing — owner secret entry required. No production deploy.
+
+---
