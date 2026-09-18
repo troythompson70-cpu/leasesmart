@@ -20,10 +20,12 @@ It is the deterministic candidate to transplant into the AppDeploy backend when:
 1. One Entra service identity  
 2. One protected credential source (AppDeploy secrets)  
 3. One shared `GraphClient` (`src/client.js`)  
-4. One Outlook reconciliation worker (`reconcileOutlookDelta` + lifecycle)  
+4. One Outlook reconciliation worker (`reconcileOutlookDelta` + notifications/lifecycle)  
 5. One SharePoint reconciliation worker (`reconcileSharePointDelta`)  
 6. One atomic idempotent ingestion boundary (`atomicCapture`)  
 7. One controlled production evidence run (post-deploy only)
+
+Change notifications: `src/notifications.js` validates handshake/`clientState`, handles lifecycle, recreates subscriptions, and **always** delta-reconciles — webhook alone is never SoT.
 
 ## Safe production baseline (do not replace until candidate passes review)
 

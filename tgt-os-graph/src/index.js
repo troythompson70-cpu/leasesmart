@@ -35,3 +35,11 @@ export {
   createMemoryProcessedStore,
   idempotencyKey,
 } from './ingest.js';
+
+export {
+  ensureMailSubscription,
+  processOutlookNotifications,
+  recreateMailSubscription,
+  validateNotificationHandshake,
+  validateNotificationPayload,
+} from './notifications.js';
