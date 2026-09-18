@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>TGT-OS Outlook Ingestion Audit Handoff</title>
+<title>TGT-OS Graph Deploy Candidate Handoff</title>
 <style>.ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 .ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}
 .ls-copy-for-claude-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35);letter-spacing:.2px}
@@ -8,51 +8,32 @@
 .ls-copy-for-claude-btn:active{transform:scale(.98)}
 .ls-copy-for-claude-status{display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#16a34a;min-height:20px}</style>
 </head><body style="max-width:900px;margin:0 auto;padding:24px 18px;color:#111827">
-<h1 style="font-size:22px;margin-bottom:8px">TGT-OS Outlook Ingestion Audit Handoff</h1>
+<h1 style="font-size:22px;margin-bottom:8px">TGT-OS Graph Deploy Candidate Handoff</h1>
 <p style="color:#6b7280;font-size:14px;margin-bottom:20px">TGT Technologies Inc. — click <strong>Copy for Claude</strong> below.</p>
 <div class="ls-handoff-wrap">
   <pre class="ls-handoff-pre" id="lsHandoffBlock">--- CLAUDE HANDOFF START ---
-Project: LeaseSmart / TGT OS
-Sprint: TGT-OS-OUTLOOK-INGESTION-AUDIT (2026-09-15)
-Build ID: 20260915-tgt-os-outlook-audit-vault
-Status: COMMITTED (vault only — AppDeploy production fixes already deployed outside leasesmart)
+Project: LeaseSmart
+Sprint: TGT-OS-GRAPH-INTEGRATION
+Build ID: 20260918-tgt-graph-integration-audit
+Status: COMMITTED — DEPLOYMENT_BLOCKED_CREDIT_RESET (candidate ready; no deployment attempted)
 
-What was built (vault record):
-- Recorded full TGT OS Outlook ingestion audit (items 1–15) into master-vault
-- Confirmed leasesmart repo does NOT contain AppDeploy TGT OS ingest code
-- Graph mailbox check as tgates@tgttechnologies.com for live e2e candidates
-- Flagged Aug 31 Power Automate dormancy alert for LeaseSmart Agent Intake Router (adjacent; not proof TGT Email Intake is dead)
+What was built:
+- tgt-os-graph auth/client/outlook/sharepoint/ingest + notifications (webhook validation, lifecycle, subscription recreate)
+- Deterministic tests 23/23 PASS
+- Existing RCC 26/26 + orchestrator 19/19 PASS (no Command Center regression)
+- Deploy candidate checklist vaulted
 
-AppDeploy audit (reported FIXED/deployed — not re-verified in this repo):
-1. OUTLOOK_INGEST_KEY configured
-2. Full body before bodyPreview
-3. Outlook body object/HTML parsing
-4. Owner-scoped realtime broadcast
-5. Open drawer rebinds on refresh/realtime
-6. Reconciliation backfill-only (no overwrite of newer Outlook state)
-7–9. Last Transmission chronology + card body display
-10–11. Mobile readability + neutral sync banner
-12–13. Regression coverage + deploy QA READY
-14. M365 flow delivery — STILL NEEDS LIVE VERIFY
-15. Historical missing bodies — need Outlook backfill
-
-Live e2e candidates already in mailbox (use these; do not fabricate probes):
-- 2026-09-15 15:59Z Inbox: Max Farrell / NinjaOne time-slot reply
-- 2026-09-15 usecure + Duo MSP replies also present
-
-Test results:
-- Vault documentation: PASS
-- AppDeploy code change in leasesmart: N/A
-- Aikido SAST: N/A (docs-only)
-- Lovable MCP: needsAuth — cannot open TGT OS from this agent
-- Browser-use MCP: unavailable
+Production:
+- v44 / 1789734343421 intact
+- api-v2 402 APP_TEMPORARILY_UNAVAILABLE — no deploy
+- GRAPH_* secrets still owner-only (APPDEPLOY_SECRET_ENTRY) before AUTH_TEST
+- Cisco/Jared HARD HOLD; no outbound email
 
 What Claude needs to check:
-- Accept AppDeploy receiving-side audit as production truth pending Troy live e2e
-- Troy must confirm Power Automate "TGT - Email Intake" On + successful run for Max Farrell message
-- Open TGT OS card for NinjaOne/Max Farrell: body + Received + timestamp + open-drawer rebind
-- Optional historical Outlook body backfill — separate from this fix
-- Do not start parked TGT OS agent/blueprint sprint unless Troy resumes it
+1. Candidate completeness vs Graph mission (delta + notifications + atomic ingest)
+2. No real secrets committed
+3. Status is DEPLOYMENT_BLOCKED_CREDIT_RESET not VERIFIED
+4. Owner must still set GRAPH_TENANT_ID/CLIENT_ID/CLIENT_SECRET before prod AUTH_TEST
 --- CLAUDE HANDOFF END ---</pre>
   <button type="button" class="ls-copy-for-claude-btn" data-handoff-target="lsHandoffBlock" onclick="lsCopyHandoffForClaude(this)">Copy for Claude</button>
   <span class="ls-copy-for-claude-status" aria-live="polite"></span>
