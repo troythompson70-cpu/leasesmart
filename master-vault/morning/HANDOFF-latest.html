@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>TGT-OS Graph Integration Handoff</title>
+<title>TGT-OS Graph Deploy Candidate Handoff</title>
 <style>.ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 .ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}
 .ls-copy-for-claude-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35);letter-spacing:.2px}
@@ -8,47 +8,32 @@
 .ls-copy-for-claude-btn:active{transform:scale(.98)}
 .ls-copy-for-claude-status{display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#16a34a;min-height:20px}</style>
 </head><body style="max-width:900px;margin:0 auto;padding:24px 18px;color:#111827">
-<h1 style="font-size:22px;margin-bottom:8px">TGT-OS Graph Integration Handoff</h1>
+<h1 style="font-size:22px;margin-bottom:8px">TGT-OS Graph Deploy Candidate Handoff</h1>
 <p style="color:#6b7280;font-size:14px;margin-bottom:20px">TGT Technologies Inc. — click <strong>Copy for Claude</strong> below.</p>
 <div class="ls-handoff-wrap">
   <pre class="ls-handoff-pre" id="lsHandoffBlock">--- CLAUDE HANDOFF START ---
 Project: LeaseSmart
 Sprint: TGT-OS-GRAPH-INTEGRATION
 Build ID: 20260918-tgt-graph-integration-audit
-Status: COMMITTED (candidate + vault; production NOT deployed)
+Status: COMMITTED — DEPLOYMENT_BLOCKED_CREDIT_RESET (candidate ready; no deployment attempted)
 
 What was built:
-- Phase 1 audit of production Graph boundary (v44 / 1789734343421 confirmed live)
-- Portable tgt-os-graph package: client-credentials auth + token cache, Graph retry (429/503), Outlook ImmutableId/delta/lifecycle, SharePoint ID/delta, atomic capture/dedupe
-- Owner-action report for AppDeploy GRAPH_* secrets
-- Deterministic tests 18/18 PASS
+- tgt-os-graph auth/client/outlook/sharepoint/ingest + notifications (webhook validation, lifecycle, subscription recreate)
+- Deterministic tests 23/23 PASS
+- Existing RCC 26/26 + orchestrator 19/19 PASS (no Command Center regression)
+- Deploy candidate checklist vaulted
 
-Files changed:
-- tgt-os-graph/** (new)
-- master-vault/cursor-reports/TGT-OS-GRAPH-INTEGRATION-AUDIT-2026-09-18.md
-- master-vault/cursor-reports/TGT-OS-GRAPH-OWNER-ACTION-2026-09-18.md
-- master-vault/LeaseSmart-Sprint-Master-Log.md
-- master-vault/morning/HANDOFF-latest.html
-
-Production evidence (executed):
-- Static appVersion=1789734343421 (safe baseline intact)
-- api-v2.appdeploy.ai → 402 APP_TEMPORARILY_UNAVAILABLE (no deploy)
-- Outlook read-only fixtures: Cisco Duo 2026-09-18T10:01:40Z (HARD HOLD), NinjaOne 2026-09-15T15:59:35Z, PC Matic 2026-09-16T02:23:15Z
-- No outbound email; Cisco/Jared hard hold respected
-
-Blockers:
-- OWNER_ACTION_REQUIRED: APPDEPLOY_SECRET_ENTRY (GRAPH_TENANT_ID, GRAPH_CLIENT_ID, GRAPH_CLIENT_SECRET)
-- OWNER_ACTION_REQUIRED: MICROSOFT_ADMIN_CONSENT if not already granted (Mail.Read, Sites.ReadWrite.All only)
-- AppDeploy source not in leasesmart (Lovable auth unavailable); transplant required after credits restore
-- DEPLOYMENT_BLOCKED until AppDeploy API available
-- Aikido scan not run (sign-in required)
+Production:
+- v44 / 1789734343421 intact
+- api-v2 402 APP_TEMPORARILY_UNAVAILABLE — no deploy
+- GRAPH_* secrets still owner-only (APPDEPLOY_SECRET_ENTRY) before AUTH_TEST
+- Cisco/Jared HARD HOLD; no outbound email
 
 What Claude needs to check:
-1. Candidate architecture matches required one-of-each Graph design
-2. No secrets/tokens in repo or reports
-3. Tests cover AUTH / ImmutableId / delta / lifecycle / SharePoint / atomic / dedupe / Cisco hard-hold
-4. Do NOT treat as production VERIFIED — READY_FOR_REVIEW of candidate only
-5. Confirm v44 must remain until owner secrets + credit restore + AppDeploy transplant
+1. Candidate completeness vs Graph mission (delta + notifications + atomic ingest)
+2. No real secrets committed
+3. Status is DEPLOYMENT_BLOCKED_CREDIT_RESET not VERIFIED
+4. Owner must still set GRAPH_TENANT_ID/CLIENT_ID/CLIENT_SECRET before prod AUTH_TEST
 --- CLAUDE HANDOFF END ---</pre>
   <button type="button" class="ls-copy-for-claude-btn" data-handoff-target="lsHandoffBlock" onclick="lsCopyHandoffForClaude(this)">Copy for Claude</button>
   <span class="ls-copy-for-claude-status" aria-live="polite"></span>
