@@ -664,6 +664,25 @@ async function loadLiveOrFixture(key) {
   });
 }
 
+async function loadLiveOrFixture(key) {
+  const liveUrl =
+    typeof window !== 'undefined' && window.RCC_DASHBOARD_FEED_URL
+      ? window.RCC_DASHBOARD_FEED_URL
+      : 'http://127.0.0.1:5173/api/dashboard-feed';
+  const live = await loadLiveDashboardFeed(liveUrl);
+  if (live.ok) {
+    state.fixtureKey = 'live-sharepoint';
+    state.feed = mergePersistedNewReplies(mergePersistedActivity(live.feed));
+    state.loadError = null;
+    recompute();
+    return;
+  }
+  state.fixtureKey = key;
+  state.feed = null;
+  state.loadError = live.error;
+  recompute();
+}
+
 async function loadFixture(key) {
   resetIncomingBuffer();
   state.fixtureKey = key;
