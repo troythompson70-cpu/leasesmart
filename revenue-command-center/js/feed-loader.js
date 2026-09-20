@@ -3,6 +3,11 @@
  * Never invents statuses. Missing health fields → incomplete (YELLOW), not GREEN.
  */
 import { SCHEMA_VERSION } from './constants.js';
+import {
+  CANONICAL_DASHBOARD_FEED,
+  CANONICAL_DASHBOARD_FEED_FILE,
+  GRAPH_ENV_NAMES,
+} from './paths.js';
 
 /**
  * @typedef {object} DashboardFeed
@@ -93,6 +98,29 @@ export function getPipeline(feed) {
   if (Array.isArray(feed.pipeline)) return feed.pipeline;
   if (Array.isArray(feed.pipeline_records)) return feed.pipeline_records;
   return [];
+}
+
+/**
+ * Live SharePoint 10 Dashboard Feed is server-side Graph only.
+ * The browser must not receive Graph secrets.
+ */
+export function liveDashboardFeedUnavailableReason() {
+  const names = GRAPH_ENV_NAMES.join(', ');
+  return (
+    `Live SharePoint 10 Dashboard Feed is not connected. Canonical path: TEAM TGT MSP / ${CANONICAL_DASHBOARD_FEED} / ${CANONICAL_DASHBOARD_FEED_FILE}. ` +
+    `Required env (existing names only, not present in this process for the UI): ${names}.`
+  );
+}
+
+/**
+ * Load the live dashboard feed. Uses a proxy URL if provided; never invents GREEN.
+ */
+export async function loadLiveDashboardFeed(proxyUrl) {
+  const url = String(proxyUrl || '').trim();
+  if (!url) {
+    return emptyFeedError(liveDashboardFeedUnavailableReason());
+  }
+  return loadFeedFromUrl(url);
 }
 
 /**

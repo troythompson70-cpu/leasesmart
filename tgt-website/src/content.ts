@@ -36,6 +36,14 @@ export const laborDay = {
   inquiryPrefill: "I'm interested in the $280 AI-Ready Laptop.",
 } as const
 
+/**
+ * Ninth Edition laptop copy was requested for intake + modal.
+ * It is not present in this repo (or in content.ts). Do not invent it.
+ */
+export const ninthEdition = null as const
+export const NINTH_EDITION_MISSING =
+  'Ninth Edition copy is missing from this repo. Not shown. Not invented.'
+
 export const videos = [
   {
     id: 'tip-iphone',

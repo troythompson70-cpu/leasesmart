@@ -304,6 +304,16 @@ async function main() {
     }
   });
 
+  {
+    const { loadLiveDashboardFeed } = await loadMod('js/feed-loader.js');
+    const loaded = await loadLiveDashboardFeed('');
+    test('live dashboard feed fails closed without a Graph proxy URL', () => {
+      assert(!loaded.ok, 'live feed must not succeed without proxy');
+      assert(String(loaded.error).includes('10 Dashboard Feed'), loaded.error);
+      assert(String(loaded.error).includes('GRAPH_CLIENT_SECRET'), loaded.error);
+    });
+  }
+
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} PASS`);
   if (failed.length) process.exitCode = 1;

@@ -2,26 +2,33 @@ import type { Plugin } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { handleDashboardFeedRequest } from './server/dashboard-feed-http.ts'
 import { handleIntakeRequest } from './server/intake-http.ts'
 
-function intakeApiPlugin(): Plugin {
+function localApiPlugin(): Plugin {
   return {
-    name: 'tgt-intake-api',
+    name: 'tgt-local-api',
     configureServer(server) {
       server.middlewares.use('/api/intake', (req, res) => {
         void handleIntakeRequest(req, res)
+      })
+      server.middlewares.use('/api/dashboard-feed', (req, res) => {
+        void handleDashboardFeedRequest(req, res)
       })
     },
     configurePreviewServer(server) {
       server.middlewares.use('/api/intake', (req, res) => {
         void handleIntakeRequest(req, res)
       })
+      server.middlewares.use('/api/dashboard-feed', (req, res) => {
+        void handleDashboardFeedRequest(req, res)
+      })
     },
   }
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), intakeApiPlugin()],
+  plugins: [react(), tailwindcss(), localApiPlugin()],
   server: {
     host: '0.0.0.0',
     port: 5173,

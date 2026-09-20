@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import type { FormEvent } from 'react'
-import { laborDay } from '../content'
+import { laborDay, NINTH_EDITION_MISSING, ninthEdition } from '../content'
 import { submitLaptopInquiry } from '../lib/intake'
 import { track } from '../lib/track'
 
@@ -49,6 +49,7 @@ export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
       email: trimmedEmail,
       phone: trimmedPhone,
       message: message.trim() || laborDay.inquiryPrefill,
+      ninthEdition,
     })
 
     if (!result.ok) {
@@ -87,6 +88,11 @@ export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
             <h2 id={titleId} className="font-display text-2xl font-semibold text-navy-900">
               I want the $280 laptop
             </h2>
+            {ninthEdition === null ? (
+              <p className="mt-2 text-xs font-semibold text-amber-800" role="status">
+                {NINTH_EDITION_MISSING}
+              </p>
+            ) : null}
           </div>
           <button
             type="button"
