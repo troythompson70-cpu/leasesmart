@@ -154,3 +154,27 @@ function pass(name) {
   assert.equal(payload.ninthEdition, true)
   pass('laptop payload flags Ninth Edition as true')
 }
+
+{
+  const { videos } = await import('../src/content.ts')
+  const ids = videos.map((v) => v.youtubeId)
+  assert.equal(new Set(ids).size, ids.length, 'each homepage video must have a unique YouTube id')
+  assert.ok(ids.includes('We6DCKigVbY'))
+  assert.ok(ids.includes('nj36vr4q6M0'))
+  assert.ok(ids.includes('NAmV_svHzNI'))
+  pass('homepage videos restore unique TGT YouTube commercials')
+}
+
+{
+  const { buildAssessmentInquiryPayload } = await import('../src/lib/intake.ts')
+  const payload = buildAssessmentInquiryPayload({
+    name: 'Troy',
+    email: 'troy@example.com',
+    phone: '555-0100',
+    message: "I'd like remote computer help from TGT.",
+    source: 'tgt-website-remote-help',
+  })
+  assert.equal(payload.requestType, 'assessment')
+  assert.equal(payload.source, 'tgt-website-remote-help')
+  pass('remote-help inquiry uses assessment intake not mailto')
+}

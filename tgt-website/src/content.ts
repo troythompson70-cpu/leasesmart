@@ -40,24 +40,31 @@ export const laborDay = {
 export const ninthEdition =
   'THE NINTH EDITION: The ultimate AI-hardened workstation for the modern MSP. Precision engineered for zero-latency intelligence and maximum throughput.' as const
 
+/** Official TGT Technologies Inc YouTube channel that hosts the commercials. */
+export const youtubeChannelUrl = 'https://www.youtube.com/@tgttechnologiesinc5537'
+
+/**
+ * Live TGT commercials from git + the official channel.
+ * IDs verified via YouTube oembed (not invented placeholders).
+ */
 export const videos = [
   {
-    id: 'tip-iphone',
-    tag: 'Latest Tech Tip',
-    title: 'Your iPhone can do this?',
-    youtubeId: 'nj36vr4q6M0',
-  },
-  {
-    id: 'scam-alert',
-    tag: 'Scam Alert',
-    title: "Don't click this text.",
+    id: 'commercial-1',
+    tag: 'TGT Commercial',
+    title: 'TGT Technologies Inc — 1st Commercial',
     youtubeId: 'We6DCKigVbY',
   },
   {
-    id: 'ai-simple',
-    tag: 'AI Made Simple',
-    title: '3 things to ask ChatGPT today.',
+    id: 'commercial-2',
+    tag: 'TGT Commercial',
+    title: 'Come learn more about TGT Technologies Inc',
     youtubeId: 'nj36vr4q6M0',
+  },
+  {
+    id: 'sixty-second',
+    tag: '60-second pitch',
+    title: 'Get to know TGT in a minute',
+    youtubeId: 'NAmV_svHzNI',
   },
 ] as const
 

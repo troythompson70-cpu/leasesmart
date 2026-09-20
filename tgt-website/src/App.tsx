@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AnnouncementBar, Hero, SiteHeader } from './components/Hero'
 import { LaptopInquiryModal } from './components/LaptopInquiryModal'
+import { LeadInquiryModal, type LeadKind } from './components/LeadInquiryModal'
 import {
   BottomSignup,
   BusinessIt,
@@ -15,6 +16,7 @@ import {
 
 function App() {
   const [laptopOpen, setLaptopOpen] = useState(false)
+  const [leadKind, setLeadKind] = useState<LeadKind | null>(null)
 
   return (
     <>
@@ -22,17 +24,20 @@ function App() {
       <SiteHeader onLaptopClick={() => setLaptopOpen(true)} />
       <main>
         <Hero onLaptopClick={() => setLaptopOpen(true)} />
-        <LaptopPromo onInquire={() => setLaptopOpen(true)} />
         <VideosSection />
-        <MeetGates />
-        <RemoteSupport />
+        <LaptopPromo onInquire={() => setLaptopOpen(true)} />
+        <MeetGates onAsk={() => setLeadKind('gates')} />
+        <RemoteSupport onRequest={() => setLeadKind('remote')} />
         <ContentCategories />
-        <ReferralProgram />
-        <BusinessIt />
+        <ReferralProgram onRefer={() => setLeadKind('referral')} />
+        <BusinessIt onAssess={() => setLeadKind('assessment')} />
         <BottomSignup />
       </main>
       <SiteFooter />
       {laptopOpen ? <LaptopInquiryModal onClose={() => setLaptopOpen(false)} /> : null}
+      {leadKind ? (
+        <LeadInquiryModal kind={leadKind} onClose={() => setLeadKind(null)} />
+      ) : null}
     </>
   )
 }

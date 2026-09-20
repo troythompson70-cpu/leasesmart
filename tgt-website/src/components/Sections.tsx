@@ -1,5 +1,4 @@
-import { laborDay, videos, remoteHelpItems, mspServices, categoryStrip } from '../content'
-import { openMailto } from '../lib/mailto'
+import { laborDay, videos, remoteHelpItems, mspServices, categoryStrip, youtubeChannelUrl } from '../content'
 import { track } from '../lib/track'
 import { TipsSignupForm } from './TipsSignupForm'
 
@@ -65,22 +64,57 @@ export function LaptopPromo({ onInquire }: { onInquire: () => void }) {
   )
 }
 
+function youtubeEmbedSrc(youtubeId: string): string {
+  const params = new URLSearchParams({
+    rel: '0',
+    modestbranding: '1',
+    playsinline: '1',
+    feature: 'oembed',
+  })
+  return `https://www.youtube.com/embed/${youtubeId}?${params.toString()}`
+}
+
+function VideoEmbed({
+  youtubeId,
+  title,
+  eager = false,
+}: {
+  youtubeId: string
+  title: string
+  eager?: boolean
+}) {
+  return (
+    <div className="video-embed">
+      <iframe
+        src={youtubeEmbedSrc(youtubeId)}
+        title={title}
+        loading={eager ? 'eager' : 'lazy'}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerPolicy="strict-origin-when-cross-origin"
+        allowFullScreen
+      />
+    </div>
+  )
+}
+
 export function VideosSection() {
+  const featured = videos[0]
   return (
     <section id="videos" className="section-pad bg-white">
       <div className="wrap">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="eyebrow">Watch Gates</p>
+            <p className="eyebrow">Watch TGT</p>
             <h2 className="font-display text-3xl font-semibold tracking-tight text-navy-900 sm:text-4xl">
-              Short videos. Real answers.
+              See TGT Technologies on camera.
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-muted">
-              Motion and personality up front — not buried under corporate copy.
+              Official TGT commercials and the 60-second pitch — playing here, not buried and not
+              blank.
             </p>
           </div>
           <a
-            href="https://www.youtube.com/@teegates"
+            href={youtubeChannelUrl}
             target="_blank"
             rel="noreferrer"
             className="btn-outline"
@@ -90,23 +124,25 @@ export function VideosSection() {
           </a>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <article className="mt-8 overflow-hidden rounded-2xl border border-slate-line bg-slate-soft/60 shadow-[0_10px_30px_-18px_rgba(6,16,31,0.35)]">
+          <VideoEmbed youtubeId={featured.youtubeId} title={featured.title} eager />
+          <div className="p-4">
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-blue">
+              {featured.tag}
+            </p>
+            <h3 className="mt-1 font-display text-lg font-semibold text-navy-900">
+              {featured.title}
+            </h3>
+          </div>
+        </article>
+
+        <div className="mt-6 grid gap-5 md:grid-cols-3">
           {videos.map((video) => (
             <article
               key={video.id}
               className="overflow-hidden rounded-2xl border border-slate-line bg-slate-soft/60 shadow-[0_10px_30px_-18px_rgba(6,16,31,0.35)]"
             >
-              <div className="relative aspect-video bg-navy-900">
-                <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}`}
-                  title={video.title}
-                  className="absolute inset-0 h-full w-full"
-                  loading="lazy"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  onLoad={() => track('video_play', { video: video.id })}
-                />
-              </div>
+              <VideoEmbed youtubeId={video.youtubeId} title={video.title} eager />
               <div className="p-4">
                 <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-blue">
                   {video.tag}
@@ -123,7 +159,7 @@ export function VideosSection() {
   )
 }
 
-export function MeetGates() {
+export function MeetGates({ onAsk }: { onAsk: () => void }) {
   return (
     <section id="gates" className="section-pad border-y border-slate-line bg-slate-soft">
       <div className="wrap grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
@@ -144,14 +180,17 @@ export function MeetGates() {
             Technology changes fast. Gates breaks it down so you can actually use it.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a
-              href="mailto:info@tgttechnologies.com?subject=Ask%20Gates"
+            <button
+              type="button"
               className="btn-primary"
-              onClick={() => track('ask_gates_click')}
+              onClick={() => {
+                track('ask_gates_click')
+                onAsk()
+              }}
               data-cta="ask-gates"
             >
               ASK GATES
-            </a>
+            </button>
             <a
               href="#signup"
               className="btn-outline"
@@ -167,7 +206,7 @@ export function MeetGates() {
   )
 }
 
-export function RemoteSupport() {
+export function RemoteSupport({ onRequest }: { onRequest: () => void }) {
   return (
     <section id="remote-help" className="section-pad bg-navy-900 text-white">
       <div className="wrap grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -195,10 +234,7 @@ export function RemoteSupport() {
             className="btn-primary mt-5"
             onClick={() => {
               track('remote_help_inquiry')
-              openMailto({
-                subject: 'Request remote help',
-                body: "I'd like remote computer help from TGT.\n\nName:\nPhone:\nBest time to call:\nIssue:",
-              })
+              onRequest()
             }}
             data-cta="remote-help"
           >
@@ -247,7 +283,7 @@ export function ContentCategories() {
   )
 }
 
-export function ReferralProgram() {
+export function ReferralProgram({ onRefer }: { onRefer: () => void }) {
   return (
     <section id="referral" className="section-pad border-y border-slate-line bg-slate-soft">
       <div className="wrap max-w-3xl text-center">
@@ -264,24 +300,10 @@ export function ReferralProgram() {
         <button
           type="button"
           className="btn-primary mt-8"
-          onClick={() => {
-            track('referral_click')
-            openMailto({
-              subject: 'Business referral to TGT',
-              body: [
-                'I want to refer a business to TGT.',
-                '',
-                'My name:',
-                'My email:',
-                'My phone:',
-                '',
-                'Business name:',
-                'Contact name:',
-                'Contact phone/email:',
-                'What they need:',
-              ].join('\n'),
-            })
-          }}
+            onClick={() => {
+              track('referral_click')
+              onRefer()
+            }}
           data-cta="referral"
         >
           MAKE A REFERRAL
@@ -291,7 +313,7 @@ export function ReferralProgram() {
   )
 }
 
-export function BusinessIt() {
+export function BusinessIt({ onAssess }: { onAssess: () => void }) {
   return (
     <section id="business-it" className="section-pad bg-white">
       <div className="wrap">
@@ -327,14 +349,17 @@ export function BusinessIt() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-          <a
-            href="mailto:info@tgttechnologies.com?subject=Free%20IT%20Assessment"
+          <button
+            type="button"
             className="btn-primary"
-            onClick={() => track('business_assessment_click')}
+            onClick={() => {
+              track('business_assessment_click')
+              onAssess()
+            }}
             data-cta="business-assessment"
           >
             GET A FREE IT ASSESSMENT
-          </a>
+          </button>
           <a href="#remote-help" className="btn-outline">
             REQUEST REMOTE HELP
           </a>

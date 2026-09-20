@@ -35,7 +35,7 @@ export type LaptopInquiryPayload = {
   ninthEdition: true
 }
 
-export type AssessmentFallbackPayload = {
+export type AssessmentInquiryPayload = {
   schemaVersion: '1.1'
   requestType: 'assessment'
   submissionId: string
@@ -52,7 +52,12 @@ export type AssessmentFallbackPayload = {
   newsletterConsent: false
   newsletterPhonePlatform: ''
   newsletterConsentTextVersion: ''
-  source: 'tgt-website-laptop'
+  source:
+    | 'tgt-website-laptop'
+    | 'tgt-website-remote-help'
+    | 'tgt-website-referral'
+    | 'tgt-website-ask-gates'
+    | 'tgt-website-assessment'
 }
 
 export type NewsletterPayload = {
@@ -123,7 +128,7 @@ export function buildLaptopInquiryPayload(input: {
 
 export function buildAssessmentFallbackPayload(
   payload: LaptopInquiryPayload,
-): AssessmentFallbackPayload {
+): AssessmentInquiryPayload {
   return {
     schemaVersion: '1.1',
     requestType: 'assessment',
@@ -149,6 +154,35 @@ export function buildAssessmentFallbackPayload(
     newsletterPhonePlatform: '',
     newsletterConsentTextVersion: '',
     source: 'tgt-website-laptop',
+  }
+}
+
+export function buildAssessmentInquiryPayload(input: {
+  name: string
+  email: string
+  phone: string
+  message: string
+  company?: string
+  source: AssessmentInquiryPayload['source']
+}): AssessmentInquiryPayload {
+  return {
+    schemaVersion: '1.1',
+    requestType: 'assessment',
+    submissionId: newSubmissionId(),
+    name: input.name.trim(),
+    company: (input.company || '').trim(),
+    email: input.email.trim(),
+    bestCallbackNumber: input.phone.trim(),
+    numberOfPcs: '',
+    server: '',
+    existingNetworkWifi: '',
+    internetConnectivityIssue: [],
+    currentItSupport: [],
+    message: input.message.trim(),
+    newsletterConsent: false,
+    newsletterPhonePlatform: '',
+    newsletterConsentTextVersion: '',
+    source: input.source,
   }
 }
 
@@ -277,6 +311,45 @@ export async function submitLaptopInquiry(input: {
       }
     }
 
+    return { ok: false, error: 'Inquiry could not be completed. Please try again.' }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : ''
+    if (message.includes('Test/probe email blocked')) {
+      return { ok: false, error: message }
+    }
+    return { ok: false, error: 'Inquiry could not be completed. Please try again.' }
+  }
+}
+
+/** On-page inquiry (remote help, referral, Ask Gates, IT assessment) — no mailto. */
+export async function submitAssessmentInquiry(input: {
+  name: string
+  email: string
+  phone: string
+  message: string
+  company?: string
+  source: AssessmentInquiryPayload['source']
+}): Promise<IntakeSuccess | IntakeFailure> {
+  if (intakeConfig.mode !== 'api' || !intakeConfig.apiEndpoint) {
+    return { ok: false, error: 'No protected intake destination is configured' }
+  }
+
+  const blocked = guardEmailOrFail(input.email)
+  if (blocked) return blocked
+
+  const payload = buildAssessmentInquiryPayload(input)
+
+  try {
+    const res = await postIntake(intakeConfig.apiEndpoint, payload)
+    const body: unknown = await res.json().catch(() => null)
+    if (res.ok && isConfirmed(body)) {
+      return {
+        ok: true,
+        delivery: 'confirmed',
+        requestId: body.requestId,
+        method: 'assessment',
+      }
+    }
     return { ok: false, error: 'Inquiry could not be completed. Please try again.' }
   } catch (error) {
     const message = error instanceof Error ? error.message : ''
