@@ -277,8 +277,22 @@ export type CoverageProbe = {
   detail: string
 }
 
-/** Campaign inbox used for a read-only Graph mailbox GET. Never sends mail. */
-const MAILBOX_PROBE_USER = 'info@tgttechnologies.com'
+/**
+ * Graph mailbox GET must use the mailbox User Principal Name (primary SMTP).
+ * `info@tgttechnologies.com` is a secondary alias on this mailbox — Graph
+ * `/users/info@...` is not a user resource and returns ErrorAccessDenied.
+ * Override with GRAPH_MAILBOX_UPN in .env. Never sends mail.
+ */
+export const DEFAULT_MAILBOX_PROBE_UPN = 'tgates@tgttechnologies.com'
+
+export function mailboxProbeUpn(): string {
+  loadGraphEnvFromDotEnv()
+  const fromEnv = String(process.env.GRAPH_MAILBOX_UPN || '').trim()
+  if (fromEnv && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fromEnv) && !PLACEHOLDER_RE.test(fromEnv)) {
+    return fromEnv
+  }
+  return DEFAULT_MAILBOX_PROBE_UPN
+}
 
 /**
  * Read-only Graph mailbox probe. Does not POST mail or hit production /api/intake.
@@ -293,15 +307,16 @@ export async function probeMailboxCoverage(): Promise<CoverageProbe> {
       detail: 'MISSING_GRAPH_SECRETS',
     }
   }
+  const upn = mailboxProbeUpn()
   const res = await graphFetch(
-    `/users/${encodeURIComponent(MAILBOX_PROBE_USER)}/mailFolders/inbox?$select=id,displayName,totalItemCount`,
+    `/users/${encodeURIComponent(upn)}/mailFolders/inbox?$select=id,displayName,totalItemCount`,
   )
   if (res.ok) {
     return {
       check: 'mailbox_coverage',
       status: 'PASS',
       http: res.status,
-      detail: `Inbox folder readable for ${MAILBOX_PROBE_USER} (GET only).`,
+      detail: `Inbox folder readable for ${upn} (GET only).`,
     }
   }
   const body = (await res.json().catch(() => ({}))) as { error?: { code?: string; message?: string } }

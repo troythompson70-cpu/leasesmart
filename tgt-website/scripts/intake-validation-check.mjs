@@ -199,3 +199,13 @@ function pass(name) {
   assert.equal(hits.length, 0, `UI still has mailto: ${hits.join(', ')}`)
   pass('website UI has no mailto: or openMailto in src components')
 }
+
+{
+  const { readFileSync } = await import('node:fs')
+  const { fileURLToPath } = await import('node:url')
+  const graph = readFileSync(fileURLToPath(new URL('../server/graph-sharepoint.ts', import.meta.url)), 'utf8')
+  assert.match(graph, /DEFAULT_MAILBOX_PROBE_UPN = 'tgates@tgttechnologies.com'/)
+  assert.equal(graph.includes("/users/${encodeURIComponent('info@tgttechnologies.com')}"), false)
+  assert.equal(/\/users\/\$\{encodeURIComponent\(upn\)\}/.test(graph), true)
+  pass('mailbox Graph GET targets primary UPN tgates@ not alias info@')
+}
