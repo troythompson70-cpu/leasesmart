@@ -224,9 +224,26 @@ export function evaluateSyncHealth(feed, opts = {}) {
     yellowReasons.push('Health verification incomplete.');
   }
 
-  const mailboxCoverageVerified = feed.mailbox_coverage_verified === true;
+  const uiChecks =
+    feed.ui_sync_health && typeof feed.ui_sync_health === 'object'
+      ? feed.ui_sync_health.checks
+      : null;
+  const mailboxCoverageVerified =
+    feed.mailbox_coverage_verified === true ||
+    (uiChecks && uiChecks.mailbox_coverage === 'PASS');
   if (!mailboxCoverageVerified) {
     yellowReasons.push('Full mailbox coverage is not verified.');
+  }
+  const appRuntimeReadbackBlocked =
+    uiChecks && uiChecks.app_runtime_record_readback === 'BLOCKED';
+  if (appRuntimeReadbackBlocked) {
+    yellowReasons.push('App runtime record read-back is blocked.');
+  }
+  const declaredUiStatus = String(
+    (feed.ui_sync_health && feed.ui_sync_health.status) || health.health_state || '',
+  ).toUpperCase();
+  if (declaredUiStatus === 'BLOCKED') {
+    yellowReasons.push('Feed ui_sync_health.status is BLOCKED.');
   }
 
   // Integrity verification required for GREEN / SYNCED
@@ -279,15 +296,22 @@ export function evaluateSyncHealth(feed, opts = {}) {
   }
 
   // Feed-declared health_state can escalate severity but never invent GREEN alone
-  const declared = String(health.health_state || '').toUpperCase();
+  const declared = String(health.health_state || declaredUiStatus || '').toUpperCase();
   if (declared === 'RED' && state !== HEALTH.RED) {
     state = HEALTH.RED;
     message = HEALTH_LABELS.RED;
     reasons.push('Feed declared health_state=RED');
+  } else if (declared === 'BLOCKED' && state === HEALTH.GREEN) {
+    state = HEALTH.YELLOW;
+    message = 'REVIEW REQUIRED — Feed ui_sync_health.status is BLOCKED.';
+    yellowReasons.push('Feed declared health_state=BLOCKED');
   } else if (declared === 'YELLOW' && state === HEALTH.GREEN) {
     state = HEALTH.YELLOW;
     message = HEALTH_LABELS.YELLOW;
     yellowReasons.push('Feed declared health_state=YELLOW');
+  } else if (appRuntimeReadbackBlocked && state === HEALTH.GREEN) {
+    state = HEALTH.YELLOW;
+    message = 'REVIEW REQUIRED — App runtime record read-back is blocked.';
   }
 
   return {

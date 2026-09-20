@@ -47,7 +47,7 @@ async function main() {
   const { evaluateSyncHealth } = await loadMod('js/sync-health.js');
   const { findExistingOpportunity, findDuplicateCollisions } = await loadMod('js/dedupe.js');
   const { saveAndVerify } = await loadMod('js/save-verify.js');
-  const { selectOwnerActionPanel, sortOpportunities } = await loadMod('js/sorting.js');
+  const { selectOwnerActionPanel, sortOpportunities, activityTimestamp } = await loadMod('js/sorting.js');
   const {
     reconcileSoftwareChecklist,
     parseListSoftwareBody,
@@ -67,6 +67,8 @@ async function main() {
     CANONICAL_RCC_ROOT,
   } = await loadMod('js/paths.js');
   const { cardViewModel } = await loadMod('js/opportunity-card.js');
+  const { saveUiState, loadUiState, clearUiState, saveFeedCache, loadFeedCache, clearFeedCache } = await loadMod('js/ui-persist.js');
+  const { stabilizeIncomingList, resetIncomingBuffer } = await loadMod('js/new-activity.js');
 
   const green = loadJson('green.json');
   const yellow = loadJson('yellow-stale.json');
@@ -264,14 +266,62 @@ async function main() {
     assert(CANONICAL_RCC_ROOT.includes('General/TGT REVENUE COMMAND CENTER'));
   });
 
-  test('BONUS: Dashboard sorting puts PASS/LOST at bottom; Tier1 owner first', () => {
+  test('BONUS: Dashboard sorting is Newest First; PASS/LOST at bottom', () => {
     const sorted = sortOpportunities(green.opportunities);
-    assert(sorted[0].tier === 1, 'first should be tier 1');
-    assert(
-      ['OWNER_ACTION', 'ACCOUNT_SETUP', 'BLOCKED'].includes(sorted[0].status),
-      `expected owner/blocked first got ${sorted[0].status}`,
-    );
+    const open = sorted.filter((o) => o.status !== 'PASS' && o.status !== 'LOST' && o.status !== 'WON');
+    for (let i = 1; i < open.length; i += 1) {
+      const prev = activityTimestamp(open[i - 1]);
+      const cur = activityTimestamp(open[i]);
+      assert(prev >= cur, `open items must be newest first ${open[i - 1].id} ${prev} vs ${open[i].id} ${cur}`);
+    }
     assert(sorted[sorted.length - 1].status === 'PASS', 'PASS at bottom');
+  });
+
+  test('PERSIST: UI filter and selected lead survive storage reload', () => {
+    const mem = new Map();
+    globalThis.localStorage = {
+      getItem: (k) => (mem.has(k) ? mem.get(k) : null),
+      setItem: (k, v) => mem.set(k, String(v)),
+      removeItem: (k) => mem.delete(k),
+    };
+    saveUiState({ filter: 'incoming', openOppId: 'opp-optus-coi', fixtureKey: 'green' });
+    const loaded = loadUiState();
+    assert(loaded.filter === 'incoming', loaded.filter);
+    assert(loaded.openOppId === 'opp-optus-coi', loaded.openOppId);
+    saveFeedCache({ opportunities: [{ opportunity_id: 'opp-optus-coi', status: 'OWNER_ACTION' }] }, 'green');
+    const cached = loadFeedCache();
+    assert(cached.feed.opportunities[0].opportunity_id === 'opp-optus-coi', 'cached lead survives storage');
+    clearUiState();
+    clearFeedCache();
+    assert(loadUiState().filter === 'all', 'cleared state returns default filter');
+    assert(loadFeedCache() === null, 'cleared feed cache is empty');
+  });
+
+  test('INCOMING BUFFER: existing order stays put when timestamps update', () => {
+    resetIncomingBuffer();
+    const a = {
+      opportunity_id: 'lead-a',
+      incoming_attention: true,
+      latest_transmission_at: '2026-01-01T00:00:00Z',
+    };
+    const b = {
+      opportunity_id: 'lead-b',
+      incoming_attention: true,
+      latest_transmission_at: '2026-01-02T00:00:00Z',
+    };
+    const first = stabilizeIncomingList([a, b]);
+    assert(first[0].opportunity_id === 'lead-b', 'newcomers start newest first');
+    const aHot = { ...a, latest_transmission_at: '2026-06-01T00:00:00Z' };
+    const second = stabilizeIncomingList([aHot, b]);
+    assert(second.map((o) => o.opportunity_id).join(',') === 'lead-b,lead-a', second.map((o) => o.opportunity_id).join(','));
+    const c = {
+      opportunity_id: 'lead-c',
+      incoming_attention: true,
+      latest_transmission_at: '2026-07-01T00:00:00Z',
+    };
+    const third = stabilizeIncomingList([aHot, b, c]);
+    assert(third[0].opportunity_id === 'lead-c', 'new packet prepends');
+    assert(third[1].opportunity_id === 'lead-b', 'prior order locked');
   });
 
   test('NON-NEGOTIABLE: no second database files introduced under rcc', () => {
@@ -305,12 +355,21 @@ async function main() {
   });
 
   {
-    const { loadLiveDashboardFeed } = await loadMod('js/feed-loader.js');
+    const { loadLiveDashboardFeed, applyNewestFirst } = await loadMod('js/feed-loader.js');
     const loaded = await loadLiveDashboardFeed('');
     test('live dashboard feed fails closed without a Graph proxy URL', () => {
       assert(!loaded.ok, 'live feed must not succeed without proxy');
       assert(String(loaded.error).includes('10 Dashboard Feed'), loaded.error);
       assert(String(loaded.error).includes('GRAPH_CLIENT_SECRET'), loaded.error);
+    });
+    test('BONUS: applyNewestFirst sorts records Newest First', () => {
+      const out = applyNewestFirst({
+        records: [
+          { record_id: 'old', created_at: '2026-01-01T00:00:00Z', status: 'NEW' },
+          { record_id: 'new', created_at: '2026-09-01T00:00:00Z', status: 'NEW' },
+        ],
+      });
+      assert(out.records[0].record_id === 'new', out.records[0].record_id);
     });
   }
 

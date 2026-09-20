@@ -28,7 +28,10 @@ import {
   countUnreadActivity,
   isUnreadActivity,
   mergePersistedActivity,
+  resetIncomingBuffer,
+  stabilizeIncomingList,
 } from './new-activity.js';
+import { loadFeedCache, loadUiState, saveFeedCache, saveUiState } from './ui-persist.js';
 import {
   acknowledgeNewReply,
   countNewReplies,
@@ -76,6 +79,33 @@ const state = {
 
 function $(id) {
   return document.getElementById(id);
+}
+
+function persistView() {
+  saveUiState({
+    filter: state.filter,
+    openOppId: state.openOppId,
+    fixtureKey: state.fixtureKey,
+  });
+  if (state.feed) saveFeedCache(state.feed, state.fixtureKey);
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function restoreView() {
+  const ui = loadUiState();
+  state.filter = ui.filter;
+  state.openOppId = ui.openOppId;
+  if (ui.fixtureKey) state.fixtureKey = ui.fixtureKey;
+}
+
+function assignOpportunities(feed, opps) {
+  if (Array.isArray(feed.records) && !Array.isArray(feed.opportunities)) {
+    return { ...feed, records: opps };
+  }
+  return { ...feed, opportunities: opps };
 }
 
 function toast(message, fail = false) {
@@ -148,10 +178,11 @@ function renderOwnerPanel() {
 }
 
 function filteredOpportunities() {
-  const opps = sortOpportunities(getOpportunities(state.feed));
+  const raw = getOpportunities(state.feed);
   if (state.filter === 'incoming') {
-    return opps.filter((o) => hasIncomingAttention(o));
+    return stabilizeIncomingList(raw);
   }
+  const opps = sortOpportunities(raw);
   if (state.filter === 'new-activity') {
     return opps.filter((o) => isUnreadActivity(o));
   }
@@ -477,7 +508,7 @@ function patchOpp(id, patcher) {
     if (String(o.id || o.opportunity_id) !== String(id)) return o;
     return patcher(o);
   });
-  state.feed = { ...state.feed, opportunities: opps };
+  state.feed = assignOpportunities(state.feed, opps);
   return findOpp(id);
 }
 
@@ -485,6 +516,7 @@ function openDetail(id) {
   const opp = findOpp(id);
   if (!opp) return;
   state.openOppId = id;
+  persistView();
   const vm = cardViewModel(opp, getOpportunities(state.feed));
   $('rccDetailLeadId').textContent = `Opportunity ID ${vm.opportunityId || vm.leadId}`;
   $('rccDetailTitle').textContent = opp.company || opp.vendor || 'Opportunity';
@@ -541,6 +573,7 @@ function openDetail(id) {
 
 function closeDetail() {
   state.openOppId = null;
+  persistView();
   $('rccDetailBackdrop').classList.remove('on');
 }
 
@@ -577,6 +610,14 @@ function recompute(runtime = {}) {
   renderChecklist();
   renderAuditDrawer();
   if (state.openOppId) openDetail(state.openOppId);
+  persistView();
+}
+
+function applyLoadedFeed(feed, fixtureKey, loadError) {
+  state.fixtureKey = fixtureKey;
+  state.feed = feed ? mergePersistedNewReplies(mergePersistedActivity(feed)) : null;
+  state.loadError = loadError;
+  recompute();
 }
 
 async function loadLiveOrFixture(key) {
@@ -584,21 +625,33 @@ async function loadLiveOrFixture(key) {
     typeof window !== 'undefined' && window.RCC_DASHBOARD_FEED_URL
       ? window.RCC_DASHBOARD_FEED_URL
       : 'http://127.0.0.1:5173/api/dashboard-feed';
-  const live = await loadLiveDashboardFeed(liveUrl);
-  if (live.ok) {
-    state.fixtureKey = 'live-sharepoint';
-    state.feed = mergePersistedNewReplies(mergePersistedActivity(live.feed));
-    state.loadError = null;
-    recompute();
+  const cached = loadFeedCache();
+  if (cached?.feed && !state.feed) {
+    applyLoadedFeed(cached.feed, cached.fixtureKey || key, null);
+  }
+
+  const liveP = loadLiveDashboardFeed(liveUrl);
+  const first = await Promise.race([
+    liveP.then((live) => ({ kind: 'live', live })),
+    delay(2500).then(() => ({ kind: 'timeout' })),
+  ]);
+
+  if (first.kind === 'live' && first.live.ok) {
+    applyLoadedFeed(first.live.feed, 'live-sharepoint', null);
     return;
   }
-  state.fixtureKey = key;
-  state.feed = null;
-  state.loadError = live.error;
-  recompute();
+
+  if (!state.feed) {
+    await loadFixture(key);
+  }
+
+  liveP.then((live) => {
+    if (live.ok) applyLoadedFeed(live.feed, 'live-sharepoint', null);
+  });
 }
 
 async function loadFixture(key) {
+  resetIncomingBuffer();
   state.fixtureKey = key;
   const url = FIXTURES[key];
   const loaded = await loadFeedFromUrl(url);
@@ -850,10 +903,12 @@ function wireEvents() {
   $('rccCloseAudit').addEventListener('click', () => openDrawer(false));
   $('rccDrawerBackdrop').addEventListener('click', () => openDrawer(false));
   $('rccRefresh').addEventListener('click', () => {
-    // Refresh merges persisted NEW ACTIVITY and re-runs orphan reconcile on current feed side-channels.
+    persistView();
     if (state.feed) {
       state.feed = mergePersistedNewReplies(mergePersistedActivity(state.feed));
       runOrphanReconcileNow();
+    } else if (state.fixtureKey === 'live-sharepoint') {
+      loadLiveOrFixture('green');
     } else {
       loadFixture(state.fixtureKey);
     }
@@ -870,6 +925,7 @@ function wireEvents() {
   document.querySelectorAll('.rcc-tab').forEach((tab) => {
     tab.addEventListener('click', () => {
       state.filter = tab.getAttribute('data-filter') || 'all';
+      persistView();
       renderCards();
     });
   });
@@ -981,8 +1037,12 @@ function wireEvents() {
 
 export async function boot() {
   wireEvents();
-  // Obstructive banner stays hidden by default on mobile-first flow UI.
-  await loadLiveOrFixture('green');
+  restoreView();
+  const fixtureSelect = $('rccFixtureSelect');
+  if (fixtureSelect && state.fixtureKey && FIXTURES[state.fixtureKey]) {
+    fixtureSelect.value = state.fixtureKey;
+  }
+  await loadLiveOrFixture(state.fixtureKey || 'green');
 }
 
 boot();
@@ -1008,6 +1068,10 @@ window.RCC = {
   countUnreadActivity,
   isUnreadActivity,
   mergePersistedActivity,
+  stabilizeIncomingList,
+  sortOpportunities,
+  loadUiState,
+  saveUiState,
   reconcileSoftwareChecklist,
   parseListSoftwareBody,
   clearIncomingAttention,

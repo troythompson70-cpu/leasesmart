@@ -266,3 +266,103 @@ export async function readDashboardFeedJson(): Promise<{
     path: `${CANONICAL_DASHBOARD_FEED}/${CANONICAL_DASHBOARD_FEED_FILE}`,
   }
 }
+
+export type CoverageProbeCheck = 'mailbox_coverage' | 'app_runtime_record_readback'
+export type CoverageProbeStatus = 'PASS' | 'BLOCKED'
+
+export type CoverageProbe = {
+  check: CoverageProbeCheck
+  status: CoverageProbeStatus
+  http: number
+  detail: string
+}
+
+/** Campaign inbox used for a read-only Graph mailbox GET. Never sends mail. */
+const MAILBOX_PROBE_USER = 'info@tgttechnologies.com'
+
+/**
+ * Read-only Graph mailbox probe. Does not POST mail or hit production /api/intake.
+ * PASS only when Graph returns the Inbox folder. 401/403 is BLOCKED, not GREEN.
+ */
+export async function probeMailboxCoverage(): Promise<CoverageProbe> {
+  if (!graphAuthReady()) {
+    return {
+      check: 'mailbox_coverage',
+      status: 'BLOCKED',
+      http: 0,
+      detail: 'MISSING_GRAPH_SECRETS',
+    }
+  }
+  const res = await graphFetch(
+    `/users/${encodeURIComponent(MAILBOX_PROBE_USER)}/mailFolders/inbox?$select=id,displayName,totalItemCount`,
+  )
+  if (res.ok) {
+    return {
+      check: 'mailbox_coverage',
+      status: 'PASS',
+      http: res.status,
+      detail: `Inbox folder readable for ${MAILBOX_PROBE_USER} (GET only).`,
+    }
+  }
+  const body = (await res.json().catch(() => ({}))) as { error?: { code?: string; message?: string } }
+  const code = body.error?.code || 'graph_error'
+  return {
+    check: 'mailbox_coverage',
+    status: 'BLOCKED',
+    http: res.status,
+    detail: `${code}: Graph Mail.Read is not granted or the mailbox is not reachable. No mail was sent.`,
+  }
+}
+
+/**
+ * Graph read-back of Command Center SoT files (dashboard feed + 00 Lead Intake listing).
+ * This is not TGT OS AppDeploy auth. PASS only on HTTP 200 item reads.
+ */
+export async function probeAppRuntimeRecordReadback(): Promise<CoverageProbe> {
+  if (!graphAuthReady()) {
+    return {
+      check: 'app_runtime_record_readback',
+      status: 'BLOCKED',
+      http: 0,
+      detail: 'MISSING_GRAPH_SECRETS',
+    }
+  }
+  try {
+    const live = await readDashboardFeedJson()
+    const site = await resolveTeamTgtMspSite()
+    if (!site?.id) {
+      return {
+        check: 'app_runtime_record_readback',
+        status: 'BLOCKED',
+        http: 404,
+        detail: 'TEAM TGT MSP site was not locatable via Graph.',
+      }
+    }
+    const folderPath = encodeDrivePath(CANONICAL_LEAD_INTAKE)
+    const list = await graphFetch(`/sites/${site.id}/drive/root:/${folderPath}:/children?$select=id,name&$top=5`)
+    if (!list.ok) {
+      return {
+        check: 'app_runtime_record_readback',
+        status: 'BLOCKED',
+        http: list.status,
+        detail: `00 Lead Intake listing failed (HTTP ${list.status}).`,
+      }
+    }
+    const payload = (await list.json()) as { value?: Array<{ name?: string }> }
+    const count = (payload.value || []).length
+    return {
+      check: 'app_runtime_record_readback',
+      status: 'PASS',
+      http: 200,
+      detail: `Graph read-back of ${live.name} plus 00 Lead Intake (${count} items). Not TGT OS AppDeploy.`,
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return {
+      check: 'app_runtime_record_readback',
+      status: 'BLOCKED',
+      http: 503,
+      detail: message,
+    }
+  }
+}
