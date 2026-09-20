@@ -130,7 +130,16 @@ export async function loadFeedFromUrl(url) {
   try {
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) {
-      return emptyFeedError(`Dashboard Feed cannot be read (HTTP ${res.status}).`);
+      let detail = `HTTP ${res.status}`;
+      try {
+        const body = await res.json();
+        if (body && typeof body.error === 'string' && body.error.trim()) {
+          detail = body.error.trim();
+        }
+      } catch {
+        /* keep HTTP status */
+      }
+      return emptyFeedError(`Dashboard Feed cannot be read (${detail}).`);
     }
     const feed = await res.json();
     return {

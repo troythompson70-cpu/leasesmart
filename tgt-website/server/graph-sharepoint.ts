@@ -35,8 +35,12 @@ type TokenCache = { value: string; expiresAt: number }
 let tokenCache: TokenCache | null = null
 let envLoaded = false
 
+const PLACEHOLDER_RE = /^YOUR_|placeholder|changeme|^example$/i
+
 function envValue(name: GraphEnvName): string {
-  return String(process.env[name] || '').trim()
+  const value = String(process.env[name] || '').trim()
+  if (!value || PLACEHOLDER_RE.test(value)) return ''
+  return value
 }
 
 function applyDotEnvFile(filePath: string): void {
