@@ -36,13 +36,9 @@ export const laborDay = {
   inquiryPrefill: "I'm interested in the $280 AI-Ready Laptop.",
 } as const
 
-/**
- * Ninth Edition laptop copy was requested for intake + modal.
- * It is not present in this repo (or in content.ts). Do not invent it.
- */
-export const ninthEdition = null as const
-export const NINTH_EDITION_MISSING =
-  'Ninth Edition copy is missing from this repo. Not shown. Not invented.'
+/** Approved Ninth Edition copy. Intake flag is boolean `ninthEdition: true`. */
+export const ninthEdition =
+  'THE NINTH EDITION: The ultimate AI-hardened workstation for the modern MSP. Precision engineered for zero-latency intelligence and maximum throughput.' as const
 
 export const videos = [
   {

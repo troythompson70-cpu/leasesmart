@@ -151,6 +151,6 @@ function pass(name) {
     phone: '555-0100',
     message: "I'm interested in the $280 AI-Ready Laptop.",
   })
-  assert.equal(payload.ninthEdition, null)
-  pass('laptop payload flags missing Ninth Edition as null')
+  assert.equal(payload.ninthEdition, true)
+  pass('laptop payload flags Ninth Edition as true')
 }
