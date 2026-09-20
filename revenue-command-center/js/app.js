@@ -1,5 +1,5 @@
 import { HEALTH, ACTION_LOCK_MESSAGE, SCHEMA_VERSION } from './constants.js';
-import { loadFeedFromUrl, getOpportunities } from './feed-loader.js';
+import { loadFeedFromUrl, loadLiveDashboardFeed, getOpportunities } from './feed-loader.js';
 import { evaluateSyncHealth, formatMetric } from './sync-health.js';
 import { sortOpportunities, selectOwnerActionPanel } from './sorting.js';
 import { findExistingOpportunity } from './dedupe.js';
@@ -579,6 +579,25 @@ function recompute(runtime = {}) {
   if (state.openOppId) openDetail(state.openOppId);
 }
 
+async function loadLiveOrFixture(key) {
+  const liveUrl =
+    typeof window !== 'undefined' && window.RCC_DASHBOARD_FEED_URL
+      ? window.RCC_DASHBOARD_FEED_URL
+      : 'http://127.0.0.1:5173/api/dashboard-feed';
+  const live = await loadLiveDashboardFeed(liveUrl);
+  if (live.ok) {
+    state.fixtureKey = 'live-sharepoint';
+    state.feed = mergePersistedNewReplies(mergePersistedActivity(live.feed));
+    state.loadError = null;
+    recompute();
+    return;
+  }
+  state.fixtureKey = key;
+  state.feed = null;
+  state.loadError = live.error;
+  recompute();
+}
+
 async function loadFixture(key) {
   state.fixtureKey = key;
   const url = FIXTURES[key];
@@ -963,7 +982,7 @@ function wireEvents() {
 export async function boot() {
   wireEvents();
   // Obstructive banner stays hidden by default on mobile-first flow UI.
-  await loadFixture('green');
+  await loadLiveOrFixture('green');
 }
 
 boot();
@@ -972,6 +991,8 @@ boot();
 window.RCC = {
   state,
   loadFixture,
+  loadLiveOrFixture,
+  loadLiveDashboardFeed,
   evaluateSyncHealth,
   findExistingOpportunity,
   saveAndVerify,

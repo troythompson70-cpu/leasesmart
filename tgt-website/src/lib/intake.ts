@@ -3,7 +3,7 @@ import {
   isProductionIntakeUrl,
   resolveIntakePostUrl,
 } from './intake-probe-guard'
-import type { TipTopicId } from '../content'
+import { ninthEdition, type TipTopicId } from '../content'
 
 export type IntakeMode = 'api' | 'formspark' | 'unconfigured'
 
@@ -32,6 +32,7 @@ export type LaptopInquiryPayload = {
   message: string
   offer: '280-ai-laptop'
   source: 'tgt-website-laptop'
+  ninthEdition: null
 }
 
 export type AssessmentFallbackPayload = {
@@ -104,6 +105,7 @@ export function buildLaptopInquiryPayload(input: {
   email: string
   phone: string
   message: string
+  ninthEdition?: null
 }): LaptopInquiryPayload {
   return {
     schemaVersion: '1.1',
@@ -115,6 +117,7 @@ export function buildLaptopInquiryPayload(input: {
     message: input.message.trim(),
     offer: '280-ai-laptop',
     source: 'tgt-website-laptop',
+    ninthEdition: input.ninthEdition === undefined ? ninthEdition : input.ninthEdition,
   }
 }
 
@@ -236,6 +239,7 @@ export async function submitLaptopInquiry(input: {
   email: string
   phone: string
   message: string
+  ninthEdition?: null
 }): Promise<IntakeSuccess | IntakeFailure> {
   if (intakeConfig.mode !== 'api' || !intakeConfig.apiEndpoint) {
     return { ok: false, error: 'No protected intake destination is configured' }

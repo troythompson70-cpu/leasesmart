@@ -143,4 +143,14 @@ function pass(name) {
   pass('mailto encodes spaces as %20 not + (URLSearchParams forbidden)')
 }
 
-console.log('All intake validation checks passed.')
+{
+  const { buildLaptopInquiryPayload } = await import('../src/lib/intake.ts')
+  const payload = buildLaptopInquiryPayload({
+    name: 'Troy',
+    email: 'troy@example.com',
+    phone: '555-0100',
+    message: "I'm interested in the $280 AI-Ready Laptop.",
+  })
+  assert.equal(payload.ninthEdition, null)
+  pass('laptop payload flags missing Ninth Edition as null')
+}
