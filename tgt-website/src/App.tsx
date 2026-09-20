@@ -23,17 +23,28 @@ function App() {
       <AnnouncementBar onLaptopClick={() => setLaptopOpen(true)} />
       <SiteHeader onLaptopClick={() => setLaptopOpen(true)} />
       <main>
-        <Hero onLaptopClick={() => setLaptopOpen(true)} />
+        <Hero
+          onLaptopClick={() => setLaptopOpen(true)}
+          onHelp={() => setLeadKind('remote')}
+        />
         <VideosSection />
         <LaptopPromo onInquire={() => setLaptopOpen(true)} />
         <MeetGates onAsk={() => setLeadKind('gates')} />
         <RemoteSupport onRequest={() => setLeadKind('remote')} />
         <ContentCategories />
         <ReferralProgram onRefer={() => setLeadKind('referral')} />
-        <BusinessIt onAssess={() => setLeadKind('assessment')} />
+        <BusinessIt
+          onAssess={() => setLeadKind('assessment')}
+          onRemote={() => setLeadKind('remote')}
+        />
         <BottomSignup />
       </main>
-      <SiteFooter />
+      <SiteFooter
+        onContact={() => setLeadKind('contact')}
+        onLaptop={() => setLaptopOpen(true)}
+        onRemote={() => setLeadKind('remote')}
+        onAssess={() => setLeadKind('assessment')}
+      />
       {laptopOpen ? <LaptopInquiryModal onClose={() => setLaptopOpen(false)} /> : null}
       {leadKind ? (
         <LeadInquiryModal kind={leadKind} onClose={() => setLeadKind(null)} />

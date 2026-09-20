@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { categoryStrip, laborDay } from '../content'
+import { scrollToHash } from '../lib/scroll-to'
 import { track } from '../lib/track'
 import { TipsSignupForm } from './TipsSignupForm'
 
@@ -21,7 +22,7 @@ export function AnnouncementBar({ onLaptopClick }: { onLaptopClick: () => void }
           }}
           data-cta="announcement-laptop"
         >
-          SHOP / EMAIL US
+          SHOP / INQUIRE
         </button>
       </div>
     </div>
@@ -58,7 +59,11 @@ export function SiteHeader({ onLaptopClick }: HeaderProps) {
       }`}
     >
       <div className="mx-auto flex h-16 w-full max-w-[1320px] items-center justify-between gap-4 px-5 sm:h-20 sm:px-6 lg:px-8">
-        <a href="#top" className="flex items-center gap-3" aria-label="TGT Technologies home">
+        <a href="#top" className="flex items-center gap-3" aria-label="TGT Technologies home" onClick={(event) => {
+          event.preventDefault()
+          scrollToHash('#top')
+          window.history.replaceState(null, '', '#top')
+        }}>
           <img
             src="/media/tgt-logo-2026.svg"
             alt="TGT Technologies"
@@ -74,6 +79,11 @@ export function SiteHeader({ onLaptopClick }: HeaderProps) {
               className={`text-sm font-semibold transition ${
                 scrolled ? 'text-navy-900 hover:text-brand-blue' : 'text-white/90 hover:text-white'
               }`}
+              onClick={(event) => {
+                event.preventDefault()
+                scrollToHash(link.href)
+                window.history.replaceState(null, '', link.href)
+              }}
             >
               {link.label}
             </a>
@@ -119,7 +129,12 @@ export function SiteHeader({ onLaptopClick }: HeaderProps) {
                 key={link.href}
                 href={link.href}
                 className="rounded-md px-3 py-3 text-base font-medium text-navy-900 hover:bg-slate-soft"
-                onClick={() => setOpen(false)}
+                onClick={(event) => {
+                  event.preventDefault()
+                  setOpen(false)
+                  scrollToHash(link.href)
+                  window.history.replaceState(null, '', link.href)
+                }}
               >
                 {link.label}
               </a>
@@ -144,7 +159,13 @@ export function SiteHeader({ onLaptopClick }: HeaderProps) {
   )
 }
 
-export function Hero({ onLaptopClick }: { onLaptopClick: () => void }) {
+export function Hero({
+  onLaptopClick,
+  onHelp,
+}: {
+  onLaptopClick: () => void
+  onHelp: () => void
+}) {
   return (
     <section
       id="top"
@@ -199,9 +220,17 @@ export function Hero({ onLaptopClick }: { onLaptopClick: () => void }) {
             >
               SHOP THE $280 AI-READY LAPTOP
             </button>
-            <a href="#remote-help" className="btn-secondary" data-cta="hero-help">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                track('remote_help_inquiry', { method: 'hero' })
+                onHelp()
+              }}
+              data-cta="hero-help"
+            >
               NEED TECH HELP?
-            </a>
+            </button>
           </div>
 
           <div className="fade-up fade-up-d3 mt-6 flex flex-wrap gap-2" aria-label="What TGT offers">

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { laborDay, videos, remoteHelpItems, mspServices, categoryStrip, youtubeChannelUrl } from '../content'
 import { track } from '../lib/track'
 import { TipsSignupForm } from './TipsSignupForm'
@@ -64,31 +65,47 @@ export function LaptopPromo({ onInquire }: { onInquire: () => void }) {
   )
 }
 
-function youtubeEmbedSrc(youtubeId: string): string {
+function youtubeEmbedSrc(youtubeId: string, autoplay = false): string {
   const params = new URLSearchParams({
     rel: '0',
     modestbranding: '1',
     playsinline: '1',
     feature: 'oembed',
   })
+  if (autoplay) params.set('autoplay', '1')
   return `https://www.youtube.com/embed/${youtubeId}?${params.toString()}`
 }
 
-function VideoEmbed({
-  youtubeId,
-  title,
-  eager = false,
-}: {
-  youtubeId: string
-  title: string
-  eager?: boolean
-}) {
+function VideoEmbed({ youtubeId, title }: { youtubeId: string; title: string }) {
+  const [playing, setPlaying] = useState(false)
+  if (!playing) {
+    return (
+      <div className="video-embed">
+        <button
+          type="button"
+          className="video-embed-poster"
+          onClick={() => {
+            track('video_play', { video: youtubeId })
+            setPlaying(true)
+          }}
+          aria-label={`Play ${title}`}
+        >
+          <img
+            src={`https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`}
+            alt=""
+          />
+          <span className="video-embed-play" aria-hidden="true">
+            <span>▶</span>
+          </span>
+        </button>
+      </div>
+    )
+  }
   return (
     <div className="video-embed">
       <iframe
-        src={youtubeEmbedSrc(youtubeId)}
+        src={youtubeEmbedSrc(youtubeId, true)}
         title={title}
-        loading={eager ? 'eager' : 'lazy'}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         referrerPolicy="strict-origin-when-cross-origin"
         allowFullScreen
@@ -98,7 +115,6 @@ function VideoEmbed({
 }
 
 export function VideosSection() {
-  const featured = videos[0]
   return (
     <section id="videos" className="section-pad bg-white">
       <div className="wrap">
@@ -109,8 +125,7 @@ export function VideosSection() {
               See TGT Technologies on camera.
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-muted">
-              Official TGT commercials and the 60-second pitch — playing here, not buried and not
-              blank.
+              Three official TGT videos — one commercial, the follow-up, and the 60-second pitch.
             </p>
           </div>
           <a
@@ -124,25 +139,13 @@ export function VideosSection() {
           </a>
         </div>
 
-        <article className="mt-8 overflow-hidden rounded-2xl border border-slate-line bg-slate-soft/60 shadow-[0_10px_30px_-18px_rgba(6,16,31,0.35)]">
-          <VideoEmbed youtubeId={featured.youtubeId} title={featured.title} eager />
-          <div className="p-4">
-            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-blue">
-              {featured.tag}
-            </p>
-            <h3 className="mt-1 font-display text-lg font-semibold text-navy-900">
-              {featured.title}
-            </h3>
-          </div>
-        </article>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-3">
+        <div className="mt-8 grid gap-5 md:grid-cols-3">
           {videos.map((video) => (
             <article
               key={video.id}
               className="overflow-hidden rounded-2xl border border-slate-line bg-slate-soft/60 shadow-[0_10px_30px_-18px_rgba(6,16,31,0.35)]"
             >
-              <VideoEmbed youtubeId={video.youtubeId} title={video.title} eager />
+              <VideoEmbed youtubeId={video.youtubeId} title={video.title} />
               <div className="p-4">
                 <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-blue">
                   {video.tag}
@@ -313,7 +316,13 @@ export function ReferralProgram({ onRefer }: { onRefer: () => void }) {
   )
 }
 
-export function BusinessIt({ onAssess }: { onAssess: () => void }) {
+export function BusinessIt({
+  onAssess,
+  onRemote,
+}: {
+  onAssess: () => void
+  onRemote: () => void
+}) {
   return (
     <section id="business-it" className="section-pad bg-white">
       <div className="wrap">
@@ -360,9 +369,16 @@ export function BusinessIt({ onAssess }: { onAssess: () => void }) {
           >
             GET A FREE IT ASSESSMENT
           </button>
-          <a href="#remote-help" className="btn-outline">
+          <button
+            type="button"
+            className="btn-outline"
+            onClick={() => {
+              track('remote_help_inquiry', { method: 'business_it' })
+              onRemote()
+            }}
+          >
             REQUEST REMOTE HELP
-          </a>
+          </button>
         </div>
       </div>
     </section>
@@ -389,7 +405,17 @@ export function BottomSignup() {
   )
 }
 
-export function SiteFooter() {
+export function SiteFooter({
+  onContact,
+  onLaptop,
+  onRemote,
+  onAssess,
+}: {
+  onContact: () => void
+  onLaptop: () => void
+  onRemote: () => void
+  onAssess: () => void
+}) {
   return (
     <footer id="contact" className="border-t border-white/10 bg-navy-950 text-white">
       <div className="wrap grid gap-8 py-12 md:grid-cols-[1.2fr_0.8fr]">
@@ -405,21 +431,40 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="grid gap-2 text-sm">
-          <a className="font-semibold hover:text-blue-200" href="mailto:info@tgttechnologies.com">
-            info@tgttechnologies.com
-          </a>
+          <button
+            type="button"
+            className="text-left font-semibold hover:text-blue-200"
+            onClick={() => {
+              track('contact_click', { method: 'footer' })
+              onContact()
+            }}
+          >
+            Contact TGT
+          </button>
           <a className="hover:text-blue-200" href="#signup">
             Sign up for tips
           </a>
-          <a className="hover:text-blue-200" href="#laptop">
+          <button
+            type="button"
+            className="text-left hover:text-blue-200"
+            onClick={onLaptop}
+          >
             $280 AI-ready laptop
-          </a>
-          <a className="hover:text-blue-200" href="#remote-help">
+          </button>
+          <button
+            type="button"
+            className="text-left hover:text-blue-200"
+            onClick={onRemote}
+          >
             Request remote help
-          </a>
-          <a className="hover:text-blue-200" href="#business-it">
+          </button>
+          <button
+            type="button"
+            className="text-left hover:text-blue-200"
+            onClick={onAssess}
+          >
             Business IT / MSP
-          </a>
+          </button>
         </div>
       </div>
       <div className="border-t border-white/10">

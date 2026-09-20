@@ -178,3 +178,24 @@ function pass(name) {
   assert.equal(payload.source, 'tgt-website-remote-help')
   pass('remote-help inquiry uses assessment intake not mailto')
 }
+
+{
+  const { readdirSync, readFileSync, statSync } = await import('node:fs')
+  const { join } = await import('node:path')
+  const { fileURLToPath } = await import('node:url')
+  const srcRoot = join(fileURLToPath(new URL('../src/', import.meta.url)))
+  const hits = []
+  function walk(dir) {
+    for (const name of readdirSync(dir)) {
+      const p = join(dir, name)
+      if (statSync(p).isDirectory()) walk(p)
+      else if (/\.(tsx|ts)$/.test(name) && !p.endsWith('mailto.ts')) {
+        const text = readFileSync(p, 'utf8')
+        if (text.includes('mailto:') || text.includes('openMailto(')) hits.push(p)
+      }
+    }
+  }
+  walk(srcRoot)
+  assert.equal(hits.length, 0, `UI still has mailto: ${hits.join(', ')}`)
+  pass('website UI has no mailto: or openMailto in src components')
+}

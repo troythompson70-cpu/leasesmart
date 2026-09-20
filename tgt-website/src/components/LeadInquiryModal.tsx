@@ -3,7 +3,7 @@ import type { FormEvent } from 'react'
 import { submitAssessmentInquiry, type AssessmentInquiryPayload } from '../lib/intake'
 import { track, type CtaEvent } from '../lib/track'
 
-export type LeadKind = 'remote' | 'referral' | 'gates' | 'assessment'
+export type LeadKind = 'remote' | 'referral' | 'gates' | 'assessment' | 'contact'
 
 type LeadInquiryModalProps = {
   kind: LeadKind
@@ -69,6 +69,15 @@ const COPY: Record<
     prefill: 'What the business needs from TGT:\n',
     showCompany: true,
     success: 'Thank you — TGT received your assessment request and will call you back.',
+  },
+  contact: {
+    eyebrow: 'Contact TGT',
+    title: 'Message TGT on this page',
+    trackEvent: 'contact_click',
+    source: 'tgt-website-contact',
+    prefill: 'How can TGT help?\n',
+    showCompany: false,
+    success: 'Thank you — TGT received your message and will call you back.',
   },
 }
 

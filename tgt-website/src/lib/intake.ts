@@ -58,6 +58,7 @@ export type AssessmentInquiryPayload = {
     | 'tgt-website-referral'
     | 'tgt-website-ask-gates'
     | 'tgt-website-assessment'
+    | 'tgt-website-contact'
 }
 
 export type NewsletterPayload = {
