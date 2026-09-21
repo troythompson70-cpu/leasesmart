@@ -1,46 +1,28 @@
-# Morning Review — 2026-09-21 (late) — READY_FOR_PRODUCTION_AUTH_TEST
+# Morning Review — 2026-09-21 — TROY GO AUTH_TEST
 
-**Build ID:** 20260921-graph-ready-auth-test · **Branch:** `cursor/graph-auth-appdeploy-secrets-d437` · **PR:** #28
+**Build ID:** 20260921-troy-go-auth-test · **Branch:** `cursor/graph-auth-appdeploy-secrets-d437` · **PR:** #28
 
-## Operating model
+## Command
 
-| Role | Agent |
-|------|--------|
-| PM / Orchestrator | ChatGPT |
-| Architecture / Risk | Gemini |
-| Implementation | Cursor |
-| Ops record | M365 / SharePoint |
-| Live AUTH_TEST | Independent Verifier |
-| Claude | **SUSPENDED — DO NOT USE** |
+Troy: **`go`** → live AUTH_TEST sequence **AUTHORIZED**.
 
-## Dashboard
+## Status string
+
+`TROY_GO — AWAITING_APPDEPLOY_AUTH_TEST_EXECUTION`
 
 | Check | Result |
 |-------|--------|
-| Live AppDeploy version | **v98 / 1790006649557** (~12:04 PM ET) |
-| `backend/graph-auth.ts` | **PATCHED** — all three secrets via `secrets.readSecret` |
-| Hard-coded tenant/client IDs | **GONE** |
-| AppDeploy QA | **READY** (0 / 0 / 0) |
-| Code-side identity defect | **CLOSED** |
-| Live token endpoint proof | **NOT YET** |
-| Sledgehammer cron | **DISABLED** (do not re-enable yet) |
-| Local 28/28 | Useful re-verify only — **not** VERIFIED |
-| Status string | **`READY_FOR_PRODUCTION_AUTH_TEST`** |
+| Live | v98 / 1790006649557 READY 0/0/0 |
+| graph-auth secrets path | PATCHED |
+| Code defect | CLOSED |
+| Troy GO | **YES** |
+| Cursor live AUTH_TEST | **BLOCKED** (no AppDeploy / no GRAPH_*) |
+| Cron | DISABLED |
+| Claude | SUSPENDED |
 
-## Next sequence (strict order)
+## Execute now (ChatGPT + Independent Verifier)
 
-1. live AUTH_TEST  
-2. real Graph Mail.Read  
-3. inbox/sent reconciliation  
-4. Command Center readback  
-5. replay proves creates=0  
-6. re-enable Sledgehammer cron  
-7. independent verification  
+live AUTH_TEST → Mail.Read → reconcile → Command Center readback → replay creates=0 → re-enable cron → independent verification
 
-## Do not
-
-- Roll back to v44  
-- Restart UI work  
-- Wait for Claude  
-- Treat local unit tests as live Entra proof  
-- Re-enable cron before AUTH_OK + replay creates=0  
+Runbook: `master-vault/cursor-reports/TGT-OS-GRAPH-READY-FOR-AUTH-TEST-2026-09-21.md`  
+GO record: `master-vault/cursor-reports/TGT-OS-GRAPH-TROY-GO-AUTH-TEST-2026-09-21.md`

@@ -6,6 +6,13 @@ This log records sprint commands, AI reviews, GO/NO-GO decisions, and Cursor rep
 Secrets are stripped automatically — never paste API keys or passwords here.
 
 ---
+## 2026-09-21 (GO) — TROY GO AUTH_TEST — Cursor Report
+
+**Build ID:** 20260921-troy-go-auth-test · **PR:** #28
+
+Troy commanded **`go`**. Live AUTH_TEST sequence **AUTHORIZED**. Status: `TROY_GO — AWAITING_APPDEPLOY_AUTH_TEST_EXECUTION`. Cursor re-probed: Lovable 0 projects, preview 404, no GRAPH_* in agent — cannot execute client_credentials AUTH_TEST. ChatGPT must run AUTH_TEST inside AppDeploy now; cron stays disabled until AUTH_OK + replay creates=0. Record: `master-vault/cursor-reports/TGT-OS-GRAPH-TROY-GO-AUTH-TEST-2026-09-21.md`.
+
+---
 ## 2026-09-21 (late) — GRAPH READY_FOR_PRODUCTION_AUTH_TEST — Cursor Report
 
 **Build ID:** 20260921-graph-ready-auth-test · **PR:** #28
