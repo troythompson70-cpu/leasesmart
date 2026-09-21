@@ -1,43 +1,48 @@
-# Morning Review — Tuesday, September 15, 2026
+# Morning Review — 2026-09-21 — Graph v98 auth repair (Claude suspended)
 
-**LeaseSmart · TGT Technologies Inc.**
-**Build ID:** 20260915-tgt-os-outlook-audit-vault · **Branch:** cursor/tgt-os-outlook-audit-vault-9057
+**Build ID:** 20260921-graph-v98-auth-repair · **Branch:** `cursor/graph-auth-appdeploy-secrets-d437` · **PR:** #28
 
-> Read this in under 2 minutes. Upload `master-vault/` files to Microsoft 365 Master Vault.
+## Operating model (effective now)
 
-## Dashboard status — TGT OS Outlook audit
+| Role | Agent |
+|------|--------|
+| PM / Orchestrator | ChatGPT |
+| Architecture / Risk | Gemini |
+| Implementation | Cursor |
+| Ops record | M365 / SharePoint |
+| Claude | **SUSPENDED — DO NOT USE** |
+
+## Dashboard — Graph / AppDeploy production repair
 
 | Check | Result |
-|---|---|
-| AppDeploy TGT OS receiving-side fixes | **REPORTED FIXED + DEPLOYED** (outside leasesmart) |
-| `OUTLOOK_INGEST_KEY` on production | **REPORTED CONFIGURED** |
-| Email body / object parse / realtime / drawer rebind / reconciliation | **REPORTED FIXED** |
-| Deploy QA (AppDeploy) | **REPORTED READY** (0 FE / 0 BE / 0 network) |
-| M365 `TGT - Email Intake` POSTs | **NEEDS LIVE VERIFY** |
-| Historical missing bodies | **BACKFILL OPTIONAL** |
-| leasesmart contains TGT OS ingest code | **NO** |
-| Strong e2e candidate in Inbox | **YES** — Max Farrell / NinjaOne 15:59Z |
+|-------|--------|
+| Production freeze | **v98 / 1789910277389** `FROZEN_FOR_GRAPH_REPAIR` |
+| Rollback-only | v44 / 1789734343421 |
+| Root cause | Hard-coded tenant/client in `backend/graph-auth.ts` → **AADSTS7000215** |
+| AppDeploy secret **names** | Present (ChatGPT inspection) |
+| Cursor drop-in | Ready — `tgt-os-graph/appdeploy/graph-auth.ts` |
+| Local tests | **28/28 PASS** |
+| Production apply | **NOT DONE** — Cursor Lovable MCP sees 0 projects; ChatGPT must apply |
+| Public preview URLs | 404 (expected publicly; authenticated AppDeploy is SoT) |
+| Cron `sledgehammer-production-sweep-v3` | **DISABLED** (keep off until AUTH_OK) |
+| VERIFIED | **No** |
 
-Full report: `master-vault/cursor-reports/TGT-OS-OUTLOOK-INGESTION-AUDIT-2026-09-15.md`
+## Status string
 
-## What Troy should do next (2 minutes)
+`OWNER_ACTION_REQUIRED: APPDEPLOY_APPLY_GRAPH_AUTH`
 
-1. Open TGT Operating System.
-2. Check NinjaOne / Max Farrell card for LAST RECEIVED + body from today’s time-slot reply.
-3. In Power Automate, confirm `TGT - Email Intake` is On and ran for that message.
+## Next actions (ordered)
 
-## What Cursor did here
+1. **ChatGPT** — apply drop-in to AppDeploy `backend/graph-auth.ts` on frozen v98 (see transplant notes).
+2. **Troy** — confirm Entra **TGT Command Center Production** client-secret **VALUE** matches the three AppDeploy Graph secrets (never paste into chat).
+3. **Production AUTH_TEST** — then Independent Verifier readback (not Gemini if Gemini co-designed the auth path).
+4. **Gemini** — architecture/risk review of hard-coded-ID defect class + secrets boundary (optional parallel; not a deploy gate if ChatGPT already has apply path).
+5. Only after AUTH_OK: mailbox → ingest → visible readback → replay creates=0 → consider re-enabling cron.
 
-- Vaulted the AppDeploy audit + live-verify checklist
-- Graph mailbox scan for real e2e candidates (no fabricated probes)
-- Could not open AppDeploy UI (no URL in repo; Lovable MCP needs auth)
+## Do not
 
-## Ready for commit
-
-- Docs only on `cursor/tgt-os-outlook-audit-vault-9057`
-
----
-
-**Full sprint log:** `master-vault/LeaseSmart-Sprint-Master-Log.md`
-
-**Copy for Claude:** open `master-vault/morning/HANDOFF-latest.html` and click the button.
+- Wait for Claude
+- Restart completed UI work
+- Re-enable sledgehammer cron before AUTH_OK
+- Transplant PR #25 `process.env` auth literally into AppDeploy
+- Claim VERIFIED from local unit tests alone

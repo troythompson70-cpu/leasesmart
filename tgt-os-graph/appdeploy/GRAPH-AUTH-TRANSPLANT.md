@@ -29,17 +29,28 @@ Behavior:
 7. Never logs tokens/secrets
 8. Maps `AADSTS7000215` → `OWNER_ACTION_REQUIRED: GRAPH_SERVICE_IDENTITY_REPAIR`
 
-## Apply via AppDeploy (Cursor has no AppDeploy MCP this session)
+## Apply via AppDeploy (Cursor cannot write production this session)
 
-ChatGPT / AppDeploy-authenticated agent:
+**Claude is suspended — do not route this apply to Claude.**
+
+| Role | Agent |
+|------|--------|
+| Apply / orchestrate | **ChatGPT** (authenticated AppDeploy access) |
+| Architecture / risk | **Gemini** (review only; not production verifier if co-architect) |
+| Package owner | **Cursor** (this drop-in + tests) |
+| Secret VALUE confirmation | **Troy** (never paste into chat) |
+| Production AUTH_TEST / readback | **Independent Verifier** |
+
+ChatGPT apply steps:
 
 1. Open app `tgt-operating-system-wjjsv6` at frozen v98 source.
 2. Replace `backend/graph-auth.ts` with the drop-in contents (or equivalent import).
 3. Update any imports if the old module exported different names — keep call sites on `getGraphAccessToken` / `clearGraphTokenCache` / `runAuthTest` if already used; otherwise re-export adapters as needed with the **smallest** call-site diff.
 4. Deploy **only** this auth fix (no cron re-enable yet).
 5. Troy: ensure Entra **TGT Command Center Production** client-secret **VALUE** (not Secret ID) matches the three AppDeploy secret values for that exact app+tenant.
-6. Run AUTH_TEST in production.
+6. Run AUTH_TEST in production (Independent Verifier — not Gemini if Gemini co-designed this path).
 7. Only after AUTH_OK: mailbox read → reconcile → ingest → visible readback → replay creates=0 → then consider re-enabling sledgehammer cron.
+8. Write AUTH result to SharePoint `TGT BUSINESS / TGT OPERATING SYSTEM / 11 APP BUILD`.
 
 ## PR #25 note
 

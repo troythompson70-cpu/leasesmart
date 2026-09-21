@@ -2,8 +2,17 @@
 
 **TGT Technologies Inc.** — Upload this file to Microsoft 365 Master Vault.
 
-This log records sprint commands, Claude reviews, GO/NO-GO decisions, and Cursor reports.
+This log records sprint commands, AI reviews, GO/NO-GO decisions, and Cursor reports.
 Secrets are stripped automatically — never paste API keys or passwords here.
+
+---
+## 2026-09-21 — OPERATING MODEL + GRAPH-V98-AUTH-REPAIR — Cursor Report
+
+**Build ID:** 20260921-graph-v98-auth-repair · **PR:** #28
+
+Claude **SUSPENDED**. Active model: ChatGPT (PM/apply) · Gemini (architecture/risk) · Cursor (implementation) · M365/SharePoint (ops record).
+
+Graph production repair continues from known state: v98 freeze / AADSTS7000215 hard-coded identity defect. Cursor drop-in ready (`tgt-os-graph/appdeploy/graph-auth.ts`); local tests **28/28 PASS**. Status remains `OWNER_ACTION_REQUIRED: APPDEPLOY_APPLY_GRAPH_AUTH` — ChatGPT must apply on AppDeploy; Cursor Lovable MCP lists 0 projects. Cron stays disabled. Docs: `master-vault/OPERATING-MODEL-2026-09-21.md`, `master-vault/cursor-reports/TGT-OS-GRAPH-V98-AUTH-REPAIR-2026-09-21.md`.
 
 ---
 ## 2026-09-15 — TGT-OS-OUTLOOK-INGESTION-AUDIT — Cursor Report
