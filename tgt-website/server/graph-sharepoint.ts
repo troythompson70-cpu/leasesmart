@@ -26,6 +26,12 @@ export const CANONICAL_DASHBOARD_FEED_FILE = 'TGT_DASHBOARD_FEED_2026-09-10.json
 
 const GRAPH_ROOT = 'https://graph.microsoft.com/v1.0'
 const LOGIN_ROOT = 'https://login.microsoftonline.com'
+const GRAPH_FETCH_TIMEOUT_MS = 20_000
+
+function graphFetchInit(init: RequestInit = {}): RequestInit {
+  if (init.signal) return init
+  return { ...init, signal: AbortSignal.timeout(GRAPH_FETCH_TIMEOUT_MS) }
+}
 const SITE_HOST_CANDIDATES = [
   'tgttechnologies.sharepoint.com',
   'netorgft7859571.sharepoint.com',
@@ -34,6 +40,11 @@ const SITE_HOST_CANDIDATES = [
 type TokenCache = { value: string; expiresAt: number }
 let tokenCache: TokenCache | null = null
 let envLoaded = false
+
+/** Drop cached Graph tokens so a watch loop can request a new client-credentials grant. */
+export function clearGraphTokenCache(): void {
+  tokenCache = null
+}
 
 const PLACEHOLDER_RE = /^YOUR_|placeholder|changeme|^example$/i
 
@@ -130,11 +141,14 @@ async function graphAccessToken(): Promise<string> {
         body.set('grant_type', 'client_credentials')
         body.set('client_secret', clientSecret)
       }
-      const tokenRes = await fetch(`${LOGIN_ROOT}/${encodeURIComponent(tenant)}/oauth2/v2.0/token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body,
-      })
+      const tokenRes = await fetch(
+        `${LOGIN_ROOT}/${encodeURIComponent(tenant)}/oauth2/v2.0/token`,
+        graphFetchInit({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body,
+        }),
+      )
       const json = (await tokenRes.json().catch(() => ({}))) as {
         access_token?: string
         expires_in?: number
@@ -162,7 +176,7 @@ async function graphFetch(pathname: string, init: RequestInit = {}): Promise<Res
   if (init.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
-  return fetch(`${GRAPH_ROOT}${pathname}`, { ...init, headers })
+  return fetch(`${GRAPH_ROOT}${pathname}`, graphFetchInit({ ...init, headers }))
 }
 
 type GraphSite = { id?: string; displayName?: string; webUrl?: string; name?: string }
@@ -275,6 +289,7 @@ export type CoverageProbe = {
   status: CoverageProbeStatus
   http: number
   detail: string
+  graphCode?: string
 }
 
 /**
@@ -325,6 +340,7 @@ export async function probeMailboxCoverage(): Promise<CoverageProbe> {
     check: 'mailbox_coverage',
     status: 'BLOCKED',
     http: res.status,
+    graphCode: code,
     detail: `${code}: Graph Mail.Read is not granted or the mailbox is not reachable. No mail was sent.`,
   }
 }
