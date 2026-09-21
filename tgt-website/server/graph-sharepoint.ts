@@ -26,6 +26,12 @@ export const CANONICAL_DASHBOARD_FEED_FILE = 'TGT_DASHBOARD_FEED_2026-09-10.json
 
 const GRAPH_ROOT = 'https://graph.microsoft.com/v1.0'
 const LOGIN_ROOT = 'https://login.microsoftonline.com'
+const GRAPH_FETCH_TIMEOUT_MS = 20_000
+
+function graphFetchInit(init: RequestInit = {}): RequestInit {
+  if (init.signal) return init
+  return { ...init, signal: AbortSignal.timeout(GRAPH_FETCH_TIMEOUT_MS) }
+}
 const SITE_HOST_CANDIDATES = [
   'tgttechnologies.sharepoint.com',
   'netorgft7859571.sharepoint.com',
@@ -35,8 +41,17 @@ type TokenCache = { value: string; expiresAt: number }
 let tokenCache: TokenCache | null = null
 let envLoaded = false
 
+/** Drop cached Graph tokens so a watch loop can request a new client-credentials grant. */
+export function clearGraphTokenCache(): void {
+  tokenCache = null
+}
+
+const PLACEHOLDER_RE = /^YOUR_|placeholder|changeme|^example$/i
+
 function envValue(name: GraphEnvName): string {
-  return String(process.env[name] || '').trim()
+  const value = String(process.env[name] || '').trim()
+  if (!value || PLACEHOLDER_RE.test(value)) return ''
+  return value
 }
 
 function applyDotEnvFile(filePath: string): void {
@@ -126,11 +141,14 @@ async function graphAccessToken(): Promise<string> {
         body.set('grant_type', 'client_credentials')
         body.set('client_secret', clientSecret)
       }
-      const tokenRes = await fetch(`${LOGIN_ROOT}/${encodeURIComponent(tenant)}/oauth2/v2.0/token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body,
-      })
+      const tokenRes = await fetch(
+        `${LOGIN_ROOT}/${encodeURIComponent(tenant)}/oauth2/v2.0/token`,
+        graphFetchInit({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body,
+        }),
+      )
       const json = (await tokenRes.json().catch(() => ({}))) as {
         access_token?: string
         expires_in?: number
@@ -158,7 +176,7 @@ async function graphFetch(pathname: string, init: RequestInit = {}): Promise<Res
   if (init.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
-  return fetch(`${GRAPH_ROOT}${pathname}`, { ...init, headers })
+  return fetch(`${GRAPH_ROOT}${pathname}`, graphFetchInit({ ...init, headers }))
 }
 
 type GraphSite = { id?: string; displayName?: string; webUrl?: string; name?: string }
@@ -260,5 +278,122 @@ export async function readDashboardFeedJson(): Promise<{
     name: CANONICAL_DASHBOARD_FEED_FILE,
     webUrl: '',
     path: `${CANONICAL_DASHBOARD_FEED}/${CANONICAL_DASHBOARD_FEED_FILE}`,
+  }
+}
+
+export type CoverageProbeCheck = 'mailbox_coverage' | 'app_runtime_record_readback'
+export type CoverageProbeStatus = 'PASS' | 'BLOCKED'
+
+export type CoverageProbe = {
+  check: CoverageProbeCheck
+  status: CoverageProbeStatus
+  http: number
+  detail: string
+  graphCode?: string
+}
+
+/**
+ * Graph mailbox GET must use the mailbox User Principal Name (primary SMTP).
+ * `info@tgttechnologies.com` is a secondary alias on this mailbox — Graph
+ * `/users/info@...` is not a user resource and returns ErrorAccessDenied.
+ * Override with GRAPH_MAILBOX_UPN in .env. Never sends mail.
+ */
+export const DEFAULT_MAILBOX_PROBE_UPN = 'tgates@tgttechnologies.com'
+
+export function mailboxProbeUpn(): string {
+  loadGraphEnvFromDotEnv()
+  const fromEnv = String(process.env.GRAPH_MAILBOX_UPN || '').trim()
+  if (fromEnv && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fromEnv) && !PLACEHOLDER_RE.test(fromEnv)) {
+    return fromEnv
+  }
+  return DEFAULT_MAILBOX_PROBE_UPN
+}
+
+/**
+ * Read-only Graph mailbox probe. Does not POST mail or hit production /api/intake.
+ * PASS only when Graph returns the Inbox folder. 401/403 is BLOCKED, not GREEN.
+ */
+export async function probeMailboxCoverage(): Promise<CoverageProbe> {
+  if (!graphAuthReady()) {
+    return {
+      check: 'mailbox_coverage',
+      status: 'BLOCKED',
+      http: 0,
+      detail: 'MISSING_GRAPH_SECRETS',
+    }
+  }
+  const upn = mailboxProbeUpn()
+  const res = await graphFetch(
+    `/users/${encodeURIComponent(upn)}/mailFolders/inbox?$select=id,displayName,totalItemCount`,
+  )
+  if (res.ok) {
+    return {
+      check: 'mailbox_coverage',
+      status: 'PASS',
+      http: res.status,
+      detail: `Inbox folder readable for ${upn} (GET only).`,
+    }
+  }
+  const body = (await res.json().catch(() => ({}))) as { error?: { code?: string; message?: string } }
+  const code = body.error?.code || 'graph_error'
+  return {
+    check: 'mailbox_coverage',
+    status: 'BLOCKED',
+    http: res.status,
+    graphCode: code,
+    detail: `${code}: Graph Mail.Read is not granted or the mailbox is not reachable. No mail was sent.`,
+  }
+}
+
+/**
+ * Graph read-back of Command Center SoT files (dashboard feed + 00 Lead Intake listing).
+ * This is not TGT OS AppDeploy auth. PASS only on HTTP 200 item reads.
+ */
+export async function probeAppRuntimeRecordReadback(): Promise<CoverageProbe> {
+  if (!graphAuthReady()) {
+    return {
+      check: 'app_runtime_record_readback',
+      status: 'BLOCKED',
+      http: 0,
+      detail: 'MISSING_GRAPH_SECRETS',
+    }
+  }
+  try {
+    const live = await readDashboardFeedJson()
+    const site = await resolveTeamTgtMspSite()
+    if (!site?.id) {
+      return {
+        check: 'app_runtime_record_readback',
+        status: 'BLOCKED',
+        http: 404,
+        detail: 'TEAM TGT MSP site was not locatable via Graph.',
+      }
+    }
+    const folderPath = encodeDrivePath(CANONICAL_LEAD_INTAKE)
+    const list = await graphFetch(`/sites/${site.id}/drive/root:/${folderPath}:/children?$select=id,name&$top=5`)
+    if (!list.ok) {
+      return {
+        check: 'app_runtime_record_readback',
+        status: 'BLOCKED',
+        http: list.status,
+        detail: `00 Lead Intake listing failed (HTTP ${list.status}).`,
+      }
+    }
+    const payload = (await list.json()) as { value?: Array<{ name?: string }> }
+    const count = (payload.value || []).length
+    return {
+      check: 'app_runtime_record_readback',
+      status: 'PASS',
+      http: 200,
+      detail: `Graph read-back of ${live.name} plus 00 Lead Intake (${count} items). Not TGT OS AppDeploy.`,
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return {
+      check: 'app_runtime_record_readback',
+      status: 'BLOCKED',
+      http: 503,
+      detail: message,
+    }
   }
 }

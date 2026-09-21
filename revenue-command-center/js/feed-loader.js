@@ -8,6 +8,7 @@ import {
   CANONICAL_DASHBOARD_FEED_FILE,
   GRAPH_ENV_NAMES,
 } from './paths.js';
+import { sortOpportunities } from './sorting.js';
 
 /**
  * @typedef {object} DashboardFeed
@@ -130,9 +131,18 @@ export async function loadFeedFromUrl(url) {
   try {
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) {
-      return emptyFeedError(`Dashboard Feed cannot be read (HTTP ${res.status}).`);
+      let detail = `HTTP ${res.status}`;
+      try {
+        const body = await res.json();
+        if (body && typeof body.error === 'string' && body.error.trim()) {
+          detail = body.error.trim();
+        }
+      } catch {
+        /* keep HTTP status */
+      }
+      return emptyFeedError(`Dashboard Feed cannot be read (${detail}).`);
     }
-    const feed = await res.json();
+    const feed = applyNewestFirst(await res.json());
     return {
       ok: true,
       error: null,
@@ -150,14 +160,26 @@ export async function loadFeedFromUrl(url) {
 }
 
 /**
+ * Newest First on lead arrays. Closed items stay last via sortOpportunities.
+ */
+export function applyNewestFirst(feed) {
+  if (!feed || typeof feed !== 'object') return feed;
+  const next = { ...feed };
+  if (Array.isArray(next.opportunities)) next.opportunities = sortOpportunities(next.opportunities);
+  if (Array.isArray(next.records)) next.records = sortOpportunities(next.records);
+  return next;
+}
+
+/**
  * Parse feed from raw JSON string (tests / paste).
  */
 export function loadFeedFromJson(jsonText) {
   try {
-    const feed = typeof jsonText === 'string' ? JSON.parse(jsonText) : jsonText;
-    if (!feed || typeof feed !== 'object') {
+    const parsed = typeof jsonText === 'string' ? JSON.parse(jsonText) : jsonText;
+    if (!parsed || typeof parsed !== 'object') {
       return emptyFeedError('Dashboard Feed cannot be read: invalid JSON object.');
     }
+    const feed = applyNewestFirst(parsed);
     return {
       ok: true,
       error: null,

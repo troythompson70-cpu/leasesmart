@@ -2,8 +2,8 @@ import {
   assertSafeIntakeEmail,
   isProductionIntakeUrl,
   resolveIntakePostUrl,
-} from './intake-probe-guard'
-import { ninthEdition, type TipTopicId } from '../content'
+} from './intake-probe-guard.ts'
+import { type TipTopicId } from '../content.ts'
 
 export type IntakeMode = 'api' | 'formspark' | 'unconfigured'
 
@@ -32,10 +32,10 @@ export type LaptopInquiryPayload = {
   message: string
   offer: '280-ai-laptop'
   source: 'tgt-website-laptop'
-  ninthEdition: null
+  ninthEdition: true
 }
 
-export type AssessmentFallbackPayload = {
+export type AssessmentInquiryPayload = {
   schemaVersion: '1.1'
   requestType: 'assessment'
   submissionId: string
@@ -52,7 +52,13 @@ export type AssessmentFallbackPayload = {
   newsletterConsent: false
   newsletterPhonePlatform: ''
   newsletterConsentTextVersion: ''
-  source: 'tgt-website-laptop'
+  source:
+    | 'tgt-website-laptop'
+    | 'tgt-website-remote-help'
+    | 'tgt-website-referral'
+    | 'tgt-website-ask-gates'
+    | 'tgt-website-assessment'
+    | 'tgt-website-contact'
 }
 
 export type NewsletterPayload = {
@@ -105,7 +111,7 @@ export function buildLaptopInquiryPayload(input: {
   email: string
   phone: string
   message: string
-  ninthEdition?: null
+  ninthEdition?: true
 }): LaptopInquiryPayload {
   return {
     schemaVersion: '1.1',
@@ -117,13 +123,13 @@ export function buildLaptopInquiryPayload(input: {
     message: input.message.trim(),
     offer: '280-ai-laptop',
     source: 'tgt-website-laptop',
-    ninthEdition: input.ninthEdition === undefined ? ninthEdition : input.ninthEdition,
+    ninthEdition: true,
   }
 }
 
 export function buildAssessmentFallbackPayload(
   payload: LaptopInquiryPayload,
-): AssessmentFallbackPayload {
+): AssessmentInquiryPayload {
   return {
     schemaVersion: '1.1',
     requestType: 'assessment',
@@ -149,6 +155,35 @@ export function buildAssessmentFallbackPayload(
     newsletterPhonePlatform: '',
     newsletterConsentTextVersion: '',
     source: 'tgt-website-laptop',
+  }
+}
+
+export function buildAssessmentInquiryPayload(input: {
+  name: string
+  email: string
+  phone: string
+  message: string
+  company?: string
+  source: AssessmentInquiryPayload['source']
+}): AssessmentInquiryPayload {
+  return {
+    schemaVersion: '1.1',
+    requestType: 'assessment',
+    submissionId: newSubmissionId(),
+    name: input.name.trim(),
+    company: (input.company || '').trim(),
+    email: input.email.trim(),
+    bestCallbackNumber: input.phone.trim(),
+    numberOfPcs: '',
+    server: '',
+    existingNetworkWifi: '',
+    internetConnectivityIssue: [],
+    currentItSupport: [],
+    message: input.message.trim(),
+    newsletterConsent: false,
+    newsletterPhonePlatform: '',
+    newsletterConsentTextVersion: '',
+    source: input.source,
   }
 }
 
@@ -239,7 +274,7 @@ export async function submitLaptopInquiry(input: {
   email: string
   phone: string
   message: string
-  ninthEdition?: null
+  ninthEdition?: true
 }): Promise<IntakeSuccess | IntakeFailure> {
   if (intakeConfig.mode !== 'api' || !intakeConfig.apiEndpoint) {
     return { ok: false, error: 'No protected intake destination is configured' }
@@ -277,6 +312,45 @@ export async function submitLaptopInquiry(input: {
       }
     }
 
+    return { ok: false, error: 'Inquiry could not be completed. Please try again.' }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : ''
+    if (message.includes('Test/probe email blocked')) {
+      return { ok: false, error: message }
+    }
+    return { ok: false, error: 'Inquiry could not be completed. Please try again.' }
+  }
+}
+
+/** On-page inquiry (remote help, referral, Ask Gates, IT assessment) — no mailto. */
+export async function submitAssessmentInquiry(input: {
+  name: string
+  email: string
+  phone: string
+  message: string
+  company?: string
+  source: AssessmentInquiryPayload['source']
+}): Promise<IntakeSuccess | IntakeFailure> {
+  if (intakeConfig.mode !== 'api' || !intakeConfig.apiEndpoint) {
+    return { ok: false, error: 'No protected intake destination is configured' }
+  }
+
+  const blocked = guardEmailOrFail(input.email)
+  if (blocked) return blocked
+
+  const payload = buildAssessmentInquiryPayload(input)
+
+  try {
+    const res = await postIntake(intakeConfig.apiEndpoint, payload)
+    const body: unknown = await res.json().catch(() => null)
+    if (res.ok && isConfirmed(body)) {
+      return {
+        ok: true,
+        delivery: 'confirmed',
+        requestId: body.requestId,
+        method: 'assessment',
+      }
+    }
     return { ok: false, error: 'Inquiry could not be completed. Please try again.' }
   } catch (error) {
     const message = error instanceof Error ? error.message : ''

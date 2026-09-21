@@ -151,6 +151,61 @@ function pass(name) {
     phone: '555-0100',
     message: "I'm interested in the $280 AI-Ready Laptop.",
   })
-  assert.equal(payload.ninthEdition, null)
-  pass('laptop payload flags missing Ninth Edition as null')
+  assert.equal(payload.ninthEdition, true)
+  pass('laptop payload flags Ninth Edition as true')
+}
+
+{
+  const { videos } = await import('../src/content.ts')
+  const ids = videos.map((v) => v.youtubeId)
+  assert.equal(new Set(ids).size, ids.length, 'each homepage video must have a unique YouTube id')
+  assert.ok(ids.includes('We6DCKigVbY'))
+  assert.ok(ids.includes('nj36vr4q6M0'))
+  assert.ok(ids.includes('NAmV_svHzNI'))
+  pass('homepage videos restore unique TGT YouTube commercials')
+}
+
+{
+  const { buildAssessmentInquiryPayload } = await import('../src/lib/intake.ts')
+  const payload = buildAssessmentInquiryPayload({
+    name: 'Troy',
+    email: 'troy@example.com',
+    phone: '555-0100',
+    message: "I'd like remote computer help from TGT.",
+    source: 'tgt-website-remote-help',
+  })
+  assert.equal(payload.requestType, 'assessment')
+  assert.equal(payload.source, 'tgt-website-remote-help')
+  pass('remote-help inquiry uses assessment intake not mailto')
+}
+
+{
+  const { readdirSync, readFileSync, statSync } = await import('node:fs')
+  const { join } = await import('node:path')
+  const { fileURLToPath } = await import('node:url')
+  const srcRoot = join(fileURLToPath(new URL('../src/', import.meta.url)))
+  const hits = []
+  function walk(dir) {
+    for (const name of readdirSync(dir)) {
+      const p = join(dir, name)
+      if (statSync(p).isDirectory()) walk(p)
+      else if (/\.(tsx|ts)$/.test(name) && !p.endsWith('mailto.ts')) {
+        const text = readFileSync(p, 'utf8')
+        if (text.includes('mailto:') || text.includes('openMailto(')) hits.push(p)
+      }
+    }
+  }
+  walk(srcRoot)
+  assert.equal(hits.length, 0, `UI still has mailto: ${hits.join(', ')}`)
+  pass('website UI has no mailto: or openMailto in src components')
+}
+
+{
+  const { readFileSync } = await import('node:fs')
+  const { fileURLToPath } = await import('node:url')
+  const graph = readFileSync(fileURLToPath(new URL('../server/graph-sharepoint.ts', import.meta.url)), 'utf8')
+  assert.match(graph, /DEFAULT_MAILBOX_PROBE_UPN = 'tgates@tgttechnologies.com'/)
+  assert.equal(graph.includes("/users/${encodeURIComponent('info@tgttechnologies.com')}"), false)
+  assert.equal(/\/users\/\$\{encodeURIComponent\(upn\)\}/.test(graph), true)
+  pass('mailbox Graph GET targets primary UPN tgates@ not alias info@')
 }

@@ -50,11 +50,11 @@ export async function writeLeadToSharePoint(input: {
   requestId: string
 }): Promise<SharePointIntakeResult> {
   const missing = missingGraphEnv()
-  if (missing.length > 0) {
+  if (!graphAuthReady() || missing.length > 0) {
+    console.error('MISSING_GRAPH_SECRETS', missing)
     return {
       ok: false,
-      error:
-        'SharePoint 00 Lead Intake write blocked: Graph env vars are not present in this process.',
+      error: 'MISSING_GRAPH_SECRETS',
       missingEnv: missing,
     }
   }

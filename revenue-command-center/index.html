@@ -121,6 +121,17 @@
 
 <div id="rccToast" class="rcc-toast" role="status"></div>
 
-<script type="module" src="./js/app.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "/js/app.js": "/js/app.js?v=5",
+    "/js/feed-loader.js": "/js/feed-loader.js?v=5",
+    "/js/sorting.js": "/js/sorting.js?v=5",
+    "/js/new-activity.js": "/js/new-activity.js?v=5",
+    "/js/ui-persist.js": "/js/ui-persist.js?v=5"
+  }
+}
+</script>
+<script type="module" src="./js/app.js?v=5"></script>
 </body>
 </html>

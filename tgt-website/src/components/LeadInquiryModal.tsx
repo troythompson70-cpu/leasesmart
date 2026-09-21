@@ -1,21 +1,96 @@
 import { useEffect, useId, useState } from 'react'
 import type { FormEvent } from 'react'
-import { laborDay, ninthEdition } from '../content'
-import { submitLaptopInquiry } from '../lib/intake'
-import { track } from '../lib/track'
+import { submitAssessmentInquiry, type AssessmentInquiryPayload } from '../lib/intake'
+import { track, type CtaEvent } from '../lib/track'
 
-type LaptopInquiryModalProps = {
+export type LeadKind = 'remote' | 'referral' | 'gates' | 'assessment' | 'contact'
+
+type LeadInquiryModalProps = {
+  kind: LeadKind
   onClose: () => void
+}
+
+const COPY: Record<
+  LeadKind,
+  {
+    eyebrow: string
+    title: string
+    trackEvent: CtaEvent
+    source: AssessmentInquiryPayload['source']
+    prefill: string
+    showCompany: boolean
+    success: string
+  }
+> = {
+  remote: {
+    eyebrow: 'Remote help',
+    title: 'Request remote help from TGT',
+    trackEvent: 'remote_help_inquiry',
+    source: 'tgt-website-remote-help',
+    prefill:
+      "I'd like remote computer help from TGT.\n\nName:\nPhone:\nBest time to call:\nIssue:",
+    showCompany: false,
+    success: 'Thank you — TGT received your remote-help request and will call you back.',
+  },
+  referral: {
+    eyebrow: 'Referral',
+    title: 'Refer a business to TGT',
+    trackEvent: 'referral_click',
+    source: 'tgt-website-referral',
+    prefill: [
+      'I want to refer a business to TGT.',
+      '',
+      'My name:',
+      'My email:',
+      'My phone:',
+      '',
+      'Business name:',
+      'Contact name:',
+      'Contact phone/email:',
+      'What they need:',
+    ].join('\n'),
+    showCompany: true,
+    success: 'Thank you — TGT received your referral.',
+  },
+  gates: {
+    eyebrow: 'Ask Gates',
+    title: 'Ask Gates a question',
+    trackEvent: 'ask_gates_click',
+    source: 'tgt-website-ask-gates',
+    prefill: 'Question for Gates:\n',
+    showCompany: false,
+    success: 'Thank you — Gates / TGT received your question.',
+  },
+  assessment: {
+    eyebrow: 'Business IT',
+    title: 'Request a free IT assessment',
+    trackEvent: 'business_assessment_click',
+    source: 'tgt-website-assessment',
+    prefill: 'What the business needs from TGT:\n',
+    showCompany: true,
+    success: 'Thank you — TGT received your assessment request and will call you back.',
+  },
+  contact: {
+    eyebrow: 'Contact TGT',
+    title: 'Message TGT on this page',
+    trackEvent: 'contact_click',
+    source: 'tgt-website-contact',
+    prefill: 'How can TGT help?\n',
+    showCompany: false,
+    success: 'Thank you — TGT received your message and will call you back.',
+  },
 }
 
 type SubmitState = 'idle' | 'submitting' | 'success' | 'error'
 
-export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
+export function LeadInquiryModal({ kind, onClose }: LeadInquiryModalProps) {
+  const copy = COPY[kind]
   const titleId = useId()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
-  const [message, setMessage] = useState<string>(laborDay.inquiryPrefill)
+  const [company, setCompany] = useState('')
+  const [message, setMessage] = useState(copy.prefill)
   const [error, setError] = useState('')
   const [status, setStatus] = useState<SubmitState>('idle')
 
@@ -42,29 +117,26 @@ export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
 
     setStatus('submitting')
     setError('')
-    track('laptop_inquiry', { method: 'form' })
+    track(copy.trackEvent, { method: 'form' })
 
-    const result = await submitLaptopInquiry({
+    const result = await submitAssessmentInquiry({
       name: trimmedName,
       email: trimmedEmail,
       phone: trimmedPhone,
-      message: message.trim() || laborDay.inquiryPrefill,
-      ninthEdition: true,
+      company: copy.showCompany ? company : '',
+      message: message.trim() || copy.prefill,
+      source: copy.source,
     })
 
     if (!result.ok) {
-      track('laptop_inquiry', { method: 'error' })
+      track(copy.trackEvent, { method: 'error' })
       setStatus('error')
       setError(result.error)
       return
     }
 
-    track('laptop_inquiry', { method: result.method })
+    track(copy.trackEvent, { method: result.method })
     setStatus('success')
-    setName('')
-    setEmail('')
-    setPhone('')
-    setMessage(laborDay.inquiryPrefill)
   }
 
   return (
@@ -84,11 +156,10 @@ export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="eyebrow">Laptop inquiry</p>
+            <p className="eyebrow">{copy.eyebrow}</p>
             <h2 id={titleId} className="font-display text-2xl font-semibold text-navy-900">
-              I want the $280 laptop
+              {copy.title}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-navy-900">{ninthEdition}</p>
           </div>
           <button
             type="button"
@@ -103,10 +174,7 @@ export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
 
         {status === 'success' ? (
           <div className="mt-5 grid gap-3" role="status">
-            <p className="text-sm leading-relaxed text-navy-900">
-              Thank you — your laptop inquiry was sent. TGT will call you back. No email app
-              required.
-            </p>
+            <p className="text-sm leading-relaxed text-navy-900">{copy.success}</p>
             <button className="btn-primary w-full" type="button" onClick={onClose}>
               DONE
             </button>
@@ -123,6 +191,17 @@ export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
                 disabled={status === 'submitting'}
               />
             </label>
+            {copy.showCompany ? (
+              <label className="grid gap-1.5 text-sm font-medium text-navy-900">
+                Business name
+                <input
+                  className="field"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  disabled={status === 'submitting'}
+                />
+              </label>
+            ) : null}
             <label className="grid gap-1.5 text-sm font-medium text-navy-900">
               Email
               <input
@@ -146,9 +225,9 @@ export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
               />
             </label>
             <label className="grid gap-1.5 text-sm font-medium text-navy-900">
-              Message
+              Details
               <textarea
-                className="field min-h-24"
+                className="field min-h-28"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 disabled={status === 'submitting'}
@@ -160,11 +239,10 @@ export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
               </p>
             ) : null}
             <button className="btn-primary w-full" type="submit" disabled={status === 'submitting'}>
-              {status === 'submitting' ? 'SENDING…' : 'SEND INQUIRY'}
+              {status === 'submitting' ? 'SENDING…' : 'SEND'}
             </button>
             <p className="text-xs leading-relaxed text-slate-muted">
-              Submits through TGT&apos;s protected intake route. No email app is required. TGT will
-              call you back.
+              Submits through TGT&apos;s protected intake. No email app is required.
             </p>
           </form>
         )}

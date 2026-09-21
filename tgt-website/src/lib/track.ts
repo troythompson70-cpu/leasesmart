@@ -18,6 +18,7 @@ export type CtaEvent =
   | 'referral_click'
   | 'business_assessment_click'
   | 'ask_gates_click'
+  | 'contact_click'
 
 export function track(event: CtaEvent, detail?: Record<string, string>): void {
   const payload = { event, ...detail, ts: new Date().toISOString() }
