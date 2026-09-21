@@ -1,44 +1,28 @@
-# TGT OS Graph — production truth + continuation (2026-09-21)
+# TGT OS Graph — production truth (2026-09-21 late)
 
-**Sources:** ChatGPT AppDeploy inspection + Cursor repair package + Troy operating directive  
-**Status:** `OWNER_ACTION_REQUIRED: APPDEPLOY_APPLY_GRAPH_AUTH`  
-**Freeze:** v98 / `1789910277389` `FROZEN_FOR_GRAPH_REPAIR`  
-**Rollback-only:** v44 / `1789734343421`  
-**Claude:** **SUSPENDED — DO NOT USE** (architect replacement: Gemini; apply: ChatGPT)
+**Sources:** Troy AppDeploy inspection + Cursor vault continuation  
+**Status:** `READY_FOR_PRODUCTION_AUTH_TEST`  
+**Live version:** **v98 / `1790006649557`** (deployed ~2026-09-21 12:04 PM ET)  
+**Prior freeze id (superseded as newest):** `1789910277389`  
+**Rollback-only:** v44 / `1789734343421` — **do not roll back**  
+**Claude:** **SUSPENDED — DO NOT USE**
 
-## Corrected facts vs Sep 18 handoff
+## Facts
 
-| Item | Sep 18 handoff | Sep 21 truth |
-|------|----------------|--------------|
-| Live version | assumed v44 locked | **v98 / 1789910277389** |
-| Public API URL | 402 credit block | still 404 publicly |
-| Authenticated AppDeploy | unavailable to Cursor | **working for ChatGPT** |
-| Secret **names** | missing | **all four present** |
-| Actual failure | credit block | **AADSTS7000215 / HTTP 401** |
-| Cron | n/a | `sledgehammer-production-sweep-v3` disabled after 10 failures |
-| Root defect | secrets missing | **hard-coded tenant/client IDs in `backend/graph-auth.ts`** |
+| Item | State |
+|------|--------|
+| Production `backend/graph-auth.ts` | **PATCHED** — reads `GRAPH_TENANT_ID` + `GRAPH_CLIENT_ID` + `GRAPH_CLIENT_SECRET` from AppDeploy secrets; hard-coded IDs gone |
+| AppDeploy QA | **READY** — 0 FE / 0 BE / 0 network |
+| Code-side Graph identity defect | **CORRECTED** |
+| Live Entra client-secret acceptance | **UNPROVEN** after repair |
+| Cron `sledgehammer-production-sweep-v3` | **DISABLED** (old AADSTS7000215 / HTTP 401 failure state) |
+| Local Cursor suite | 28/28 PASS — **not** live token proof |
+| UI work | Do not restart |
 
-## Cursor deliverable (PR #28)
+## Next wall
 
-- Drop-in: `tgt-os-graph/appdeploy/graph-auth.ts`
-- Transplant notes: `tgt-os-graph/appdeploy/GRAPH-AUTH-TRANSPLANT.md`
-- Local AUTH adapter tests (mock `secrets.readSecret`) — **28/28 PASS**, not production VERIFIED
-- Operating model vaulted: `master-vault/OPERATING-MODEL-2026-09-21.md`
-- Handoffs: ChatGPT apply + Gemini risk — `master-vault/morning/HANDOFF-latest.html`
+Prove the stored Entra client-secret credential against Microsoft:
 
-## Continuation check (this agent turn)
+`live AUTH_TEST → Graph Mail.Read → inbox/sent reconciliation → Command Center readback → replay creates=0 → re-enable Sledgehammer cron → independent verification`
 
-| Probe | Result |
-|-------|--------|
-| Re-run `tgt-os-graph` tests | **28/28 PASS** |
-| Lovable MCP projects in `TGT's Lovable` | **0** — Cursor still cannot apply |
-| Public `*.lovable.app` preview URLs | **404 Project not found** |
-| Outlook scan for AADSTS/sledgehammer alerts | No matching ops failure mail in top hits |
-| UI rework | **Not started** (per directive) |
-
-## Still blocked on ChatGPT + Troy
-
-- AppDeploy write of `backend/graph-auth.ts`
-- Production AUTH_TEST
-- Cron remains disabled (correct)
-- No VERIFIED claim
+Runbook: `master-vault/cursor-reports/TGT-OS-GRAPH-READY-FOR-AUTH-TEST-2026-09-21.md`

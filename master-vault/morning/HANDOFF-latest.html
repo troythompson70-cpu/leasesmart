@@ -1,91 +1,76 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Graph v98 Auth Repair — ChatGPT Apply Handoff</title>
+<title>Graph v98 — READY_FOR_PRODUCTION_AUTH_TEST</title>
 <style>.ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 .ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}
-.ls-copy-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35);letter-spacing:.2px}
+.ls-copy-btn{display:block;width:100%;max-width:420px;margin:16px auto 0;padding:18px 28px;font-size:20px;font-weight:800;color:#000;background:linear-gradient(135deg,#22d98a,#0ea060);border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(34,217,138,.35)}
 .ls-copy-status{display:block;text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:#16a34a;min-height:20px}
 .ls-note{color:#6b7280;font-size:14px;margin-bottom:12px}
-.ls-warn{background:#fef2f2;border:2px solid #fecaca;color:#991b1b;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:700;margin-bottom:16px}</style>
+.ls-warn{background:#fef2f2;border:2px solid #fecaca;color:#991b1b;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:700;margin-bottom:16px}
+.ls-ok{background:#f0fdf4;border:2px solid #bbf7d0;color:#166534;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:700;margin-bottom:16px}</style>
 </head><body style="max-width:900px;margin:0 auto;padding:24px 18px;color:#111827">
-<h1 style="font-size:22px;margin-bottom:8px">Graph v98 Auth Repair — Apply Handoff</h1>
-<p class="ls-note">TGT Technologies Inc. — Claude suspended. Route to ChatGPT (apply) and Gemini (risk review).</p>
-<div class="ls-warn">CLAUDE STATUS: SUSPENDED — DO NOT USE. Do not paste this into Claude.</div>
+<h1 style="font-size:22px;margin-bottom:8px">Graph v98 — READY_FOR_PRODUCTION_AUTH_TEST</h1>
+<p class="ls-note">Claude suspended. Code-side identity defect closed. Next wall = live Entra credential proof.</p>
+<div class="ls-warn">CLAUDE: SUSPENDED — DO NOT USE</div>
+<div class="ls-ok">Production backend/graph-auth.ts PATCHED on v98 / 1790006649557 — AppDeploy READY 0/0/0</div>
 
 <div class="ls-handoff-wrap">
-  <h2 style="font-size:16px;margin-bottom:8px">ChatGPT — Apply</h2>
+  <h2 style="font-size:16px;margin-bottom:8px">ChatGPT — Orchestrate AUTH_TEST</h2>
   <pre class="ls-handoff-pre" id="lsChatgptBlock">--- CHATGPT HANDOFF START ---
 Project: LeaseSmart / TGT OS (AppDeploy)
-Sprint: GRAPH-V98-AUTH-REPAIR
-Build ID: 20260921-graph-v98-auth-repair
+Sprint: GRAPH-V98-AUTH-TEST
+Build ID: 20260921-graph-ready-auth-test
 PR: https://github.com/troythompson70-cpu/leasesmart/pull/28
-Status: COMMITTED candidate — OWNER_ACTION_REQUIRED: APPDEPLOY_APPLY_GRAPH_AUTH
-Claude: SUSPENDED — do not route here
+Status: READY_FOR_PRODUCTION_AUTH_TEST
+Claude: SUSPENDED
 
-Operating model:
-- ChatGPT = PM / apply orchestrator (you)
-- Gemini = architecture / risk review
-- Cursor = implementation package (done for this gate)
-- Troy = final approval
-- Independent Verifier = production AUTH_TEST + readback (separate)
+Production truth (Troy AppDeploy inspection):
+- Live: v98 / 1790006649557 (~12:04 PM ET Sep 21)
+- backend/graph-auth.ts reads GRAPH_TENANT_ID + GRAPH_CLIENT_ID + GRAPH_CLIENT_SECRET from protected secrets
+- Hard-coded tenant/client IDs: GONE
+- AppDeploy QA: READY (0 FE / 0 BE / 0 network)
+- Code-side Graph identity defect: CLOSED
+- Cron sledgehammer-production-sweep-v3: STILL DISABLED (old AADSTS7000215 state)
+- Local Cursor 28/28: NOT live token proof
 
-Known production truth:
-- Freeze: v98 / 1789910277389 FROZEN_FOR_GRAPH_REPAIR
-- Rollback-only: v44 / 1789734343421
-- App: tgt-operating-system-wjjsv6
-- Defect: backend/graph-auth.ts hard-coded GRAPH_TENANT_ID + GRAPH_CLIENT_ID; only GRAPH_CLIENT_SECRET from secrets → AADSTS7000215 / HTTP 401
-- Secret NAMES all present; identity binding wrong
-- Cron sledgehammer-production-sweep-v3: DISABLED (keep disabled)
+Your job now (orchestrate — Independent Verifier executes live gates):
+1) live AUTH_TEST against Microsoft token endpoint via AppDeploy runAuthTest / equivalent
+2) On AUTH_OK only: real Graph Mail.Read
+3) inbox/sent reconciliation
+4) Command Center readback
+5) replay proves creates=0
+6) THEN re-enable Sledgehammer cron
+7) independent verification
+8) Vault result to SharePoint 11 APP BUILD (AUTH code only — never secrets/tokens)
 
-Cursor deliverable (apply this):
-- Replace AppDeploy backend/graph-auth.ts with leasesmart tgt-os-graph/appdeploy/graph-auth.ts
-- Notes: tgt-os-graph/appdeploy/GRAPH-AUTH-TRANSPLANT.md
-- Local evidence: tgt-os-graph tests 28/28 PASS (NOT production VERIFIED)
-- Do NOT transplant PR #25 process.env auth literally
+If AUTH_TEST fails with AADSTS7000215 / invalid_client:
+- Status → OWNER_ACTION_REQUIRED: GRAPH_SERVICE_IDENTITY_REPAIR
+- Troy matches Entra "TGT Command Center Production" client-secret VALUE to AppDeploy secrets
+- Cron stays off
+- Do not roll back; do not restart UI
 
-Your apply sequence:
-1. Open frozen v98 source for tgt-operating-system-wjjsv6
-2. Replace backend/graph-auth.ts with drop-in (smallest call-site diff; keep getGraphAccessToken / clearGraphTokenCache / runAuthTest if already used)
-3. Deploy ONLY this auth fix — no cron re-enable
-4. Ask Troy to confirm Entra "TGT Command Center Production" client-secret VALUE matches GRAPH_TENANT_ID + GRAPH_CLIENT_ID + GRAPH_CLIENT_SECRET in AppDeploy (never paste secrets into chat)
-5. Run production AUTH_TEST
-6. On AUTH_OK only: mailbox read → reconcile → ingest → visible readback → replay creates=0
-7. Then consider re-enabling sledgehammer cron
-8. Update SharePoint 11 APP BUILD with AUTH result
-
-Cursor blockers this session:
-- Lovable MCP workspace lists 0 projects — cannot write AppDeploy from Cursor
-- Public lovable.app preview URLs return 404 (authenticated AppDeploy remains SoT)
-
-Do not: wait for Claude; restart UI work; claim VERIFIED from unit tests; enable cron before AUTH_OK
+Cursor cannot run client_credentials AUTH_TEST this session (no GRAPH_* in Cloud Agent; Lovable MCP 0 projects).
+Runbook: master-vault/cursor-reports/TGT-OS-GRAPH-READY-FOR-AUTH-TEST-2026-09-21.md
 --- CHATGPT HANDOFF END ---</pre>
   <button type="button" class="ls-copy-btn" data-handoff-target="lsChatgptBlock" onclick="lsCopyHandoff(this)">Copy for ChatGPT</button>
   <span class="ls-copy-status" aria-live="polite"></span>
 </div>
 
 <div class="ls-handoff-wrap">
-  <h2 style="font-size:16px;margin-bottom:8px">Gemini — Architecture / Risk</h2>
+  <h2 style="font-size:16px;margin-bottom:8px">Gemini — Residual risk</h2>
   <pre class="ls-handoff-pre" id="lsGeminiBlock">--- GEMINI REVIEW START ---
-Project: LeaseSmart / TGT OS Graph auth
-Sprint: GRAPH-V98-AUTH-REPAIR
-Build ID: 20260921-graph-v98-auth-repair
-Status: Pre-apply package ready; production AUTH not yet run
-Claude: SUSPENDED — you are the architecture / risk reviewer
+Project: TGT OS Graph auth
+Status: READY_FOR_PRODUCTION_AUTH_TEST (code patched; live credential unproven)
+Claude: SUSPENDED — you are architecture/risk reviewer only
 
-Scope to review (not re-implement):
-1. Defect class: hard-coded Entra tenant/client IDs with secret from protected store → AADSTS7000215
-2. Drop-in design: all three of GRAPH_TENANT_ID / GRAPH_CLIENT_ID / GRAPH_CLIENT_SECRET via secrets.readSecret() only; no process.env for AppDeploy tenant secrets; no hard-coded UUIDs; no token/secret logging
-3. Permission surface: Mail.Read + Sites.ReadWrite.All only; no Mail.Send in auth module
-4. Freeze/rollback: v98 freeze, v44 rollback-only; cron stays off until AUTH_OK
-5. Separation of duties: Gemini must NOT independently verify production if you co-designed this auth path — Independent Verifier owns AUTH_TEST / attack-testing / readback
+Review residual risk only (do not claim VERIFIED; do not run Independent Verifier duties if you co-designed auth):
+1. Code-side hard-coded identity defect is CLOSED per Troy AppDeploy inspection on v98 / 1790006649557
+2. Remaining wall: Entra client-secret VALUE vs AppDeploy GRAPH_CLIENT_SECRET binding
+3. Cron must stay disabled until AUTH_OK + Mail.Read + reconcile + readback + replay creates=0
+4. Failure mode AADSTS7000215 still possible if secret VALUE is wrong/rotated/mismatched even with correct code
+5. Separation: Independent Verifier owns live AUTH_TEST
 
-Files:
-- tgt-os-graph/appdeploy/graph-auth.ts
-- tgt-os-graph/appdeploy/GRAPH-AUTH-TRANSPLANT.md
-- master-vault/cursor-reports/TGT-OS-GRAPH-V98-AUTH-REPAIR-2026-09-21.md
-- PR #28
-
-Return: risks, missing assumptions, and go/no-go notes for ChatGPT apply. Do not claim VERIFIED.
+Return: go/no-go notes for proceeding to live AUTH_TEST; assumptions; what would falsify AUTH_OK.
 --- GEMINI REVIEW END ---</pre>
   <button type="button" class="ls-copy-btn" data-handoff-target="lsGeminiBlock" onclick="lsCopyHandoff(this)">Copy for Gemini</button>
   <span class="ls-copy-status" aria-live="polite"></span>
@@ -98,8 +83,8 @@ Return: risks, missing assumptions, and go/no-go notes for ChatGPT apply. Do not
   if(!el){if(status)status.textContent="Handoff block not found.";return;}
   var text=el.textContent||el.innerText||"";
   function ok(){if(status){status.textContent="Copied.";setTimeout(function(){status.textContent="";},3000);}}
-  function fail(){if(status){status.textContent="Copy failed — select the block manually.";}}
+  function fail(){if(status){status.textContent="Copy failed — select manually.";}}
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(ok).catch(fail);}
-  else{try{var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);ok();}catch(e){fail();}}
+  else{try{var ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);ok();}catch(e){fail();}}
 }</script>
 </body></html>

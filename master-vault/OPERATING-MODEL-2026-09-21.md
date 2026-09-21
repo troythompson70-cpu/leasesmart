@@ -21,17 +21,16 @@ Do not assign Claude: architecture review, engineering review, handoffs, risk/se
 
 ## Command center priority (current)
 
-Continue **Microsoft Graph / AppDeploy production repair** from known state:
+**Microsoft Graph / AppDeploy** — code identity defect **CLOSED**; next wall is live Entra credential proof.
 
-- Freeze: **v98 / `1789910277389`** `FROZEN_FOR_GRAPH_REPAIR`
-- Rollback-only: **v44 / `1789734343421`**
-- Defect: hard-coded tenant/client IDs in AppDeploy `backend/graph-auth.ts` → `AADSTS7000215`
-- Cursor deliverable: PR #28 drop-in `tgt-os-graph/appdeploy/graph-auth.ts`
-- Status: `OWNER_ACTION_REQUIRED: APPDEPLOY_APPLY_GRAPH_AUTH`
-- Cron `sledgehammer-production-sweep-v3`: **remains disabled** until AUTH_OK
-- Do **not** restart completed UI work
-- Do **not** wait for Claude
+- Live: **v98 / `1790006649557`** (AppDeploy READY 0/0/0)
+- Production `backend/graph-auth.ts`: reads all three Graph secrets (hard-coded IDs gone)
+- Status: `READY_FOR_PRODUCTION_AUTH_TEST`
+- Cron `sledgehammer-production-sweep-v3`: **remains disabled** until AUTH_OK + replay creates=0
+- Sequence: live AUTH_TEST → Mail.Read → reconcile → Command Center readback → replay creates=0 → re-enable cron → independent verification
+- Do **not** roll back · do **not** restart UI work · do **not** wait for Claude
 - Parked TGT OS agent/blueprint sprint: still parked unless Troy resumes it
+- Runbook: `master-vault/cursor-reports/TGT-OS-GRAPH-READY-FOR-AUTH-TEST-2026-09-21.md`
 
 ## Replacement architect
 
