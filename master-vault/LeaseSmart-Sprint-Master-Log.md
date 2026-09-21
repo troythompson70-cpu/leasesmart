@@ -6,6 +6,13 @@ This log records sprint commands, AI reviews, GO/NO-GO decisions, and Cursor rep
 Secrets are stripped automatically — never paste API keys or passwords here.
 
 ---
+## 2026-09-21 (GO clarified) — AUTH_TEST still AppDeploy-only — Cursor Report
+
+**Build ID:** 20260921-auth-test-blockers · **PR:** #28
+
+Authoritative status remains `TROY_GO — AWAITING_APPDEPLOY_AUTH_TEST_EXECUTION`. ChatGPT session reports empty workspace with no AppDeploy / master-vault / iMac credentials — cannot execute the chain. Cursor Cloud likewise blocked. Cron stays **OFF** until AppDeploy completes AUTH_TEST → Mail.Read → reconciliation → Command Center readback → replay creates=0 → independent verification. Record: `master-vault/cursor-reports/TGT-OS-GRAPH-AUTH-TEST-BLOCKERS-2026-09-21.md`.
+
+---
 ## 2026-09-21 (GO) — TROY GO AUTH_TEST — Cursor Report
 
 **Build ID:** 20260921-troy-go-auth-test · **PR:** #28
