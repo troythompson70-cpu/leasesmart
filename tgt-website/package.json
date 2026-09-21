@@ -8,8 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
-    "test:intake": "node --experimental-strip-types scripts/intake-validation-check.mjs && node scripts/assert-no-live-intake-probes.mjs",
-    "test:intake-policy": "node scripts/assert-no-live-intake-probes.mjs"
+    "test:intake": "node --experimental-strip-types scripts/intake-validation-check.mjs && node scripts/assert-no-live-intake-probes.mjs && node --experimental-strip-types scripts/verify-dashboard-feed-check.mjs",
+    "test:intake-policy": "node scripts/assert-no-live-intake-probes.mjs",
+    "test:feed-verify": "node --experimental-strip-types scripts/verify-dashboard-feed-check.mjs",
+    "verify:dashboard-feed": "node --experimental-strip-types scripts/verify-dashboard-feed.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",
