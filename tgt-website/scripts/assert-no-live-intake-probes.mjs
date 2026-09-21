@@ -18,6 +18,9 @@ const forbiddenPatterns = [
 const scanFiles = [
   'scripts/intake-validation-check.mjs',
   'scripts/mailbox-coverage-watch.mjs',
+  'scripts/verify-dashboard-feed.mjs',
+  'scripts/verify-dashboard-feed-check.mjs',
+  'server/verify-dashboard-feed.ts',
   'scripts/mailbox-coverage-once.sh',
   'scripts/promote-on-mailbox-200.sh',
   'scripts/install-mailbox-coverage-watch.sh',
