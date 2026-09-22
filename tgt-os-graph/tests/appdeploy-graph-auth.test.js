@@ -3,11 +3,16 @@ import { describe, it, beforeEach } from 'node:test';
 import {
   GraphAuthError,
   __setSecretReaderForTests,
+  assertValidGraphTenantId,
   clearGraphTokenCache,
   getGraphAccessToken,
   loadGraphServiceIdentity,
+  normalizeGraphTenantId,
   runAuthTest,
 } from '../appdeploy/graph-auth.mjs';
+
+const TID = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+const CID = '11111111-2222-3333-4444-555555555555';
 
 describe('APPDEPLOY_GRAPH_AUTH — no hard-coded identity', () => {
   beforeEach(() => {
@@ -19,14 +24,14 @@ describe('APPDEPLOY_GRAPH_AUTH — no hard-coded identity', () => {
     __setSecretReaderForTests(async (name) => {
       seen.push(name);
       return {
-        GRAPH_TENANT_ID: 'tenant-from-secret',
-        GRAPH_CLIENT_ID: 'client-from-secret',
+        GRAPH_TENANT_ID: TID,
+        GRAPH_CLIENT_ID: CID,
         GRAPH_CLIENT_SECRET: 'secret-from-store',
       }[name];
     });
     const id = await loadGraphServiceIdentity();
-    assert.equal(id.tenantId, 'tenant-from-secret');
-    assert.equal(id.clientId, 'client-from-secret');
+    assert.equal(id.tenantId, TID);
+    assert.equal(id.clientId, CID);
     assert.equal(id.clientSecret, 'secret-from-store');
     assert.deepEqual(seen.sort(), [
       'GRAPH_CLIENT_ID',
@@ -35,11 +40,34 @@ describe('APPDEPLOY_GRAPH_AUTH — no hard-coded identity', () => {
     ]);
   });
 
+  it('normalizes braces/quotes/whitespace that cause AADSTS900023', () => {
+    assert.equal(normalizeGraphTenantId(`{${TID}}`), TID);
+    assert.equal(normalizeGraphTenantId(`"${TID}"`), TID);
+    assert.equal(normalizeGraphTenantId(`  ${TID}  `), TID);
+    assert.equal(assertValidGraphTenantId(`{${TID}}`), TID);
+  });
+
+  it('rejects non-GUID non-domain tenant before calling Microsoft', async () => {
+    __setSecretReaderForTests(async (name) => {
+      return {
+        GRAPH_TENANT_ID: 'not-a-tenant',
+        GRAPH_CLIENT_ID: CID,
+        GRAPH_CLIENT_SECRET: 'csecret',
+      }[name];
+    });
+    await assert.rejects(
+      () => loadGraphServiceIdentity(),
+      (err) =>
+        err instanceof GraphAuthError &&
+        err.code === 'OWNER_ACTION_REQUIRED: GRAPH_TENANT_ID_REPAIR',
+    );
+  });
+
   it('AUTH_TEST passes with client_credentials using secret-sourced ids', async () => {
     __setSecretReaderForTests(async (name) => {
       return {
-        GRAPH_TENANT_ID: 'tid',
-        GRAPH_CLIENT_ID: 'cid',
+        GRAPH_TENANT_ID: TID,
+        GRAPH_CLIENT_ID: CID,
         GRAPH_CLIENT_SECRET: 'csecret',
       }[name];
     });
@@ -47,7 +75,12 @@ describe('APPDEPLOY_GRAPH_AUTH — no hard-coded identity', () => {
     let postedClientId = '';
     let postedSecret = '';
     const fetchImpl = async (url, init) => {
-      assert.match(String(url), /login\.microsoftonline\.com\/tid\/oauth2\/v2\.0\/token/);
+      assert.match(
+        String(url),
+        new RegExp(
+          `login\\.microsoftonline\\.com/${TID}/oauth2/v2\\.0/token`,
+        ),
+      );
       const body = String(init.body);
       postedClientId = new URLSearchParams(body).get('client_id') || '';
       postedSecret = new URLSearchParams(body).get('client_secret') || '';
@@ -64,15 +97,39 @@ describe('APPDEPLOY_GRAPH_AUTH — no hard-coded identity', () => {
     const result = await runAuthTest({ fetchImpl });
     assert.equal(result.ok, true);
     assert.equal(result.code, 'AUTH_OK');
-    assert.equal(postedClientId, 'cid');
+    assert.equal(postedClientId, CID);
     assert.equal(postedSecret, 'csecret');
+  });
+
+  it('maps AADSTS900023 to GRAPH_TENANT_ID_REPAIR', async () => {
+    __setSecretReaderForTests(async (name) => {
+      return {
+        GRAPH_TENANT_ID: TID,
+        GRAPH_CLIENT_ID: CID,
+        GRAPH_CLIENT_SECRET: 'csecret',
+      }[name];
+    });
+    const fetchImpl = async () => ({
+      ok: false,
+      status: 400,
+      async json() {
+        return {
+          error: 'invalid_request',
+          error_description:
+            "AADSTS900023: Specified tenant identifier 'x' is neither a valid DNS name, nor a valid external domain.",
+        };
+      },
+    });
+    const result = await runAuthTest({ fetchImpl });
+    assert.equal(result.ok, false);
+    assert.equal(result.code, 'OWNER_ACTION_REQUIRED: GRAPH_TENANT_ID_REPAIR');
   });
 
   it('maps AADSTS7000215 to GRAPH_SERVICE_IDENTITY_REPAIR', async () => {
     __setSecretReaderForTests(async (name) => {
       return {
-        GRAPH_TENANT_ID: 'tid',
-        GRAPH_CLIENT_ID: 'cid',
+        GRAPH_TENANT_ID: TID,
+        GRAPH_CLIENT_ID: CID,
         GRAPH_CLIENT_SECRET: 'wrong-or-mismatched',
       }[name];
     });
@@ -94,8 +151,8 @@ describe('APPDEPLOY_GRAPH_AUTH — no hard-coded identity', () => {
   it('caches token and does not re-POST until near expiry', async () => {
     __setSecretReaderForTests(async (name) => {
       return {
-        GRAPH_TENANT_ID: 'tid',
-        GRAPH_CLIENT_ID: 'cid',
+        GRAPH_TENANT_ID: TID,
+        GRAPH_CLIENT_ID: CID,
         GRAPH_CLIENT_SECRET: 'csecret',
       }[name];
     });
@@ -122,7 +179,7 @@ describe('APPDEPLOY_GRAPH_AUTH — no hard-coded identity', () => {
   it('fails closed when any of the three secrets is missing', async () => {
     __setSecretReaderForTests(async (name) => {
       if (name === 'GRAPH_CLIENT_SECRET') return '';
-      return { GRAPH_TENANT_ID: 't', GRAPH_CLIENT_ID: 'c' }[name];
+      return { GRAPH_TENANT_ID: TID, GRAPH_CLIENT_ID: CID }[name];
     });
     await assert.rejects(
       () => loadGraphServiceIdentity(),

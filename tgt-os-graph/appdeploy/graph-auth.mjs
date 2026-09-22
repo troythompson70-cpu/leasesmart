@@ -7,6 +7,10 @@ const LOGIN_ROOT = 'https://login.microsoftonline.com';
 const GRAPH_SCOPE = 'https://graph.microsoft.com/.default';
 const EXPIRY_SKEW_MS = 60_000;
 
+const TENANT_GUID_RE =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+const TENANT_DOMAIN_RE = /^[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 export class GraphAuthError extends Error {
   /**
    * @param {string} code
@@ -40,6 +44,47 @@ export function clearGraphTokenCache() {
   tokenCache = null;
 }
 
+/** @param {string} raw */
+export function normalizeGraphTenantId(raw) {
+  return String(raw ?? '')
+    .replace(/^\uFEFF/, '')
+    .trim()
+    .replace(/^["'`]+|["'`]+$/g, '')
+    .replace(/^\{+/, '')
+    .replace(/\}+$/, '')
+    .trim();
+}
+
+/** @param {string} tenantId */
+export function graphTenantFingerprint(tenantId) {
+  const t = normalizeGraphTenantId(tenantId);
+  return {
+    length: t.length,
+    isGuidShape: TENANT_GUID_RE.test(t),
+    isDomainShape: TENANT_DOMAIN_RE.test(t),
+    hasForbiddenChars: /[\s{}'"\\]/.test(String(tenantId ?? '')),
+  };
+}
+
+/** @param {string} raw */
+export function assertValidGraphTenantId(raw) {
+  const tenantId = normalizeGraphTenantId(raw);
+  const fp = graphTenantFingerprint(tenantId);
+  if (!tenantId || /^YOUR_|placeholder|changeme|^example$|^undefined$|^null$/i.test(tenantId)) {
+    throw new GraphAuthError(
+      'OWNER_ACTION_REQUIRED: GRAPH_TENANT_ID_REPAIR',
+      'GRAPH_TENANT_ID is missing or placeholder after normalize.',
+    );
+  }
+  if (!fp.isGuidShape && !fp.isDomainShape) {
+    throw new GraphAuthError(
+      'OWNER_ACTION_REQUIRED: GRAPH_TENANT_ID_REPAIR',
+      `GRAPH_TENANT_ID is not a Directory (tenant) GUID or domain (len=${fp.length}).`,
+    );
+  }
+  return tenantId;
+}
+
 /**
  * @param {'GRAPH_TENANT_ID'|'GRAPH_CLIENT_ID'|'GRAPH_CLIENT_SECRET'} name
  */
@@ -64,12 +109,16 @@ async function readRequiredSecret(name) {
 }
 
 export async function loadGraphServiceIdentity() {
-  const [tenantId, clientId, clientSecret] = await Promise.all([
+  const [tenantRaw, clientId, clientSecret] = await Promise.all([
     readRequiredSecret('GRAPH_TENANT_ID'),
     readRequiredSecret('GRAPH_CLIENT_ID'),
     readRequiredSecret('GRAPH_CLIENT_SECRET'),
   ]);
-  return { tenantId, clientId, clientSecret };
+  return {
+    tenantId: assertValidGraphTenantId(tenantRaw),
+    clientId,
+    clientSecret,
+  };
 }
 
 /**
@@ -107,6 +156,12 @@ export async function getGraphAccessToken(opts = {}) {
     const aad = String(json.error_description || json.error || '');
     const codeMatch = aad.match(/AADSTS\d+/i);
     const aadCode = codeMatch ? codeMatch[0].toUpperCase() : '';
+    if (/AADSTS900023/i.test(aad) || /neither a valid DNS name/i.test(aad)) {
+      throw new GraphAuthError(
+        'OWNER_ACTION_REQUIRED: GRAPH_TENANT_ID_REPAIR',
+        `Graph rejected tenant identifier (HTTP ${res.status}, ${aadCode || 'AADSTS900023'}).`,
+      );
+    }
     if (res.status === 401 || /AADSTS7000215/i.test(aad)) {
       throw new GraphAuthError(
         'OWNER_ACTION_REQUIRED: GRAPH_SERVICE_IDENTITY_REPAIR',
@@ -119,7 +174,6 @@ export async function getGraphAccessToken(opts = {}) {
     );
   }
 
-  // Assert request used the secret-sourced client id (no hard-coded identity).
   tokenCache = {
     accessToken: json.access_token,
     expiresAtMs: now + Math.max(60, Number(json.expires_in || 3600)) * 1000,
@@ -130,10 +184,14 @@ export async function getGraphAccessToken(opts = {}) {
 export async function runAuthTest(opts = {}) {
   try {
     const token = await getGraphAccessToken(opts);
-    if (!token || token.length < 20) return { ok: false, code: 'GRAPH_TOKEN_EMPTY' };
+    if (!token || token.length < 20) {
+      return { ok: false, code: 'GRAPH_TOKEN_EMPTY' };
+    }
     return { ok: true, code: 'AUTH_OK' };
   } catch (err) {
-    if (err instanceof GraphAuthError) return { ok: false, code: err.code };
+    if (err instanceof GraphAuthError) {
+      return { ok: false, code: err.code };
+    }
     return { ok: false, code: 'GRAPH_AUTH_UNKNOWN' };
   }
 }

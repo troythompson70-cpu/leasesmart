@@ -5,6 +5,11 @@
  * GRAPH_CLIENT_SECRET from AppDeploy secrets → AADSTS7000215 when secret
  * does not belong to the hard-coded client.
  *
+ * LIVE FAILURE (2026-09-22): AADSTS900023 after repeated secret UI edits —
+ * tenant VALUE reaching login.microsoftonline.com was still malformed
+ * (braces/quotes/whitespace/BOM) or not validated before the token call.
+ * MAILBOX GAP is the UI symptom; 900023 is the Graph cause.
+ *
  * REQUIRED: all three identities from secrets.readSecret() only.
  * Never process.env for AppDeploy tenant secrets.
  * Never hard-code tenant/client UUIDs.
@@ -22,6 +27,12 @@ import { secrets } from '@appdeploy/sdk';
 const LOGIN_ROOT = 'https://login.microsoftonline.com';
 const GRAPH_SCOPE = 'https://graph.microsoft.com/.default';
 const EXPIRY_SKEW_MS = 60_000;
+
+/** Entra Directory (tenant) ID GUID shape */
+const TENANT_GUID_RE =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+/** Tenant DNS / onmicrosoft domain (not a GUID) */
+const TENANT_DOMAIN_RE = /^[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 export const GRAPH_SECRET_NAMES = [
   'GRAPH_TENANT_ID',
@@ -58,6 +69,56 @@ export function clearGraphTokenCache(): void {
   tokenCache = null;
 }
 
+/**
+ * Strip paste junk that causes AADSTS900023 even when "a tenant id was entered".
+ * Never logs the value.
+ */
+export function normalizeGraphTenantId(raw: string): string {
+  return String(raw ?? '')
+    .replace(/^\uFEFF/, '')
+    .trim()
+    .replace(/^["'`]+|["'`]+$/g, '')
+    .replace(/^\{+/, '')
+    .replace(/\}+$/, '')
+    .trim();
+}
+
+/**
+ * Safe fingerprint for operator logs — never returns the secret value.
+ */
+export function graphTenantFingerprint(tenantId: string): {
+  length: number;
+  isGuidShape: boolean;
+  isDomainShape: boolean;
+  hasForbiddenChars: boolean;
+} {
+  const t = normalizeGraphTenantId(tenantId);
+  return {
+    length: t.length,
+    isGuidShape: TENANT_GUID_RE.test(t),
+    isDomainShape: TENANT_DOMAIN_RE.test(t),
+    hasForbiddenChars: /[\s{}'"\\]/.test(String(tenantId ?? '')),
+  };
+}
+
+export function assertValidGraphTenantId(raw: string): string {
+  const tenantId = normalizeGraphTenantId(raw);
+  const fp = graphTenantFingerprint(tenantId);
+  if (!tenantId || /^YOUR_|placeholder|changeme|^example$|^undefined$|^null$/i.test(tenantId)) {
+    throw new GraphAuthError(
+      'OWNER_ACTION_REQUIRED: GRAPH_TENANT_ID_REPAIR',
+      'GRAPH_TENANT_ID is missing or placeholder after normalize.',
+    );
+  }
+  if (!fp.isGuidShape && !fp.isDomainShape) {
+    throw new GraphAuthError(
+      'OWNER_ACTION_REQUIRED: GRAPH_TENANT_ID_REPAIR',
+      `GRAPH_TENANT_ID is not a Directory (tenant) GUID or domain (len=${fp.length}). Re-copy Tenant ID from Entra Overview — no braces/quotes.`,
+    );
+  }
+  return tenantId;
+}
+
 async function readRequiredSecret(name: GraphSecretName): Promise<string> {
   let raw: string | null | undefined;
   try {
@@ -87,11 +148,12 @@ export async function loadGraphServiceIdentity(): Promise<{
   clientId: string;
   clientSecret: string;
 }> {
-  const [tenantId, clientId, clientSecret] = await Promise.all([
+  const [tenantRaw, clientId, clientSecret] = await Promise.all([
     readRequiredSecret('GRAPH_TENANT_ID'),
     readRequiredSecret('GRAPH_CLIENT_ID'),
     readRequiredSecret('GRAPH_CLIENT_SECRET'),
   ]);
+  const tenantId = assertValidGraphTenantId(tenantRaw);
   return { tenantId, clientId, clientSecret };
 }
 
@@ -135,6 +197,12 @@ export async function getGraphAccessToken(nowMs: () => number = Date.now): Promi
     // Never include client_secret. Surface AADSTS code only.
     const codeMatch = aad.match(/AADSTS\d+/i);
     const aadCode = codeMatch ? codeMatch[0].toUpperCase() : '';
+    if (/AADSTS900023/i.test(aad) || /neither a valid DNS name/i.test(aad)) {
+      throw new GraphAuthError(
+        'OWNER_ACTION_REQUIRED: GRAPH_TENANT_ID_REPAIR',
+        `Graph rejected tenant identifier (HTTP ${res.status}, ${aadCode || 'AADSTS900023'}). Fix GRAPH_TENANT_ID to Entra Directory (tenant) ID GUID — no braces/quotes.`,
+      );
+    }
     if (res.status === 401 || /AADSTS7000215/i.test(aad)) {
       throw new GraphAuthError(
         'OWNER_ACTION_REQUIRED: GRAPH_SERVICE_IDENTITY_REPAIR',

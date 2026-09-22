@@ -21,7 +21,20 @@ Production now loads:
 
 Repo reference drop-in (for audit / future ports): `tgt-os-graph/appdeploy/graph-auth.ts`
 
-## Next wall (not code transplant)
+## 2026-09-22 — AADSTS900023 / MAILBOX GAP (tenant VALUE)
+
+**Symptom:** Reconcile → MAILBOX GAP; ChatGPT probe → `HTTP 400 AADSTS900023`.  
+**Meaning:** Token URL tenant segment is not a valid Directory GUID/domain. Repeating Secrets UI paste alone did not clear it.
+
+**Drop-in fix (apply to production `backend/graph-auth.ts`):**
+1. `normalizeGraphTenantId` — strip BOM, quotes, `{…}` braces, whitespace.
+2. `assertValidGraphTenantId` — require GUID or domain **before** calling Microsoft.
+3. Map `AADSTS900023` → `OWNER_ACTION_REQUIRED: GRAPH_TENANT_ID_REPAIR`.
+
+Repo source: `tgt-os-graph/appdeploy/graph-auth.ts`  
+ChatGPT/AppDeploy: replace production `backend/graph-auth.ts` with that file (or merge the three helpers), deploy, clear token cache / restart backend if needed, then Reconcile.
+
+## Next wall (after tenant accepts)
 
 Prove the stored Entra client-secret against Microsoft. See:
 
