@@ -1,16 +1,20 @@
-# Morning Review — 2026-09-21 — Accepted SoT
+# Morning Review — 2026-09-22 — MAILBOX GAP SoT
 
-**Authoritative status:** `TROY_GO — AWAITING_APPDEPLOY_AUTH_TEST_EXECUTION`
-
-Troy accepted:
+**Authoritative status:** `BLOCKED — GRAPH AUTHENTICATION / SERVICE IDENTITY`  
+(continues `AWAITING_APPDEPLOY_AUTH_TEST_EXECUTION`)
 
 | Item | State |
 |------|--------|
-| Code | No fix required; local auth tests pass |
-| Blocker | AppDeploy access + Entra client-secret VALUE |
+| Project | TGT OS / RCC (not LeaseSmart) |
+| AppDeploy build | `1790008022504` — NOT VERIFIED |
+| Command Center UI | UP — stored cards available |
+| Graph reconcile | FAIL — MAILBOX GAP working as designed |
+| Code change | None required from current diagnosis |
 | Cron | OFF |
-| VERIFIED / complete | **Not claimed** |
+| VERIFIED / Graph-current | **Not claimed** |
 
-Required chain before cron: AUTH_TEST → Mail.Read → reconciliation → Command Center readback → replay creates=0 → independent verification.
+**Next gate:** AUTH_OK → manual Reconcile UPDATED → Outlook↔CC gap audit PASS → card readback PASS → then consider cron.
+
+Handoff: `master-vault/cursor-reports/TGT-RCC-MAILBOX-GAP-HANDOFF-2026-09-22.md`
 
 Claude: SUSPENDED.
