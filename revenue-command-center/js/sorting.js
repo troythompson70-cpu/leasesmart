@@ -1,6 +1,5 @@
 /**
  * Dashboard sorting + owner-action panel selection.
- * Lead list default: Newest First. Closed (PASS/LOST/WON) stay at the bottom.
  */
 import { CLOSED_STATUSES, OWNER_ACTION_PRIORITY } from './constants.js';
 
@@ -8,27 +7,18 @@ function isClosed(status) {
   return CLOSED_STATUSES.includes(String(status || '').toUpperCase());
 }
 
-export function activityTimestamp(opp) {
-  const candidates = [
-    opp?.latest_transmission_at,
-    opp?.last_activity_at,
-    opp?.new_activity_at,
-    opp?.updated_at,
-    opp?.last_updated,
-    opp?.last_verified_at,
-    opp?.created_at,
-    opp?.source_date,
-  ];
-  let best = 0;
-  for (const raw of candidates) {
-    const t = Date.parse(String(raw || ''));
-    if (Number.isFinite(t) && t > best) best = t;
-  }
-  return best;
+function statusRank(status) {
+  const s = String(status || '').toUpperCase();
+  if (s === 'OWNER_ACTION' || s === 'BLOCKED') return 0;
+  if (['QUALIFYING', 'REPLIED', 'PROPOSAL', 'ACCOUNT_SETUP', 'APPROVED'].includes(s))
+    return 1;
+  if (['CONTACTED', 'WAITING', 'CONTACT_READY', 'NEW', 'EXPANSION'].includes(s)) return 2;
+  return 3;
 }
 
 /**
- * Sort opportunities: open items Newest First, then PASS/LOST/WON.
+ * Sort opportunities:
+ * Tier 1 OWNER_ACTION/BLOCKED/deadlines → Tier 1 active → Tier 2 → Tier 3 → PASS/LOST
  */
 export function sortOpportunities(opportunities) {
   const list = Array.isArray(opportunities) ? [...opportunities] : [];
@@ -36,8 +26,21 @@ export function sortOpportunities(opportunities) {
     const aClosed = isClosed(a.status);
     const bClosed = isClosed(b.status);
     if (aClosed !== bClosed) return aClosed ? 1 : -1;
-    const delta = activityTimestamp(b) - activityTimestamp(a);
-    if (delta !== 0) return delta;
+
+    const aTier = Number(a.tier) || 99;
+    const bTier = Number(b.tier) || 99;
+    if (aTier !== bTier) return aTier - bTier;
+
+    if (aTier === 1) {
+      const ar = statusRank(a.status);
+      const br = statusRank(b.status);
+      if (ar !== br) return ar - br;
+      const aDl = a.hard_deadline || a.deadline || '';
+      const bDl = b.hard_deadline || b.deadline || '';
+      if (aDl && bDl && aDl !== bDl) return aDl < bDl ? -1 : 1;
+      if (aDl && !bDl) return -1;
+      if (!aDl && bDl) return 1;
+    }
     return String(a.company || a.vendor || '').localeCompare(
       String(b.company || b.vendor || ''),
     );

@@ -8,18 +8,8 @@ export const CANONICAL_RCC_ROOT =
   'Shared Documents/General/TGT REVENUE COMMAND CENTER';
 export const CANONICAL_DASHBOARD_FEED =
   `${CANONICAL_RCC_ROOT}/10 Dashboard Feed`;
-export const CANONICAL_DASHBOARD_FEED_FILE = 'TGT_DASHBOARD_FEED_2026-09-10.json';
 export const CANONICAL_LEAD_INTAKE =
   `${CANONICAL_RCC_ROOT}/00 Lead Intake`;
-
-/** Existing Graph secret names (values never belong in the browser). */
-export const GRAPH_ENV_NAMES = Object.freeze([
-  'GRAPH_ACCESS_TOKEN',
-  'GRAPH_TENANT_ID',
-  'GRAPH_CLIENT_ID',
-  'GRAPH_CLIENT_SECRET',
-  'GRAPH_REFRESH_TOKEN',
-]);
 
 /** Known bad / legacy shells that must not be written or linked by the UI. */
 export const MALFORMED_PATH_PATTERNS = Object.freeze([
