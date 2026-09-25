@@ -6,6 +6,15 @@ This log records sprint commands, Claude reviews, GO/NO-GO decisions, and Cursor
 Secrets are stripped automatically — never paste API keys or passwords here.
 
 ---
+
+## 2026-09-24 — TGT GATE 1 Outlook ingest diagnosis (no repair yet)
+
+**Build ID:** 20260924-gate1-outlook-ingest-diagnosis  
+**Branch:** cursor/gate1-outlook-ingest-diagnosis-aa85  
+**Status:** DIAGNOSIS ONLY — awaiting Troy Power Automate HTTP evidence  
+
+Proved production `POST /api/integrations/outlook/ingest` exists on AppDeploy API host (401 without key); CORS advertises header `x-outlook-ingest-key`; FE-host POST returns CloudFront 403. No Gate 1 COMPLETE claim. Report: `master-vault/cursor-reports/TGT-GATE1-OUTLOOK-INGEST-DIAGNOSIS-2026-09-24.md`.
+
 ## 2026-09-15 — TGT-OS-OUTLOOK-INGESTION-AUDIT — Cursor Report
 
 **Build ID:** 20260915-tgt-os-outlook-audit-vault
