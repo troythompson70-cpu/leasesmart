@@ -841,7 +841,9 @@ a.rcc-btn {
 .rcc-exec-main h3 { margin: 0 0 6px; font-size: 16px; color: var(--rcc-text); }
 .rcc-exec-main p { margin: 0 0 8px; font-size: 14px; line-height: 1.45; color: var(--rcc-muted); }
 .rcc-exec-next { color: var(--rcc-text) !important; font-weight: 700; }
-.rcc-hard-hold-flag {
+.rcc-hard-hold-flag,
+.rcc-exec-main p.rcc-hard-hold-flag,
+.rcc-guidance p.rcc-hard-hold-flag {
   margin: 8px 0;
   padding: 8px 10px;
   border-radius: 8px;
@@ -951,5 +953,30 @@ a.rcc-btn {
   .rcc-decision-row { grid-template-columns: 1fr; }
   .rcc-head { margin-bottom: 4px; }
   .rcc-exec-panel { margin-top: 4px; }
+}
+
+/* Must follow dark-first executive rules so light ink wins */
+@media (prefers-color-scheme: light) {
+  .rcc-exec-priority,
+  .rcc-card-lane { color: #0b3d2e; }
+  .rcc-hard-hold-flag,
+  .rcc-exec-main p.rcc-hard-hold-flag,
+  .rcc-guidance p.rcc-hard-hold-flag {
+    background: #fff4ec;
+    color: #9a3412;
+    border-color: #fdba74;
+  }
+  .rcc-draft-warn { color: #9a3412; }
+  .rcc-tab.on {
+    background: #dbeafe;
+    border-color: #2563eb;
+    color: #0f2744;
+  }
+  .rcc-fixture-bar select,
+  .rcc-assistant-input {
+    background: #fff;
+    color: #122033;
+    border-color: #c7d3e0;
+  }
 }
 

@@ -399,6 +399,7 @@ let feed = structuredClone(green);
       css.includes('background: var(--rcc-surface-2)') &&
       css.includes('.rcc-assistant-out') &&
       css.includes('color: var(--rcc-text)') &&
+      css.includes('.rcc-exec-main p.rcc-hard-hold-flag') &&
       !/rcc-fixture-bar select\s*\{[^}]*background:\s*#0f1620/s.test(css),
     'fixture select + assistant use theme tokens (not dark-only ink)',
   );
