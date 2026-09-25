@@ -60,18 +60,27 @@
     <div id="rccDraftPanel" class="rcc-draft-panel" hidden></div>
   </section>
 
-  <div class="rcc-fixture-bar">
-    <label for="rccFixtureSelect">Local feed fixture (acceptance / offline) — not a second SoT</label>
-    <select id="rccFixtureSelect">
-      <option value="green">GREEN — synced + incoming</option>
-      <option value="yellow-stale">YELLOW — stale feed</option>
-      <option value="yellow-incomplete">YELLOW — health fields incomplete</option>
-      <option value="red-failed-write">RED — failed write</option>
-      <option value="red-duplicate">RED — duplicate opportunities</option>
-      <option value="red-orphan-email">RED — orphan email</option>
-      <option value="jared-live-ingested">LIVE — Jared Cisco Duo ingested</option>
-    </select>
-  </div>
+  <details class="rcc-dev-tools" id="rccDevTools">
+    <summary>Fixtures &amp; demo controls</summary>
+    <div class="rcc-dev-tools-body">
+      <div class="rcc-fixture-bar">
+        <label for="rccFixtureSelect">Local feed fixture (acceptance / offline) — not a second SoT</label>
+        <select id="rccFixtureSelect">
+          <option value="green">GREEN — synced + incoming</option>
+          <option value="yellow-stale">YELLOW — stale feed</option>
+          <option value="yellow-incomplete">YELLOW — health fields incomplete</option>
+          <option value="red-failed-write">RED — failed write</option>
+          <option value="red-duplicate">RED — duplicate opportunities</option>
+          <option value="red-orphan-email">RED — orphan email</option>
+          <option value="jared-live-ingested">LIVE — Jared Cisco Duo ingested</option>
+        </select>
+      </div>
+      <div class="rcc-toolbar rcc-demo-toolbar">
+        <button type="button" class="rcc-btn" id="rccSimSaveOk">Demo: SAVED + VERIFIED</button>
+        <button type="button" class="rcc-btn danger" id="rccSimFailVerify">Demo: SAVED — VERIFICATION FAILED</button>
+      </div>
+    </div>
+  </details>
 
   <nav class="rcc-tabs" role="tablist" aria-label="Opportunity filters">
     <button type="button" class="rcc-tab on" role="tab" aria-selected="true" data-filter="all" id="rccTabAll">All</button>
@@ -86,8 +95,6 @@
     <button type="button" class="rcc-btn" id="rccRunOrphanReconcile">Reconcile Orphans</button>
     <button type="button" class="rcc-btn" data-lockable="1" id="rccCreateOpp">Create New Opportunity</button>
     <button type="button" class="rcc-btn" data-lockable="1" id="rccBulkStatus">Bulk Status Change</button>
-    <button type="button" class="rcc-btn" id="rccSimSaveOk">Demo: SAVED + VERIFIED</button>
-    <button type="button" class="rcc-btn danger" id="rccSimFailVerify">Demo: SAVED — VERIFICATION FAILED</button>
   </div>
 
   <section id="rccOwnerPanel" class="rcc-panel-owner" style="display:none">
