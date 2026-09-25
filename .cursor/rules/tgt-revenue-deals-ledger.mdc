@@ -1,0 +1,19 @@
+---
+description: Read TGT Revenue Deals & AI Tools Master Ledger before vendor/deal/AI-tool status claims
+alwaysApply: true
+---
+
+# TGT Revenue Deals & AI Tools Master Ledger
+
+Before claiming status, approval, NFR rights, trial terms, commercial/reseller rights, or next actions for any TGT vendor, MSP deal, free tool, AI video/avatar tool, or sponsorship opportunity:
+
+1. Read `master-vault/TGT-REVENUE-DEALS-AI-TOOLS-MASTER-LEDGER.md`.
+2. Treat **Microsoft 365 / OneDrive** as authoritative if that record conflicts with chat history or an outdated repo copy.
+3. Do **not** invent vendor approval, commercial-use, client-use, retention, licensing, or reseller rights.
+4. Separate internal-use/NFR, trial, client-use, reseller, and commercial rights.
+5. Flag contracts, payment commitments, exclusivity, licensing, likeness/voice/avatar rights, paid-ad rights, sublicensing, and model-training rights as **OWNER APPROVAL REQUIRED**.
+6. Business/legal correspondence identity: **Troy Thompson, Founder & CEO, TGT Technologies Inc.**
+7. Creator/media/entertainment context only: **Tee Gates**.
+8. When adding or updating a deal/tool in-repo, use the documentation standard fields in the ledger (source, date verified, exact offer, limitations, next action, status).
+
+AI Troy Generation Stream tools (Runway/Act-Two, HeyGen, D-ID, Synthesia, Firefly, Lovable, Vibbit, etc.) are covered by the same ledger and rights rules.
