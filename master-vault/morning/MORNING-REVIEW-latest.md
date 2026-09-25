@@ -1,43 +1,20 @@
-# Morning Review — Tuesday, September 15, 2026
+# Morning Review — 2026-09-22 — MAILBOX GAP SoT
 
-**LeaseSmart · TGT Technologies Inc.**
-**Build ID:** 20260915-tgt-os-outlook-audit-vault · **Branch:** cursor/tgt-os-outlook-audit-vault-9057
+**Authoritative status:** `BLOCKED — GRAPH AUTHENTICATION / SERVICE IDENTITY`  
+(continues `AWAITING_APPDEPLOY_AUTH_TEST_EXECUTION`)
 
-> Read this in under 2 minutes. Upload `master-vault/` files to Microsoft 365 Master Vault.
+| Item | State |
+|------|--------|
+| Project | TGT OS / RCC (not LeaseSmart) |
+| AppDeploy build | `1790008022504` — NOT VERIFIED |
+| Command Center UI | UP — stored cards available |
+| Graph reconcile | FAIL — MAILBOX GAP working as designed |
+| Code change | None required from current diagnosis |
+| Cron | OFF |
+| VERIFIED / Graph-current | **Not claimed** |
 
-## Dashboard status — TGT OS Outlook audit
+**Next gate:** AUTH_OK → manual Reconcile UPDATED → Outlook↔CC gap audit PASS → card readback PASS → then consider cron.
 
-| Check | Result |
-|---|---|
-| AppDeploy TGT OS receiving-side fixes | **REPORTED FIXED + DEPLOYED** (outside leasesmart) |
-| `OUTLOOK_INGEST_KEY` on production | **REPORTED CONFIGURED** |
-| Email body / object parse / realtime / drawer rebind / reconciliation | **REPORTED FIXED** |
-| Deploy QA (AppDeploy) | **REPORTED READY** (0 FE / 0 BE / 0 network) |
-| M365 `TGT - Email Intake` POSTs | **NEEDS LIVE VERIFY** |
-| Historical missing bodies | **BACKFILL OPTIONAL** |
-| leasesmart contains TGT OS ingest code | **NO** |
-| Strong e2e candidate in Inbox | **YES** — Max Farrell / NinjaOne 15:59Z |
+Handoff: `master-vault/cursor-reports/TGT-RCC-MAILBOX-GAP-HANDOFF-2026-09-22.md`
 
-Full report: `master-vault/cursor-reports/TGT-OS-OUTLOOK-INGESTION-AUDIT-2026-09-15.md`
-
-## What Troy should do next (2 minutes)
-
-1. Open TGT Operating System.
-2. Check NinjaOne / Max Farrell card for LAST RECEIVED + body from today’s time-slot reply.
-3. In Power Automate, confirm `TGT - Email Intake` is On and ran for that message.
-
-## What Cursor did here
-
-- Vaulted the AppDeploy audit + live-verify checklist
-- Graph mailbox scan for real e2e candidates (no fabricated probes)
-- Could not open AppDeploy UI (no URL in repo; Lovable MCP needs auth)
-
-## Ready for commit
-
-- Docs only on `cursor/tgt-os-outlook-audit-vault-9057`
-
----
-
-**Full sprint log:** `master-vault/LeaseSmart-Sprint-Master-Log.md`
-
-**Copy for Claude:** open `master-vault/morning/HANDOFF-latest.html` and click the button.
+Claude: SUSPENDED.

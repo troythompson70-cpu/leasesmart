@@ -1,0 +1,21 @@
+{
+  "name": "tgt-os-graph",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Portable Microsoft Graph client + Outlook/SharePoint reconciliation for TGT OS AppDeploy transplant",
+  "exports": {
+    ".": "./src/index.js",
+    "./auth": "./src/auth.js",
+    "./client": "./src/client.js",
+    "./outlook": "./src/outlook.js",
+    "./sharepoint": "./src/sharepoint.js",
+    "./ingest": "./src/ingest.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

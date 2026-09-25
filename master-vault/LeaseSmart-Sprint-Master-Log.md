@@ -2,8 +2,38 @@
 
 **TGT Technologies Inc.** — Upload this file to Microsoft 365 Master Vault.
 
-This log records sprint commands, Claude reviews, GO/NO-GO decisions, and Cursor reports.
+This log records sprint commands, AI reviews, GO/NO-GO decisions, and Cursor reports.
 Secrets are stripped automatically — never paste API keys or passwords here.
+
+---
+## 2026-09-21 (GO clarified) — AUTH_TEST still AppDeploy-only — Cursor Report
+
+**Build ID:** 20260921-auth-test-blockers · **PR:** #28
+
+Authoritative status remains `TROY_GO — AWAITING_APPDEPLOY_AUTH_TEST_EXECUTION`. ChatGPT session reports empty workspace with no AppDeploy / master-vault / iMac credentials — cannot execute the chain. Cursor Cloud likewise blocked. Cron stays **OFF** until AppDeploy completes AUTH_TEST → Mail.Read → reconciliation → Command Center readback → replay creates=0 → independent verification. Record: `master-vault/cursor-reports/TGT-OS-GRAPH-AUTH-TEST-BLOCKERS-2026-09-21.md`.
+
+---
+## 2026-09-21 (GO) — TROY GO AUTH_TEST — Cursor Report
+
+**Build ID:** 20260921-troy-go-auth-test · **PR:** #28
+
+Troy commanded **`go`**. Live AUTH_TEST sequence **AUTHORIZED**. Status: `TROY_GO — AWAITING_APPDEPLOY_AUTH_TEST_EXECUTION`. Cursor re-probed: Lovable 0 projects, preview 404, no GRAPH_* in agent — cannot execute client_credentials AUTH_TEST. ChatGPT must run AUTH_TEST inside AppDeploy now; cron stays disabled until AUTH_OK + replay creates=0. Record: `master-vault/cursor-reports/TGT-OS-GRAPH-TROY-GO-AUTH-TEST-2026-09-21.md`.
+
+---
+## 2026-09-21 (late) — GRAPH READY_FOR_PRODUCTION_AUTH_TEST — Cursor Report
+
+**Build ID:** 20260921-graph-ready-auth-test · **PR:** #28
+
+Troy AppDeploy inspection: production `backend/graph-auth.ts` **patched** on **v98 / 1790006649557** (READY 0/0/0) — all three Graph secrets via protected store; hard-coded IDs gone. Code-side identity defect **CLOSED**. Status advanced to `READY_FOR_PRODUCTION_AUTH_TEST`. Sledgehammer cron still disabled pending live AUTH_TEST → Mail.Read → reconcile → readback → replay creates=0. Local 28/28 is not live token proof. Runbook: `master-vault/cursor-reports/TGT-OS-GRAPH-READY-FOR-AUTH-TEST-2026-09-21.md`.
+
+---
+## 2026-09-21 — OPERATING MODEL + GRAPH-V98-AUTH-REPAIR — Cursor Report
+
+**Build ID:** 20260921-graph-v98-auth-repair · **PR:** #28
+
+Claude **SUSPENDED**. Active model: ChatGPT (PM/apply) · Gemini (architecture/risk) · Cursor (implementation) · M365/SharePoint (ops record).
+
+Graph production repair continues from known state: v98 freeze / AADSTS7000215 hard-coded identity defect. Cursor drop-in ready (`tgt-os-graph/appdeploy/graph-auth.ts`); local tests **28/28 PASS**. Status was `OWNER_ACTION_REQUIRED: APPDEPLOY_APPLY_GRAPH_AUTH` (superseded later same day when production apply confirmed). Docs: `master-vault/OPERATING-MODEL-2026-09-21.md`.
 
 ---
 ## 2026-09-15 — TGT-OS-OUTLOOK-INGESTION-AUDIT — Cursor Report
