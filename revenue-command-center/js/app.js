@@ -138,22 +138,40 @@ function setLocked(locked) {
   banner.textContent = locked ? ACTION_LOCK_MESSAGE : '';
 }
 
+function formatDashTime(value) {
+  if (value == null || value === '') return '—';
+  const raw = String(value);
+  const t = Date.parse(raw);
+  if (!Number.isFinite(t)) return raw;
+  try {
+    return new Date(t).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return raw;
+  }
+}
+
 function renderHealth() {
   const h = state.health;
   const bar = $('rccHealthBar');
   if (!h) return;
   bar.className = `rcc-health ${h.state}`;
   $('rccHealthTitle').textContent = `${h.state} — ${h.label}`;
-  $('mLastVerified').textContent = h.lastVerifiedAt || '—';
-  $('mFeedUpdated').textContent = h.feedUpdatedAt || '—';
-  $('mOrphanEmail').textContent = formatMetric(h.metrics.orphan_email_count);
+  $('mLastVerified').textContent = formatDashTime(h.lastVerifiedAt);
+  $('mFeedUpdated').textContent = formatDashTime(h.feedUpdatedAt);
+  $('mOrphanEmail').textContent = formatMetric(h.metrics?.orphan_email_count);
   $('mOrphanRecord').textContent = formatMetric(
-    h.metrics.orphan_discovery_count ?? h.metrics.orphan_record_count,
+    h.metrics?.orphan_discovery_count ?? h.metrics?.orphan_record_count,
   );
-  $('mDuplicate').textContent = formatMetric(h.metrics.duplicate_count);
-  $('mInvalidRoute').textContent = formatMetric(h.metrics.invalid_route_count);
-  $('mFailedWrite').textContent = formatMetric(h.metrics.failed_write_count);
-  $('mStale').textContent = formatMetric(h.metrics.stale_record_count);
+  $('mDuplicate').textContent = formatMetric(h.metrics?.duplicate_count);
+  $('mInvalidRoute').textContent = formatMetric(h.metrics?.invalid_route_count);
+  $('mFailedWrite').textContent = formatMetric(h.metrics?.failed_write_count);
+  $('mStale').textContent = formatMetric(h.metrics?.stale_record_count);
   const warn = $('rccMailboxWarn');
   if (warn) {
     const show = !h.mailboxCoverageVerified;

@@ -105,6 +105,17 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font-weight: 800;
   margin-top: 2px;
   overflow-wrap: anywhere;
+  color: var(--rcc-text);
+}
+.rcc-health .rcc-metric {
+  background: rgba(0, 0, 0, 0.32);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.rcc-health .rcc-metric span {
+  color: #c5d3e0;
+}
+.rcc-health .rcc-metric strong {
+  color: #f5f9fc;
 }
 
 .rcc-lock-banner {
@@ -704,6 +715,20 @@ a.rcc-btn {
   .rcc-card, .rcc-email-block, .rcc-metric, .rcc-owner-item {
     background: #fff;
     color: var(--rcc-text);
+  }
+  /* Health dashboard metrics: dark contrast rules above set light text —
+     force readable ink on white metric cards (was blank/invisible). */
+  .rcc-metric span,
+  .rcc-health .rcc-metric span {
+    color: #44586c;
+  }
+  .rcc-metric strong,
+  .rcc-health .rcc-metric strong {
+    color: #122033;
+  }
+  .rcc-health .rcc-metric {
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(18, 32, 51, 0.14);
   }
   .rcc-email-block h4,
   .rcc-tx-subject,
