@@ -46,6 +46,21 @@ import {
 } from './orphan-reconcile.js';
 import { enforceReportIntegrity, buildSixPmReportView } from './report-integrity.js';
 import { runMailboxBackfill, assertBackfillIdempotent } from './mailbox-backfill.js';
+import {
+  buildActionGuidance,
+  buildExecutiveReadout,
+  LANE_BANNERS,
+  LANES,
+  mapOpportunityLane,
+} from './executive-readout.js';
+import {
+  QUEUE_DECISIONS,
+  applyQueueDecision,
+  filterActiveQueue,
+  isRemovedFromActiveQueue,
+  prepareConservativeReplyDraft,
+} from './record-decisions.js';
+import { interpretAssistantCommand } from './tgt-assistant.js';
 
 const FIXTURES = {
   green: './fixtures/green.json',
@@ -54,15 +69,16 @@ const FIXTURES = {
   'red-failed-write': './fixtures/red-failed-write.json',
   'red-duplicate': './fixtures/red-duplicate.json',
   'red-orphan-email': './fixtures/red-orphan-email.json',
+  'jared-live-ingested': './fixtures/jared-live-ingested.json',
 };
 
 /** LIST SOFTWARE body excerpt (Outlook 2026-09-14) for checklist reconciliation demos. */
-const LIST_SOFTWARE_BODY = \`ONE MASTER LIST — Everything You Need to Do
+const LIST_SOFTWARE_BODY = `ONE MASTER LIST — Everything You Need to Do
 1 Cisco / Duo MSP Activate NFR/MSP
 2 Chinron Accept admin invite
 3 Malwarebytes Techbench Complete application/setup
 7 Huntress Complete partner setup
-15 Cursor AI Troy/TGT automation create account\`;
+15 Cursor AI Troy/TGT automation create account`;
 
 const state = {
   feed: null,
@@ -98,14 +114,11 @@ function restoreView() {
   const ui = loadUiState();
   state.filter = ui.filter;
   state.openOppId = ui.openOppId;
-  if (ui.fixtureKey) state.fixtureKey = ui.fixtureKey;
-}
-
-function assignOpportunities(feed, opps) {
-  if (Array.isArray(feed.records) && !Array.isArray(feed.opportunities)) {
-    return { ...feed, records: opps };
+  if (ui.fixtureKey && FIXTURES[ui.fixtureKey]) {
+    state.fixtureKey = ui.fixtureKey;
+  } else {
+    state.fixtureKey = 'green';
   }
-  return { ...feed, opportunities: opps };
 }
 
 function toast(message, fail = false) {
@@ -129,22 +142,40 @@ function setLocked(locked) {
   banner.textContent = locked ? ACTION_LOCK_MESSAGE : '';
 }
 
+function formatDashTime(value) {
+  if (value == null || value === '') return '—';
+  const raw = String(value);
+  const t = Date.parse(raw);
+  if (!Number.isFinite(t)) return raw;
+  try {
+    return new Date(t).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return raw;
+  }
+}
+
 function renderHealth() {
   const h = state.health;
   const bar = $('rccHealthBar');
   if (!h) return;
-  bar.className = \`rcc-health \${h.state}\`;
-  $('rccHealthTitle').textContent = \`\${h.state} — \${h.label}\`;
-  $('mLastVerified').textContent = h.lastVerifiedAt || '—';
-  $('mFeedUpdated').textContent = h.feedUpdatedAt || '—';
-  $('mOrphanEmail').textContent = formatMetric(h.metrics.orphan_email_count);
+  bar.className = `rcc-health ${h.state}`;
+  $('rccHealthTitle').textContent = `${h.state} — ${h.label}`;
+  $('mLastVerified').textContent = formatDashTime(h.lastVerifiedAt);
+  $('mFeedUpdated').textContent = formatDashTime(h.feedUpdatedAt);
+  $('mOrphanEmail').textContent = formatMetric(h.metrics?.orphan_email_count);
   $('mOrphanRecord').textContent = formatMetric(
-    h.metrics.orphan_discovery_count ?? h.metrics.orphan_record_count,
+    h.metrics?.orphan_discovery_count ?? h.metrics?.orphan_record_count,
   );
-  $('mDuplicate').textContent = formatMetric(h.metrics.duplicate_count);
-  $('mInvalidRoute').textContent = formatMetric(h.metrics.invalid_route_count);
-  $('mFailedWrite').textContent = formatMetric(h.metrics.failed_write_count);
-  $('mStale').textContent = formatMetric(h.metrics.stale_record_count);
+  $('mDuplicate').textContent = formatMetric(h.metrics?.duplicate_count);
+  $('mInvalidRoute').textContent = formatMetric(h.metrics?.invalid_route_count);
+  $('mFailedWrite').textContent = formatMetric(h.metrics?.failed_write_count);
+  $('mStale').textContent = formatMetric(h.metrics?.stale_record_count);
   const warn = $('rccMailboxWarn');
   if (warn) {
     const show = !h.mailboxCoverageVerified;
@@ -167,18 +198,18 @@ function renderOwnerPanel() {
   panel.style.display = 'block';
   list.innerHTML = items
     .map(
-      (o) => \`<div class="rcc-owner-item">
-      <div class="rcc-lead-id">Opportunity ID \${esc(leadIdOf(o))}</div>
-      <strong>\${esc(o.company || o.vendor)}</strong>
-      <div>Status: \${esc(o.status)} · Category: \${esc(o.owner_action_category || 'other')}</div>
-      <div>Next: \${esc(o.next_action || '—')}</div>
-    </div>\`,
+      (o) => `<div class="rcc-owner-item">
+      <div class="rcc-lead-id">Opportunity ID ${esc(leadIdOf(o))}</div>
+      <strong>${esc(o.company || o.vendor)}</strong>
+      <div>Status: ${esc(o.status)} · Category: ${esc(o.owner_action_category || 'other')}</div>
+      <div>Next: ${esc(o.next_action || '—')}</div>
+    </div>`,
     )
     .join('');
 }
 
 function filteredOpportunities() {
-  const raw = getOpportunities(state.feed);
+  const raw = filterActiveQueue(getOpportunities(state.feed));
   if (state.filter === 'incoming') {
     return stabilizeIncomingList(raw);
   }
@@ -187,6 +218,7 @@ function filteredOpportunities() {
     return opps.filter((o) => isUnreadActivity(o));
   }
   if (state.filter === 'new-replies') {
+    // Cards for opportunities linked to unacknowledged replies; also render reply cards separately.
     const ids = new Set(
       listUnacknowledgedReplies(state.feed).map((r) => String(r.opportunity_id || '')),
     );
@@ -195,8 +227,82 @@ function filteredOpportunities() {
   return opps;
 }
 
+function renderExecutiveReadout() {
+  const host = $('rccExecutiveReadout');
+  if (!host) return;
+  const rows = buildExecutiveReadout(filterActiveQueue(getOpportunities(state.feed)));
+  host.innerHTML = rows
+    .map(
+      (r) => `<article class="rcc-exec-item ${r.hardHold ? 'hard-hold' : ''}" data-exec-id="${esc(r.id)}">
+      <div class="rcc-exec-priority">${esc(r.priority)}</div>
+      <div class="rcc-exec-main">
+        <h3>${esc(r.title)}</h3>
+        <p>${esc(r.body)}</p>
+        <p class="rcc-exec-next"><strong>Your next move:</strong> ${esc(r.nextMove)}</p>
+        ${
+          r.hardHold
+            ? '<p class="rcc-hard-hold-flag">HARD HOLD — read-only wait · no live send from RCC</p>'
+            : ''
+        }
+        ${
+          r.matchedOpportunityId
+            ? `<button type="button" class="rcc-btn" data-action="open-card" data-id="${esc(r.matchedOpportunityId)}">Open matched record</button>`
+            : ''
+        }
+      </div>
+    </article>`,
+    )
+    .join('');
+}
+
+function renderLaneBanners() {
+  const host = $('rccLaneBanners');
+  if (!host) return;
+  const active = filterActiveQueue(getOpportunities(state.feed));
+  const counts = {
+    [LANES.REVENUE]: 0,
+    [LANES.NFR_SOFTWARE_AI]: 0,
+    [LANES.CONTRACTORS_FIELD]: 0,
+  };
+  active.forEach((o) => {
+    counts[mapOpportunityLane(o)] += 1;
+  });
+  host.innerHTML = Object.values(LANE_BANNERS)
+    .map(
+      (b) => `<div class="rcc-lane-banner lane-${esc(b.id)}">
+      <strong>${esc(b.title)}</strong>
+      <span>${esc(b.subtitle)}</span>
+      <em>${counts[b.id] || 0} active</em>
+    </div>`,
+    )
+    .join('');
+}
+
+function decisionButtonsHtml(id) {
+  return `<div class="rcc-decision-row" role="group" aria-label="Queue decisions">
+    <button type="button" class="rcc-btn" data-lockable="1" data-action="keep-active" data-id="${esc(id)}">Keep Active</button>
+    <button type="button" class="rcc-btn" data-lockable="1" data-action="pass-not-fit" data-id="${esc(id)}">Pass / Not a Fit</button>
+    <button type="button" class="rcc-btn" data-lockable="1" data-action="save-record" data-id="${esc(id)}">Save Record</button>
+    <button type="button" class="rcc-btn danger" data-lockable="1" data-action="remove-queue" data-id="${esc(id)}">Delete / Remove from Queue</button>
+  </div>`;
+}
+
+function guidanceHtml(guidance) {
+  return `<div class="rcc-guidance">
+    <div><span class="rcc-guide-label">Goal</span><p>${esc(guidance.goal)}</p></div>
+    <div><span class="rcc-guide-label">What happened</span><p>${esc(guidance.whatHappened)}</p></div>
+    <div><span class="rcc-guide-label">Your next move</span><p>${esc(guidance.yourNextMove)}</p></div>
+    <div><span class="rcc-guide-label">Why</span><p>${esc(guidance.why)}</p></div>
+    ${
+      guidance.hardHold
+        ? '<p class="rcc-hard-hold-flag">HARD HOLD / read-only wait — no live email send</p>'
+        : ''
+    }
+  </div>`;
+}
+
 function renderFilterTabs() {
-  const all = getOpportunities(state.feed);
+  const all = filterActiveQueue(getOpportunities(state.feed));
   const incomingCount = all.filter((o) => hasIncomingAttention(o)).length;
   const newActivityCount = countUnreadActivity(all);
   const newRepliesCount = countNewReplies(state.feed);
@@ -217,19 +323,19 @@ function renderFilterTabs() {
     tab.setAttribute('aria-selected', on ? 'true' : 'false');
   });
   if (state.filter === 'incoming') {
-    $('rccCardsTitle').textContent = \`Incoming queue (\${incomingCount})\`;
+    $('rccCardsTitle').textContent = `Incoming queue (${incomingCount})`;
   } else if (state.filter === 'new-activity') {
-    $('rccCardsTitle').textContent = \`New Activity / Unread (\${newActivityCount})\`;
+    $('rccCardsTitle').textContent = `New Activity / Unread (${newActivityCount})`;
   } else if (state.filter === 'new-replies') {
-    $('rccCardsTitle').textContent = \`NEW REPLIES (\${newRepliesCount})\`;
+    $('rccCardsTitle').textContent = `NEW REPLIES (${newRepliesCount})`;
   } else {
-    $('rccCardsTitle').textContent = \`Opportunities (\${all.length})\`;
+    $('rccCardsTitle').textContent = `Active opportunities (${all.length})`;
   }
 }
 
 function transmissionHtml(tx) {
   if (!tx) {
-    return \`<div class="rcc-tx muted">No transmission on record</div>\`;
+    return `<div class="rcc-tx muted">No transmission on record</div>`;
   }
   const dirClass =
     tx.direction === 'INCOMING'
@@ -237,59 +343,59 @@ function transmissionHtml(tx) {
       : tx.direction === 'OUTBOUND'
         ? 'OUTBOUND'
         : '';
-  return \`<div class="rcc-tx">
+  return `<div class="rcc-tx">
     <div class="rcc-tx-row">
-      <span class="rcc-tx-dir \${dirClass}">\${esc(tx.direction)}</span>
-      <span class="rcc-tx-at">\${esc(tx.at || '—')}</span>
+      <span class="rcc-tx-dir ${dirClass}">${esc(tx.direction)}</span>
+      <span class="rcc-tx-at">${esc(tx.at || '—')}</span>
     </div>
-    <div class="rcc-tx-subject">\${esc(tx.subject || '—')}</div>
-    <div class="rcc-tx-sender">\${esc(tx.sender || '—')}</div>
-    \${tx.preview ? \`<div class="rcc-tx-preview">\${esc(tx.preview)}</div>\` : ''}
-    \${tx.eventId ? \`<div class="rcc-tx-event">Event \${esc(tx.eventId)}</div>\` : ''}
-  </div>\`;
+    <div class="rcc-tx-subject">${esc(tx.subject || '—')}</div>
+    <div class="rcc-tx-sender">${esc(tx.sender || '—')}</div>
+    ${tx.preview ? `<div class="rcc-tx-preview">${esc(tx.preview)}</div>` : ''}
+    ${tx.eventId ? `<div class="rcc-tx-event">Event ${esc(tx.eventId)}</div>` : ''}
+  </div>`;
 }
 
 function recentEmailHtml(recent) {
   if (!recent) {
-    return \`<section class="rcc-email-block"><h4>Recent Email</h4><div class="rcc-tx muted">No recent email</div></section>\`;
+    return `<section class="rcc-email-block"><h4>Recent Email</h4><div class="rcc-tx muted">No recent email</div></section>`;
   }
   const body = recent.preview || recent.body || recent.unavailable || '';
-  return \`<section class="rcc-email-block" aria-label="Recent Email">
+  return `<section class="rcc-email-block" aria-label="Recent Email">
     <h4>Recent Email</h4>
     <div class="rcc-tx">
       <div class="rcc-tx-row">
-        <span class="rcc-tx-dir \${esc(recent.direction)}">\${esc(recent.direction)}</span>
-        <span class="rcc-tx-at">\${esc(recent.at || '—')}</span>
+        <span class="rcc-tx-dir ${esc(recent.direction)}">${esc(recent.direction)}</span>
+        <span class="rcc-tx-at">${esc(recent.at || '—')}</span>
       </div>
-      <div class="rcc-tx-subject">\${esc(recent.subject || '—')}</div>
-      <div class="rcc-tx-sender">From: \${esc(recent.sender || '—')}</div>
-      <div class="rcc-tx-sender">To: \${esc(recent.recipient || '—')}</div>
-      <div class="rcc-tx-preview">\${esc(body || '—')}</div>
+      <div class="rcc-tx-subject">${esc(recent.subject || '—')}</div>
+      <div class="rcc-tx-sender">From: ${esc(recent.sender || '—')}</div>
+      <div class="rcc-tx-sender">To: ${esc(recent.recipient || '—')}</div>
+      <div class="rcc-tx-preview">${esc(body || '—')}</div>
     </div>
-  </section>\`;
+  </section>`;
 }
 
 function conversationSnapshotHtml(snap) {
   if (!snap || !snap.items?.length) {
-    return \`<section class="rcc-email-block"><h4>Conversation Snapshot</h4><div class="rcc-tx muted">Empty snapshot</div></section>\`;
+    return `<section class="rcc-email-block"><h4>Conversation Snapshot</h4><div class="rcc-tx muted">Empty snapshot</div></section>`;
   }
   const rows = snap.items
     .map(
-      (m) => \`<div class="rcc-snap-item">
+      (m) => `<div class="rcc-snap-item">
       <div class="rcc-tx-row">
-        <span class="rcc-tx-dir \${esc(m.direction)}">\${esc(m.direction)}</span>
-        <span class="rcc-tx-at">\${esc(m.at || '—')}</span>
+        <span class="rcc-tx-dir ${esc(m.direction)}">${esc(m.direction)}</span>
+        <span class="rcc-tx-at">${esc(m.at || '—')}</span>
       </div>
-      <div class="rcc-tx-subject">\${esc(m.subject || snap.thread || '—')}</div>
-      <div class="rcc-tx-sender">\${esc(m.sender || '—')} → \${esc(m.recipient || '—')}</div>
-      <div class="rcc-tx-preview">\${esc(m.preview || '—')}</div>
-    </div>\`,
+      <div class="rcc-tx-subject">${esc(m.subject || snap.thread || '—')}</div>
+      <div class="rcc-tx-sender">${esc(m.sender || '—')} → ${esc(m.recipient || '—')}</div>
+      <div class="rcc-tx-preview">${esc(m.preview || '—')}</div>
+    </div>`,
     )
     .join('');
-  return \`<section class="rcc-email-block" aria-label="Conversation Snapshot">
+  return `<section class="rcc-email-block" aria-label="Conversation Snapshot">
     <h4>Conversation Snapshot</h4>
-    \${rows}
-  </section>\`;
+    ${rows}
+  </section>`;
 }
 
 function renderNewReplyCards() {
@@ -299,42 +405,44 @@ function renderNewReplyCards() {
     .map((r) => {
       const id = esc(r.source_message_id);
       const open = r.web_link
-        ? \`<a class="rcc-btn primary" href="\${esc(r.web_link)}" target="_blank" rel="noopener noreferrer">Open Email</a>\`
+        ? `<a class="rcc-btn primary" href="${esc(r.web_link)}" target="_blank" rel="noopener noreferrer">Open Email</a>`
         : '';
-      return \`<article class="rcc-card unread rcc-new-reply-card" data-reply-id="\${id}">
-        <div class="rcc-lead-id">NEW REPLY · \${esc(r.lane || 'Revenue')}</div>
-        <h3>\${esc(r.company || 'Unknown company')}</h3>
-        <div class="rcc-card-opp">\${esc(r.subject || '—')}</div>
+      return `<article class="rcc-card unread rcc-new-reply-card" data-reply-id="${id}">
+        <div class="rcc-lead-id">NEW REPLY · ${esc(r.lane || 'Revenue')}</div>
+        <h3>${esc(r.company || 'Unknown company')}</h3>
+        <div class="rcc-card-opp">${esc(r.subject || '—')}</div>
         <div class="rcc-badges"><span class="rcc-badge UNREAD">UNACKNOWLEDGED</span></div>
         <div class="rcc-tx">
           <div class="rcc-tx-row">
             <span class="rcc-tx-dir INCOMING">INCOMING</span>
-            <span class="rcc-tx-at">\${esc(r.received_at || '—')}</span>
+            <span class="rcc-tx-at">${esc(r.received_at || '—')}</span>
           </div>
-          <div class="rcc-tx-sender">From: \${esc(r.sender || r.sender_email || '—')}</div>
-          <div class="rcc-tx-sender">To: \${esc(r.recipient || '—')}</div>
-          <div class="rcc-tx-preview">\${esc(r.body_preview || '—')}</div>
+          <div class="rcc-tx-sender">From: ${esc(r.sender || r.sender_email || '—')}</div>
+          <div class="rcc-tx-sender">To: ${esc(r.recipient || '—')}</div>
+          <div class="rcc-tx-preview">${esc(r.body_preview || '—')}</div>
         </div>
         <div class="rcc-card-actions rcc-action-grid">
-          \${open}
-          <button type="button" class="rcc-btn" data-action="open-linked-opp" data-id="\${esc(r.opportunity_id || '')}">Open Linked Opportunity</button>
-          <button type="button" class="rcc-btn rcc-ack-btn" data-action="ack-reply" data-reply-id="\${id}">Acknowledge + Disposition</button>
+          ${open}
+          <button type="button" class="rcc-btn" data-action="open-linked-opp" data-id="${esc(r.opportunity_id || '')}">Open Linked Opportunity</button>
+          <button type="button" class="rcc-btn rcc-ack-btn" data-action="ack-reply" data-reply-id="${id}">Acknowledge + Disposition</button>
         </div>
-        <div class="rcc-disposition-row" data-disposition-for="\${id}" hidden>
-          \${DISPOSITIONS.map(
+        <div class="rcc-disposition-row" data-disposition-for="${id}" hidden>
+          ${DISPOSITIONS.map(
             (d) =>
-              \`<button type="button" class="rcc-btn disposition \${d.toLowerCase()}" data-action="ack-reply-disposition" data-reply-id="\${id}" data-disposition="\${d}">\${d}</button>\`,
+              `<button type="button" class="rcc-btn disposition ${d.toLowerCase()}" data-action="ack-reply-disposition" data-reply-id="${id}" data-disposition="${d}">${d}</button>`,
           ).join('')}
         </div>
-      </article>\`;
+      </article>`;
     })
     .join('');
 }
 
 function renderCards() {
   const host = $('rccCards');
-  const all = getOpportunities(state.feed);
+  const all = filterActiveQueue(getOpportunities(state.feed));
   renderFilterTabs();
+  renderExecutiveReadout();
+  renderLaneBanners();
 
   if (state.filter === 'new-replies') {
     const replyHtml = renderNewReplyCards();
@@ -351,66 +459,69 @@ function renderCards() {
         ? '<p class="rcc-section-title">No incoming attention items.</p>'
         : state.filter === 'new-activity'
           ? '<p class="rcc-section-title">No unacknowledged new activity.</p>'
-          : '<p class="rcc-section-title">No opportunities in feed.</p>';
+          : '<p class="rcc-section-title">No active opportunities in queue.</p>';
     return;
   }
   host.innerHTML = opps
     .map((opp) => {
       const vm = cardViewModel(opp, all);
+      const guidance = buildActionGuidance(opp);
       const id = opp.id || opp.opportunity_id;
       const badges = vm.badges
-        .map((b) => \`<span class="rcc-badge \${b.type}">\${esc(b.label)}</span>\`)
+        .map((b) => `<span class="rcc-badge ${b.type}">${esc(b.label)}</span>`)
         .join('');
       const unreadBadge = vm.unread
         ? '<span class="rcc-badge UNREAD">UNREAD</span>'
         : '';
       const email = vm.emailLink;
-      const openEmailLabel = 'Open Email';
-      return \`<article class="rcc-card \${vm.unread ? 'unread' : ''}" data-opp-id="\${esc(id)}">
-        <div class="rcc-lead-id">Opportunity ID \${esc(vm.opportunityId || vm.leadId)}</div>
-        <h3>\${esc(vm.company || 'Opportunity')}</h3>
-        <div class="rcc-card-opp">\${esc(vm.opportunity || '—')}</div>
+      const openEmailLabel = guidance.hardHold
+        ? 'Open verified thread'
+        : 'Open Email';
+      const lane = guidance.laneBanner;
+      return `<article class="rcc-card ${vm.unread ? 'unread' : ''} lane-${esc(guidance.lane)}" data-opp-id="${esc(id)}">
+        <div class="rcc-card-lane">${esc(lane.title)}</div>
+        <div class="rcc-lead-id">Opportunity ID ${esc(vm.opportunityId || vm.leadId)}</div>
+        <h3>${esc(vm.company || 'Opportunity')}</h3>
+        <div class="rcc-card-opp">${esc(vm.opportunity || '—')}</div>
         <div class="rcc-badges">
-          <span class="rcc-tier-lg">Tier \${esc(vm.tier)}</span>
-          <span class="rcc-status-lg">\${esc(vm.status)}</span>
-          <span class="rcc-owner-lg \${vm.ownerYesNo === 'Yes' ? 'yes' : ''}">OWNER ACTION: \${esc(vm.ownerYesNo)}</span>
-          \${unreadBadge}\${badges}<span class="rcc-badge OK">Sync: \${esc(vm.sync)}</span>
+          <span class="rcc-tier-lg">Tier ${esc(vm.tier)}</span>
+          <span class="rcc-status-lg">${esc(vm.status)}</span>
+          <span class="rcc-owner-lg ${vm.ownerYesNo === 'Yes' ? 'yes' : ''}">OWNER ACTION: ${esc(vm.ownerYesNo)}</span>
+          ${unreadBadge}${badges}<span class="rcc-badge OK">Sync: ${esc(vm.sync)}</span>
         </div>
+        ${guidanceHtml(guidance)}
         <dl class="rcc-card-meta">
-          <div><dt>Owner</dt><dd>\${esc(vm.owner)}</dd></div>
-          <div><dt>Source</dt><dd>\${esc(vm.source || '—')}</dd></div>
-          <div><dt>Domain</dt><dd>\${esc(vm.domain || '—')}</dd></div>
-          <div><dt>Last activity</dt><dd>\${esc(vm.lastActivity || '—')}</dd></div>
-          <div><dt>Next action</dt><dd>\${esc(vm.nextAction || '—')}</dd></div>
-          <div><dt>Follow-up</dt><dd>\${esc(vm.followUp || '—')}</dd></div>
-          <div><dt>Ack</dt><dd>\${esc(vm.acknowledgement)}</dd></div>
-          <div><dt>Classification</dt><dd>\${esc(vm.classification)}</dd></div>
+          <div><dt>Owner</dt><dd>${esc(vm.owner)}</dd></div>
+          <div><dt>Source</dt><dd>${esc(vm.source || '—')}</dd></div>
+          <div><dt>Domain</dt><dd>${esc(vm.domain || '—')}</dd></div>
+          <div><dt>Last activity</dt><dd>${esc(vm.lastActivity || '—')}</dd></div>
+          <div><dt>Follow-up</dt><dd>${esc(vm.followUp || '—')}</dd></div>
         </dl>
-        \${recentEmailHtml(vm.recentEmail)}
-        \${conversationSnapshotHtml(vm.conversationSnapshot)}
-        \${vm.timing ? \`<div class="rcc-timing">\${esc(vm.timing)}</div>\` : ''}
+        ${recentEmailHtml(vm.recentEmail)}
+        ${conversationSnapshotHtml(vm.conversationSnapshot)}
+        ${vm.timing ? `<div class="rcc-timing">${esc(vm.timing)}</div>` : ''}
         <div class="rcc-card-actions rcc-action-grid">
-          <button type="button" class="rcc-btn primary" data-action="open-card" data-id="\${esc(id)}">Open</button>
-          <button type="button" class="rcc-btn" data-action="contact" data-id="\${esc(id)}">Contact</button>
-          <button type="button" class="rcc-btn" data-action="ready" data-id="\${esc(id)}">Ready</button>
-          <button type="button" class="rcc-btn" data-action="tier" data-id="\${esc(id)}">Tier</button>
-          \${
+          <button type="button" class="rcc-btn primary" data-action="open-card" data-id="${esc(id)}">${esc(guidance.actionLabels.primary)}</button>
+          <button type="button" class="rcc-btn" data-action="contact" data-id="${esc(id)}">${esc(guidance.actionLabels.contact)}</button>
+          <button type="button" class="rcc-btn" data-action="draft-reply" data-id="${esc(id)}">${esc(guidance.actionLabels.followup)}</button>
+          ${
             vm.incoming
-              ? \`<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="\${esc(id)}">Clear Incoming</button>\`
+              ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
               : ''
           }
-          \${
+          ${
             email
-              ? \`<a class="rcc-btn" href="\${esc(email.href)}" target="_blank" rel="noopener noreferrer">\${openEmailLabel}</a>\`
-              : \`<button type="button" class="rcc-btn" data-action="open-source" data-id="\${esc(id)}">\${openEmailLabel}</button>\`
+              ? `<a class="rcc-btn" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer" data-confirm-outlook="1">${openEmailLabel}</a>`
+              : `<button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">${openEmailLabel}</button>`
           }
-          \${
+          ${
             vm.unread
-              ? \`<button type="button" class="rcc-btn rcc-ack-btn" data-action="acknowledge" data-id="\${esc(id)}">Acknowledge Activity</button>\`
+              ? `<button type="button" class="rcc-btn rcc-ack-btn" data-action="acknowledge" data-id="${esc(id)}">Acknowledge Activity</button>`
               : ''
           }
         </div>
-      </article>\`;
+        ${decisionButtonsHtml(id)}
+      </article>`;
     })
     .join('');
 }
@@ -424,10 +535,10 @@ function renderChecklist() {
   const rows = reconcileSoftwareChecklist(base);
   host.innerHTML = rows
     .map(
-      (r) => \`<div class="rcc-checklist-item \${r.suppressed ? 'suppressed' : ''}">
-      <div><strong>\${esc(r.software || r.vendor)}</strong><div>\${esc(r.displayAction)}</div></div>
-      \${r.suppressed ? '<div class="ovr">EVIDENCE OVERRIDE</div>' : ''}
-    </div>\`,
+      (r) => `<div class="rcc-checklist-item ${r.suppressed ? 'suppressed' : ''}">
+      <div><strong>${esc(r.software || r.vendor)}</strong><div>${esc(r.displayAction)}</div></div>
+      ${r.suppressed ? '<div class="ovr">EVIDENCE OVERRIDE</div>' : ''}
+    </div>`,
     )
     .join('');
 }
@@ -456,33 +567,33 @@ function renderAuditDrawer() {
       let items = rows.filter((r) => r.section === section);
       if (section === 'Malformed SharePoint Paths') {
         items = pathHits.map((h, i) => ({
-          id: \`path-\${i}\`,
+          id: `path-${i}`,
           company: h.path,
           problem: 'Malformed Shared Documents/Shared Documents (or Documents/Documents) path',
           source: h.value,
           status: 'REJECT',
-          recommended_fix: \`Use canonical \${CANONICAL_RCC_ROOT}\`,
+          recommended_fix: `Use canonical ${CANONICAL_RCC_ROOT}`,
         }));
       }
       const body = items.length
         ? items
             .map(
-              (r) => \`<div class="rcc-audit-row">
-            <strong>\${esc(r.company)}</strong>
-            <div>Problem: \${esc(r.problem)}</div>
-            <div>Source: \${esc(r.source)}</div>
-            <div>Status: \${esc(r.status)}</div>
-            <div>Fix: \${esc(r.recommended_fix)}</div>
+              (r) => `<div class="rcc-audit-row">
+            <strong>${esc(r.company)}</strong>
+            <div>Problem: ${esc(r.problem)}</div>
+            <div>Source: ${esc(r.source)}</div>
+            <div>Status: ${esc(r.status)}</div>
+            <div>Fix: ${esc(r.recommended_fix)}</div>
             <div class="rcc-card-actions">
-              <button type="button" class="rcc-btn" data-audit="open-source" data-id="\${esc(r.id)}">Open Source</button>
-              <button type="button" class="rcc-btn" data-audit="repair" data-id="\${esc(r.id)}">Repair</button>
-              <button type="button" class="rcc-btn" data-audit="dismiss" data-id="\${esc(r.id)}">Dismiss with reason</button>
+              <button type="button" class="rcc-btn" data-audit="open-source" data-id="${esc(r.id)}">Open Source</button>
+              <button type="button" class="rcc-btn" data-audit="repair" data-id="${esc(r.id)}">Repair</button>
+              <button type="button" class="rcc-btn" data-audit="dismiss" data-id="${esc(r.id)}">Dismiss with reason</button>
             </div>
-          </div>\`,
+          </div>`,
             )
             .join('')
         : '<p style="font-size:12px;color:#93a4b5">None</p>';
-      return \`<div class="rcc-audit-section"><h3>\${esc(section)}</h3>\${body}</div>\`;
+      return `<div class="rcc-audit-section"><h3>${esc(section)}</h3>${body}</div>`;
     })
     .join('');
 }
@@ -507,7 +618,7 @@ function patchOpp(id, patcher) {
     if (String(o.id || o.opportunity_id) !== String(id)) return o;
     return patcher(o);
   });
-  state.feed = assignOpportunities(state.feed, opps);
+  state.feed = { ...state.feed, opportunities: opps };
   return findOpp(id);
 }
 
@@ -515,79 +626,62 @@ function openDetail(id) {
   const opp = findOpp(id);
   if (!opp) return;
   state.openOppId = id;
-  persistView();
-  const vm = cardViewModel(opp, getOpportunities(state.feed));
-  $('rccDetailLeadId').textContent = \`Opportunity ID \${vm.opportunityId || vm.leadId}\`;
+  const vm = cardViewModel(opp, filterActiveQueue(getOpportunities(state.feed)));
+  const guidance = buildActionGuidance(opp);
+  $('rccDetailLeadId').textContent = `Opportunity ID ${vm.opportunityId || vm.leadId}`;
   $('rccDetailTitle').textContent = opp.company || opp.vendor || 'Opportunity';
   $('rccDetailNotes').textContent = vm.notes || 'No notes yet.';
   const path = formatResolvedPath(resolveRecordPath(opp));
-  $('rccDetailBody').innerHTML = \`
+  const plan = (guidance.nextActionPlan || [])
+    .map((step, i) => `<li>${esc(`${i + 1}. ${step}`)}</li>`)
+    .join('');
+  $('rccDetailBody').innerHTML = `
+    <section class="rcc-next-plan" aria-label="Next-action plan">
+      <h3>Next-action plan</h3>
+      <ol>${plan}</ol>
+      ${guidanceHtml(guidance)}
+    </section>
     <dl class="rcc-card-meta">
-      <div><dt>Status</dt><dd>\${esc(opp.status)}</dd></div>
-      <div><dt>Tier</dt><dd>\${esc(opp.tier)}</dd></div>
-      <div><dt>Ack</dt><dd>\${esc(vm.acknowledgement)}</dd></div>
-      <div><dt>Classification</dt><dd>\${esc(vm.classification)}</dd></div>
-      <div><dt>Domain</dt><dd>\${esc(vm.domain || '—')}</dd></div>
-      <div><dt>SharePoint</dt><dd>\${esc(path)}</dd></div>
-      <div><dt>Next action</dt><dd>\${esc(sanitizeUiText(opp.next_action) || '—')}</dd></div>
-      <div><dt>Source</dt><dd>\${esc(sanitizeUiText(opp.source || opp.source_ref) || '—')}</dd></div>
+      <div><dt>Status</dt><dd>${esc(opp.status)}</dd></div>
+      <div><dt>Lane</dt><dd>${esc(guidance.laneBanner.title)}</dd></div>
+      <div><dt>Tier</dt><dd>${esc(opp.tier)}</dd></div>
+      <div><dt>Domain</dt><dd>${esc(vm.domain || '—')}</dd></div>
+      <div><dt>SharePoint</dt><dd>${esc(path)}</dd></div>
+      <div><dt>Source</dt><dd>${esc(sanitizeUiText(opp.source || opp.source_ref) || '—')}</dd></div>
     </dl>
-    \${recentEmailHtml(vm.recentEmail || recentEmailOf(opp))}
-    \${conversationSnapshotHtml(vm.conversationSnapshot || conversationSnapshotOf(opp))}
-  \`;
-
-  // NAVIGATION LOGIC: Professional Prev/Next
-  const allOpps = getOpportunities(state.feed);
-  const currentIndex = allOpps.findIndex(o => (o.id || o.opportunity_id) === id);
-  const prevId = currentIndex > 0 ? allOpps[currentIndex - 1].id || allOpps[currentIndex - 1].opportunity_id : null;
-  const nextId = currentIndex < allOpps.length - 1 ? allOpps[currentIndex + 1].id || allOpps[currentIndex + 1].opportunity_id : null;
-
-  const navHtml = \`
-    <div class="rcc-detail-nav" style="display:flex; justify-content:space-between; margin-bottom:12px; gap:10px;">
-      <button type="button" class="rcc-btn" \${!prevId ? 'disabled' : ''} data-nav="prev" data-id="\${prevId}">← Previous</button>
-      <button type="button" class="rcc-btn" \${!nextId ? 'disabled' : ''} data-nav="next" data-id="\${nextId}">Next →</button>
-    </div>
-  \`;
-
+    ${recentEmailHtml(vm.recentEmail || recentEmailOf(opp))}
+    ${conversationSnapshotHtml(vm.conversationSnapshot || conversationSnapshotOf(opp))}
+  `;
   const email = buildEmailThreadLink(opp);
-  $('rccDetailActions').innerHTML = \`
-    \${navHtml}
+  $('rccDetailActions').innerHTML = `
     <div class="rcc-action-grid">
-    \${
+    ${
       vm.unread
-        ? \`<button type="button" class="rcc-btn rcc-ack-btn" data-action="acknowledge" data-id="\${esc(id)}">Acknowledge Activity</button>\`
+        ? `<button type="button" class="rcc-btn rcc-ack-btn" data-action="acknowledge" data-id="${esc(id)}">Acknowledge Activity</button>`
         : ''
     }
-    <button type="button" class="rcc-btn" data-action="classify-valid" data-id="\${esc(id)}">Classify VALID</button>
-    <button type="button" class="rcc-btn" data-action="classify-invalid" data-id="\${esc(id)}">Classify INVALID</button>
-    <button type="button" class="rcc-btn" data-action="classify-unsure" data-id="\${esc(id)}">Classify UNSURE</button>
-    <button type="button" class="rcc-btn" data-action="contact" data-id="\${esc(id)}">Contact</button>
-    <button type="button" class="rcc-btn" data-action="ready" data-id="\${esc(id)}">Ready</button>
-    <button type="button" class="rcc-btn" data-action="tier" data-id="\${esc(id)}">Tier</button>
-    \${
+    <button type="button" class="rcc-btn" data-action="draft-reply" data-id="${esc(id)}">${esc(guidance.actionLabels.followup)}</button>
+    ${
       vm.incoming
-        ? \`<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="\${esc(id)}">Clear Incoming</button>\`
+        ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
         : ''
     }
-    \${
+    ${
       email
-        ? \`<a class="rcc-btn primary" href="\${esc(email.href)}" target="_blank" rel="noopener noreferrer">Open Email</a>\`
-        : \`<button type="button" class="rcc-btn" data-action="open-source" data-id="\${esc(id)}">Open Email</button>\`
+        ? `<a class="rcc-btn primary" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer" data-confirm-outlook="1">${guidance.hardHold ? 'Open verified thread' : 'Open Email'}</a>`
+        : `<button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Email</button>`
     }
-    <button type="button" class="rcc-btn" data-action="open-sp" data-id="\${esc(id)}">Open SharePoint Record</button>
-    <button type="button" class="rcc-btn" data-lockable="1" data-action="followup" data-id="\${esc(id)}">Send Follow-up</button>
-    <button type="button" class="rcc-btn" data-lockable="1" data-action="done" data-id="\${esc(id)}">Mark Done</button>
-    <button type="button" class="rcc-btn" data-lockable="1" data-action="pass" data-id="\${esc(id)}">Close/Pass</button>
-    <button type="button" class="rcc-btn" data-action="repair" data-id="\${esc(id)}">Repair Record</button>
+    <button type="button" class="rcc-btn" data-action="open-sp" data-id="${esc(id)}">Open SharePoint Record</button>
+    <button type="button" class="rcc-btn" data-action="repair" data-id="${esc(id)}">Repair Record</button>
     </div>
-  \`;
+    ${decisionButtonsHtml(id)}
+  `;
   $('rccDetailBackdrop').classList.add('on');
   setLocked(!!state.health?.actionsLocked);
 }
 
 function closeDetail() {
   state.openOppId = null;
-  persistView();
   $('rccDetailBackdrop').classList.remove('on');
 }
 
@@ -634,6 +728,11 @@ function applyLoadedFeed(feed, fixtureKey, loadError) {
   recompute();
 }
 
+/**
+ * Prefer live SharePoint dashboard feed via local Graph proxy.
+ * Race allows fixture fallback when the proxy is slow/unreachable.
+ * Does not invent GREEN when live feed is missing.
+ */
 async function loadLiveOrFixture(key) {
   const liveUrl =
     typeof window !== 'undefined' && window.RCC_DASHBOARD_FEED_URL
@@ -656,7 +755,8 @@ async function loadLiveOrFixture(key) {
   }
 
   if (!state.feed) {
-    await loadFixture(key);
+    const fallbackKey = FIXTURES[key] ? key : 'green';
+    await loadFixture(fallbackKey);
   }
 
   liveP.then((live) => {
@@ -664,29 +764,11 @@ async function loadLiveOrFixture(key) {
   });
 }
 
-async function loadLiveOrFixture(key) {
-  const liveUrl =
-    typeof window !== 'undefined' && window.RCC_DASHBOARD_FEED_URL
-      ? window.RCC_DASHBOARD_FEED_URL
-      : 'http://127.0.0.1:5173/api/dashboard-feed';
-  const live = await loadLiveDashboardFeed(liveUrl);
-  if (live.ok) {
-    state.fixtureKey = 'live-sharepoint';
-    state.feed = mergePersistedNewReplies(mergePersistedActivity(live.feed));
-    state.loadError = null;
-    recompute();
-    return;
-  }
-  state.fixtureKey = key;
-  state.feed = null;
-  state.loadError = live.error;
-  recompute();
-}
-
 async function loadFixture(key) {
   resetIncomingBuffer();
-  state.fixtureKey = key;
-  const url = FIXTURES[key];
+  const fixtureKey = FIXTURES[key] ? key : 'green';
+  state.fixtureKey = fixtureKey;
+  const url = FIXTURES[fixtureKey];
   const loaded = await loadFeedFromUrl(url);
   if (!loaded.ok) {
     state.feed = null;
@@ -694,6 +776,10 @@ async function loadFixture(key) {
   } else {
     state.feed = mergePersistedNewReplies(mergePersistedActivity(loaded.feed));
     state.loadError = null;
+  }
+  const fixtureSelect = $('rccFixtureSelect');
+  if (fixtureSelect && FIXTURES[fixtureKey]) {
+    fixtureSelect.value = fixtureKey;
   }
   recompute();
 }
@@ -705,14 +791,14 @@ function openDrawer(on) {
 
 function openExistingModal(opp) {
   const m = $('rccModalBackdrop');
-  $('rccExistingBody').innerHTML = \`
-    <p><strong>Opportunity ID:</strong> \${esc(leadIdOf(opp))}</p>
-    <p><strong>Company:</strong> \${esc(opp.company || opp.vendor)}</p>
-    <p><strong>Status:</strong> \${esc(opp.status)}</p>
-    <p><strong>Last action:</strong> \${esc(opp.last_action || '—')}</p>
-    <p><strong>Next action:</strong> \${esc(opp.next_action || '—')}</p>
-    <p><strong>Most recent email:</strong> \${esc(opp.most_recent_email || '—')}</p>
-  \`;
+  $('rccExistingBody').innerHTML = `
+    <p><strong>Opportunity ID:</strong> ${esc(leadIdOf(opp))}</p>
+    <p><strong>Company:</strong> ${esc(opp.company || opp.vendor)}</p>
+    <p><strong>Status:</strong> ${esc(opp.status)}</p>
+    <p><strong>Last action:</strong> ${esc(opp.last_action || '—')}</p>
+    <p><strong>Next action:</strong> ${esc(opp.next_action || '—')}</p>
+    <p><strong>Most recent email:</strong> ${esc(opp.most_recent_email || '—')}</p>
+  `;
   m.dataset.oppId = opp.id || opp.opportunity_id;
   m.classList.add('on');
 }
@@ -761,7 +847,7 @@ function onClearIncoming(id) {
     after.message_preview === previewBefore;
   toast(
     ok
-      ? \`Incoming cleared for Opportunity ID \${leadIdOf(after)} — status unchanged\`
+      ? `Incoming cleared for Opportunity ID ${leadIdOf(after)} — status unchanged`
       : 'Clear Incoming violated permanence rules',
     !ok,
   );
@@ -787,7 +873,7 @@ function onAcknowledge(id) {
     (after.classification || 'UNSURE') === classBefore;
   toast(
     ok
-      ? \`Acknowledged \${leadIdOf(after)} — status/classification unchanged\`
+      ? `Acknowledged ${leadIdOf(after)} — status/classification unchanged`
       : 'Acknowledge violated permanence rules',
     !ok,
   );
@@ -795,7 +881,7 @@ function onAcknowledge(id) {
 }
 
 function onAckReplyPrompt(replyId) {
-  const row = document.querySelector(\`[data-disposition-for="\${CSS.escape(replyId)}"]\`);
+  const row = document.querySelector(`[data-disposition-for="${CSS.escape(replyId)}"]`);
   if (row) row.hidden = !row.hidden;
 }
 
@@ -806,7 +892,7 @@ function onAckReplyDisposition(replyId, disposition) {
     return;
   }
   state.feed = result.feed;
-  toast(\`NEW REPLY acknowledged · \${disposition}\`);
+  toast(`NEW REPLY acknowledged · ${disposition}`);
   recompute();
 }
 
@@ -819,7 +905,7 @@ function onClassify(id, classification) {
     return;
   }
   patchOpp(id, () => result.opp);
-  toast(\`Classification set to \${classification} — status unchanged\`);
+  toast(`Classification set to ${classification} — status unchanged`);
   recompute();
 }
 
@@ -829,15 +915,100 @@ function runOrphanReconcileNow() {
   state.feed = report.feed;
   state.lastOrphanReport = report;
   toast(
-    \`Orphans found \${report.ORPHAN_DISCOVERIES_FOUND} · repaired \${report.ORPHAN_DISCOVERIES_REPAIRED} · unresolved \${report.UNRESOLVED_ORPHANS}\`,
+    `Orphans found ${report.ORPHAN_DISCOVERIES_FOUND} · repaired ${report.ORPHAN_DISCOVERIES_REPAIRED} · unresolved ${report.UNRESOLVED_ORPHANS}`,
     report.UNRESOLVED_ORPHANS > 0,
   );
   recompute();
   return report;
 }
 
+function onQueueDecision(id, decision) {
+  if (guardLockedAction()) return;
+  const opp = findOpp(id);
+  if (!opp) return;
+  if (decision === QUEUE_DECISIONS.REMOVE_FROM_QUEUE) {
+    const ok = window.confirm(
+      `Soft-remove “${opp.company || opp.vendor || id}” from the active queue?\n\nSource evidence is kept. This is auditable and does not hard-delete the record.`,
+    );
+    if (!ok) return;
+  }
+  const applied = applyQueueDecision(opp, decision, 'Troy');
+  if (!applied.ok) {
+    toast(applied.error || 'Decision failed', true);
+    return;
+  }
+  patchOpp(id, () => applied.opp);
+  if (decision === QUEUE_DECISIONS.REMOVE_FROM_QUEUE && state.openOppId === id) {
+    closeDetail();
+  }
+  toast(
+    decision === QUEUE_DECISIONS.REMOVE_FROM_QUEUE
+      ? 'Removed from active queue (evidence retained).'
+      : `Decision saved: ${decision}`,
+  );
+  recompute();
+}
+
+function showDraftPanel(draft, company) {
+  const host = $('rccDraftPanel');
+  if (!host) {
+    toast(draft.warning || 'Draft prepared (not sent).');
+    return;
+  }
+  host.hidden = false;
+  host.innerHTML = `<h3>Reply draft — ${esc(company || 'record')}</h3>
+    <p class="rcc-draft-warn">${esc(draft.warning)}</p>
+    <p><strong>Subject:</strong> ${esc(draft.subject)}</p>
+    <pre class="rcc-draft-body">${esc(draft.body)}</pre>
+    <button type="button" class="rcc-btn" id="rccDraftDismiss">Dismiss draft</button>`;
+  $('rccDraftDismiss')?.addEventListener('click', () => {
+    host.hidden = true;
+    host.innerHTML = '';
+  });
+}
+
+function runAssistantUtterance(raw) {
+  const active = filterActiveQueue(getOpportunities(state.feed));
+  const result = interpretAssistantCommand(raw, {
+    opportunities: active,
+    filter: state.filter,
+  });
+  const out = $('rccAssistantOut');
+  if (out) out.textContent = result.reply;
+  for (const action of result.actions || []) {
+    if (action.type === 'refresh') {
+      $('rccRefresh')?.click();
+    } else if (action.type === 'set_filter') {
+      state.filter = action.filter;
+      recompute();
+    } else if (action.type === 'open_record') {
+      openDetail(action.id);
+    } else if (action.type === 'show_draft') {
+      showDraftPanel(action.draft, findOpp(action.id)?.company);
+    } else if (action.type === 'prepare_decision') {
+      if (action.requiresConfirm) {
+        onQueueDecision(action.id, action.decision);
+      } else {
+        const ok = window.confirm(
+          `Apply “${action.decision}” to ${action.company}?`,
+        );
+        if (ok) onQueueDecision(action.id, action.decision);
+      }
+    }
+  }
+  if (result.draft && !(result.actions || []).some((a) => a.type === 'show_draft')) {
+    showDraftPanel(result.draft);
+  }
+  return result;
+}
+
 function onCardAction(action, id, el = null) {
-  if (['followup', 'done', 'pass', 'bulk'].includes(action) && guardLockedAction()) {
+  if (
+    ['followup', 'done', 'pass', 'bulk', 'keep-active', 'pass-not-fit', 'save-record', 'remove-queue'].includes(
+      action,
+    ) &&
+    guardLockedAction()
+  ) {
     return;
   }
   if (action === 'ack-reply') {
@@ -856,7 +1027,31 @@ function onCardAction(action, id, el = null) {
     return;
   }
   if (action === 'contact' || action === 'ready' || action === 'tier') {
-    toast(\`\${action} control — use disposition/next action to update status\`);
+    toast(`${action} — use Keep / Pass / Save or prepare a draft (no live send)`);
+    return;
+  }
+  if (action === 'draft-reply') {
+    const opp = findOpp(id);
+    if (!opp) return;
+    const guidance = buildActionGuidance(opp);
+    const draft = prepareConservativeReplyDraft(opp, guidance);
+    showDraftPanel(draft, opp.company || opp.vendor);
+    return;
+  }
+  if (action === 'keep-active') {
+    onQueueDecision(id, QUEUE_DECISIONS.KEEP_ACTIVE);
+    return;
+  }
+  if (action === 'pass-not-fit') {
+    onQueueDecision(id, QUEUE_DECISIONS.PASS_NOT_FIT);
+    return;
+  }
+  if (action === 'save-record') {
+    onQueueDecision(id, QUEUE_DECISIONS.SAVE_RECORD);
+    return;
+  }
+  if (action === 'remove-queue') {
+    onQueueDecision(id, QUEUE_DECISIONS.REMOVE_FROM_QUEUE);
     return;
   }
   if (action === 'open-card') {
@@ -884,12 +1079,17 @@ function onCardAction(action, id, el = null) {
     return;
   }
   if (action === 'followup' || action === 'done' || action === 'pass') {
+    if (action === 'followup') {
+      const opp = findOpp(id);
+      const guidance = buildActionGuidance(opp || {});
+      const draft = prepareConservativeReplyDraft(opp || {}, guidance);
+      showDraftPanel(draft, opp?.company);
+      return;
+    }
     const patch =
       action === 'done'
         ? { status: 'WON', next_action: 'Closed' }
-        : action === 'pass'
-          ? { status: 'PASS', next_action: 'Passed' }
-          : { last_action: 'Follow-up queued (manual — no auto-send)', next_action: 'Await reply' };
+        : { status: 'PASS', next_action: 'Passed' };
     const result = saveAndVerify(state.feed, id, patch, {
       simulateReadbackFail: false,
     });
@@ -903,7 +1103,16 @@ function onCardAction(action, id, el = null) {
     return;
   }
   if (action === 'open-source') {
-    openEmailThread(findOpp(id));
+    const opp = findOpp(id);
+    const link = buildEmailThreadLink(opp);
+    if (!link) {
+      toast('No verified Outlook thread link on this record', true);
+      return;
+    }
+    const ok = window.confirm(
+      'Open the verified Outlook thread in a new tab?\n\nRCC will not send email.',
+    );
+    if (ok) openEmailThread(opp);
     return;
   }
   if (action === 'open-sp') {
@@ -911,9 +1120,9 @@ function onCardAction(action, id, el = null) {
     const resolved = resolveRecordPath(opp);
     const path = formatResolvedPath(resolved);
     if (resolved.malformedRejected) {
-      toast(\`Rejected malformed path — using \${path}\`, true);
+      toast(`Rejected malformed path — using ${path}`, true);
     } else {
-      toast(\`SharePoint SoT: \${path}\`);
+      toast(`SharePoint SoT: ${path}`);
     }
     return;
   }
@@ -936,10 +1145,11 @@ function wireEvents() {
   $('rccCloseAudit').addEventListener('click', () => openDrawer(false));
   $('rccDrawerBackdrop').addEventListener('click', () => openDrawer(false));
   $('rccRefresh').addEventListener('click', () => {
-    persistView();
+    // Refresh merges persisted NEW ACTIVITY and re-runs orphan reconcile on current feed side-channels.
     if (state.feed) {
       state.feed = mergePersistedNewReplies(mergePersistedActivity(state.feed));
       runOrphanReconcileNow();
+      persistView();
     } else if (state.fixtureKey === 'live-sharepoint') {
       loadLiveOrFixture('green');
     } else {
@@ -958,9 +1168,45 @@ function wireEvents() {
   document.querySelectorAll('.rcc-tab').forEach((tab) => {
     tab.addEventListener('click', () => {
       state.filter = tab.getAttribute('data-filter') || 'all';
-      persistView();
       renderCards();
     });
+  });
+
+  $('rccAssistantRun')?.addEventListener('click', () => {
+    const input = $('rccAssistantInput');
+    runAssistantUtterance(input?.value || '');
+  });
+  $('rccAssistantInput')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      runAssistantUtterance(e.target.value || '');
+    }
+  });
+  $('rccAssistantVoice')?.addEventListener('click', () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      toast('Voice input not supported in this browser — type instead.', true);
+      return;
+    }
+    const rec = new SR();
+    rec.lang = 'en-US';
+    rec.onresult = (ev) => {
+      const said = ev.results?.[0]?.[0]?.transcript || '';
+      if ($('rccAssistantInput')) $('rccAssistantInput').value = said;
+      runAssistantUtterance(said);
+    };
+    rec.onerror = () => toast('Voice capture failed — type the command.', true);
+    rec.start();
+    toast('Listening…');
+  });
+
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-confirm-outlook="1"]');
+    if (!a) return;
+    const ok = window.confirm(
+      'Open the verified Outlook thread?\n\nRCC will not send email from this action.',
+    );
+    if (!ok) e.preventDefault();
   });
 
   $('rccCreateOpp').addEventListener('click', () => {
@@ -988,7 +1234,7 @@ function wireEvents() {
     state.feed = result.feed;
     toast(
       result.ok
-        ? \`SAVED + VERIFIED — \${result.opportunity?.opportunity_id}\`
+        ? `SAVED + VERIFIED — ${result.opportunity?.opportunity_id}`
         : result.error || 'Discovery write blocked',
       !result.ok,
     );
@@ -1075,6 +1321,7 @@ export async function boot() {
   if (fixtureSelect && state.fixtureKey && FIXTURES[state.fixtureKey]) {
     fixtureSelect.value = state.fixtureKey;
   }
+  // Obstructive banner stays hidden by default on mobile-first flow UI.
   await loadLiveOrFixture(state.fixtureKey || 'green');
 }
 
@@ -1102,6 +1349,7 @@ window.RCC = {
   isUnreadActivity,
   mergePersistedActivity,
   stabilizeIncomingList,
+  resetIncomingBuffer,
   sortOpportunities,
   loadUiState,
   saveUiState,
@@ -1112,6 +1360,11 @@ window.RCC = {
   buildEmailThreadLink,
   leadIdOf,
   auditMalformedPaths,
+  buildExecutiveReadout,
+  filterActiveQueue,
+  applyQueueDecision,
+  prepareConservativeReplyDraft,
+  interpretAssistantCommand,
   SCHEMA_VERSION,
   ACTION_LOCK_MESSAGE,
   CANONICAL_RCC_ROOT,

@@ -394,6 +394,111 @@ let feed = structuredClone(green);
   );
 }
 
+// Cards / voice handoff gates (2026-09-21)
+{
+  const {
+    mapOpportunityLane,
+    buildActionGuidance,
+    buildExecutiveReadout,
+    LANES,
+  } = await import(js('executive-readout.js'));
+  const {
+    filterActiveQueue,
+    applyQueueDecision,
+    QUEUE_DECISIONS,
+    isRemovedFromActiveQueue,
+    prepareConservativeReplyDraft,
+  } = await import(js('record-decisions.js'));
+  const { interpretAssistantCommand } = await import(js('tgt-assistant.js'));
+
+  const coi = green.opportunities.find((o) => /optus/i.test(o.company || ''));
+  const cisco = green.opportunities.find((o) => /cisco/i.test(o.company || ''));
+  check(
+    'LANE1',
+    mapOpportunityLane(coi) === LANES.CONTRACTORS_FIELD,
+    `optus lane=${mapOpportunityLane(coi)}`,
+  );
+  check(
+    'LANE2',
+    mapOpportunityLane(cisco) === LANES.NFR_SOFTWARE_AI,
+    `cisco lane=${mapOpportunityLane(cisco)}`,
+  );
+
+  const gCisco = buildActionGuidance(cisco);
+  check(
+    'GUIDE1',
+    gCisco.hardHold === true &&
+      /HARD HOLD/i.test(gCisco.why) &&
+      /Goal|What happened|Your next move|Why/.test(
+        ['Goal', 'What happened', 'Your next move', 'Why'].join(''),
+      ) &&
+      !!gCisco.goal &&
+      !!gCisco.whatHappened &&
+      !!gCisco.yourNextMove &&
+      !!gCisco.why,
+    'cisco hard-hold guidance fields',
+  );
+  const gCoi = buildActionGuidance(coi);
+  check('GUIDE2', /COI|insurance/i.test(gCoi.goal + gCoi.why), 'COI guidance');
+
+  const readout = buildExecutiveReadout(green.opportunities);
+  check(
+    'EXEC1',
+    readout.length === 4 &&
+      readout[0].priority === 'P0' &&
+      /COI/i.test(readout[0].title) &&
+      readout[1].hardHold === true &&
+      /HARD HOLD/i.test(readout[1].title + readout[1].body),
+    'executive readout priorities + hard hold',
+  );
+
+  let sample = structuredClone(cisco);
+  const keep = applyQueueDecision(sample, QUEUE_DECISIONS.KEEP_ACTIVE);
+  check('DEC1', keep.ok && keep.opp.queue_state === 'active', 'Keep Active');
+  const pass = applyQueueDecision(sample, QUEUE_DECISIONS.PASS_NOT_FIT);
+  check('DEC2', pass.ok && pass.opp.status === 'PASS', 'Pass / Not a Fit');
+  const save = applyQueueDecision(sample, QUEUE_DECISIONS.SAVE_RECORD);
+  check('DEC3', save.ok && !!save.opp.record_saved_at, 'Save Record');
+  const rem = applyQueueDecision(sample, QUEUE_DECISIONS.REMOVE_FROM_QUEUE);
+  check(
+    'DEC4',
+    rem.ok &&
+      isRemovedFromActiveQueue(rem.opp) &&
+      rem.opp.source === sample.source &&
+      Array.isArray(rem.opp.decision_audit) &&
+      rem.opp.decision_audit.at(-1).evidence_retained === true,
+    'soft-remove retains evidence',
+  );
+  const mixed = [...green.opportunities, rem.opp];
+  const active = filterActiveQueue(mixed);
+  check(
+    'ARCH1',
+    active.length === green.opportunities.length &&
+      !active.some((o) => isRemovedFromActiveQueue(o)),
+    `active=${active.length}`,
+  );
+
+  const draft = prepareConservativeReplyDraft(cisco, gCisco);
+  check(
+    'DRAFT1',
+    draft.canSendLive === false && /DRAFT|not sent|HARD HOLD/i.test(draft.body + draft.warning),
+    'draft-only helper',
+  );
+
+  const asst = interpretAssistantCommand('draft reply for Cisco', {
+    opportunities: green.opportunities,
+  });
+  check('ASST1', asst.ok && asst.draft && asst.draft.canSendLive === false, asst.reply);
+  const asst2 = interpretAssistantCommand('show incoming', {
+    opportunities: green.opportunities,
+  });
+  check(
+    'ASST2',
+    asst2.ok && asst2.actions.some((a) => a.type === 'set_filter' && a.filter === 'incoming'),
+    asst2.reply,
+  );
+}
+
 const failed = results.filter((r) => !r.ok);
 console.log('\n=== SUMMARY ===');
 console.log(`passed=${results.length - failed.length} failed=${failed.length} total=${results.length}`);

@@ -123,16 +123,10 @@ function persistAck(opp) {
  * Merge durable ack state from localStorage into feed opportunities (refresh survival).
  */
 export function mergePersistedActivity(feed) {
-  if (!feed || typeof feed !== 'object') return feed;
-  const listKey = Array.isArray(feed.opportunities)
-    ? 'opportunities'
-    : Array.isArray(feed.records)
-      ? 'records'
-      : null;
-  if (!listKey) return feed;
+  if (!feed || !Array.isArray(feed.opportunities)) return feed;
   const store = loadStore();
   if (!Object.keys(store).length) return feed;
-  const opportunities = feed[listKey].map((opp) => {
+  const opportunities = feed.opportunities.map((opp) => {
     const key = activityKey(opp);
     const saved = store[key];
     if (!saved) return opp;
@@ -152,7 +146,7 @@ export function mergePersistedActivity(feed) {
           : saved.new_activity ?? opp.new_activity,
     };
   });
-  return { ...feed, [listKey]: opportunities };
+  return { ...feed, opportunities };
 }
 
 export function countUnreadActivity(opportunities) {
