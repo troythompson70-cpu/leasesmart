@@ -385,12 +385,30 @@ let feed = structuredClone(green);
 // Dark + light mode CSS contrast rules
 {
   const css = readFileSync(join(RCC, 'css', 'rcc.css'), 'utf8');
+  const html = readFileSync(join(RCC, 'index.html'), 'utf8');
   check(
     'THEME',
     css.includes('prefers-color-scheme: light') &&
       css.includes('--rcc-text') &&
       css.includes('.rcc-checklist-item'),
     'light+dark contrast rules',
+  );
+  check(
+    'THEME_FIXTURE_SELECT',
+    css.includes('.rcc-fixture-bar select') &&
+      css.includes('background: var(--rcc-surface-2)') &&
+      css.includes('.rcc-assistant-out') &&
+      css.includes('color: var(--rcc-text)') &&
+      css.includes('.rcc-exec-main p.rcc-hard-hold-flag') &&
+      !/rcc-fixture-bar select\s*\{[^}]*background:\s*#0f1620/s.test(css),
+    'fixture select + assistant use theme tokens (not dark-only ink)',
+  );
+  check(
+    'THEME_DEV_TOOLS',
+    html.includes('rcc-dev-tools') &&
+      html.includes('Fixtures &amp; demo controls') &&
+      css.includes('.rcc-dev-tools'),
+    'fixtures/demo collapsed behind details',
   );
 }
 
