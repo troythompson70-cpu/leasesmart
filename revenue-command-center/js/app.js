@@ -1,5 +1,5 @@
 import { HEALTH, ACTION_LOCK_MESSAGE, SCHEMA_VERSION } from './constants.js';
-import { loadFeedFromUrl, getOpportunities } from './feed-loader.js';
+import { loadFeedFromUrl, loadLiveDashboardFeed, getOpportunities } from './feed-loader.js';
 import { evaluateSyncHealth, formatMetric } from './sync-health.js';
 import { sortOpportunities, selectOwnerActionPanel } from './sorting.js';
 import { findExistingOpportunity } from './dedupe.js';
@@ -28,7 +28,10 @@ import {
   countUnreadActivity,
   isUnreadActivity,
   mergePersistedActivity,
+  resetIncomingBuffer,
+  stabilizeIncomingList,
 } from './new-activity.js';
+import { loadFeedCache, loadUiState, saveFeedCache, saveUiState } from './ui-persist.js';
 import {
   acknowledgeNewReply,
   countNewReplies,
@@ -92,6 +95,26 @@ const state = {
 
 function $(id) {
   return document.getElementById(id);
+}
+
+function persistView() {
+  saveUiState({
+    filter: state.filter,
+    openOppId: state.openOppId,
+    fixtureKey: state.fixtureKey,
+  });
+  if (state.feed) saveFeedCache(state.feed, state.fixtureKey);
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function restoreView() {
+  const ui = loadUiState();
+  state.filter = ui.filter;
+  state.openOppId = ui.openOppId;
+  if (ui.fixtureKey) state.fixtureKey = ui.fixtureKey;
 }
 
 function toast(message, fail = false) {
@@ -165,10 +188,10 @@ function renderOwnerPanel() {
 
 function filteredOpportunities() {
   const raw = filterActiveQueue(getOpportunities(state.feed));
-  const opps = sortOpportunities(raw);
   if (state.filter === 'incoming') {
-    return opps.filter((o) => hasIncomingAttention(o));
+    return stabilizeIncomingList(raw);
   }
+  const opps = sortOpportunities(raw);
   if (state.filter === 'new-activity') {
     return opps.filter((o) => isUnreadActivity(o));
   }
@@ -673,9 +696,53 @@ function recompute(runtime = {}) {
   renderChecklist();
   renderAuditDrawer();
   if (state.openOppId) openDetail(state.openOppId);
+  persistView();
+}
+
+function applyLoadedFeed(feed, fixtureKey, loadError) {
+  state.fixtureKey = fixtureKey;
+  state.feed = feed ? mergePersistedNewReplies(mergePersistedActivity(feed)) : null;
+  state.loadError = loadError;
+  recompute();
+}
+
+/**
+ * Prefer live SharePoint dashboard feed via local Graph proxy.
+ * Race allows fixture fallback when the proxy is slow/unreachable.
+ * Does not invent GREEN when live feed is missing.
+ */
+async function loadLiveOrFixture(key) {
+  const liveUrl =
+    typeof window !== 'undefined' && window.RCC_DASHBOARD_FEED_URL
+      ? window.RCC_DASHBOARD_FEED_URL
+      : 'http://127.0.0.1:5173/api/dashboard-feed';
+  const cached = loadFeedCache();
+  if (cached?.feed && !state.feed) {
+    applyLoadedFeed(cached.feed, cached.fixtureKey || key, null);
+  }
+
+  const liveP = loadLiveDashboardFeed(liveUrl);
+  const first = await Promise.race([
+    liveP.then((live) => ({ kind: 'live', live })),
+    delay(2500).then(() => ({ kind: 'timeout' })),
+  ]);
+
+  if (first.kind === 'live' && first.live.ok) {
+    applyLoadedFeed(first.live.feed, 'live-sharepoint', null);
+    return;
+  }
+
+  if (!state.feed) {
+    await loadFixture(key);
+  }
+
+  liveP.then((live) => {
+    if (live.ok) applyLoadedFeed(live.feed, 'live-sharepoint', null);
+  });
 }
 
 async function loadFixture(key) {
+  resetIncomingBuffer();
   state.fixtureKey = key;
   const url = FIXTURES[key];
   const loaded = await loadFeedFromUrl(url);
@@ -1054,6 +1121,9 @@ function wireEvents() {
     if (state.feed) {
       state.feed = mergePersistedNewReplies(mergePersistedActivity(state.feed));
       runOrphanReconcileNow();
+      persistView();
+    } else if (state.fixtureKey === 'live-sharepoint') {
+      loadLiveOrFixture('green');
     } else {
       loadFixture(state.fixtureKey);
     }
@@ -1218,8 +1288,13 @@ function wireEvents() {
 
 export async function boot() {
   wireEvents();
+  restoreView();
+  const fixtureSelect = $('rccFixtureSelect');
+  if (fixtureSelect && state.fixtureKey && FIXTURES[state.fixtureKey]) {
+    fixtureSelect.value = state.fixtureKey;
+  }
   // Obstructive banner stays hidden by default on mobile-first flow UI.
-  await loadFixture('green');
+  await loadLiveOrFixture(state.fixtureKey || 'green');
 }
 
 boot();
@@ -1228,6 +1303,8 @@ boot();
 window.RCC = {
   state,
   loadFixture,
+  loadLiveOrFixture,
+  loadLiveDashboardFeed,
   evaluateSyncHealth,
   findExistingOpportunity,
   saveAndVerify,
@@ -1243,6 +1320,11 @@ window.RCC = {
   countUnreadActivity,
   isUnreadActivity,
   mergePersistedActivity,
+  stabilizeIncomingList,
+  resetIncomingBuffer,
+  sortOpportunities,
+  loadUiState,
+  saveUiState,
   reconcileSoftwareChecklist,
   parseListSoftwareBody,
   clearIncomingAttention,
@@ -1250,6 +1332,11 @@ window.RCC = {
   buildEmailThreadLink,
   leadIdOf,
   auditMalformedPaths,
+  buildExecutiveReadout,
+  filterActiveQueue,
+  applyQueueDecision,
+  prepareConservativeReplyDraft,
+  interpretAssistantCommand,
   SCHEMA_VERSION,
   ACTION_LOCK_MESSAGE,
   CANONICAL_RCC_ROOT,
