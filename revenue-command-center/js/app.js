@@ -114,7 +114,11 @@ function restoreView() {
   const ui = loadUiState();
   state.filter = ui.filter;
   state.openOppId = ui.openOppId;
-  if (ui.fixtureKey) state.fixtureKey = ui.fixtureKey;
+  if (ui.fixtureKey && FIXTURES[ui.fixtureKey]) {
+    state.fixtureKey = ui.fixtureKey;
+  } else {
+    state.fixtureKey = 'green';
+  }
 }
 
 function toast(message, fail = false) {
@@ -751,7 +755,8 @@ async function loadLiveOrFixture(key) {
   }
 
   if (!state.feed) {
-    await loadFixture(key);
+    const fallbackKey = FIXTURES[key] ? key : 'green';
+    await loadFixture(fallbackKey);
   }
 
   liveP.then((live) => {
@@ -761,8 +766,9 @@ async function loadLiveOrFixture(key) {
 
 async function loadFixture(key) {
   resetIncomingBuffer();
-  state.fixtureKey = key;
-  const url = FIXTURES[key];
+  const fixtureKey = FIXTURES[key] ? key : 'green';
+  state.fixtureKey = fixtureKey;
+  const url = FIXTURES[fixtureKey];
   const loaded = await loadFeedFromUrl(url);
   if (!loaded.ok) {
     state.feed = null;
@@ -770,6 +776,10 @@ async function loadFixture(key) {
   } else {
     state.feed = mergePersistedNewReplies(mergePersistedActivity(loaded.feed));
     state.loadError = null;
+  }
+  const fixtureSelect = $('rccFixtureSelect');
+  if (fixtureSelect && FIXTURES[fixtureKey]) {
+    fixtureSelect.value = fixtureKey;
   }
   recompute();
 }
