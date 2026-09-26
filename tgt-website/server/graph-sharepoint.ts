@@ -184,7 +184,7 @@ async function graphAccessToken(): Promise<string> {
         } else {
           body.set(
             'scope',
-            'https://graph.microsoft.com/Files.Read.All https://graph.microsoft.com/Sites.Read.All offline_access',
+            'https://graph.microsoft.com/Files.ReadWrite.All https://graph.microsoft.com/Sites.ReadWrite.All offline_access',
           )
         }
       } else {
@@ -227,7 +227,7 @@ async function graphAccessToken(): Promise<string> {
   }
 }
 
-async function graphFetch(pathname: string, init: RequestInit = {}): Promise<Response> {
+export async function graphFetch(pathname: string, init: RequestInit = {}): Promise<Response> {
   const headers = new Headers(init.headers)
   headers.set('Authorization', `Bearer ${await graphAccessToken()}`)
   if (init.body && !headers.has('Content-Type')) {
