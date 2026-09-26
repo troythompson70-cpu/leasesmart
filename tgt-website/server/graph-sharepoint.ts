@@ -54,7 +54,7 @@ function envValue(name: GraphEnvName): string {
   return value
 }
 
-function applyDotEnvFile(filePath: string): void {
+function applyDotEnvFile(filePath: string, override = false): void {
   if (!existsSync(filePath)) return
   const text = readFileSync(filePath, 'utf8')
   for (const line of text.split(/\r?\n/)) {
@@ -65,7 +65,7 @@ function applyDotEnvFile(filePath: string): void {
     const key = trimmed.slice(0, eq).trim()
     const raw = trimmed.slice(eq + 1).trim()
     const value = raw.replace(/^['"]|['"]$/g, '')
-    if (!process.env[key]) process.env[key] = value
+    if (override || !process.env[key]) process.env[key] = value
   }
 }
 
@@ -77,7 +77,7 @@ export function loadGraphEnvFromDotEnv(): void {
   const repoRoot = path.resolve(websiteRoot, '..')
   applyDotEnvFile(path.join(repoRoot, '.env'))
   applyDotEnvFile(path.join(websiteRoot, '.env'))
-  applyDotEnvFile(path.join(websiteRoot, '.env.local'))
+  applyDotEnvFile(path.join(websiteRoot, '.env.local'), true)
 }
 
 export function listPresentGraphEnvNames(): GraphEnvName[] {
@@ -174,10 +174,11 @@ async function graphAccessToken(): Promise<string> {
       }
       const body = new URLSearchParams()
       body.set('client_id', clientId)
+      const deviceCodeClient = clientId === '14d82eec-204b-4c2f-b7e8-296a70dab67e'
       if (kind === 'refresh_token') {
         body.set('grant_type', 'refresh_token')
         body.set('refresh_token', refreshToken)
-        if (clientSecret) {
+        if (clientSecret && !deviceCodeClient) {
           body.set('client_secret', clientSecret)
           body.set('scope', 'https://graph.microsoft.com/.default')
         } else {
@@ -204,9 +205,14 @@ async function graphAccessToken(): Promise<string> {
         access_token?: string
         expires_in?: number
         error?: string
+        error_description?: string
       }
       if (!tokenRes.ok || !json.access_token) {
-        throw new Error(`Graph token request failed (${tokenRes.status}).`)
+        const aadsts = String(json.error_description || '').match(/AADSTS\d+/)
+        const detail = [json.error, aadsts?.[0]].filter(Boolean).join(' ')
+        throw new Error(
+          `Graph token request failed (${tokenRes.status})${detail ? `: ${detail}` : ''}.`,
+        )
       }
       tokenCache = {
         value: json.access_token,
