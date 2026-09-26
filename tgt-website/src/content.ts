@@ -19,6 +19,8 @@ export const categoryStrip = [
 ] as const
 
 export const aiLaptopDeal = {
+  sku: 'ai-laptop-280',
+  priceCents: 28000,
   bar: 'AI-READY TOUCHSCREEN LAPTOPS — $280 • LIMITED QUANTITY',
   title: 'AI-READY LAPTOP DEAL',
   product: 'AI-READY TOUCHSCREEN LAPTOP — $280',
@@ -35,6 +37,14 @@ export const aiLaptopDeal = {
   cta: 'I WANT THE $280 LAPTOP',
   inquiryPrefill: "I'm interested in the $280 AI-Ready Laptop.",
 } as const
+
+export const catalog = [
+  {
+    sku: aiLaptopDeal.sku,
+    name: 'AI-Ready Touchscreen Laptop',
+    priceCents: aiLaptopDeal.priceCents,
+  },
+] as const
 
 /** Approved Ninth Edition copy. Intake flag is boolean `ninthEdition: true`. */
 export const ninthEdition =

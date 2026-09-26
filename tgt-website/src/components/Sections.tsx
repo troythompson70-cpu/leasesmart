@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { aiLaptopDeal, videos, remoteHelpItems, mspServices, categoryStrip, youtubeChannelUrl } from '../content'
+import { addToCart } from '../lib/cart-store'
 import { track } from '../lib/track'
 import { TipsSignupForm } from './TipsSignupForm'
 
@@ -39,6 +40,17 @@ export function LaptopPromo({ onInquire }: { onInquire: () => void }) {
             data-cta="laptop-promo"
           >
             {aiLaptopDeal.cta}
+          </button>
+          <button
+            type="button"
+            className="btn-primary mt-8 ml-3"
+            onClick={() => {
+              addToCart(aiLaptopDeal.sku)
+              window.location.assign('/cart')
+            }}
+            data-cta="laptop-add-cart"
+          >
+            Add to cart
           </button>
         </div>
         <div className="overflow-hidden rounded-2xl border border-slate-line bg-navy-900 shadow-[0_18px_50px_-24px_rgba(6,16,31,0.45)]">

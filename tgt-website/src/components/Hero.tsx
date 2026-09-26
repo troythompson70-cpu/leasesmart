@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { categoryStrip, aiLaptopDeal } from '../content'
 import { scrollToHash } from '../lib/scroll-to'
 import { track } from '../lib/track'
+import { CartCount } from './Cart'
 import { TipsSignupForm } from './TipsSignupForm'
 
 type HeaderProps = {
@@ -91,6 +92,7 @@ export function SiteHeader({ onLaptopClick }: HeaderProps) {
         </nav>
 
         <div className="hidden items-center gap-3 xl:flex">
+          <CartCount />
           <a href="#signup" className="btn-primary !py-2.5" data-cta="nav-signup">
             SIGN UP FREE
           </a>
