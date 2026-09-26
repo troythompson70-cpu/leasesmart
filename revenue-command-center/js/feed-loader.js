@@ -162,9 +162,31 @@ export async function loadFeedFromUrl(url) {
 /**
  * Newest First on lead arrays. Closed items stay last via sortOpportunities.
  */
+function aliasSender(row) {
+  if (!row || typeof row !== 'object') return row;
+  const next = { ...row };
+  const shortName = next.latest_transmission_sender_or_so;
+  const longName = next.latest_transmission_sender_or_source;
+  if ((longName === undefined || longName === null || longName === '') && shortName) {
+    next.latest_transmission_sender_or_source = shortName;
+  }
+  if ((shortName === undefined || shortName === null || shortName === '') && longName) {
+    next.latest_transmission_sender_or_so = longName;
+  }
+  return next;
+}
+
+function aliasSenderLists(feed) {
+  const next = { ...feed };
+  for (const key of ['opportunities', 'records', 'pipeline', 'pipeline_records']) {
+    if (Array.isArray(next[key])) next[key] = next[key].map(aliasSender);
+  }
+  return next;
+}
+
 export function applyNewestFirst(feed) {
   if (!feed || typeof feed !== 'object') return feed;
-  const next = { ...feed };
+  const next = aliasSenderLists(feed);
   if (Array.isArray(next.opportunities)) next.opportunities = sortOpportunities(next.opportunities);
   if (Array.isArray(next.records)) next.records = sortOpportunities(next.records);
   return next;

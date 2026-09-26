@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="./css/rcc.css"/>
 </head>
 <body>
+<div id="rccConnectionBanner" class="rcc-connection-banner" hidden></div>
 <!-- Gate note is compact + dismissible so it does not obstruct mobile cards -->
 <div class="rcc-gate" id="rccGate" hidden>
   INTERNAL — SharePoint TEAM TGT MSP SoT. Local fixtures only. No second database.
@@ -39,27 +40,6 @@
     <p>Schema 2.2 · SoT: TEAM TGT MSP / Shared Documents/General/TGT REVENUE COMMAND CENTER</p>
   </header>
 
-  <section class="rcc-exec-panel" aria-label="Executive Readout">
-    <h2 class="rcc-section-title">Executive Readout</h2>
-    <div id="rccExecutiveReadout" class="rcc-exec-list"></div>
-  </section>
-
-  <section class="rcc-lane-panel" aria-label="Lane banners">
-    <div id="rccLaneBanners" class="rcc-lane-row"></div>
-  </section>
-
-  <section class="rcc-assistant" aria-label="TGT assistant">
-    <h2 class="rcc-section-title">TGT assistant (typed / voice)</h2>
-    <p class="rcc-assistant-note">Refresh, filter, open records, prepare drafts, prepare Keep/Pass/Save/soft-remove. Live email send is disabled until Graph write auth exists.</p>
-    <div class="rcc-assistant-row">
-      <input id="rccAssistantInput" class="rcc-assistant-input" type="text" placeholder="e.g. open Optus · draft reply for Cisco · remove Example Passed" autocomplete="off"/>
-      <button type="button" class="rcc-btn primary" id="rccAssistantRun">Run</button>
-      <button type="button" class="rcc-btn" id="rccAssistantVoice">Voice</button>
-    </div>
-    <div id="rccAssistantOut" class="rcc-assistant-out" role="status"></div>
-    <div id="rccDraftPanel" class="rcc-draft-panel" hidden></div>
-  </section>
-
   <div class="rcc-fixture-bar">
     <label for="rccFixtureSelect">Local feed fixture (acceptance / offline) — not a second SoT</label>
     <select id="rccFixtureSelect">
@@ -69,7 +49,6 @@
       <option value="red-failed-write">RED — failed write</option>
       <option value="red-duplicate">RED — duplicate opportunities</option>
       <option value="red-orphan-email">RED — orphan email</option>
-      <option value="jared-live-ingested">LIVE — Jared Cisco Duo ingested</option>
     </select>
   </div>
 
@@ -143,6 +122,17 @@
 
 <div id="rccToast" class="rcc-toast" role="status"></div>
 
-<script type="module" src="./js/app.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "/js/app.js": "/command-center/js/app.js?v=17",
+    "/js/feed-loader.js": "/command-center/js/feed-loader.js?v=17",
+    "/js/sorting.js": "/command-center/js/sorting.js?v=17",
+    "/js/new-activity.js": "/command-center/js/new-activity.js?v=17",
+    "/js/ui-persist.js": "/command-center/js/ui-persist.js?v=17"
+  }
+}
+</script>
+<script type="module" src="./js/app.js?v=17"></script>
 </body>
 </html>

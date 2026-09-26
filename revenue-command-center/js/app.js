@@ -1,3 +1,4 @@
+import { bannerFromFeedAge } from './banner-age.js';
 import { HEALTH, ACTION_LOCK_MESSAGE, SCHEMA_VERSION } from './constants.js';
 import { loadFeedFromUrl, loadLiveDashboardFeed, getOpportunities } from './feed-loader.js';
 import { evaluateSyncHealth, formatMetric } from './sync-health.js';
@@ -46,21 +47,6 @@ import {
 } from './orphan-reconcile.js';
 import { enforceReportIntegrity, buildSixPmReportView } from './report-integrity.js';
 import { runMailboxBackfill, assertBackfillIdempotent } from './mailbox-backfill.js';
-import {
-  buildActionGuidance,
-  buildExecutiveReadout,
-  LANE_BANNERS,
-  LANES,
-  mapOpportunityLane,
-} from './executive-readout.js';
-import {
-  QUEUE_DECISIONS,
-  applyQueueDecision,
-  filterActiveQueue,
-  isRemovedFromActiveQueue,
-  prepareConservativeReplyDraft,
-} from './record-decisions.js';
-import { interpretAssistantCommand } from './tgt-assistant.js';
 
 const FIXTURES = {
   green: './fixtures/green.json',
@@ -69,7 +55,6 @@ const FIXTURES = {
   'red-failed-write': './fixtures/red-failed-write.json',
   'red-duplicate': './fixtures/red-duplicate.json',
   'red-orphan-email': './fixtures/red-orphan-email.json',
-  'jared-live-ingested': './fixtures/jared-live-ingested.json',
 };
 
 /** LIST SOFTWARE body excerpt (Outlook 2026-09-14) for checklist reconciliation demos. */
@@ -91,6 +76,8 @@ const state = {
   openOppId: null,
   pathAudit: [],
   lastOrphanReport: null,
+  demoMode: false,
+  liveDisconnected: false,
 };
 
 function $(id) {
@@ -114,11 +101,14 @@ function restoreView() {
   const ui = loadUiState();
   state.filter = ui.filter;
   state.openOppId = ui.openOppId;
-  if (ui.fixtureKey && FIXTURES[ui.fixtureKey]) {
-    state.fixtureKey = ui.fixtureKey;
-  } else {
-    state.fixtureKey = 'green';
+  if (ui.fixtureKey) state.fixtureKey = ui.fixtureKey;
+}
+
+function assignOpportunities(feed, opps) {
+  if (Array.isArray(feed.records) && !Array.isArray(feed.opportunities)) {
+    return { ...feed, records: opps };
   }
+  return { ...feed, opportunities: opps };
 }
 
 function toast(message, fail = false) {
@@ -142,40 +132,54 @@ function setLocked(locked) {
   banner.textContent = locked ? ACTION_LOCK_MESSAGE : '';
 }
 
-function formatDashTime(value) {
-  if (value == null || value === '') return '—';
-  const raw = String(value);
-  const t = Date.parse(raw);
-  if (!Number.isFinite(t)) return raw;
-  try {
-    return new Date(t).toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return raw;
+function paintConnectionBanner() {
+  const el = $('rccConnectionBanner');
+  if (!el) return;
+  if (state.demoMode) {
+    el.hidden = false;
+    el.className = 'rcc-connection-banner on demo';
+    el.textContent = 'DEMO DATA — NOT REAL';
+    return;
   }
+  if (state.liveDisconnected) {
+    el.hidden = false;
+    el.className = 'rcc-connection-banner on bad';
+    const reason = state.loadError ? ` ${state.loadError}` : '';
+    el.textContent = `LIVE DATA NOT CONNECTED.${reason}`;
+    return;
+  }
+  el.hidden = true;
+  el.className = 'rcc-connection-banner';
+  el.textContent = '';
 }
 
 function renderHealth() {
   const h = state.health;
   const bar = $('rccHealthBar');
   if (!h) return;
-  bar.className = `rcc-health ${h.state}`;
-  $('rccHealthTitle').textContent = `${h.state} — ${h.label}`;
-  $('mLastVerified').textContent = formatDashTime(h.lastVerifiedAt);
-  $('mFeedUpdated').textContent = formatDashTime(h.feedUpdatedAt);
-  $('mOrphanEmail').textContent = formatMetric(h.metrics?.orphan_email_count);
+  let bannerState = h.state;
+  let title = `${h.state} — ${h.label}`;
+  if (state.demoMode) {
+    bannerState = 'YELLOW';
+    title = 'DEMO DATA — NOT REAL';
+  } else if (state.feed && !state.liveDisconnected) {
+    const age = bannerFromFeedAge(state.feed);
+    bannerState = age.state;
+    title = age.title;
+  }
+  bar.className = `rcc-health ${bannerState}`;
+  $('rccHealthTitle').textContent = title;
+  paintConnectionBanner();
+  $('mLastVerified').textContent = h.lastVerifiedAt || '—';
+  $('mFeedUpdated').textContent = h.feedUpdatedAt || '—';
+  $('mOrphanEmail').textContent = formatMetric(h.metrics.orphan_email_count);
   $('mOrphanRecord').textContent = formatMetric(
-    h.metrics?.orphan_discovery_count ?? h.metrics?.orphan_record_count,
+    h.metrics.orphan_discovery_count ?? h.metrics.orphan_record_count,
   );
-  $('mDuplicate').textContent = formatMetric(h.metrics?.duplicate_count);
-  $('mInvalidRoute').textContent = formatMetric(h.metrics?.invalid_route_count);
-  $('mFailedWrite').textContent = formatMetric(h.metrics?.failed_write_count);
-  $('mStale').textContent = formatMetric(h.metrics?.stale_record_count);
+  $('mDuplicate').textContent = formatMetric(h.metrics.duplicate_count);
+  $('mInvalidRoute').textContent = formatMetric(h.metrics.invalid_route_count);
+  $('mFailedWrite').textContent = formatMetric(h.metrics.failed_write_count);
+  $('mStale').textContent = formatMetric(h.metrics.stale_record_count);
   const warn = $('rccMailboxWarn');
   if (warn) {
     const show = !h.mailboxCoverageVerified;
@@ -209,7 +213,7 @@ function renderOwnerPanel() {
 }
 
 function filteredOpportunities() {
-  const raw = filterActiveQueue(getOpportunities(state.feed));
+  const raw = getOpportunities(state.feed);
   if (state.filter === 'incoming') {
     return stabilizeIncomingList(raw);
   }
@@ -218,7 +222,6 @@ function filteredOpportunities() {
     return opps.filter((o) => isUnreadActivity(o));
   }
   if (state.filter === 'new-replies') {
-    // Cards for opportunities linked to unacknowledged replies; also render reply cards separately.
     const ids = new Set(
       listUnacknowledgedReplies(state.feed).map((r) => String(r.opportunity_id || '')),
     );
@@ -227,82 +230,8 @@ function filteredOpportunities() {
   return opps;
 }
 
-function renderExecutiveReadout() {
-  const host = $('rccExecutiveReadout');
-  if (!host) return;
-  const rows = buildExecutiveReadout(filterActiveQueue(getOpportunities(state.feed)));
-  host.innerHTML = rows
-    .map(
-      (r) => `<article class="rcc-exec-item ${r.hardHold ? 'hard-hold' : ''}" data-exec-id="${esc(r.id)}">
-      <div class="rcc-exec-priority">${esc(r.priority)}</div>
-      <div class="rcc-exec-main">
-        <h3>${esc(r.title)}</h3>
-        <p>${esc(r.body)}</p>
-        <p class="rcc-exec-next"><strong>Your next move:</strong> ${esc(r.nextMove)}</p>
-        ${
-          r.hardHold
-            ? '<p class="rcc-hard-hold-flag">HARD HOLD — read-only wait · no live send from RCC</p>'
-            : ''
-        }
-        ${
-          r.matchedOpportunityId
-            ? `<button type="button" class="rcc-btn" data-action="open-card" data-id="${esc(r.matchedOpportunityId)}">Open matched record</button>`
-            : ''
-        }
-      </div>
-    </article>`,
-    )
-    .join('');
-}
-
-function renderLaneBanners() {
-  const host = $('rccLaneBanners');
-  if (!host) return;
-  const active = filterActiveQueue(getOpportunities(state.feed));
-  const counts = {
-    [LANES.REVENUE]: 0,
-    [LANES.NFR_SOFTWARE_AI]: 0,
-    [LANES.CONTRACTORS_FIELD]: 0,
-  };
-  active.forEach((o) => {
-    counts[mapOpportunityLane(o)] += 1;
-  });
-  host.innerHTML = Object.values(LANE_BANNERS)
-    .map(
-      (b) => `<div class="rcc-lane-banner lane-${esc(b.id)}">
-      <strong>${esc(b.title)}</strong>
-      <span>${esc(b.subtitle)}</span>
-      <em>${counts[b.id] || 0} active</em>
-    </div>`,
-    )
-    .join('');
-}
-
-function decisionButtonsHtml(id) {
-  return `<div class="rcc-decision-row" role="group" aria-label="Queue decisions">
-    <button type="button" class="rcc-btn" data-lockable="1" data-action="keep-active" data-id="${esc(id)}">Keep Active</button>
-    <button type="button" class="rcc-btn" data-lockable="1" data-action="pass-not-fit" data-id="${esc(id)}">Pass / Not a Fit</button>
-    <button type="button" class="rcc-btn" data-lockable="1" data-action="save-record" data-id="${esc(id)}">Save Record</button>
-    <button type="button" class="rcc-btn danger" data-lockable="1" data-action="remove-queue" data-id="${esc(id)}">Delete / Remove from Queue</button>
-  </div>`;
-}
-
-function guidanceHtml(guidance) {
-  return `<div class="rcc-guidance">
-    <div><span class="rcc-guide-label">Goal</span><p>${esc(guidance.goal)}</p></div>
-    <div><span class="rcc-guide-label">What happened</span><p>${esc(guidance.whatHappened)}</p></div>
-    <div><span class="rcc-guide-label">Your next move</span><p>${esc(guidance.yourNextMove)}</p></div>
-    <div><span class="rcc-guide-label">Why</span><p>${esc(guidance.why)}</p></div>
-    ${
-      guidance.hardHold
-        ? '<p class="rcc-hard-hold-flag">HARD HOLD / read-only wait — no live email send</p>'
-        : ''
-    }
-  </div>`;
-}
-
 function renderFilterTabs() {
-  const all = filterActiveQueue(getOpportunities(state.feed));
+  const all = getOpportunities(state.feed);
   const incomingCount = all.filter((o) => hasIncomingAttention(o)).length;
   const newActivityCount = countUnreadActivity(all);
   const newRepliesCount = countNewReplies(state.feed);
@@ -329,7 +258,7 @@ function renderFilterTabs() {
   } else if (state.filter === 'new-replies') {
     $('rccCardsTitle').textContent = `NEW REPLIES (${newRepliesCount})`;
   } else {
-    $('rccCardsTitle').textContent = `Active opportunities (${all.length})`;
+    $('rccCardsTitle').textContent = `Opportunities (${all.length})`;
   }
 }
 
@@ -439,10 +368,8 @@ function renderNewReplyCards() {
 
 function renderCards() {
   const host = $('rccCards');
-  const all = filterActiveQueue(getOpportunities(state.feed));
+  const all = getOpportunities(state.feed);
   renderFilterTabs();
-  renderExecutiveReadout();
-  renderLaneBanners();
 
   if (state.filter === 'new-replies') {
     const replyHtml = renderNewReplyCards();
@@ -459,13 +386,12 @@ function renderCards() {
         ? '<p class="rcc-section-title">No incoming attention items.</p>'
         : state.filter === 'new-activity'
           ? '<p class="rcc-section-title">No unacknowledged new activity.</p>'
-          : '<p class="rcc-section-title">No active opportunities in queue.</p>';
+          : '<p class="rcc-section-title">No opportunities in feed.</p>';
     return;
   }
   host.innerHTML = opps
     .map((opp) => {
       const vm = cardViewModel(opp, all);
-      const guidance = buildActionGuidance(opp);
       const id = opp.id || opp.opportunity_id;
       const badges = vm.badges
         .map((b) => `<span class="rcc-badge ${b.type}">${esc(b.label)}</span>`)
@@ -474,12 +400,8 @@ function renderCards() {
         ? '<span class="rcc-badge UNREAD">UNREAD</span>'
         : '';
       const email = vm.emailLink;
-      const openEmailLabel = guidance.hardHold
-        ? 'Open verified thread'
-        : 'Open Email';
-      const lane = guidance.laneBanner;
-      return `<article class="rcc-card ${vm.unread ? 'unread' : ''} lane-${esc(guidance.lane)}" data-opp-id="${esc(id)}">
-        <div class="rcc-card-lane">${esc(lane.title)}</div>
+      const openEmailLabel = 'Open Email';
+      return `<article class="rcc-card ${vm.unread ? 'unread' : ''}" data-opp-id="${esc(id)}">
         <div class="rcc-lead-id">Opportunity ID ${esc(vm.opportunityId || vm.leadId)}</div>
         <h3>${esc(vm.company || 'Opportunity')}</h3>
         <div class="rcc-card-opp">${esc(vm.opportunity || '—')}</div>
@@ -489,21 +411,24 @@ function renderCards() {
           <span class="rcc-owner-lg ${vm.ownerYesNo === 'Yes' ? 'yes' : ''}">OWNER ACTION: ${esc(vm.ownerYesNo)}</span>
           ${unreadBadge}${badges}<span class="rcc-badge OK">Sync: ${esc(vm.sync)}</span>
         </div>
-        ${guidanceHtml(guidance)}
         <dl class="rcc-card-meta">
           <div><dt>Owner</dt><dd>${esc(vm.owner)}</dd></div>
           <div><dt>Source</dt><dd>${esc(vm.source || '—')}</dd></div>
           <div><dt>Domain</dt><dd>${esc(vm.domain || '—')}</dd></div>
           <div><dt>Last activity</dt><dd>${esc(vm.lastActivity || '—')}</dd></div>
+          <div><dt>Next action</dt><dd>${esc(vm.nextAction || '—')}</dd></div>
           <div><dt>Follow-up</dt><dd>${esc(vm.followUp || '—')}</dd></div>
+          <div><dt>Ack</dt><dd>${esc(vm.acknowledgement)}</dd></div>
+          <div><dt>Classification</dt><dd>${esc(vm.classification)}</dd></div>
         </dl>
         ${recentEmailHtml(vm.recentEmail)}
         ${conversationSnapshotHtml(vm.conversationSnapshot)}
         ${vm.timing ? `<div class="rcc-timing">${esc(vm.timing)}</div>` : ''}
         <div class="rcc-card-actions rcc-action-grid">
-          <button type="button" class="rcc-btn primary" data-action="open-card" data-id="${esc(id)}">${esc(guidance.actionLabels.primary)}</button>
-          <button type="button" class="rcc-btn" data-action="contact" data-id="${esc(id)}">${esc(guidance.actionLabels.contact)}</button>
-          <button type="button" class="rcc-btn" data-action="draft-reply" data-id="${esc(id)}">${esc(guidance.actionLabels.followup)}</button>
+          <button type="button" class="rcc-btn primary" data-action="open-card" data-id="${esc(id)}">Open</button>
+          <button type="button" class="rcc-btn" data-action="contact" data-id="${esc(id)}">Contact</button>
+          <button type="button" class="rcc-btn" data-action="ready" data-id="${esc(id)}">Ready</button>
+          <button type="button" class="rcc-btn" data-action="tier" data-id="${esc(id)}">Tier</button>
           ${
             vm.incoming
               ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
@@ -511,7 +436,7 @@ function renderCards() {
           }
           ${
             email
-              ? `<a class="rcc-btn" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer" data-confirm-outlook="1">${openEmailLabel}</a>`
+              ? `<a class="rcc-btn" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer">${openEmailLabel}</a>`
               : `<button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">${openEmailLabel}</button>`
           }
           ${
@@ -520,7 +445,6 @@ function renderCards() {
               : ''
           }
         </div>
-        ${decisionButtonsHtml(id)}
       </article>`;
     })
     .join('');
@@ -618,7 +542,7 @@ function patchOpp(id, patcher) {
     if (String(o.id || o.opportunity_id) !== String(id)) return o;
     return patcher(o);
   });
-  state.feed = { ...state.feed, opportunities: opps };
+  state.feed = assignOpportunities(state.feed, opps);
   return findOpp(id);
 }
 
@@ -626,41 +550,55 @@ function openDetail(id) {
   const opp = findOpp(id);
   if (!opp) return;
   state.openOppId = id;
-  const vm = cardViewModel(opp, filterActiveQueue(getOpportunities(state.feed)));
-  const guidance = buildActionGuidance(opp);
+  persistView();
+  const vm = cardViewModel(opp, getOpportunities(state.feed));
   $('rccDetailLeadId').textContent = `Opportunity ID ${vm.opportunityId || vm.leadId}`;
   $('rccDetailTitle').textContent = opp.company || opp.vendor || 'Opportunity';
   $('rccDetailNotes').textContent = vm.notes || 'No notes yet.';
   const path = formatResolvedPath(resolveRecordPath(opp));
-  const plan = (guidance.nextActionPlan || [])
-    .map((step, i) => `<li>${esc(`${i + 1}. ${step}`)}</li>`)
-    .join('');
   $('rccDetailBody').innerHTML = `
-    <section class="rcc-next-plan" aria-label="Next-action plan">
-      <h3>Next-action plan</h3>
-      <ol>${plan}</ol>
-      ${guidanceHtml(guidance)}
-    </section>
     <dl class="rcc-card-meta">
       <div><dt>Status</dt><dd>${esc(opp.status)}</dd></div>
-      <div><dt>Lane</dt><dd>${esc(guidance.laneBanner.title)}</dd></div>
       <div><dt>Tier</dt><dd>${esc(opp.tier)}</dd></div>
+      <div><dt>Ack</dt><dd>${esc(vm.acknowledgement)}</dd></div>
+      <div><dt>Classification</dt><dd>${esc(vm.classification)}</dd></div>
       <div><dt>Domain</dt><dd>${esc(vm.domain || '—')}</dd></div>
       <div><dt>SharePoint</dt><dd>${esc(path)}</dd></div>
+      <div><dt>Next action</dt><dd>${esc(sanitizeUiText(opp.next_action) || '—')}</dd></div>
       <div><dt>Source</dt><dd>${esc(sanitizeUiText(opp.source || opp.source_ref) || '—')}</dd></div>
     </dl>
     ${recentEmailHtml(vm.recentEmail || recentEmailOf(opp))}
     ${conversationSnapshotHtml(vm.conversationSnapshot || conversationSnapshotOf(opp))}
   `;
+
+  // NAVIGATION LOGIC: Professional Prev/Next
+  const allOpps = getOpportunities(state.feed);
+  const currentIndex = allOpps.findIndex(o => (o.id || o.opportunity_id) === id);
+  const prevId = currentIndex > 0 ? allOpps[currentIndex - 1].id || allOpps[currentIndex - 1].opportunity_id : null;
+  const nextId = currentIndex < allOpps.length - 1 ? allOpps[currentIndex + 1].id || allOpps[currentIndex + 1].opportunity_id : null;
+
+  const navHtml = `
+    <div class="rcc-detail-nav" style="display:flex; justify-content:space-between; margin-bottom:12px; gap:10px;">
+      <button type="button" class="rcc-btn" ${!prevId ? 'disabled' : ''} data-nav="prev" data-id="${prevId}">← Previous</button>
+      <button type="button" class="rcc-btn" ${!nextId ? 'disabled' : ''} data-nav="next" data-id="${nextId}">Next →</button>
+    </div>
+  `;
+
   const email = buildEmailThreadLink(opp);
   $('rccDetailActions').innerHTML = `
+    ${navHtml}
     <div class="rcc-action-grid">
     ${
       vm.unread
         ? `<button type="button" class="rcc-btn rcc-ack-btn" data-action="acknowledge" data-id="${esc(id)}">Acknowledge Activity</button>`
         : ''
     }
-    <button type="button" class="rcc-btn" data-action="draft-reply" data-id="${esc(id)}">${esc(guidance.actionLabels.followup)}</button>
+    <button type="button" class="rcc-btn" data-action="classify-valid" data-id="${esc(id)}">Classify VALID</button>
+    <button type="button" class="rcc-btn" data-action="classify-invalid" data-id="${esc(id)}">Classify INVALID</button>
+    <button type="button" class="rcc-btn" data-action="classify-unsure" data-id="${esc(id)}">Classify UNSURE</button>
+    <button type="button" class="rcc-btn" data-action="contact" data-id="${esc(id)}">Contact</button>
+    <button type="button" class="rcc-btn" data-action="ready" data-id="${esc(id)}">Ready</button>
+    <button type="button" class="rcc-btn" data-action="tier" data-id="${esc(id)}">Tier</button>
     ${
       vm.incoming
         ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
@@ -668,13 +606,15 @@ function openDetail(id) {
     }
     ${
       email
-        ? `<a class="rcc-btn primary" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer" data-confirm-outlook="1">${guidance.hardHold ? 'Open verified thread' : 'Open Email'}</a>`
+        ? `<a class="rcc-btn primary" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer">Open Email</a>`
         : `<button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Email</button>`
     }
     <button type="button" class="rcc-btn" data-action="open-sp" data-id="${esc(id)}">Open SharePoint Record</button>
+    <button type="button" class="rcc-btn" data-lockable="1" data-action="followup" data-id="${esc(id)}">Send Follow-up</button>
+    <button type="button" class="rcc-btn" data-lockable="1" data-action="done" data-id="${esc(id)}">Mark Done</button>
+    <button type="button" class="rcc-btn" data-lockable="1" data-action="pass" data-id="${esc(id)}">Close/Pass</button>
     <button type="button" class="rcc-btn" data-action="repair" data-id="${esc(id)}">Repair Record</button>
     </div>
-    ${decisionButtonsHtml(id)}
   `;
   $('rccDetailBackdrop').classList.add('on');
   setLocked(!!state.health?.actionsLocked);
@@ -682,6 +622,7 @@ function openDetail(id) {
 
 function closeDetail() {
   state.openOppId = null;
+  persistView();
   $('rccDetailBackdrop').classList.remove('on');
 }
 
@@ -728,47 +669,66 @@ function applyLoadedFeed(feed, fixtureKey, loadError) {
   recompute();
 }
 
-/**
- * Prefer live SharePoint dashboard feed via local Graph proxy.
- * Race allows fixture fallback when the proxy is slow/unreachable.
- * Does not invent GREEN when live feed is missing.
- */
-async function loadLiveOrFixture(key) {
-  const liveUrl =
-    typeof window !== 'undefined' && window.RCC_DASHBOARD_FEED_URL
-      ? window.RCC_DASHBOARD_FEED_URL
-      : 'http://127.0.0.1:5173/api/dashboard-feed';
-  const cached = loadFeedCache();
-  if (cached?.feed && !state.feed) {
-    applyLoadedFeed(cached.feed, cached.fixtureKey || key, null);
-  }
+function isDemoRequest() {
+  return new URLSearchParams(window.location.search).get('demo') === '1';
+}
 
-  const liveP = loadLiveDashboardFeed(liveUrl);
+function dashboardFeedUrl() {
+  if (typeof window !== 'undefined' && window.RCC_DASHBOARD_FEED_URL) {
+    return window.RCC_DASHBOARD_FEED_URL;
+  }
+  if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+    return `${window.location.origin}/api/dashboard-feed`;
+  }
+  return 'http://127.0.0.1:5173/api/dashboard-feed';
+}
+
+function showLiveDisconnected(reason) {
+  state.demoMode = false;
+  state.liveDisconnected = true;
+  state.fixtureKey = 'live-sharepoint';
+  state.feed = null;
+  state.loadError = reason || 'Dashboard Feed cannot be read';
+  recompute();
+}
+
+async function loadLiveOrFixture(key) {
+  if (isDemoRequest()) {
+    state.demoMode = true;
+    state.liveDisconnected = false;
+    await loadFixture(FIXTURES[key] ? key : 'green');
+    return;
+  }
+  state.demoMode = false;
+  const liveP = loadLiveDashboardFeed(dashboardFeedUrl());
   const first = await Promise.race([
     liveP.then((live) => ({ kind: 'live', live })),
     delay(2500).then(() => ({ kind: 'timeout' })),
   ]);
 
   if (first.kind === 'live' && first.live.ok) {
+    state.liveDisconnected = false;
     applyLoadedFeed(first.live.feed, 'live-sharepoint', null);
     return;
   }
 
-  if (!state.feed) {
-    const fallbackKey = FIXTURES[key] ? key : 'green';
-    await loadFixture(fallbackKey);
-  }
-
+  const reason =
+    first.kind === 'live'
+      ? first.live.error
+      : 'Dashboard Feed cannot be read (timed out after 2.5s).';
+  showLiveDisconnected(reason);
   liveP.then((live) => {
-    if (live.ok) applyLoadedFeed(live.feed, 'live-sharepoint', null);
+    if (live.ok) {
+      state.liveDisconnected = false;
+      applyLoadedFeed(live.feed, 'live-sharepoint', null);
+    }
   });
 }
 
 async function loadFixture(key) {
   resetIncomingBuffer();
-  const fixtureKey = FIXTURES[key] ? key : 'green';
-  state.fixtureKey = fixtureKey;
-  const url = FIXTURES[fixtureKey];
+  state.fixtureKey = key;
+  const url = FIXTURES[key];
   const loaded = await loadFeedFromUrl(url);
   if (!loaded.ok) {
     state.feed = null;
@@ -776,10 +736,6 @@ async function loadFixture(key) {
   } else {
     state.feed = mergePersistedNewReplies(mergePersistedActivity(loaded.feed));
     state.loadError = null;
-  }
-  const fixtureSelect = $('rccFixtureSelect');
-  if (fixtureSelect && FIXTURES[fixtureKey]) {
-    fixtureSelect.value = fixtureKey;
   }
   recompute();
 }
@@ -922,93 +878,8 @@ function runOrphanReconcileNow() {
   return report;
 }
 
-function onQueueDecision(id, decision) {
-  if (guardLockedAction()) return;
-  const opp = findOpp(id);
-  if (!opp) return;
-  if (decision === QUEUE_DECISIONS.REMOVE_FROM_QUEUE) {
-    const ok = window.confirm(
-      `Soft-remove “${opp.company || opp.vendor || id}” from the active queue?\n\nSource evidence is kept. This is auditable and does not hard-delete the record.`,
-    );
-    if (!ok) return;
-  }
-  const applied = applyQueueDecision(opp, decision, 'Troy');
-  if (!applied.ok) {
-    toast(applied.error || 'Decision failed', true);
-    return;
-  }
-  patchOpp(id, () => applied.opp);
-  if (decision === QUEUE_DECISIONS.REMOVE_FROM_QUEUE && state.openOppId === id) {
-    closeDetail();
-  }
-  toast(
-    decision === QUEUE_DECISIONS.REMOVE_FROM_QUEUE
-      ? 'Removed from active queue (evidence retained).'
-      : `Decision saved: ${decision}`,
-  );
-  recompute();
-}
-
-function showDraftPanel(draft, company) {
-  const host = $('rccDraftPanel');
-  if (!host) {
-    toast(draft.warning || 'Draft prepared (not sent).');
-    return;
-  }
-  host.hidden = false;
-  host.innerHTML = `<h3>Reply draft — ${esc(company || 'record')}</h3>
-    <p class="rcc-draft-warn">${esc(draft.warning)}</p>
-    <p><strong>Subject:</strong> ${esc(draft.subject)}</p>
-    <pre class="rcc-draft-body">${esc(draft.body)}</pre>
-    <button type="button" class="rcc-btn" id="rccDraftDismiss">Dismiss draft</button>`;
-  $('rccDraftDismiss')?.addEventListener('click', () => {
-    host.hidden = true;
-    host.innerHTML = '';
-  });
-}
-
-function runAssistantUtterance(raw) {
-  const active = filterActiveQueue(getOpportunities(state.feed));
-  const result = interpretAssistantCommand(raw, {
-    opportunities: active,
-    filter: state.filter,
-  });
-  const out = $('rccAssistantOut');
-  if (out) out.textContent = result.reply;
-  for (const action of result.actions || []) {
-    if (action.type === 'refresh') {
-      $('rccRefresh')?.click();
-    } else if (action.type === 'set_filter') {
-      state.filter = action.filter;
-      recompute();
-    } else if (action.type === 'open_record') {
-      openDetail(action.id);
-    } else if (action.type === 'show_draft') {
-      showDraftPanel(action.draft, findOpp(action.id)?.company);
-    } else if (action.type === 'prepare_decision') {
-      if (action.requiresConfirm) {
-        onQueueDecision(action.id, action.decision);
-      } else {
-        const ok = window.confirm(
-          `Apply “${action.decision}” to ${action.company}?`,
-        );
-        if (ok) onQueueDecision(action.id, action.decision);
-      }
-    }
-  }
-  if (result.draft && !(result.actions || []).some((a) => a.type === 'show_draft')) {
-    showDraftPanel(result.draft);
-  }
-  return result;
-}
-
 function onCardAction(action, id, el = null) {
-  if (
-    ['followup', 'done', 'pass', 'bulk', 'keep-active', 'pass-not-fit', 'save-record', 'remove-queue'].includes(
-      action,
-    ) &&
-    guardLockedAction()
-  ) {
+  if (['followup', 'done', 'pass', 'bulk'].includes(action) && guardLockedAction()) {
     return;
   }
   if (action === 'ack-reply') {
@@ -1027,31 +898,7 @@ function onCardAction(action, id, el = null) {
     return;
   }
   if (action === 'contact' || action === 'ready' || action === 'tier') {
-    toast(`${action} — use Keep / Pass / Save or prepare a draft (no live send)`);
-    return;
-  }
-  if (action === 'draft-reply') {
-    const opp = findOpp(id);
-    if (!opp) return;
-    const guidance = buildActionGuidance(opp);
-    const draft = prepareConservativeReplyDraft(opp, guidance);
-    showDraftPanel(draft, opp.company || opp.vendor);
-    return;
-  }
-  if (action === 'keep-active') {
-    onQueueDecision(id, QUEUE_DECISIONS.KEEP_ACTIVE);
-    return;
-  }
-  if (action === 'pass-not-fit') {
-    onQueueDecision(id, QUEUE_DECISIONS.PASS_NOT_FIT);
-    return;
-  }
-  if (action === 'save-record') {
-    onQueueDecision(id, QUEUE_DECISIONS.SAVE_RECORD);
-    return;
-  }
-  if (action === 'remove-queue') {
-    onQueueDecision(id, QUEUE_DECISIONS.REMOVE_FROM_QUEUE);
+    toast(`${action} control — use disposition/next action to update status`);
     return;
   }
   if (action === 'open-card') {
@@ -1079,17 +926,12 @@ function onCardAction(action, id, el = null) {
     return;
   }
   if (action === 'followup' || action === 'done' || action === 'pass') {
-    if (action === 'followup') {
-      const opp = findOpp(id);
-      const guidance = buildActionGuidance(opp || {});
-      const draft = prepareConservativeReplyDraft(opp || {}, guidance);
-      showDraftPanel(draft, opp?.company);
-      return;
-    }
     const patch =
       action === 'done'
         ? { status: 'WON', next_action: 'Closed' }
-        : { status: 'PASS', next_action: 'Passed' };
+        : action === 'pass'
+          ? { status: 'PASS', next_action: 'Passed' }
+          : { last_action: 'Follow-up queued (manual — no auto-send)', next_action: 'Await reply' };
     const result = saveAndVerify(state.feed, id, patch, {
       simulateReadbackFail: false,
     });
@@ -1103,16 +945,7 @@ function onCardAction(action, id, el = null) {
     return;
   }
   if (action === 'open-source') {
-    const opp = findOpp(id);
-    const link = buildEmailThreadLink(opp);
-    if (!link) {
-      toast('No verified Outlook thread link on this record', true);
-      return;
-    }
-    const ok = window.confirm(
-      'Open the verified Outlook thread in a new tab?\n\nRCC will not send email.',
-    );
-    if (ok) openEmailThread(opp);
+    openEmailThread(findOpp(id));
     return;
   }
   if (action === 'open-sp') {
@@ -1139,17 +972,22 @@ function onCardAction(action, id, el = null) {
 
 function wireEvents() {
   $('rccFixtureSelect').addEventListener('change', (e) => {
+    if (!isDemoRequest()) {
+      e.target.value = 'live-sharepoint';
+      loadLiveOrFixture('green');
+      return;
+    }
+    state.demoMode = true;
     loadFixture(e.target.value);
   });
   $('rccOpenAudit').addEventListener('click', () => openDrawer(true));
   $('rccCloseAudit').addEventListener('click', () => openDrawer(false));
   $('rccDrawerBackdrop').addEventListener('click', () => openDrawer(false));
   $('rccRefresh').addEventListener('click', () => {
-    // Refresh merges persisted NEW ACTIVITY and re-runs orphan reconcile on current feed side-channels.
+    persistView();
     if (state.feed) {
       state.feed = mergePersistedNewReplies(mergePersistedActivity(state.feed));
       runOrphanReconcileNow();
-      persistView();
     } else if (state.fixtureKey === 'live-sharepoint') {
       loadLiveOrFixture('green');
     } else {
@@ -1168,45 +1006,9 @@ function wireEvents() {
   document.querySelectorAll('.rcc-tab').forEach((tab) => {
     tab.addEventListener('click', () => {
       state.filter = tab.getAttribute('data-filter') || 'all';
+      persistView();
       renderCards();
     });
-  });
-
-  $('rccAssistantRun')?.addEventListener('click', () => {
-    const input = $('rccAssistantInput');
-    runAssistantUtterance(input?.value || '');
-  });
-  $('rccAssistantInput')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      runAssistantUtterance(e.target.value || '');
-    }
-  });
-  $('rccAssistantVoice')?.addEventListener('click', () => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      toast('Voice input not supported in this browser — type instead.', true);
-      return;
-    }
-    const rec = new SR();
-    rec.lang = 'en-US';
-    rec.onresult = (ev) => {
-      const said = ev.results?.[0]?.[0]?.transcript || '';
-      if ($('rccAssistantInput')) $('rccAssistantInput').value = said;
-      runAssistantUtterance(said);
-    };
-    rec.onerror = () => toast('Voice capture failed — type the command.', true);
-    rec.start();
-    toast('Listening…');
-  });
-
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[data-confirm-outlook="1"]');
-    if (!a) return;
-    const ok = window.confirm(
-      'Open the verified Outlook thread?\n\nRCC will not send email from this action.',
-    );
-    if (!ok) e.preventDefault();
   });
 
   $('rccCreateOpp').addEventListener('click', () => {
@@ -1318,11 +1120,19 @@ export async function boot() {
   wireEvents();
   restoreView();
   const fixtureSelect = $('rccFixtureSelect');
-  if (fixtureSelect && state.fixtureKey && FIXTURES[state.fixtureKey]) {
-    fixtureSelect.value = state.fixtureKey;
+  if (isDemoRequest()) {
+    state.demoMode = true;
+    if (fixtureSelect && state.fixtureKey && FIXTURES[state.fixtureKey]) {
+      fixtureSelect.value = state.fixtureKey;
+    }
+    await loadFixture(FIXTURES[state.fixtureKey] ? state.fixtureKey : 'green');
+  } else {
+    if (fixtureSelect) fixtureSelect.value = 'live-sharepoint';
+    await loadLiveOrFixture('green');
   }
-  // Obstructive banner stays hidden by default on mobile-first flow UI.
-  await loadLiveOrFixture(state.fixtureKey || 'green');
+  setInterval(() => {
+    if (state.feed && !state.demoMode) renderHealth();
+  }, 60_000);
 }
 
 boot();
@@ -1334,6 +1144,7 @@ window.RCC = {
   loadLiveOrFixture,
   loadLiveDashboardFeed,
   evaluateSyncHealth,
+  bannerFromFeedAge,
   findExistingOpportunity,
   saveAndVerify,
   processDiscovery,
@@ -1349,7 +1160,6 @@ window.RCC = {
   isUnreadActivity,
   mergePersistedActivity,
   stabilizeIncomingList,
-  resetIncomingBuffer,
   sortOpportunities,
   loadUiState,
   saveUiState,
@@ -1360,11 +1170,6 @@ window.RCC = {
   buildEmailThreadLink,
   leadIdOf,
   auditMalformedPaths,
-  buildExecutiveReadout,
-  filterActiveQueue,
-  applyQueueDecision,
-  prepareConservativeReplyDraft,
-  interpretAssistantCommand,
   SCHEMA_VERSION,
   ACTION_LOCK_MESSAGE,
   CANONICAL_RCC_ROOT,

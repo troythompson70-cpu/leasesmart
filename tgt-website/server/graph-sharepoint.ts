@@ -77,6 +77,7 @@ export function loadGraphEnvFromDotEnv(): void {
   const repoRoot = path.resolve(websiteRoot, '..')
   applyDotEnvFile(path.join(repoRoot, '.env'))
   applyDotEnvFile(path.join(websiteRoot, '.env'))
+  applyDotEnvFile(path.join(websiteRoot, '.env.local'))
 }
 
 export function listPresentGraphEnvNames(): GraphEnvName[] {
@@ -173,15 +174,23 @@ async function graphAccessToken(): Promise<string> {
       }
       const body = new URLSearchParams()
       body.set('client_id', clientId)
-      body.set('scope', 'https://graph.microsoft.com/.default')
       if (kind === 'refresh_token') {
         body.set('grant_type', 'refresh_token')
         body.set('refresh_token', refreshToken)
-        if (clientSecret) body.set('client_secret', clientSecret)
+        if (clientSecret) {
+          body.set('client_secret', clientSecret)
+          body.set('scope', 'https://graph.microsoft.com/.default')
+        } else {
+          body.set(
+            'scope',
+            'https://graph.microsoft.com/Files.Read.All https://graph.microsoft.com/Sites.Read.All offline_access',
+          )
+        }
       } else {
         if (!clientSecret) throw new Error('Graph credentials are not configured.')
         body.set('grant_type', 'client_credentials')
         body.set('client_secret', clientSecret)
+        body.set('scope', 'https://graph.microsoft.com/.default')
       }
       const tokenRes = await fetch(
         `${LOGIN_ROOT}/${encodeURIComponent(tenant)}/oauth2/v2.0/token`,
