@@ -105,7 +105,27 @@ def queue_lock(queue_path: Path) -> Iterator[None]:
             fcntl.flock(lf.fileno(), fcntl.LOCK_UN)
 
 
+def uses_work_queue_list(path: Path) -> bool:
+    """The live OS queue is the SharePoint list. Temp test CSVs stay files."""
+    if os.getenv("TGT_QUEUE_BACKEND", "list") == "csv":
+        return False
+    canonical = (
+        Path.home()
+        / "Library/CloudStorage/OneDrive-tgttechnologies.com"
+        / "TGT BUSINESS/TGT OPERATING SYSTEM/09 AI WORK ORDERS"
+        / "TGT_AI_EXECUTION_QUEUE.csv"
+    )
+    try:
+        return path.expanduser().resolve() == canonical.resolve()
+    except OSError:
+        return False
+
+
 def load_queue(path: Path) -> List[Dict[str, str]]:
+    if uses_work_queue_list(path):
+        from list_queue import load_list_queue
+
+        return load_list_queue()
     if not path.exists():
         raise FileNotFoundError(path)
     with path.open(newline="", encoding="utf-8-sig") as f:
@@ -118,6 +138,11 @@ def load_queue(path: Path) -> List[Dict[str, str]]:
 
 
 def save_queue(path: Path, rows: List[Dict[str, str]]) -> None:
+    if uses_work_queue_list(path):
+        from list_queue import save_list_queue
+
+        save_list_queue(rows)
+        return
     if not rows:
         return
     fieldnames = list(QUEUE_FIELDS)
