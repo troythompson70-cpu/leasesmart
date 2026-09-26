@@ -6,11 +6,13 @@ import { serveCommandCenter } from './server/command-center-static.ts'
 import { handleDashboardFeedRequest } from './server/dashboard-feed-http.ts'
 import { handleHealthRequest } from './server/health-http.ts'
 import { handleIntakeRequest } from './server/intake-http.ts'
+import { startWebsiteLeadCopyLoop } from './server/website-lead-copy.ts'
 
 function localApiPlugin(): Plugin {
   return {
     name: 'tgt-local-api',
     configureServer(server) {
+      startWebsiteLeadCopyLoop()
       server.middlewares.use((req, res, next) => {
         serveCommandCenter(req, res, next)
       })
