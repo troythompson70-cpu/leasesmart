@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { categoryStrip, laborDay } from '../content'
+import { categoryStrip, aiLaptopDeal } from '../content'
 import { scrollToHash } from '../lib/scroll-to'
 import { track } from '../lib/track'
 import { TipsSignupForm } from './TipsSignupForm'
@@ -12,7 +12,7 @@ export function AnnouncementBar({ onLaptopClick }: { onLaptopClick: () => void }
   return (
     <div className="relative z-[60] border-b border-brand-blue/40 bg-brand-blue text-white">
       <div className="wrap flex flex-col items-start justify-between gap-2 py-2.5 sm:flex-row sm:items-center">
-        <p className="text-sm font-semibold tracking-wide">{laborDay.bar}</p>
+        <p className="text-sm font-semibold tracking-wide">{aiLaptopDeal.bar}</p>
         <button
           type="button"
           className="rounded-md bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-brand-blue"

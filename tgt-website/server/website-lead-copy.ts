@@ -225,6 +225,7 @@ let loopStarted = false
 export function startWebsiteLeadCopyLoop(log: (line: string) => void = console.log): void {
   if (loopStarted) return
   loopStarted = true
+  log('[website-lead-copy] started')
   const tick = () => {
     void copyNewWebsiteLeads(log).catch((err: unknown) => {
       const message = err instanceof Error ? err.message : String(err)

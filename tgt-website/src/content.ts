@@ -18,9 +18,9 @@ export const categoryStrip = [
   'Business IT',
 ] as const
 
-export const laborDay = {
-  bar: 'LABOR DAY TECH DEAL — AI-READY LAPTOPS $280 • LIMITED QUANTITY',
-  title: 'LABOR DAY TECH DEAL',
+export const aiLaptopDeal = {
+  bar: 'AI-READY TOUCHSCREEN LAPTOPS — $280 • LIMITED QUANTITY',
+  title: 'AI-READY LAPTOP DEAL',
   product: 'AI-READY TOUCHSCREEN LAPTOP — $280',
   readyFor: [
     'ChatGPT',
