@@ -1,43 +1,22 @@
-# Morning Review — Tuesday, September 15, 2026
+# Morning Review — 2026-09-18 — TGT OS Graph integration
 
-**LeaseSmart · TGT Technologies Inc.**
-**Build ID:** 20260915-tgt-os-outlook-audit-vault · **Branch:** cursor/tgt-os-outlook-audit-vault-9057
+**Build ID:** 20260918-tgt-graph-integration-audit · **Branch:** cursor/tgt-graph-integration-candidate-d437 · **PR:** #25
 
-> Read this in under 2 minutes. Upload `master-vault/` files to Microsoft 365 Master Vault.
-
-## Dashboard status — TGT OS Outlook audit
+## Dashboard status — Graph production boundary
 
 | Check | Result |
-|---|---|
-| AppDeploy TGT OS receiving-side fixes | **REPORTED FIXED + DEPLOYED** (outside leasesmart) |
-| `OUTLOOK_INGEST_KEY` on production | **REPORTED CONFIGURED** |
-| Email body / object parse / realtime / drawer rebind / reconciliation | **REPORTED FIXED** |
-| Deploy QA (AppDeploy) | **REPORTED READY** (0 FE / 0 BE / 0 network) |
-| M365 `TGT - Email Intake` POSTs | **NEEDS LIVE VERIFY** |
-| Historical missing bodies | **BACKFILL OPTIONAL** |
-| leasesmart contains TGT OS ingest code | **NO** |
-| Strong e2e candidate in Inbox | **YES** — Max Farrell / NinjaOne 15:59Z |
+|-------|--------|
+| Production baseline v44 / 1789734343421 | **CONFIRMED LIVE** (static) |
+| AppDeploy API | **402 APP_TEMPORARILY_UNAVAILABLE** — no deploy |
+| `OUTLOOK_INGEST_KEY` | Reported present (prior audit) |
+| `GRAPH_TENANT_ID` / `GRAPH_CLIENT_ID` / `GRAPH_CLIENT_SECRET` | **MISSING** — owner secret entry |
+| AppDeploy source in leasesmart | **ABSENT** — portable candidate in `tgt-os-graph/` |
+| Deterministic tests | **18/18 PASS** |
+| Cisco/Jared | **HARD HOLD** read-only observed |
 
-Full report: `master-vault/cursor-reports/TGT-OS-OUTLOOK-INGESTION-AUDIT-2026-09-15.md`
+Full audit: `master-vault/cursor-reports/TGT-OS-GRAPH-INTEGRATION-AUDIT-2026-09-18.md`  
+Owner action: `master-vault/cursor-reports/TGT-OS-GRAPH-OWNER-ACTION-2026-09-18.md`
 
-## What Troy should do next (2 minutes)
+## Status string
 
-1. Open TGT Operating System.
-2. Check NinjaOne / Max Farrell card for LAST RECEIVED + body from today’s time-slot reply.
-3. In Power Automate, confirm `TGT - Email Intake` is On and ran for that message.
-
-## What Cursor did here
-
-- Vaulted the AppDeploy audit + live-verify checklist
-- Graph mailbox scan for real e2e candidates (no fabricated probes)
-- Could not open AppDeploy UI (no URL in repo; Lovable MCP needs auth)
-
-## Ready for commit
-
-- Docs only on `cursor/tgt-os-outlook-audit-vault-9057`
-
----
-
-**Full sprint log:** `master-vault/LeaseSmart-Sprint-Master-Log.md`
-
-**Copy for Claude:** open `master-vault/morning/HANDOFF-latest.html` and click the button.
+`OWNER_ACTION_REQUIRED: APPDEPLOY_SECRET_ENTRY`
