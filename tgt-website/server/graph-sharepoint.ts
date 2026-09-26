@@ -54,7 +54,7 @@ function envValue(name: GraphEnvName): string {
   return value
 }
 
-function applyDotEnvFile(filePath: string): void {
+function applyDotEnvFile(filePath: string, override = false): void {
   if (!existsSync(filePath)) return
   const text = readFileSync(filePath, 'utf8')
   for (const line of text.split(/\r?\n/)) {
@@ -65,7 +65,7 @@ function applyDotEnvFile(filePath: string): void {
     const key = trimmed.slice(0, eq).trim()
     const raw = trimmed.slice(eq + 1).trim()
     const value = raw.replace(/^['"]|['"]$/g, '')
-    if (!process.env[key]) process.env[key] = value
+    if (override || !process.env[key]) process.env[key] = value
   }
 }
 
@@ -77,6 +77,7 @@ export function loadGraphEnvFromDotEnv(): void {
   const repoRoot = path.resolve(websiteRoot, '..')
   applyDotEnvFile(path.join(repoRoot, '.env'))
   applyDotEnvFile(path.join(websiteRoot, '.env'))
+  applyDotEnvFile(path.join(websiteRoot, '.env.local'), true)
 }
 
 export function listPresentGraphEnvNames(): GraphEnvName[] {
@@ -109,6 +110,48 @@ function grantKind(): GrantKind {
   return 'client_credentials'
 }
 
+function decodeJwtPayload(token: string): Record<string, unknown> {
+  const parts = token.split('.')
+  if (parts.length < 2) return {}
+  const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+  const pad = b64 + '='.repeat((4 - (b64.length % 4)) % 4)
+  try {
+    return JSON.parse(Buffer.from(pad, 'base64').toString('utf8')) as Record<string, unknown>
+  } catch {
+    return {}
+  }
+}
+
+/** Claims only — never returns the access token value. */
+export async function inspectGraphAppTokenClaims(): Promise<{
+  grant: GrantKind
+  roles: string[]
+  scp: string | null
+  idtyp: string | null
+  appid: string | null
+  tid: string | null
+  aud: string | null
+  mailReadApplication: boolean
+}> {
+  loadGraphEnvFromDotEnv()
+  clearGraphTokenCache()
+  const grant = grantKind()
+  const token = await graphAccessToken()
+  const payload = decodeJwtPayload(token)
+  const roles = Array.isArray(payload.roles) ? payload.roles.map((r) => String(r)) : []
+  const scp = payload.scp == null ? null : String(payload.scp)
+  return {
+    grant,
+    roles,
+    scp,
+    idtyp: payload.idtyp == null ? null : String(payload.idtyp),
+    appid: payload.appid == null ? null : String(payload.appid),
+    tid: payload.tid == null ? null : String(payload.tid),
+    aud: payload.aud == null ? null : String(payload.aud),
+    mailReadApplication: roles.includes('Mail.Read'),
+  }
+}
+
 async function graphAccessToken(): Promise<string> {
   loadGraphEnvFromDotEnv()
   if (tokenCache && tokenCache.expiresAt > Date.now() + 60_000) return tokenCache.value
@@ -131,15 +174,24 @@ async function graphAccessToken(): Promise<string> {
       }
       const body = new URLSearchParams()
       body.set('client_id', clientId)
-      body.set('scope', 'https://graph.microsoft.com/.default')
+      const deviceCodeClient = clientId === '14d82eec-204b-4c2f-b7e8-296a70dab67e'
       if (kind === 'refresh_token') {
         body.set('grant_type', 'refresh_token')
         body.set('refresh_token', refreshToken)
-        if (clientSecret) body.set('client_secret', clientSecret)
+        if (clientSecret && !deviceCodeClient) {
+          body.set('client_secret', clientSecret)
+          body.set('scope', 'https://graph.microsoft.com/.default')
+        } else {
+          body.set(
+            'scope',
+            'https://graph.microsoft.com/Files.Read.All https://graph.microsoft.com/Sites.Read.All offline_access',
+          )
+        }
       } else {
         if (!clientSecret) throw new Error('Graph credentials are not configured.')
         body.set('grant_type', 'client_credentials')
         body.set('client_secret', clientSecret)
+        body.set('scope', 'https://graph.microsoft.com/.default')
       }
       const tokenRes = await fetch(
         `${LOGIN_ROOT}/${encodeURIComponent(tenant)}/oauth2/v2.0/token`,
@@ -153,9 +205,14 @@ async function graphAccessToken(): Promise<string> {
         access_token?: string
         expires_in?: number
         error?: string
+        error_description?: string
       }
       if (!tokenRes.ok || !json.access_token) {
-        throw new Error(`Graph token request failed (${tokenRes.status}).`)
+        const aadsts = String(json.error_description || '').match(/AADSTS\d+/)
+        const detail = [json.error, aadsts?.[0]].filter(Boolean).join(' ')
+        throw new Error(
+          `Graph token request failed (${tokenRes.status})${detail ? `: ${detail}` : ''}.`,
+        )
       }
       tokenCache = {
         value: json.access_token,
@@ -177,6 +234,79 @@ async function graphFetch(pathname: string, init: RequestInit = {}): Promise<Res
     headers.set('Content-Type', 'application/json')
   }
   return fetch(`${GRAPH_ROOT}${pathname}`, graphFetchInit({ ...init, headers }))
+}
+
+const GRAPH_RESOURCE_APP_ID = '00000003-0000-0000-c000-000000000000'
+const KNOWN_GRAPH_APP_ROLES: Record<string, string> = {
+  '810c84a8-4a9e-49e6-bf7d-12d183f40d01': 'Mail.Read',
+  '6931bccd-447a-43d1-b442-00a1954745bd': 'MailboxSettings.Read',
+  '205e70e5-aba6-4c52-a976-6d2d46c48043': 'Sites.Read.All',
+  '9492366f-7969-46a4-8d15-ed1a20078fff': 'Sites.ReadWrite.All',
+  '9a5d68dd-61b1-44c3-b353-d64dd5032e0b': 'Application.Read.All',
+}
+const KNOWN_GRAPH_DELEGATED: Record<string, string> = {
+  '570282fd-fa5c-430d-a7fd-fc8dc19a8e5a': 'Mail.Read',
+}
+
+function nameGraphPermission(kind: 'Role' | 'Scope', id: string): string {
+  const table = kind === 'Role' ? KNOWN_GRAPH_APP_ROLES : KNOWN_GRAPH_DELEGATED
+  return table[id] || id
+}
+
+/** App registration requested permissions. Needs Application.Read.All to succeed. Never logs tokens. */
+export async function inspectEntraAppRequestedPermissions(): Promise<{
+  http: number
+  displayName: string | null
+  graphApplication: string[]
+  graphDelegated: string[]
+  mailReadApplicationRequested: boolean
+  mailReadDelegatedRequested: boolean
+  detail: string
+}> {
+  loadGraphEnvFromDotEnv()
+  const appId = envValue('GRAPH_CLIENT_ID')
+  const res = await graphFetch(
+    `/applications?$filter=${encodeURIComponent(`appId eq '${appId}'`)}&$select=id,appId,displayName,requiredResourceAccess`,
+  )
+  if (!res.ok) {
+    return {
+      http: res.status,
+      displayName: null,
+      graphApplication: [],
+      graphDelegated: [],
+      mailReadApplicationRequested: false,
+      mailReadDelegatedRequested: false,
+      detail: 'Cannot read app registration (need Application.Read.All consented on this app, or use the Entra blade).',
+    }
+  }
+  const payload = (await res.json()) as {
+    value?: Array<{
+      displayName?: string
+      requiredResourceAccess?: Array<{
+        resourceAppId?: string
+        resourceAccess?: Array<{ id?: string; type?: string }>
+      }>
+    }>
+  }
+  const app = payload.value?.[0]
+  const graph = (app?.requiredResourceAccess || []).find((r) => r.resourceAppId === GRAPH_RESOURCE_APP_ID)
+  const graphApplication: string[] = []
+  const graphDelegated: string[] = []
+  for (const entry of graph?.resourceAccess || []) {
+    const id = String(entry.id || '')
+    const type = String(entry.type || '')
+    if (type === 'Role') graphApplication.push(nameGraphPermission('Role', id))
+    else if (type === 'Scope') graphDelegated.push(nameGraphPermission('Scope', id))
+  }
+  return {
+    http: res.status,
+    displayName: app?.displayName || null,
+    graphApplication,
+    graphDelegated,
+    mailReadApplicationRequested: graphApplication.includes('Mail.Read'),
+    mailReadDelegatedRequested: graphDelegated.includes('Mail.Read'),
+    detail: 'requiredResourceAccess from this app registration (requested, not the same as JWT roles).',
+  }
 }
 
 type GraphSite = { id?: string; displayName?: string; webUrl?: string; name?: string }
@@ -278,6 +408,33 @@ export async function readDashboardFeedJson(): Promise<{
     name: CANONICAL_DASHBOARD_FEED_FILE,
     webUrl: '',
     path: `${CANONICAL_DASHBOARD_FEED}/${CANONICAL_DASHBOARD_FEED_FILE}`,
+  }
+}
+
+/** PUT the canonical dashboard feed. Does not invent GREEN. */
+export async function writeDashboardFeedJson(feed: unknown): Promise<GraphItemProof> {
+  const site = await resolveTeamTgtMspSite()
+  if (!site?.id) {
+    throw new Error('TEAM TGT MSP site was not locatable via Graph.')
+  }
+  const itemPath = encodeDrivePath(CANONICAL_DASHBOARD_FEED, CANONICAL_DASHBOARD_FEED_FILE)
+  const res = await graphFetch(`/sites/${site.id}/drive/root:/${itemPath}:/content`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    body: JSON.stringify(feed, null, 2),
+  })
+  if (!res.ok) {
+    throw new Error(`SharePoint 10 Dashboard Feed write failed (HTTP ${res.status}).`)
+  }
+  const item = (await res.json()) as { id?: string; name?: string; webUrl?: string }
+  if (!item.id || !item.name || !item.webUrl) {
+    throw new Error('SharePoint dashboard feed write returned no item proof.')
+  }
+  return {
+    id: item.id,
+    name: item.name,
+    webUrl: item.webUrl,
+    path: `${CANONICAL_DASHBOARD_FEED}/${item.name}`,
   }
 }
 

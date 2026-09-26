@@ -30,6 +30,30 @@ export function activityTimestamp(opp) {
 /**
  * Sort opportunities: open items Newest First, then PASS/LOST/WON.
  */
+export function sortOpportunitiesBy(opportunities, mode) {
+  const list = Array.isArray(opportunities) ? [...opportunities] : [];
+  const nameOf = (opp) => String(opp?.company || opp?.vendor || '');
+  if (mode === 'company') {
+    return list.sort((a, b) => nameOf(a).localeCompare(nameOf(b), undefined, { sensitivity: 'base' }));
+  }
+  if (mode === 'status') {
+    return list.sort((a, b) => {
+      const byStatus = String(a?.status || '').localeCompare(String(b?.status || ''), undefined, { sensitivity: 'base' });
+      return byStatus || nameOf(a).localeCompare(nameOf(b), undefined, { sensitivity: 'base' });
+    });
+  }
+  if (mode === 'tier') {
+    return list.sort((a, b) => {
+      const aTier = Number(a?.tier);
+      const bTier = Number(b?.tier);
+      const aRank = Number.isFinite(aTier) ? aTier : 99;
+      const bRank = Number.isFinite(bTier) ? bTier : 99;
+      return aRank - bRank || nameOf(a).localeCompare(nameOf(b), undefined, { sensitivity: 'base' });
+    });
+  }
+  return sortOpportunities(list);
+}
+
 export function sortOpportunities(opportunities) {
   const list = Array.isArray(opportunities) ? [...opportunities] : [];
   return list.sort((a, b) => {
