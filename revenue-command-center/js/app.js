@@ -2,7 +2,7 @@ import { bannerFromFeedAge } from './banner-age.js';
 import { HEALTH, ACTION_LOCK_MESSAGE, SCHEMA_VERSION } from './constants.js';
 import { loadFeedFromUrl, loadLiveDashboardFeed, getOpportunities } from './feed-loader.js';
 import { evaluateSyncHealth, formatMetric } from './sync-health.js';
-import { sortOpportunities, selectOwnerActionPanel } from './sorting.js';
+import { sortOpportunities, sortOpportunitiesBy, selectOwnerActionPanel } from './sorting.js';
 import { findExistingOpportunity } from './dedupe.js';
 import {
   reconcileSoftwareChecklist,
@@ -78,6 +78,8 @@ const state = {
   lastOrphanReport: null,
   demoMode: false,
   liveDisconnected: false,
+  sortMode: 'newest',
+  loadedAt: null,
 };
 
 function $(id) {
@@ -188,6 +190,8 @@ function renderHealth() {
       h.mailboxCoverageWarning || 'Full mailbox coverage is not verified.';
   }
   setLocked(!!h.actionsLocked);
+  paintLoadTimes();
+  paintSortActive();
 }
 
 function renderOwnerPanel() {
@@ -217,7 +221,7 @@ function filteredOpportunities() {
   if (state.filter === 'incoming') {
     return stabilizeIncomingList(raw);
   }
-  const opps = sortOpportunities(raw);
+  const opps = sortOpportunitiesBy(raw, state.sortMode || 'newest');
   if (state.filter === 'new-activity') {
     return opps.filter((o) => isUnreadActivity(o));
   }
@@ -352,13 +356,13 @@ function renderNewReplyCards() {
         </div>
         <div class="rcc-card-actions rcc-action-grid">
           ${open}
-          <button type="button" class="rcc-btn" data-action="open-linked-opp" data-id="${esc(r.opportunity_id || '')}">Open Linked Opportunity</button>
-          <button type="button" class="rcc-btn rcc-ack-btn" data-action="ack-reply" data-reply-id="${id}">Acknowledge + Disposition</button>
+          <button type="button" class="rcc-btn" disabled title="Not connected yet">Open Linked Opportunity</button>
+          <button type="button" class="rcc-btn rcc-ack-btn" disabled title="Not connected yet">Acknowledge + Disposition</button>
         </div>
         <div class="rcc-disposition-row" data-disposition-for="${id}" hidden>
           ${DISPOSITIONS.map(
             (d) =>
-              `<button type="button" class="rcc-btn disposition ${d.toLowerCase()}" data-action="ack-reply-disposition" data-reply-id="${id}" data-disposition="${d}">${d}</button>`,
+              `<button type="button" class="rcc-btn disposition ${d.toLowerCase()}" disabled title="Not connected yet">${d}</button>`,
           ).join('')}
         </div>
       </article>`;
@@ -426,22 +430,22 @@ function renderCards() {
         ${vm.timing ? `<div class="rcc-timing">${esc(vm.timing)}</div>` : ''}
         <div class="rcc-card-actions rcc-action-grid">
           <button type="button" class="rcc-btn primary" data-action="open-card" data-id="${esc(id)}">Open</button>
-          <button type="button" class="rcc-btn" data-action="contact" data-id="${esc(id)}">Contact</button>
-          <button type="button" class="rcc-btn" data-action="ready" data-id="${esc(id)}">Ready</button>
-          <button type="button" class="rcc-btn" data-action="tier" data-id="${esc(id)}">Tier</button>
+          <button type="button" class="rcc-btn" disabled title="Not connected yet">Contact</button>
+          <button type="button" class="rcc-btn" disabled title="Not connected yet">Ready</button>
+          <button type="button" class="rcc-btn" disabled title="Not connected yet">Tier</button>
           ${
             vm.incoming
-              ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
+              ? `<button type="button" class="rcc-btn" disabled title="Not connected yet">Clear Incoming</button>`
               : ''
           }
           ${
             email
               ? `<a class="rcc-btn" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer">${openEmailLabel}</a>`
-              : `<button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">${openEmailLabel}</button>`
+              : `<button type="button" class="rcc-btn" disabled title="Not connected yet">${openEmailLabel}</button>`
           }
           ${
             vm.unread
-              ? `<button type="button" class="rcc-btn rcc-ack-btn" data-action="acknowledge" data-id="${esc(id)}">Acknowledge Activity</button>`
+              ? `<button type="button" class="rcc-btn rcc-ack-btn" disabled title="Not connected yet">Acknowledge Activity</button>`
               : ''
           }
         </div>
@@ -509,9 +513,9 @@ function renderAuditDrawer() {
             <div>Status: ${esc(r.status)}</div>
             <div>Fix: ${esc(r.recommended_fix)}</div>
             <div class="rcc-card-actions">
-              <button type="button" class="rcc-btn" data-audit="open-source" data-id="${esc(r.id)}">Open Source</button>
-              <button type="button" class="rcc-btn" data-audit="repair" data-id="${esc(r.id)}">Repair</button>
-              <button type="button" class="rcc-btn" data-audit="dismiss" data-id="${esc(r.id)}">Dismiss with reason</button>
+              <button type="button" class="rcc-btn" disabled title="Not connected yet">Open Source</button>
+              <button type="button" class="rcc-btn" disabled title="Not connected yet">Repair</button>
+              <button type="button" class="rcc-btn" disabled title="Not connected yet">Dismiss with reason</button>
             </div>
           </div>`,
             )
@@ -579,8 +583,8 @@ function openDetail(id) {
 
   const navHtml = `
     <div class="rcc-detail-nav" style="display:flex; justify-content:space-between; margin-bottom:12px; gap:10px;">
-      <button type="button" class="rcc-btn" ${!prevId ? 'disabled' : ''} data-nav="prev" data-id="${prevId}">← Previous</button>
-      <button type="button" class="rcc-btn" ${!nextId ? 'disabled' : ''} data-nav="next" data-id="${nextId}">Next →</button>
+      <button type="button" class="rcc-btn" ${!prevId ? 'disabled' : ''} data-nav="prev" data-id="${prevId || ''}">← Previous</button>
+      <button type="button" class="rcc-btn" ${!nextId ? 'disabled' : ''} data-nav="next" data-id="${nextId || ''}">Next →</button>
     </div>
   `;
 
@@ -590,30 +594,30 @@ function openDetail(id) {
     <div class="rcc-action-grid">
     ${
       vm.unread
-        ? `<button type="button" class="rcc-btn rcc-ack-btn" data-action="acknowledge" data-id="${esc(id)}">Acknowledge Activity</button>`
+        ? `<button type="button" class="rcc-btn rcc-ack-btn" disabled title="Not connected yet">Acknowledge Activity</button>`
         : ''
     }
-    <button type="button" class="rcc-btn" data-action="classify-valid" data-id="${esc(id)}">Classify VALID</button>
-    <button type="button" class="rcc-btn" data-action="classify-invalid" data-id="${esc(id)}">Classify INVALID</button>
-    <button type="button" class="rcc-btn" data-action="classify-unsure" data-id="${esc(id)}">Classify UNSURE</button>
-    <button type="button" class="rcc-btn" data-action="contact" data-id="${esc(id)}">Contact</button>
-    <button type="button" class="rcc-btn" data-action="ready" data-id="${esc(id)}">Ready</button>
-    <button type="button" class="rcc-btn" data-action="tier" data-id="${esc(id)}">Tier</button>
+    <button type="button" class="rcc-btn" disabled title="Not connected yet">Classify VALID</button>
+    <button type="button" class="rcc-btn" disabled title="Not connected yet">Classify INVALID</button>
+    <button type="button" class="rcc-btn" disabled title="Not connected yet">Classify UNSURE</button>
+    <button type="button" class="rcc-btn" disabled title="Not connected yet">Contact</button>
+    <button type="button" class="rcc-btn" disabled title="Not connected yet">Ready</button>
+    <button type="button" class="rcc-btn" disabled title="Not connected yet">Tier</button>
     ${
       vm.incoming
-        ? `<button type="button" class="rcc-btn" data-action="clear-incoming" data-id="${esc(id)}">Clear Incoming</button>`
+        ? `<button type="button" class="rcc-btn" disabled title="Not connected yet">Clear Incoming</button>`
         : ''
     }
     ${
       email
         ? `<a class="rcc-btn primary" href="${esc(email.href)}" target="_blank" rel="noopener noreferrer">Open Email</a>`
-        : `<button type="button" class="rcc-btn" data-action="open-source" data-id="${esc(id)}">Open Email</button>`
+        : `<button type="button" class="rcc-btn" disabled title="Not connected yet">Open Email</button>`
     }
-    <button type="button" class="rcc-btn" data-action="open-sp" data-id="${esc(id)}">Open SharePoint Record</button>
-    <button type="button" class="rcc-btn" data-lockable="1" data-action="followup" data-id="${esc(id)}">Send Follow-up</button>
-    <button type="button" class="rcc-btn" data-lockable="1" data-action="done" data-id="${esc(id)}">Mark Done</button>
-    <button type="button" class="rcc-btn" data-lockable="1" data-action="pass" data-id="${esc(id)}">Close/Pass</button>
-    <button type="button" class="rcc-btn" data-action="repair" data-id="${esc(id)}">Repair Record</button>
+    <button type="button" class="rcc-btn" disabled title="Not connected yet">Open SharePoint Record</button>
+    <button type="button" class="rcc-btn" disabled title="Not connected yet">Send Follow-up</button>
+    <button type="button" class="rcc-btn" disabled title="Not connected yet">Mark Done</button>
+    <button type="button" class="rcc-btn" disabled title="Not connected yet">Close/Pass</button>
+    <button type="button" class="rcc-btn" disabled title="Not connected yet">Repair Record</button>
     </div>
   `;
   $('rccDetailBackdrop').classList.add('on');
@@ -662,10 +666,45 @@ function recompute(runtime = {}) {
   persistView();
 }
 
+function formatEtClock(iso) {
+  const stamp = Date.parse(String(iso || ''));
+  if (!Number.isFinite(stamp)) return '—';
+  const clock = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(stamp);
+  return `${clock} ET`;
+}
+
+const SORT_LABELS = {
+  newest: 'Newest update',
+  tier: 'Tier',
+  status: 'Status',
+  company: 'Company A–Z',
+};
+
+function paintLoadTimes() {
+  const el = $('rccLoadTimes');
+  if (!el) return;
+  const built = state.feed && (state.feed.updated_at || state.feed.feed_updated_at);
+  el.textContent = `Loaded ${formatEtClock(state.loadedAt)} · Feed built ${formatEtClock(built)}`;
+}
+
+function paintSortActive() {
+  const el = $('rccSortActive');
+  const select = $('rccSort');
+  const label = SORT_LABELS[state.sortMode] || SORT_LABELS.newest;
+  if (select) select.value = state.sortMode || 'newest';
+  if (el) el.textContent = `Sort: ${label}`;
+}
+
 function applyLoadedFeed(feed, fixtureKey, loadError) {
   state.fixtureKey = fixtureKey;
   state.feed = feed ? mergePersistedNewReplies(mergePersistedActivity(feed)) : null;
   state.loadError = loadError;
+  if (feed) state.loadedAt = new Date().toISOString();
   recompute();
 }
 
@@ -984,15 +1023,13 @@ function wireEvents() {
   $('rccCloseAudit').addEventListener('click', () => openDrawer(false));
   $('rccDrawerBackdrop').addEventListener('click', () => openDrawer(false));
   $('rccRefresh').addEventListener('click', () => {
-    persistView();
-    if (state.feed) {
-      state.feed = mergePersistedNewReplies(mergePersistedActivity(state.feed));
-      runOrphanReconcileNow();
-    } else if (state.fixtureKey === 'live-sharepoint') {
-      loadLiveOrFixture('green');
-    } else {
-      loadFixture(state.fixtureKey);
-    }
+    loadLiveOrFixture('green');
+  });
+  $('rccSort')?.addEventListener('change', (event) => {
+    const value = event.target.value;
+    state.sortMode = SORT_LABELS[value] ? value : 'newest';
+    renderCards();
+    paintSortActive();
   });
   $('rccRunOrphanReconcile')?.addEventListener('click', () => runOrphanReconcileNow());
   $('rccCloseDetail').addEventListener('click', closeDetail);
@@ -1081,6 +1118,13 @@ function wireEvents() {
   });
 
   $('rccDetailActions').addEventListener('click', (e) => {
+    const nav = e.target.closest('button[data-nav]');
+    if (nav) {
+      if (nav.disabled) return;
+      const next = nav.getAttribute('data-id');
+      if (next) openDetail(next);
+      return;
+    }
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;
     onCardAction(btn.getAttribute('data-action'), btn.getAttribute('data-id'), btn);
@@ -1122,8 +1166,10 @@ export async function boot() {
   const fixtureSelect = $('rccFixtureSelect');
   if (isDemoRequest()) {
     state.demoMode = true;
-    if (fixtureSelect && state.fixtureKey && FIXTURES[state.fixtureKey]) {
-      fixtureSelect.value = state.fixtureKey;
+    if (fixtureSelect) {
+      fixtureSelect.disabled = false;
+      fixtureSelect.removeAttribute('title');
+      if (state.fixtureKey && FIXTURES[state.fixtureKey]) fixtureSelect.value = state.fixtureKey;
     }
     await loadFixture(FIXTURES[state.fixtureKey] ? state.fixtureKey : 'green');
   } else {
@@ -1133,6 +1179,9 @@ export async function boot() {
   setInterval(() => {
     if (state.feed && !state.demoMode) renderHealth();
   }, 60_000);
+  setInterval(() => {
+    if (!state.demoMode) loadLiveOrFixture('green');
+  }, 5 * 60 * 1000);
 }
 
 boot();

@@ -80,6 +80,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .rcc-connection-banner.on { display: block; }
 .rcc-connection-banner.bad { background: #8f1d1d; color: #fff; }
 .rcc-connection-banner.demo { background: #5c4a00; color: #fff; }
+.rcc-load-times { color: var(--rcc-muted); font-size: 13px; font-weight: 700; }
+button:disabled, select:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .rcc-health-title {
   font-family: var(--rcc-display);

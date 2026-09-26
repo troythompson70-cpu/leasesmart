@@ -42,7 +42,7 @@
 
   <div class="rcc-fixture-bar">
     <label for="rccFixtureSelect">Local feed fixture (acceptance / offline) — not a second SoT</label>
-    <select id="rccFixtureSelect">
+    <select id="rccFixtureSelect" disabled title="Not connected yet">
       <option value="green">GREEN — synced + incoming</option>
       <option value="yellow-stale">YELLOW — stale feed</option>
       <option value="yellow-incomplete">YELLOW — health fields incomplete</option>
@@ -61,12 +61,21 @@
 
   <div class="rcc-toolbar">
     <button type="button" class="rcc-btn primary" id="rccOpenAudit">Open Integrity Audit</button>
-    <button type="button" class="rcc-btn" id="rccRefresh">Refresh/Reconcile</button>
-    <button type="button" class="rcc-btn" id="rccRunOrphanReconcile">Reconcile Orphans</button>
-    <button type="button" class="rcc-btn" data-lockable="1" id="rccCreateOpp">Create New Opportunity</button>
-    <button type="button" class="rcc-btn" data-lockable="1" id="rccBulkStatus">Bulk Status Change</button>
-    <button type="button" class="rcc-btn" id="rccSimSaveOk">Demo: SAVED + VERIFIED</button>
-    <button type="button" class="rcc-btn danger" id="rccSimFailVerify">Demo: SAVED — VERIFICATION FAILED</button>
+    <button type="button" class="rcc-btn" id="rccRefresh">Refresh</button>
+    <span id="rccLoadTimes" class="rcc-load-times">Loaded — · Feed built —</span>
+    <label for="rccSort">Sort</label>
+    <select id="rccSort" aria-label="Sort">
+      <option value="newest">Newest update</option>
+      <option value="tier">Tier</option>
+      <option value="status">Status</option>
+      <option value="company">Company A–Z</option>
+    </select>
+    <strong id="rccSortActive">Sort: Newest update</strong>
+    <button type="button" class="rcc-btn" id="rccRunOrphanReconcile" disabled title="Not connected yet">Reconcile Orphans</button>
+    <button type="button" class="rcc-btn" id="rccCreateOpp" disabled title="Not connected yet">Create New Opportunity</button>
+    <button type="button" class="rcc-btn" id="rccBulkStatus" disabled title="Not connected yet">Bulk Status Change</button>
+    <button type="button" class="rcc-btn" id="rccSimSaveOk" disabled title="Not connected yet">Demo: SAVED + VERIFIED</button>
+    <button type="button" class="rcc-btn danger" id="rccSimFailVerify" disabled title="Not connected yet">Demo: SAVED — VERIFICATION FAILED</button>
   </div>
 
   <section id="rccOwnerPanel" class="rcc-panel-owner" style="display:none">
@@ -114,7 +123,7 @@
     <h2 id="rccExistingTitle">Existing Opportunity Found</h2>
     <div id="rccExistingBody"></div>
     <div class="rcc-card-actions">
-      <button type="button" class="rcc-btn primary" id="rccMergeExisting">Merge/Update Existing</button>
+      <button type="button" class="rcc-btn primary" id="rccMergeExisting" disabled title="Not connected yet">Merge/Update Existing</button>
       <button type="button" class="rcc-btn" id="rccCloseModal">Cancel</button>
     </div>
   </div>
@@ -125,14 +134,14 @@
 <script type="importmap">
 {
   "imports": {
-    "/js/app.js": "/command-center/js/app.js?v=17",
-    "/js/feed-loader.js": "/command-center/js/feed-loader.js?v=17",
-    "/js/sorting.js": "/command-center/js/sorting.js?v=17",
-    "/js/new-activity.js": "/command-center/js/new-activity.js?v=17",
-    "/js/ui-persist.js": "/command-center/js/ui-persist.js?v=17"
+    "/js/app.js": "/command-center/js/app.js?v=19",
+    "/js/feed-loader.js": "/command-center/js/feed-loader.js?v=19",
+    "/js/sorting.js": "/command-center/js/sorting.js?v=19",
+    "/js/new-activity.js": "/command-center/js/new-activity.js?v=19",
+    "/js/ui-persist.js": "/command-center/js/ui-persist.js?v=19"
   }
 }
 </script>
-<script type="module" src="./js/app.js?v=17"></script>
+<script type="module" src="./js/app.js?v=19"></script>
 </body>
 </html>
