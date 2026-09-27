@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import type { FormEvent } from 'react'
-import { laborDay, ninthEdition } from '../content'
+import { aiLaptopDeal, ninthEdition } from '../content'
 import { submitLaptopInquiry } from '../lib/intake'
 import { track } from '../lib/track'
 
@@ -15,7 +15,7 @@ export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
-  const [message, setMessage] = useState<string>(laborDay.inquiryPrefill)
+  const [message, setMessage] = useState<string>(aiLaptopDeal.inquiryPrefill)
   const [error, setError] = useState('')
   const [status, setStatus] = useState<SubmitState>('idle')
 
@@ -48,7 +48,7 @@ export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
       name: trimmedName,
       email: trimmedEmail,
       phone: trimmedPhone,
-      message: message.trim() || laborDay.inquiryPrefill,
+      message: message.trim() || aiLaptopDeal.inquiryPrefill,
       ninthEdition: true,
     })
 
@@ -64,7 +64,7 @@ export function LaptopInquiryModal({ onClose }: LaptopInquiryModalProps) {
     setName('')
     setEmail('')
     setPhone('')
-    setMessage(laborDay.inquiryPrefill)
+    setMessage(aiLaptopDeal.inquiryPrefill)
   }
 
   return (
