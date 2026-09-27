@@ -31,6 +31,8 @@ export type TokenRecord = {
   itemId: string
   opportunityId: string
   used: boolean
+  conversationId?: string
+  sentAt?: string
 }
 
 export type ApprovalStore = {
@@ -38,6 +40,28 @@ export type ApprovalStore = {
   tokens: Record<string, TokenRecord>
   appliedReplyIds: string[]
 }
+
+export type ReplyMessage = {
+  id?: string
+  subject?: string
+  bodyPreview?: string
+  isDraft?: boolean
+  conversationId?: string
+  receivedDateTime?: string
+  from?: { emailAddress?: { address?: string } }
+  sender?: { emailAddress?: { address?: string } }
+}
+
+export type SentApprovalMessage = {
+  subject?: string
+  conversationId?: string
+  sentDateTime?: string
+}
+
+export type ReplySelection =
+  | { action: 'ignore-sender'; address: string }
+  | { action: 'skip' }
+  | { action: 'apply'; record: TokenRecord; decision: ApprovalDecision }
 
 type GraphListPayload = {
   value?: Array<{ id?: string; fields?: Record<string, unknown> }>
@@ -52,6 +76,23 @@ function text(value: unknown): string {
   return String(value ?? '').trim()
 }
 
+function tokenRecord(value: unknown): TokenRecord | null {
+  if (!value || typeof value !== 'object') return null
+  const record = value as Partial<TokenRecord>
+  const itemId = text(record.itemId)
+  if (!itemId) return null
+  const next: TokenRecord = {
+    itemId,
+    opportunityId: text(record.opportunityId),
+    used: record.used === true,
+  }
+  const conversationId = text(record.conversationId)
+  const sentAt = text(record.sentAt)
+  if (conversationId) next.conversationId = conversationId
+  if (sentAt) next.sentAt = sentAt
+  return next
+}
+
 export function emptyStore(): ApprovalStore {
   return { sentItemIds: [], tokens: {}, appliedReplyIds: [] }
 }
@@ -62,7 +103,7 @@ export function loadApprovalStore(filePath = STORE_PATH): ApprovalStore {
     const parsed = JSON.parse(readFileSync(filePath, 'utf8')) as Partial<ApprovalStore>
     return {
       sentItemIds: Array.isArray(parsed.sentItemIds) ? parsed.sentItemIds.map((id) => text(id)).filter(Boolean) : [],
-      tokens: parsed.tokens && typeof parsed.tokens === 'object' ? parsed.tokens : {},
+      tokens: tokenMap(parsed.tokens),
       appliedReplyIds: Array.isArray(parsed.appliedReplyIds)
         ? parsed.appliedReplyIds.map((id) => text(id)).filter(Boolean)
         : [],
@@ -70,6 +111,16 @@ export function loadApprovalStore(filePath = STORE_PATH): ApprovalStore {
   } catch {
     return emptyStore()
   }
+}
+
+function tokenMap(value: unknown): Record<string, TokenRecord> {
+  if (!value || typeof value !== 'object') return {}
+  const tokens: Record<string, TokenRecord> = {}
+  for (const [key, record] of Object.entries(value)) {
+    const parsed = tokenRecord(record)
+    if (parsed) tokens[key] = parsed
+  }
+  return tokens
 }
 
 export function saveApprovalStore(store: ApprovalStore, filePath = STORE_PATH): void {
@@ -205,23 +256,38 @@ export async function readApprovalRows(): Promise<ApprovalRow[]> {
   return rows
 }
 
-export async function sendApprovalEmail(row: ApprovalRow, token: string): Promise<void> {
+export async function sendApprovalEmail(
+  row: ApprovalRow,
+  token: string,
+): Promise<{ conversationId: string; sentAt: string }> {
   const message = approvalMessage(row, token)
-  const res = await graphFetch('/me/sendMail', {
+  const created = await graphFetch('/me/messages', {
     method: 'POST',
     body: JSON.stringify({
-      message: {
-        subject: message.subject,
-        body: { contentType: 'Text', content: message.body },
-        toRecipients: [{ emailAddress: { address: APPROVAL_RECIPIENT } }],
-      },
-      saveToSentItems: true,
+      subject: message.subject,
+      body: { contentType: 'Text', content: message.body },
+      toRecipients: [{ emailAddress: { address: APPROVAL_RECIPIENT } }],
     }),
   })
-  if (res.status === 202 || res.ok) return
-  const body = (await res.json().catch(() => ({}))) as { error?: { code?: string } }
-  const code = body.error?.code || 'graph_error'
-  throw new Error(`Approval email failed (HTTP ${res.status} ${code}).`)
+  const createdBody = (await created.json().catch(() => ({}))) as {
+    id?: string
+    conversationId?: string
+    error?: { code?: string }
+  }
+  const draftId = text(createdBody.id)
+  const conversationId = text(createdBody.conversationId)
+  if (!created.ok || !draftId || !conversationId) {
+    const code = createdBody.error?.code || 'graph_error'
+    throw new Error(`Approval email failed (HTTP ${created.status} ${code}).`)
+  }
+  const sent = await graphFetch(`/me/messages/${encodeURIComponent(draftId)}/send`, { method: 'POST' })
+  if (sent.status === 202 || sent.ok) {
+    return { conversationId, sentAt: new Date().toISOString() }
+  }
+  await graphFetch(`/me/messages/${encodeURIComponent(draftId)}`, { method: 'DELETE' }).catch(() => undefined)
+  const sentBody = (await sent.json().catch(() => ({}))) as { error?: { code?: string } }
+  const code = sentBody.error?.code || 'graph_error'
+  throw new Error(`Approval email failed (HTTP ${sent.status} ${code}).`)
 }
 
 export async function writeApprovalResult(itemId: string, decision: ApprovalDecision): Promise<void> {
@@ -249,7 +315,12 @@ export async function sendPendingApprovals(
   for (const row of rows) {
     const token = issueToken(store, row)
     try {
-      await sendApprovalEmail(row, token)
+      const sentMail = await sendApprovalEmail(row, token)
+      const record = store.tokens[token]
+      if (record) {
+        record.conversationId = sentMail.conversationId
+        record.sentAt = sentMail.sentAt
+      }
     } catch (err) {
       delete store.tokens[token]
       saveApprovalStore(store)
@@ -307,34 +378,172 @@ export async function handlePipelineApprovalRequest(req: IncomingMessage, res: S
   else res.end('This link is not valid.')
 }
 
-type ReplyMessage = { id?: string; subject?: string; bodyPreview?: string; isDraft?: boolean }
+export function replySenderAddress(message: ReplyMessage): string {
+  return text(message.from?.emailAddress?.address || message.sender?.emailAddress?.address).toLowerCase()
+}
+
+/** Whole opportunity id only. "SW-010" does not count as "SW-01". */
+export function subjectHasExactOpportunity(subject: string, opportunityId: string): boolean {
+  const id = text(opportunityId)
+  if (!id) return false
+  return text(subject)
+    .split(/\s+/)
+    .some((word) => word === id)
+}
+
+export function matchSentApproval(
+  messages: SentApprovalMessage[],
+  opportunityId: string,
+): SentApprovalMessage | null {
+  return (
+    messages.find(
+      (message) =>
+        subjectHasExactOpportunity(text(message.subject), opportunityId) && text(message.conversationId),
+    ) || null
+  )
+}
+
+/**
+ * A reply counts only from tgates@tgttechnologies.com, on the saved thread,
+ * and only after that approval was sent. Subject text is not the match.
+ */
+export function selectReply(message: ReplyMessage, tokens: TokenRecord[]): ReplySelection {
+  const address = replySenderAddress(message)
+  const decision = decisionFromReply(`${message.subject || ''}\n${message.bodyPreview || ''}`)
+  if (address !== APPROVAL_RECIPIENT.toLowerCase()) {
+    if (decision && /^re:/i.test(text(message.subject))) return { action: 'ignore-sender', address: address || '(none)' }
+    return { action: 'skip' }
+  }
+  if (!decision || message.isDraft || !/^re:/i.test(text(message.subject))) return { action: 'skip' }
+  const received = text(message.receivedDateTime)
+  const conversationId = text(message.conversationId)
+  if (!received || !conversationId) return { action: 'skip' }
+  const record = tokens.find((token) => {
+    if (token.used || !token.sentAt || !token.conversationId) return false
+    return token.conversationId === conversationId && received > token.sentAt
+  })
+  if (!record) return { action: 'skip' }
+  return { action: 'apply', record, decision }
+}
+
+/** Keeps newer mail and follows later pages until a page reaches the send time. */
+export function collectMessagesAfter(pages: ReplyMessage[][], sentAt: string): ReplyMessage[] {
+  const kept: ReplyMessage[] = []
+  const since = text(sentAt)
+  for (const page of pages) {
+    let reachedSent = false
+    for (const message of page) {
+      const received = text(message.receivedDateTime)
+      if (received && since && received <= since) {
+        reachedSent = true
+        continue
+      }
+      kept.push(message)
+    }
+    if (reachedSent) break
+  }
+  return kept
+}
+
+async function readJson(res: Response): Promise<{ value?: unknown[]; '@odata.nextLink'?: string; error?: { code?: string } }> {
+  return (await res.json().catch(() => ({}))) as {
+    value?: unknown[]
+    '@odata.nextLink'?: string
+    error?: { code?: string }
+  }
+}
+
+async function listSentApprovalMessages(): Promise<SentApprovalMessage[]> {
+  const found: SentApprovalMessage[] = []
+  let next: string | null =
+    "/me/mailFolders/sentitems/messages?$top=50&$select=subject,conversationId,sentDateTime&$filter=startswith(subject,'TGT approval')"
+  while (next) {
+    const res = await graphFetch(next)
+    const body = await readJson(res)
+    if (!res.ok) {
+      const code = body.error?.code || 'graph_error'
+      throw new Error(`Sent approval lookup failed (HTTP ${res.status} ${code}).`)
+    }
+    for (const item of body.value || []) {
+      const message = item as SentApprovalMessage
+      if (text(message.subject).startsWith('TGT approval')) found.push(message)
+    }
+    next = body['@odata.nextLink'] ? graphPathFromNext(body['@odata.nextLink']) : null
+  }
+  return found
+}
+
+async function attachMissingThreads(store: ApprovalStore, log: (line: string) => void): Promise<void> {
+  const missing = Object.values(store.tokens).filter((token) => !token.used && !token.conversationId)
+  if (missing.length === 0) return
+  const sent = await listSentApprovalMessages()
+  for (const token of missing) {
+    const match = matchSentApproval(sent, token.opportunityId)
+    const conversationId = text(match?.conversationId)
+    const sentAt = text(match?.sentDateTime)
+    if (!conversationId || !sentAt) {
+      log(`[pipeline-approval] no thread id for ${token.opportunityId}`)
+      continue
+    }
+    token.conversationId = conversationId
+    token.sentAt = sentAt
+    log(`[pipeline-approval] saved thread for ${token.opportunityId}`)
+  }
+  saveApprovalStore(store)
+}
+
+async function readRepliesAfter(sentAt: string, log: (line: string) => void): Promise<ReplyMessage[] | null> {
+  const collected: ReplyMessage[] = []
+  let next: string | null =
+    '/me/messages?$top=50&$orderby=receivedDateTime desc&$select=id,subject,bodyPreview,isDraft,conversationId,receivedDateTime,from,sender'
+  while (next) {
+    const res = await graphFetch(next)
+    const body = await readJson(res)
+    if (!res.ok) {
+      log(`[pipeline-approval] reply check skipped: HTTP ${res.status}`)
+      return null
+    }
+    const page = (body.value || []) as ReplyMessage[]
+    let reachedSent = false
+    for (const message of page) {
+      const received = text(message.receivedDateTime)
+      if (received && received <= sentAt) {
+        reachedSent = true
+        continue
+      }
+      collected.push(message)
+    }
+    if (reachedSent || !body['@odata.nextLink']) break
+    next = graphPathFromNext(body['@odata.nextLink'])
+  }
+  return collected
+}
 
 /** Reads a reply of APPROVE or REJECT. Mail.Read is required. The original approval email is ignored. */
 export async function applyApprovalReplies(log: (line: string) => void = console.log): Promise<void> {
-  const res = await graphFetch(
-    '/me/messages?$top=20&$select=id,subject,bodyPreview,isDraft&$orderby=receivedDateTime desc',
-  )
-  if (!res.ok) {
-    log(`[pipeline-approval] reply check skipped: HTTP ${res.status}`)
+  const store = loadApprovalStore()
+  await attachMissingThreads(store, log)
+  const pending = Object.values(store.tokens).filter((token) => !token.used && token.sentAt && token.conversationId)
+  if (pending.length === 0) {
+    saveApprovalStore(store)
     return
   }
-  const body = (await res.json().catch(() => ({}))) as { value?: ReplyMessage[] }
-  const store = loadApprovalStore()
-  for (const message of body.value || []) {
+  const since = pending.map((token) => text(token.sentAt)).sort()[0]
+  const messages = await readRepliesAfter(since, log)
+  if (!messages) return
+  for (const message of messages) {
     const id = text(message.id)
-    const subject = text(message.subject)
-    if (!id || message.isDraft || store.appliedReplyIds.includes(id)) continue
-    if (!/^re:/i.test(subject)) continue
-    const decision = decisionFromReply(`${subject}\n${message.bodyPreview || ''}`)
-    if (!decision) continue
-    const record = Object.values(store.tokens).find(
-      (token) => !token.used && subject.includes(token.opportunityId),
-    )
-    if (!record) continue
-    await writeApprovalResult(record.itemId, decision)
-    record.used = true
+    if (!id || store.appliedReplyIds.includes(id)) continue
+    const selection = selectReply(message, Object.values(store.tokens))
+    if (selection.action === 'ignore-sender') {
+      log(`[pipeline-approval] ignored reply from ${selection.address}`)
+      continue
+    }
+    if (selection.action !== 'apply') continue
+    await writeApprovalResult(selection.record.itemId, selection.decision)
+    selection.record.used = true
     store.appliedReplyIds.push(id)
-    log(`[pipeline-approval] reply ${decision} item ${record.itemId} ${record.opportunityId}`)
+    log(`[pipeline-approval] reply ${selection.decision} item ${selection.record.itemId} ${selection.record.opportunityId}`)
   }
   saveApprovalStore(store)
 }

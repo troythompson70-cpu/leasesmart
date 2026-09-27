@@ -6,11 +6,14 @@ import assert from 'node:assert/strict'
 import {
   approvalMessage,
   approvalWriteBack,
+  collectMessagesAfter,
   consumeToken,
   decisionFromReply,
   emptyStore,
   issueToken,
+  matchSentApproval,
   rowsNeedingApproval,
+  selectReply,
 } from '../server/pipeline-approvals.ts'
 
 function pass(name) {
@@ -80,6 +83,91 @@ const closed = { ...jane, id: '7', ownerApprovalRequired: 'No' }
   assert.match(message.body, /single word APPROVE/)
   assert.match(message.body, /single word REJECT/)
   pass('the email tells Troy to reply and has no local link')
+}
+
+{
+  const sw01 = {
+    itemId: '1',
+    opportunityId: 'SW-01',
+    used: false,
+    conversationId: 'thread-sw-01',
+    sentAt: '2026-09-27T00:00:00Z',
+  }
+  const sw010 = {
+    itemId: '2',
+    opportunityId: 'SW-010',
+    used: false,
+    conversationId: 'thread-sw-010',
+    sentAt: '2026-09-27T00:00:00Z',
+  }
+  const outside = selectReply(
+    {
+      id: 'msg-outside',
+      subject: 'Re: TGT approval SW-010 Cisco',
+      bodyPreview: 'APPROVE',
+      conversationId: 'thread-sw-010',
+      receivedDateTime: '2026-09-27T01:00:00Z',
+      from: { emailAddress: { address: 'stranger@example.com' } },
+    },
+    [sw01, sw010],
+  )
+  assert.equal(outside.action, 'ignore-sender')
+  if (outside.action === 'ignore-sender') assert.equal(outside.address, 'stranger@example.com')
+  pass('an outside sender saying APPROVE is ignored')
+}
+
+{
+  const sw01 = {
+    itemId: '1',
+    opportunityId: 'SW-01',
+    used: false,
+    conversationId: 'thread-sw-01',
+    sentAt: '2026-09-27T00:00:00Z',
+  }
+  const sw010 = {
+    itemId: '2',
+    opportunityId: 'SW-010',
+    used: false,
+    conversationId: 'thread-sw-010',
+    sentAt: '2026-09-27T00:00:00Z',
+  }
+  const subject = 'Re: TGT approval SW-010 Cisco'
+  assert.equal(subject.includes('SW-01'), true)
+  const selected = selectReply(
+    {
+      id: 'msg-sw-010',
+      subject,
+      bodyPreview: 'APPROVE',
+      conversationId: 'thread-sw-010',
+      receivedDateTime: '2026-09-27T01:00:00Z',
+      from: { emailAddress: { address: 'tgates@tgttechnologies.com' } },
+    },
+    [sw01, sw010],
+  )
+  assert.equal(selected.action, 'apply')
+  if (selected.action === 'apply') assert.equal(selected.record.opportunityId, 'SW-010')
+  const sent = matchSentApproval(
+    [{ subject: 'TGT approval SW-010 Cisco', conversationId: 'thread-sw-010', sentDateTime: '2026-09-27T00:00:00Z' }],
+    'SW-01',
+  )
+  assert.equal(sent, null)
+  const newer = Array.from({ length: 20 }, (_, index) => ({
+    id: `new-${index}`,
+    receivedDateTime: '2026-09-27T02:00:00Z',
+  }))
+  const reply = {
+    id: 'msg-sw-010',
+    subject,
+    bodyPreview: 'APPROVE',
+    conversationId: 'thread-sw-010',
+    receivedDateTime: '2026-09-27T01:00:00Z',
+    from: { emailAddress: { address: 'tgates@tgttechnologies.com' } },
+  }
+  const older = [{ id: 'old', receivedDateTime: '2026-09-26T23:00:00Z' }]
+  const collected = collectMessagesAfter([newer, [reply], older], '2026-09-27T00:00:00Z')
+  assert.equal(collected.some((message) => message.id === 'msg-sw-010'), true)
+  assert.equal(collected.some((message) => message.id === 'old'), false)
+  pass('SW-01 does not match SW-010')
 }
 
 console.log('pipeline-approvals-check: all passed')
