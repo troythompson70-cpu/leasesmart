@@ -3,7 +3,9 @@
  * opportunity_id is WEB- plus the source list item id, so a second pass skips it.
  * Does not send mail, does not mark VERIFIED, and does not delete rows.
  */
+import { beginCycle, endCycle } from './helper-heartbeat.ts'
 import { graphFetch } from './graph-sharepoint.ts'
+import { replaceInterval } from './process-loops.ts'
 
 export const TEAM_SITE_ID =
   'netorgft7859571.sharepoint.com,30503ad7-421e-4dde-85e8-bc446af5fab4,41146896-bbd7-416c-ac8d-f454eb4f3a61'
@@ -219,18 +221,24 @@ export async function copyNewWebsiteLeads(
   return copied
 }
 
-let loopStarted = false
-
-/** Runs once immediately, then every 15 minutes, for as long as this process stays up. */
+/** Runs once immediately, then every 15 minutes. A Vite restart replaces the previous timer. */
 export function startWebsiteLeadCopyLoop(log: (line: string) => void = console.log): void {
-  if (loopStarted) return
-  loopStarted = true
-  const tick = () => {
-    void copyNewWebsiteLeads(log).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err)
-      log(`[website-lead-copy] tick failed: ${message}`)
-    })
-  }
-  tick()
-  setInterval(tick, WEBSITE_LEAD_COPY_INTERVAL_MS)
+  log('[website-lead-copy] started')
+  replaceInterval(
+    'website-lead-copy',
+    () => {
+      beginCycle('website-lead-copy')
+      void copyNewWebsiteLeads(log)
+        .then((copied) => {
+          endCycle('website-lead-copy')
+          log(`[website-lead-copy] cycle copied ${copied.length}`)
+        })
+        .catch((err: unknown) => {
+          endCycle('website-lead-copy')
+          const message = err instanceof Error ? err.message : String(err)
+          log(`[website-lead-copy] tick failed: ${message}`)
+        })
+    },
+    WEBSITE_LEAD_COPY_INTERVAL_MS,
+  )
 }
