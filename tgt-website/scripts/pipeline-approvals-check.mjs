@@ -52,7 +52,16 @@ const closed = { ...jane, id: '7', ownerApprovalRequired: 'No' }
 
 {
   assert.equal(decisionFromReply('APPROVE'), 'APPROVE')
-  assert.equal(decisionFromReply('please REJECT this'), 'REJECT')
+  assert.equal(decisionFromReply('Approve'), 'APPROVE')
+  assert.equal(decisionFromReply('approved'), 'APPROVE')
+  assert.equal(decisionFromReply('approved.'), 'APPROVE')
+  assert.equal(decisionFromReply('yes'), 'APPROVE')
+  assert.equal(decisionFromReply('REJECT'), 'REJECT')
+  assert.equal(decisionFromReply('rejected'), 'REJECT')
+  assert.equal(decisionFromReply('no'), 'REJECT')
+  assert.equal(decisionFromReply('not approved'), null)
+  assert.equal(decisionFromReply('not approved,'), null)
+  assert.equal(decisionFromReply('please REJECT this'), null)
   assert.equal(decisionFromReply('APPROVE and REJECT'), null)
   assert.equal(decisionFromReply('looking at it'), null)
   const quoted = [
@@ -62,6 +71,8 @@ const closed = { ...jane, id: '7', ownerApprovalRequired: 'No' }
     'Reply to this email with the single word APPROVE or REJECT.',
   ].join('\n')
   assert.equal(decisionFromReply(quoted), 'APPROVE')
+  const signed = ['approved', 'Troy Thompson', 'Founder & CEO'].join('\n')
+  assert.equal(decisionFromReply(signed), 'APPROVE')
   pass('a reply is APPROVE, REJECT, or neither')
 }
 

@@ -39,12 +39,14 @@ export type ApprovalStore = {
   sentItemIds: string[]
   tokens: Record<string, TokenRecord>
   appliedReplyIds: string[]
+  answeredReplyIds: string[]
 }
 
 export type ReplyMessage = {
   id?: string
   subject?: string
   bodyPreview?: string
+  bodyText?: string
   isDraft?: boolean
   conversationId?: string
   receivedDateTime?: string
@@ -94,7 +96,7 @@ function tokenRecord(value: unknown): TokenRecord | null {
 }
 
 export function emptyStore(): ApprovalStore {
-  return { sentItemIds: [], tokens: {}, appliedReplyIds: [] }
+  return { sentItemIds: [], tokens: {}, appliedReplyIds: [], answeredReplyIds: [] }
 }
 
 export function loadApprovalStore(filePath = STORE_PATH): ApprovalStore {
@@ -106,6 +108,9 @@ export function loadApprovalStore(filePath = STORE_PATH): ApprovalStore {
       tokens: tokenMap(parsed.tokens),
       appliedReplyIds: Array.isArray(parsed.appliedReplyIds)
         ? parsed.appliedReplyIds.map((id) => text(id)).filter(Boolean)
+        : [],
+      answeredReplyIds: Array.isArray(parsed.answeredReplyIds)
+        ? parsed.answeredReplyIds.map((id) => text(id)).filter(Boolean)
         : [],
     }
   } catch {
@@ -156,17 +161,80 @@ export function consumeToken(store: ApprovalStore, token: string): TokenRecord |
   return record
 }
 
+/** First non-empty line, trimmed, without trailing punctuation. */
+export function firstReplyLine(body: string): string {
+  const beforeQuote = body.split(/\r?\n(?:On .+ wrote:|-----Original Message-----|From: )/)[0] || ''
+  const line =
+    beforeQuote
+      .split(/\r?\n/)
+      .map((part) => part.trim())
+      .find((part) => part.length > 0 && !part.startsWith('>')) || ''
+  return line.replace(/[.!?,;:]+$/g, '').trim().toLowerCase()
+}
+
 export function decisionFromReply(body: string): ApprovalDecision | null {
-  const beforeQuote = body.split(/\r?\n(?:On .+ wrote:|-----Original Message-----|From: )/)[0] || body
-  const fresh = beforeQuote
-    .split(/\r?\n/)
-    .filter((line) => !line.trim().startsWith('>'))
-    .join('\n')
-  const approve = /\bAPPROVE\b/.test(fresh.toUpperCase())
-  const reject = /\bREJECT\b/.test(fresh.toUpperCase())
-  if (approve === reject) return null
-  if (approve) return 'APPROVE'
-  return 'REJECT'
+  switch (firstReplyLine(body)) {
+    case 'approve':
+    case 'approved':
+    case 'yes':
+      return 'APPROVE'
+    case 'reject':
+    case 'rejected':
+    case 'no':
+      return 'REJECT'
+    default:
+      return null
+  }
+}
+
+export function isHelperNotice(body: string): boolean {
+  const line = firstReplyLine(body)
+  return line.startsWith('recorded:') || line.startsWith('not understood')
+}
+
+export function confirmationLine(decision: ApprovalDecision, opportunityId: string, company: string): string {
+  switch (decision) {
+    case 'APPROVE':
+      return `Recorded: APPROVED – ${text(opportunityId)} ${text(company)}`.trim()
+    case 'REJECT':
+      return `Recorded: REJECTED – ${text(opportunityId)} ${text(company)}`.trim()
+    default: {
+      const exhaustive: never = decision
+      return exhaustive
+    }
+  }
+}
+
+export const NOT_UNDERSTOOD_LINE = 'Not understood – reply APPROVE or REJECT.'
+
+export function plainTextFromMail(content: string, contentType = 'text'): string {
+  if (!/html/i.test(contentType)) return content
+  return content
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&quot;/gi, '"')
+}
+
+export function replyBodyText(message: ReplyMessage): string {
+  return message.bodyText ?? message.bodyPreview ?? ''
+}
+
+/** Newest owner reply in each thread. Inbox and Sent copies collapse to one. */
+export function newestReplyPerThread(messages: ReplyMessage[]): ReplyMessage[] {
+  const best = new Map<string, ReplyMessage>()
+  for (const message of messages) {
+    const key = text(message.conversationId)
+    if (!key) continue
+    const current = best.get(key)
+    if (!current || text(message.receivedDateTime) >= text(current.receivedDateTime)) best.set(key, message)
+  }
+  return [...best.values()]
 }
 
 export function parseDecision(value: string): ApprovalDecision | null {
@@ -409,7 +477,7 @@ export function matchSentApproval(
  */
 export function selectReply(message: ReplyMessage, tokens: TokenRecord[]): ReplySelection {
   const address = replySenderAddress(message)
-  const decision = decisionFromReply(`${message.subject || ''}\n${message.bodyPreview || ''}`)
+  const decision = decisionFromReply(replyBodyText(message))
   if (address !== APPROVAL_RECIPIENT.toLowerCase()) {
     if (decision && /^re:/i.test(text(message.subject))) return { action: 'ignore-sender', address: address || '(none)' }
     return { action: 'skip' }
@@ -492,10 +560,21 @@ async function attachMissingThreads(store: ApprovalStore, log: (line: string) =>
   saveApprovalStore(store)
 }
 
+function tokenForThread(message: ReplyMessage, tokens: TokenRecord[]): TokenRecord | null {
+  const received = text(message.receivedDateTime)
+  const conversationId = text(message.conversationId)
+  if (!received || !conversationId || message.isDraft || !/^re:/i.test(text(message.subject))) return null
+  return (
+    tokens.find(
+      (token) => text(token.conversationId) === conversationId && text(token.sentAt) && received > text(token.sentAt),
+    ) || null
+  )
+}
+
 async function readRepliesAfter(sentAt: string, log: (line: string) => void): Promise<ReplyMessage[] | null> {
   const collected: ReplyMessage[] = []
   let next: string | null =
-    '/me/messages?$top=50&$orderby=receivedDateTime desc&$select=id,subject,bodyPreview,isDraft,conversationId,receivedDateTime,from,sender'
+    '/me/messages?$top=50&$orderby=receivedDateTime desc&$select=id,subject,body,bodyPreview,isDraft,conversationId,receivedDateTime,from,sender'
   while (next) {
     const res = await graphFetch(next)
     const body = await readJson(res)
@@ -503,7 +582,7 @@ async function readRepliesAfter(sentAt: string, log: (line: string) => void): Pr
       log(`[pipeline-approval] reply check skipped: HTTP ${res.status}`)
       return null
     }
-    const page = (body.value || []) as ReplyMessage[]
+    const page = (body.value || []) as Array<ReplyMessage & { body?: { contentType?: string; content?: string } }>
     let reachedSent = false
     for (const message of page) {
       const received = text(message.receivedDateTime)
@@ -511,7 +590,11 @@ async function readRepliesAfter(sentAt: string, log: (line: string) => void): Pr
         reachedSent = true
         continue
       }
-      collected.push(message)
+      const content = message.body?.content
+      collected.push({
+        ...message,
+        bodyText: content ? plainTextFromMail(content, message.body?.contentType || '') : message.bodyPreview,
+      })
     }
     if (reachedSent || !body['@odata.nextLink']) break
     next = graphPathFromNext(body['@odata.nextLink'])
@@ -519,31 +602,67 @@ async function readRepliesAfter(sentAt: string, log: (line: string) => void): Pr
   return collected
 }
 
+async function sendThreadReply(messageId: string, line: string): Promise<void> {
+  const res = await graphFetch(`/me/messages/${encodeURIComponent(messageId)}/reply`, {
+    method: 'POST',
+    body: JSON.stringify({ comment: line }),
+  })
+  if (res.status === 202 || res.ok) return
+  const body = (await res.json().catch(() => ({}))) as { error?: { code?: string } }
+  const code = body.error?.code || 'graph_error'
+  throw new Error(`Approval reply failed (HTTP ${res.status} ${code}).`)
+}
+
 /** Reads a reply of APPROVE or REJECT. Mail.Read is required. The original approval email is ignored. */
 export async function applyApprovalReplies(log: (line: string) => void = console.log): Promise<void> {
   const store = loadApprovalStore()
   await attachMissingThreads(store, log)
-  const pending = Object.values(store.tokens).filter((token) => !token.used && token.sentAt && token.conversationId)
-  if (pending.length === 0) {
+  const dated = Object.values(store.tokens).filter((token) => token.sentAt && token.conversationId)
+  if (dated.length === 0) {
     saveApprovalStore(store)
     return
   }
-  const since = pending.map((token) => text(token.sentAt)).sort()[0]
+  const since = dated.map((token) => text(token.sentAt)).sort()[0]
   const messages = await readRepliesAfter(since, log)
   if (!messages) return
-  for (const message of messages) {
+  const companies = new Map((await readApprovalRows()).map((row) => [row.id, row.company]))
+  for (const message of newestReplyPerThread(messages)) {
     const id = text(message.id)
-    if (!id || store.appliedReplyIds.includes(id)) continue
-    const selection = selectReply(message, Object.values(store.tokens))
-    if (selection.action === 'ignore-sender') {
-      log(`[pipeline-approval] ignored reply from ${selection.address}`)
+    if (!id || store.answeredReplyIds.includes(id)) continue
+    const address = replySenderAddress(message)
+    const bodyText = replyBodyText(message)
+    const decision = decisionFromReply(bodyText)
+    if (address !== APPROVAL_RECIPIENT.toLowerCase()) {
+      if (decision && /^re:/i.test(text(message.subject))) log(`[pipeline-approval] ignored reply from ${address || '(none)'}`)
       continue
     }
-    if (selection.action !== 'apply') continue
-    await writeApprovalResult(selection.record.itemId, selection.decision)
-    selection.record.used = true
-    store.appliedReplyIds.push(id)
-    log(`[pipeline-approval] reply ${selection.decision} item ${selection.record.itemId} ${selection.record.opportunityId}`)
+    const record = tokenForThread(message, Object.values(store.tokens))
+    if (!record) continue
+    if (isHelperNotice(bodyText)) {
+      store.answeredReplyIds.push(id)
+      continue
+    }
+    const company = companies.get(record.itemId) || ''
+    if (!decision) {
+      await sendThreadReply(id, NOT_UNDERSTOOD_LINE)
+      store.answeredReplyIds.push(id)
+      saveApprovalStore(store)
+      log(`[pipeline-approval] not understood ${record.opportunityId} ${company}`.trim())
+      continue
+    }
+    if (!record.used) {
+      await writeApprovalResult(record.itemId, decision)
+      record.used = true
+      store.appliedReplyIds.push(id)
+      log(`[pipeline-approval] reply ${decision} item ${record.itemId} ${record.opportunityId}`)
+      saveApprovalStore(store)
+    } else {
+      log(`[pipeline-approval] already recorded ${record.opportunityId} ${company}`.trim())
+    }
+    await sendThreadReply(id, confirmationLine(decision, record.opportunityId, company))
+    store.answeredReplyIds.push(id)
+    saveApprovalStore(store)
+    log(`[pipeline-approval] confirmation sent ${record.opportunityId}`)
   }
   saveApprovalStore(store)
 }
