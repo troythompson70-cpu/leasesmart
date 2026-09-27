@@ -1,7 +1,6 @@
 /**
  * Owner approvals for TGT Pipeline, run by the local helper.
- * Sends one email per row to tgates@tgttechnologies.com. A link can be used once.
- * A phone cannot open 127.0.0.1, so a reply of APPROVE or REJECT is the fallback.
+ * Troy replies APPROVE or REJECT. A phone cannot open 127.0.0.1, so the email has no link.
  * Does not email customers and does not mark VERIFIED.
  */
 import { randomBytes } from 'node:crypto'
@@ -107,8 +106,13 @@ export function consumeToken(store: ApprovalStore, token: string): TokenRecord |
 }
 
 export function decisionFromReply(body: string): ApprovalDecision | null {
-  const approve = /\bAPPROVE\b/.test(body.toUpperCase())
-  const reject = /\bREJECT\b/.test(body.toUpperCase())
+  const beforeQuote = body.split(/\r?\n(?:On .+ wrote:|-----Original Message-----|From: )/)[0] || body
+  const fresh = beforeQuote
+    .split(/\r?\n/)
+    .filter((line) => !line.trim().startsWith('>'))
+    .join('\n')
+  const approve = /\bAPPROVE\b/.test(fresh.toUpperCase())
+  const reject = /\bREJECT\b/.test(fresh.toUpperCase())
   if (approve === reject) return null
   if (approve) return 'APPROVE'
   return 'REJECT'
@@ -153,8 +157,7 @@ export function approvalLinks(token: string, origin = LOCAL_APPROVAL_ORIGIN): { 
   return { approve: `${base}APPROVE`, reject: `${base}REJECT` }
 }
 
-export function approvalMessage(row: ApprovalRow, token: string): { subject: string; body: string } {
-  const links = approvalLinks(token)
+export function approvalMessage(row: ApprovalRow, _token: string): { subject: string; body: string } {
   const subject = `TGT approval ${row.opportunityId} ${row.company}`.trim()
   const body = [
     'Owner approval is required.',
@@ -163,11 +166,7 @@ export function approvalMessage(row: ApprovalRow, token: string): { subject: str
     `Company: ${row.company}`,
     `Next action: ${row.nextAction || 'None'}`,
     '',
-    `APPROVE: ${links.approve}`,
-    `REJECT: ${links.reject}`,
-    '',
-    'A phone that is not on this computer cannot open 127.0.0.1.',
-    'Reply to this email with the single word APPROVE or REJECT.',
+    'Reply to this email with the single word APPROVE or the single word REJECT.',
   ].join('\n')
   return { subject, body }
 }
@@ -310,7 +309,7 @@ export async function handlePipelineApprovalRequest(req: IncomingMessage, res: S
 
 type ReplyMessage = { id?: string; subject?: string; bodyPreview?: string; isDraft?: boolean }
 
-/** Inbox fallback when a phone cannot open the local link. Mail.Read is required. */
+/** Reads a reply of APPROVE or REJECT. Mail.Read is required. The original approval email is ignored. */
 export async function applyApprovalReplies(log: (line: string) => void = console.log): Promise<void> {
   const res = await graphFetch(
     '/me/messages?$top=20&$select=id,subject,bodyPreview,isDraft&$orderby=receivedDateTime desc',
@@ -323,11 +322,13 @@ export async function applyApprovalReplies(log: (line: string) => void = console
   const store = loadApprovalStore()
   for (const message of body.value || []) {
     const id = text(message.id)
+    const subject = text(message.subject)
     if (!id || message.isDraft || store.appliedReplyIds.includes(id)) continue
-    const decision = decisionFromReply(`${message.subject || ''}\n${message.bodyPreview || ''}`)
+    if (!/^re:/i.test(subject)) continue
+    const decision = decisionFromReply(`${subject}\n${message.bodyPreview || ''}`)
     if (!decision) continue
     const record = Object.values(store.tokens).find(
-      (token) => !token.used && message.subject?.includes(token.opportunityId),
+      (token) => !token.used && subject.includes(token.opportunityId),
     )
     if (!record) continue
     await writeApprovalResult(record.itemId, decision)

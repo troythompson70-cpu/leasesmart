@@ -184,7 +184,7 @@ async function graphAccessToken(): Promise<string> {
         } else {
           body.set(
             'scope',
-            'https://graph.microsoft.com/Files.ReadWrite.All https://graph.microsoft.com/Sites.ReadWrite.All https://graph.microsoft.com/Mail.Send offline_access',
+            'https://graph.microsoft.com/Files.ReadWrite.All https://graph.microsoft.com/Sites.ReadWrite.All https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.Send offline_access',
           )
         }
       } else {

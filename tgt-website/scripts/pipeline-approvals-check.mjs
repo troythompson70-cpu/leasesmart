@@ -4,6 +4,7 @@
  */
 import assert from 'node:assert/strict'
 import {
+  approvalMessage,
   approvalWriteBack,
   consumeToken,
   decisionFromReply,
@@ -51,6 +52,13 @@ const closed = { ...jane, id: '7', ownerApprovalRequired: 'No' }
   assert.equal(decisionFromReply('please REJECT this'), 'REJECT')
   assert.equal(decisionFromReply('APPROVE and REJECT'), null)
   assert.equal(decisionFromReply('looking at it'), null)
+  const quoted = [
+    'APPROVE',
+    '',
+    '-----Original Message-----',
+    'Reply to this email with the single word APPROVE or REJECT.',
+  ].join('\n')
+  assert.equal(decisionFromReply(quoted), 'APPROVE')
   pass('a reply is APPROVE, REJECT, or neither')
 }
 
@@ -64,6 +72,14 @@ const closed = { ...jane, id: '7', ownerApprovalRequired: 'No' }
   assert.equal(rejected.status, 'PASS')
   assert.equal(rejected.next_action, 'Rejected by owner')
   pass('write-back clears the approval flag')
+}
+
+{
+  const message = approvalMessage(jane, 'token')
+  assert.equal(message.body.includes('127.0.0.1'), false)
+  assert.match(message.body, /single word APPROVE/)
+  assert.match(message.body, /single word REJECT/)
+  pass('the email tells Troy to reply and has no local link')
 }
 
 console.log('pipeline-approvals-check: all passed')
