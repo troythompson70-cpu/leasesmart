@@ -6,6 +6,7 @@ import { serveCommandCenter } from './server/command-center-static.ts'
 import { handleDashboardFeedRequest } from './server/dashboard-feed-http.ts'
 import { handleHealthRequest } from './server/health-http.ts'
 import { handleIntakeRequest } from './server/intake-http.ts'
+import { handlePaypalRequest } from './server/paypal.ts'
 import { startWebsiteLeadCopyLoop } from './server/website-lead-copy.ts'
 
 function localApiPlugin(): Plugin {
@@ -15,6 +16,9 @@ function localApiPlugin(): Plugin {
       startWebsiteLeadCopyLoop()
       server.middlewares.use((req, res, next) => {
         serveCommandCenter(req, res, next)
+      })
+      server.middlewares.use('/api/paypal', (req, res) => {
+        void handlePaypalRequest(req, res)
       })
       server.middlewares.use('/api/intake', (req, res) => {
         void handleIntakeRequest(req, res)
@@ -29,6 +33,9 @@ function localApiPlugin(): Plugin {
     configurePreviewServer(server) {
       server.middlewares.use((req, res, next) => {
         serveCommandCenter(req, res, next)
+      })
+      server.middlewares.use('/api/paypal', (req, res) => {
+        void handlePaypalRequest(req, res)
       })
       server.middlewares.use('/api/intake', (req, res) => {
         void handleIntakeRequest(req, res)
