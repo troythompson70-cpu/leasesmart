@@ -466,6 +466,12 @@ export function mailboxProbeUpn(): string {
   return DEFAULT_MAILBOX_PROBE_UPN
 }
 
+/** Mailbox path for app-only Graph. Delegated sign-in used a different prefix. */
+export function mailboxUserPath(suffix: string): string {
+  const tail = suffix.startsWith('/') ? suffix : `/${suffix}`
+  return `/users/${encodeURIComponent(mailboxProbeUpn())}${tail}`
+}
+
 /**
  * Read-only Graph mailbox probe. Does not POST mail or hit production /api/intake.
  * PASS only when Graph returns the Inbox folder. 401/403 is BLOCKED, not GREEN.

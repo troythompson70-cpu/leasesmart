@@ -9,7 +9,7 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { beginCycle, endCycle } from './helper-heartbeat.ts'
-import { graphFetch } from './graph-sharepoint.ts'
+import { graphFetch, mailboxUserPath } from './graph-sharepoint.ts'
 import { replaceInterval } from './process-loops.ts'
 import { easternStamp, PIPELINE_LIST_ID, TEAM_SITE_ID } from './website-lead-copy.ts'
 
@@ -329,7 +329,7 @@ export async function sendApprovalEmail(
   token: string,
 ): Promise<{ conversationId: string; sentAt: string }> {
   const message = approvalMessage(row, token)
-  const created = await graphFetch('/me/messages', {
+  const created = await graphFetch(mailboxUserPath('/messages'), {
     method: 'POST',
     body: JSON.stringify({
       subject: message.subject,
@@ -348,11 +348,11 @@ export async function sendApprovalEmail(
     const code = createdBody.error?.code || 'graph_error'
     throw new Error(`Approval email failed (HTTP ${created.status} ${code}).`)
   }
-  const sent = await graphFetch(`/me/messages/${encodeURIComponent(draftId)}/send`, { method: 'POST' })
+  const sent = await graphFetch(`${mailboxUserPath('/messages')}/${encodeURIComponent(draftId)}/send`, { method: 'POST' })
   if (sent.status === 202 || sent.ok) {
     return { conversationId, sentAt: new Date().toISOString() }
   }
-  await graphFetch(`/me/messages/${encodeURIComponent(draftId)}`, { method: 'DELETE' }).catch(() => undefined)
+  await graphFetch(`${mailboxUserPath('/messages')}/${encodeURIComponent(draftId)}`, { method: 'DELETE' }).catch(() => undefined)
   const sentBody = (await sent.json().catch(() => ({}))) as { error?: { code?: string } }
   const code = sentBody.error?.code || 'graph_error'
   throw new Error(`Approval email failed (HTTP ${sent.status} ${code}).`)
@@ -524,7 +524,7 @@ async function readJson(res: Response): Promise<{ value?: unknown[]; '@odata.nex
 async function listSentApprovalMessages(): Promise<SentApprovalMessage[]> {
   const found: SentApprovalMessage[] = []
   let next: string | null =
-    "/me/mailFolders/sentitems/messages?$top=50&$select=subject,conversationId,sentDateTime&$filter=startswith(subject,'TGT approval')"
+    `${mailboxUserPath('/mailFolders/sentitems/messages')}?$top=50&$select=subject,conversationId,sentDateTime&$filter=startswith(subject,'TGT approval')`
   while (next) {
     const res = await graphFetch(next)
     const body = await readJson(res)
@@ -574,7 +574,7 @@ function tokenForThread(message: ReplyMessage, tokens: TokenRecord[]): TokenReco
 async function readRepliesAfter(sentAt: string, log: (line: string) => void): Promise<ReplyMessage[] | null> {
   const collected: ReplyMessage[] = []
   let next: string | null =
-    '/me/messages?$top=50&$orderby=receivedDateTime desc&$select=id,subject,body,bodyPreview,isDraft,conversationId,receivedDateTime,from,sender'
+    `${mailboxUserPath('/messages')}?$top=50&$orderby=receivedDateTime desc&$select=id,subject,body,bodyPreview,isDraft,conversationId,receivedDateTime,from,sender`
   while (next) {
     const res = await graphFetch(next)
     const body = await readJson(res)
@@ -603,7 +603,7 @@ async function readRepliesAfter(sentAt: string, log: (line: string) => void): Pr
 }
 
 async function sendThreadReply(messageId: string, line: string): Promise<void> {
-  const res = await graphFetch(`/me/messages/${encodeURIComponent(messageId)}/reply`, {
+  const res = await graphFetch(`${mailboxUserPath('/messages')}/${encodeURIComponent(messageId)}/reply`, {
     method: 'POST',
     body: JSON.stringify({ comment: line }),
   })

@@ -1,0 +1,6 @@
+[functions]
+  directory = "tgt-website/netlify/functions"
+
+[context.production.environment]
+  DRY_RUN = "1"
+  GRAPH_MAILBOX_UPN = "tgates@tgttechnologies.com"

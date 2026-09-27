@@ -5,7 +5,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { cycleOverLimit, HELPER_DIR, readHeartbeat } from '../server/helper-heartbeat.ts'
 import { watchdogAction } from '../server/helper-watchdog.ts'
-import { graphFetch } from '../server/graph-sharepoint.ts'
+import { graphFetch, mailboxUserPath } from '../server/graph-sharepoint.ts'
 import { readSystemMode, writeSystemMode } from '../server/system-mode.ts'
 
 const STATE_PATH = join(HELPER_DIR, 'watchdog-state.json')
@@ -47,7 +47,7 @@ function restartHelper() {
 }
 
 async function alertOnce() {
-  const res = await graphFetch('/me/sendMail', {
+  const res = await graphFetch(mailboxUserPath('/sendMail'), {
     method: 'POST',
     body: JSON.stringify({
       message: {
