@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 
 const TENANT = 'tgttechnologies.com'
 const CLIENT_ID = '14d82eec-204b-4c2f-b7e8-296a70dab67e'
-const SCOPE = 'Files.ReadWrite.All Sites.ReadWrite.All offline_access'
+const SCOPE = 'Files.ReadWrite.All Sites.ReadWrite.All Mail.Send offline_access'
 const LOGIN = 'https://login.microsoftonline.com'
 
 function aadsts(text) {
