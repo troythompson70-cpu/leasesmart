@@ -1,43 +1,31 @@
-# Morning Review — Tuesday, September 15, 2026
+# Morning Review — Friday, September 25, 2026
 
-**LeaseSmart · TGT Technologies Inc.**
-**Build ID:** 20260915-tgt-os-outlook-audit-vault · **Branch:** cursor/tgt-os-outlook-audit-vault-9057
+**TGT OS gates · Claude Gate 1 SoT + Gate 2 A1 resume**  
+**Branch:** `cursor/gate2-a1-safe-mode-aa85`
 
-> Read this in under 2 minutes. Upload `master-vault/` files to Microsoft 365 Master Vault.
+## Gate board (reconciled)
 
-## Dashboard status — TGT OS Outlook audit
-
-| Check | Result |
+| Gate | Status |
 |---|---|
-| AppDeploy TGT OS receiving-side fixes | **REPORTED FIXED + DEPLOYED** (outside leasesmart) |
-| `OUTLOOK_INGEST_KEY` on production | **REPORTED CONFIGURED** |
-| Email body / object parse / realtime / drawer rebind / reconciliation | **REPORTED FIXED** |
-| Deploy QA (AppDeploy) | **REPORTED READY** (0 FE / 0 BE / 0 network) |
-| M365 `TGT - Email Intake` POSTs | **NEEDS LIVE VERIFY** |
-| Historical missing bodies | **BACKFILL OPTIONAL** |
-| leasesmart contains TGT OS ingest code | **NO** |
-| Strong e2e candidate in Inbox | **YES** — Max Farrell / NinjaOne 15:59Z |
+| Gate 1 | **PASS (Claude SoT)** — pending Troy independent acceptance |
+| Gate 1 re-diagnosis | **STOPPED** — do not reopen unless regression |
+| Gate 2 A1 SAFE condition save | **BLOCKED** — PA designer needs authenticated session; Option B patch script ready |
+| Gate 2 A2–D | Not started |
+| Sledgehammer cron | Remains OFF |
 
-Full report: `master-vault/cursor-reports/TGT-OS-OUTLOOK-INGESTION-AUDIT-2026-09-15.md`
+## Evidence
 
-## What Troy should do next (2 minutes)
+- Claude: `…/10 AUDIT & ACTIVITY LOG/GATE1_EVIDENCE_2026-09-24.md`
+- Claude: `…/GATE2_EVIDENCE_2026-09-25.md`
+- Cursor vault: `master-vault/cursor-reports/TGT-GATE-SOT-RECONCILE-2026-09-25.md`
+- Cursor vault: `master-vault/cursor-reports/TGT-GATE2-A1-SAFE-CONDITION-2026-09-25.md`
+- Patch tool: `scripts/gate2-a1-patch-safe-rhs.mjs`
 
-1. Open TGT Operating System.
-2. Check NinjaOne / Max Farrell card for LAST RECEIVED + body from today’s time-slot reply.
-3. In Power Automate, confirm `TGT - Email Intake` is On and ran for that message.
+## Troy / Claude — unblock A1
 
-## What Cursor did here
+1. Sign into Power Automate as `tgates@…` (desktop session with password).  
+2. Prefer **Option B**: Export `TGT-EmailFeed-IN` → run patch script `--write` → Import update → Code-view reload shows `"SAFE"`.  
+3. Or Option A: Expression pane (`fx`) string `SAFE`, Code view before/after Save.  
+4. Paste Code-view proof into `GATE2_EVIDENCE_2026-09-25.md`.
 
-- Vaulted the AppDeploy audit + live-verify checklist
-- Graph mailbox scan for real e2e candidates (no fabricated probes)
-- Could not open AppDeploy UI (no URL in repo; Lovable MCP needs auth)
-
-## Ready for commit
-
-- Docs only on `cursor/tgt-os-outlook-audit-vault-9057`
-
----
-
-**Full sprint log:** `master-vault/LeaseSmart-Sprint-Master-Log.md`
-
-**Copy for Claude:** open `master-vault/morning/HANDOFF-latest.html` and click the button.
+Cursor is not re-running Gate 1.
