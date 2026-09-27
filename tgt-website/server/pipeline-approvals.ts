@@ -9,7 +9,9 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import path from 'node:path'
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { beginCycle, endCycle } from './helper-heartbeat.ts'
 import { graphFetch } from './graph-sharepoint.ts'
+import { replaceInterval } from './process-loops.ts'
 import { easternStamp, PIPELINE_LIST_ID, TEAM_SITE_ID } from './website-lead-copy.ts'
 
 export const APPROVAL_RECIPIENT = 'tgates@tgttechnologies.com'
@@ -336,21 +338,22 @@ export async function applyApprovalReplies(log: (line: string) => void = console
   saveApprovalStore(store)
 }
 
-let loopStarted = false
-
-/** Runs once immediately, then every 15 minutes, for as long as this process stays up. */
+/** Runs once immediately, then every 15 minutes. A Vite restart replaces the previous timer. */
 export function startPipelineApprovalLoop(log: (line: string) => void = console.log): void {
-  if (loopStarted) return
-  loopStarted = true
   log('[pipeline-approval] started')
-  const tick = () => {
-    void sendPendingApprovals(log)
-      .then(() => applyApprovalReplies(log))
-      .catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : String(err)
-        log(`[pipeline-approval] tick failed: ${message}`)
-      })
-  }
-  tick()
-  setInterval(tick, APPROVAL_INTERVAL_MS)
+  replaceInterval(
+    'pipeline-approval',
+    () => {
+      beginCycle('pipeline-approval')
+      void sendPendingApprovals(log)
+        .then(() => applyApprovalReplies(log))
+        .then(() => endCycle('pipeline-approval'))
+        .catch((err: unknown) => {
+          endCycle('pipeline-approval')
+          const message = err instanceof Error ? err.message : String(err)
+          log(`[pipeline-approval] tick failed: ${message}`)
+        })
+    },
+    APPROVAL_INTERVAL_MS,
+  )
 }

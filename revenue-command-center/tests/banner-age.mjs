@@ -32,4 +32,24 @@ const safe = bannerFromFeedAge(
 assert.equal(safe.state, 'SAFE');
 assert.equal(safe.title, 'SAFE');
 
-console.log('banner-age: GREEN YELLOW RED SAFE');
+const degraded = bannerFromFeedAge(
+  {
+    updated_at: new Date(now - 5 * 60 * 1000).toISOString(),
+    system_mode: 'DEGRADED',
+  },
+  now,
+);
+assert.equal(degraded.state, 'RED');
+assert.equal(degraded.title, 'DEGRADED');
+
+const stopped = bannerFromFeedAge(
+  {
+    updated_at: new Date(now - 5 * 60 * 1000).toISOString(),
+    system_mode: 'STOPPED',
+  },
+  now,
+);
+assert.equal(stopped.state, 'RED');
+assert.equal(stopped.title, 'STOPPED');
+
+console.log('banner-age: GREEN YELLOW RED SAFE DEGRADED STOPPED');
