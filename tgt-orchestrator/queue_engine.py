@@ -15,6 +15,11 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional
 
+from approval_gates import (
+    approval_required_flag,
+    classify_failure,
+    is_approval_gate_row,
+)
 from audit_log import append_audit
 from evidence import iso_now, relative_to_os, write_evidence
 from state_machine import (
@@ -196,12 +201,52 @@ def recover_stale_locks(
     *,
     os_root: Optional[Path] = None,
 ) -> List[str]:
+    """Restart recoverable in-flight work; never bypass an approval gate.
+
+    If a stale in-flight row is already parked at auth / payment / MFA /
+    legal / insurance / owner-approval, clear the lock but keep
+    WAITING_EXTERNAL — do not flip to READY for blind retry.
+    """
     recovered: List[str] = []
     for row in rows:
         if not _is_stale(row):
             continue
         wid = row["work_order_id"]
         prev_owner = row.get("claimed_by") or ""
+        if is_approval_gate_row(row):
+            decision = classify_failure(
+                row.get("last_error") or row.get("blocker") or "approval gate",
+                row=row,
+                retryable=False,
+            )
+            row["status"] = "WAITING_EXTERNAL"
+            row["current_state"] = decision.current_state
+            row["last_completed_action"] = (
+                f"Stale lock cleared from {prev_owner}; approval gate held"
+            )
+            row["next_required_action"] = decision.next_required_action
+            row["approval_required"] = "YES"
+            row["blocker"] = (
+                f"APPROVAL_GATE_{decision.kind or 'OWNER_APPROVAL'} "
+                f"previous_owner={prev_owner}"
+            )
+            row["claimed_by"] = ""
+            row["lock_token"] = ""
+            row["lock_expires_at"] = ""
+            row["heartbeat_at"] = iso_now()
+            row["audit_status"] = "APPROVAL_GATE_HELD"
+            recovered.append(wid)
+            if os_root:
+                append_audit(
+                    os_root,
+                    {
+                        "event": "approval_gate_held_on_stale_recover",
+                        "work_order_id": wid,
+                        "previous_owner": prev_owner,
+                        "gate_kind": decision.kind,
+                    },
+                )
+            continue
         row["status"] = "READY"
         row["current_state"] = "STALE_LOCK_RECOVERED"
         row["last_completed_action"] = f"Recovered stale lock from {prev_owner}"
@@ -292,6 +337,18 @@ def claim_work_order(
             raise ClaimDenied(
                 f"{work_order_id} is READY_FOR_REVIEW; use force_reclaim_review=True "
                 "(audited) to deliberately reclaim — bare --force is insufficient"
+            )
+
+        # Approval gates stop here — 24/7 agents must not bypass auth/payment/MFA/
+        # legal/insurance/owner-approval by reclaiming WAITING_EXTERNAL.
+        if (
+            (status == "WAITING_EXTERNAL" or is_approval_gate_row(row))
+            and not (force and force_reclaim_review)
+        ):
+            raise ClaimDenied(
+                f"{work_order_id} is parked at an approval gate "
+                f"(status={status}, state={row.get('current_state')}). "
+                "Owner/human must clear the gate; use force_reclaim_review only after approval."
             )
 
         if status in IN_FLIGHT and not _is_stale(row):
@@ -495,8 +552,14 @@ def fail_blocked(
     error: str,
     evidence_location: str = "",
     retryable: bool = True,
+    gate_kind: str | None = None,
     os_root: Optional[Path] = None,
 ) -> Dict[str, str]:
+    """Record failure. Recoverable → READY retry; approval gates → WAITING_EXTERNAL.
+
+    Authentication, payment, MFA, legal, insurance, and owner-approval failures
+    never schedule automatic retry — even if retryable=True was passed.
+    """
     with queue_lock(queue_path):
         rows = load_queue(queue_path)
         row = next((r for r in rows if r["work_order_id"] == work_order_id), None)
@@ -506,27 +569,38 @@ def fail_blocked(
             raise ClaimDenied("fail rejected: lock_token mismatch")
         retries = int(row.get("retry_count") or "0") + 1
         max_retries = int(row.get("max_retries") or str(DEFAULT_MAX_RETRIES))
+        decision = classify_failure(
+            error,
+            gate_kind=gate_kind,
+            row=row,
+            retryable=retryable,
+            retries=retries,
+            max_retries=max_retries,
+        )
         row["retry_count"] = str(retries)
         row["last_error"] = error[:2000]
-        row["blocker"] = error[:500]
         row["heartbeat_at"] = iso_now()
         if evidence_location:
             row["evidence_location"] = evidence_location
-        if retryable and retries < max_retries:
-            row["status"] = "READY"
-            row["current_state"] = "RETRY_SCHEDULED"
-            row["claimed_by"] = ""
-            row["lock_token"] = ""
-            row["lock_expires_at"] = ""
-            row["next_required_action"] = f"Automatic retry {retries}/{max_retries} after failure"
+        row["status"] = decision.status
+        row["current_state"] = decision.current_state
+        row["next_required_action"] = decision.next_required_action
+        row["claimed_by"] = ""
+        row["lock_token"] = ""
+        row["lock_expires_at"] = ""
+        if decision.is_approval_gate:
+            row["approval_required"] = "YES"
+            row["blocker"] = f"APPROVAL_GATE_{decision.kind}: {error[:400]}"
+            row["audit_status"] = f"APPROVAL_GATE_{decision.kind}"
+            row["last_completed_action"] = (
+                f"Stopped at approval gate ({decision.kind}): {error[:200]}"
+            )
+        elif decision.retryable:
+            row["blocker"] = error[:500]
             row["audit_status"] = f"RETRY_{retries}"
             row["last_completed_action"] = f"Failed (retryable): {error[:200]}"
         else:
-            row["status"] = "BLOCKED"
-            row["current_state"] = "BLOCKED"
-            row["lock_token"] = ""
-            row["lock_expires_at"] = ""
-            row["next_required_action"] = "Owner gate or reroute after max retries"
+            row["blocker"] = error[:500]
             row["audit_status"] = "EXECUTION_FAILED"
             row["last_completed_action"] = f"Failed (blocked): {error[:200]}"
         save_queue(queue_path, rows)
@@ -534,11 +608,17 @@ def fail_blocked(
             append_audit(
                 os_root,
                 {
-                    "event": "failed",
+                    "event": (
+                        "approval_gate_stop"
+                        if decision.is_approval_gate
+                        else "failed"
+                    ),
                     "work_order_id": work_order_id,
                     "error": error[:500],
                     "retry_count": retries,
                     "status": row["status"],
+                    "approval_gate": decision.kind,
+                    "retryable": decision.retryable,
                 },
             )
         return dict(row)
@@ -582,6 +662,7 @@ def select_next_eligible(
     owners: Iterable[str] = ("Cursor", "Claude"),
     order: Optional[List[str]] = None,
 ) -> Optional[Dict[str, str]]:
+    """Pick next claimable work. Skips approval-gated / WAITING_EXTERNAL rows."""
     recover_stale_locks(rows)
     order = order or ["AIWO-006", "AIWO-007", "AIWO-001", "AIWO-002"]
     by_id = {r["work_order_id"]: r for r in rows}
@@ -593,6 +674,11 @@ def select_next_eligible(
             continue
         status = normalize_status(row.get("status"))
         if status not in CLAIMABLE:
+            continue
+        # Never auto-pick a row parked at an approval gate (or pre-marked YES).
+        if status == "WAITING_EXTERNAL" or is_approval_gate_row(row):
+            continue
+        if approval_required_flag(row) and status in {"BLOCKED", "WAITING"}:
             continue
         if not dependencies_satisfied(rows, row):
             continue

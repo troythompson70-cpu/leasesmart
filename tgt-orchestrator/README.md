@@ -9,11 +9,23 @@ Canonical loop:
 
 Workers never mark their own work `VERIFIED`.
 
+### 24/7 watchdog vs approval gates
+
+“Agents running 24/7” must **not** mean blindly retrying the same broken operation.
+
+| Class | Behavior |
+|-------|----------|
+| **Recoverable** (timeouts, flaky exec, stale locks) | Watchdog may clear the lock and schedule `READY` / automatic retry up to `max_retries` |
+| **Approval gates** — authentication, payment, MFA, legal, insurance, owner-approval | Stop at `WAITING_EXTERNAL` with `approval_required=YES`. No automatic retry. No reclaim without audited `force_reclaim_review` after a human clears the gate |
+
+Bypassing those gates is forbidden. Classifier: `approval_gates.py`.
+
 ## Package
 
 | File | Role |
 |------|------|
 | `state_machine.py` | Legal status transitions; blocks worker self-verify |
+| `approval_gates.py` | Classifies recoverable vs stop-at-approval failures |
 | `queue_engine.py` | Atomic claim/lock, heartbeat, stale recovery, retry, handoff |
 | `checkpoint.py` | ERR-ORCH-006/007 progress checkpoint + completion evidence guards |
 | `evidence.py` | Evidence write + read-back proof + sha256 audit pin |
