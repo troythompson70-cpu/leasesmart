@@ -1,43 +1,29 @@
-# Morning Review — Tuesday, September 15, 2026
+# Morning Review — Monday, September 28, 2026
 
-**LeaseSmart · TGT Technologies Inc.**
-**Build ID:** 20260915-tgt-os-outlook-audit-vault · **Branch:** cursor/tgt-os-outlook-audit-vault-9057
+**TGT Technologies Inc. · 24/7 Production Recovery**
+**Build ID:** 20260928-tgt-247-production-recovery · **Branch:** cursor/tgt-247-production-recovery-300b
 
-> Read this in under 2 minutes. Upload `master-vault/` files to Microsoft 365 Master Vault.
+> Read in under 2 minutes.
 
-## Dashboard status — TGT OS Outlook audit
+## Dashboard
 
 | Check | Result |
 |---|---|
-| AppDeploy TGT OS receiving-side fixes | **REPORTED FIXED + DEPLOYED** (outside leasesmart) |
-| `OUTLOOK_INGEST_KEY` on production | **REPORTED CONFIGURED** |
-| Email body / object parse / realtime / drawer rebind / reconciliation | **REPORTED FIXED** |
-| Deploy QA (AppDeploy) | **REPORTED READY** (0 FE / 0 BE / 0 network) |
-| M365 `TGT - Email Intake` POSTs | **NEEDS LIVE VERIFY** |
-| Historical missing bodies | **BACKFILL OPTIONAL** |
-| leasesmart contains TGT OS ingest code | **NO** |
-| Strong e2e candidate in Inbox | **YES** — Max Farrell / NinjaOne 15:59Z |
+| Website live | **PASS** |
+| Cart UI | **PASS** |
+| PayPal Live create-order | **FAIL** — `paypal_auth_failed` |
+| Command Center cloud E2E | **FAIL** — apex APIs 404; cutover incomplete |
+| Power Automate (Sep 27 claim) | 8 On succeeded / 2 On idle / 2 staging Off — **live re-audit pending** |
+| Agents 1–6 lanes | **STOPPED** (only this recovery agent RUNNING) |
+| Ebook | Drafts + CH02/FULL v2 on OneDrive — **voice gate** |
+| NinjaOne Mon 10am ET | **MISSING on calendar** — Max asked you to accept invite |
 
-Full report: `master-vault/cursor-reports/TGT-OS-OUTLOOK-INGESTION-AUDIT-2026-09-15.md`
+## Troy — do these first
 
-## What Troy should do next (2 minutes)
+1. Put PayPal **Live** secret into site `PAYPAL_CLIENT_SECRET` (no chat paste). Reply `done`.
+2. Accept or reschedule NinjaOne (Max Farrell) — invite not on calendar.
+3. Approve ebook voice (or reject) so Agent 5 can continue.
+4. Do **not** approve a real charge until create-order returns an approve URL after secret fix.
 
-1. Open TGT Operating System.
-2. Check NinjaOne / Max Farrell card for LAST RECEIVED + body from today’s time-slot reply.
-3. In Power Automate, confirm `TGT - Email Intake` is On and ran for that message.
-
-## What Cursor did here
-
-- Vaulted the AppDeploy audit + live-verify checklist
-- Graph mailbox scan for real e2e candidates (no fabricated probes)
-- Could not open AppDeploy UI (no URL in repo; Lovable MCP needs auth)
-
-## Ready for commit
-
-- Docs only on `cursor/tgt-os-outlook-audit-vault-9057`
-
----
-
-**Full sprint log:** `master-vault/LeaseSmart-Sprint-Master-Log.md`
-
-**Copy for Claude:** open `master-vault/morning/HANDOFF-latest.html` and click the button.
+Full report: `master-vault/cursor-reports/TGT-247-PRODUCTION-RECOVERY-2026-09-28.md`  
+OneDrive: `09 AI WORK ORDERS/TGT-247-PRODUCTION-RECOVERY-2026-09-28.md`
