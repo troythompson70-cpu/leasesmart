@@ -1,39 +1,31 @@
 <!DOCTYPE html><html><head><meta charset=utf-8><title>Handoff</title></head><body>
 <pre id="lsHandoffBlock">--- CLAUDE HANDOFF START ---
 Project: LeaseSmart / TGT Technologies Inc.
-Sprint: TGT 24/7 Production Recovery
-Build ID: 20260928-tgt-247-production-recovery + 20260928-tgt-cc-cloud-cutover
+Sprint: TGT 24/7 Production Recovery — Go cycle
+Build ID: 20260928-tgt-go-cycle
 Status: COMMITTED
-PR #42: https://github.com/troythompson70-cpu/leasesmart/pull/42 (docs; NinjaOne correction; OPEN)
-PR #43: https://github.com/troythompson70-cpu/leasesmart/pull/43 (CC Netlify packaging; draft; OPEN)
+PR #42: https://github.com/troythompson70-cpu/leasesmart/pull/42 OPEN
+PR #43: https://github.com/troythompson70-cpu/leasesmart/pull/43 OPEN (CC packaging)
 
-CORRECTION APPLIED:
-NinjaOne invite was DECLINED 2026-09-27T22:44Z (not missing). Fits Sep 20 close-out to Max. Remove accept/reschedule. Owner: Troy yes/no → CLOSED.
+Go cycle results (2026-09-28):
+- PayPal: still FAIL. Valid brand Lenovo/HP/Other → paypal_auth_failed. Wrong body → brand_required. No charge.
+- NinjaOne: CLOSED (decline intended; Troy Go).
+- PA audit: BLOCKED_LOGIN (Microsoft sign-in; no session).
+- CC apex: still 404. Packaging ready in PR #43; ChatGPT custom-domain origin unchanged.
+- Holds: no Jared replies; no duplicate pipeline creates; no real charge.
 
-What was built:
-- Vault/morning/handoff/Exception Queue corrected for NinjaOne
-- CC packaging: sync RCC→dist/command-center, _redirects, netlify.toml, dashboard-feed function (fail-closed)
-- Report: master-vault/cursor-reports/CC-CLOUD-CUTOVER-2026-09-28.md
-
-Test results:
-- test:cc-cutover PASS; test:intake-policy PASS
-- Local vite preview: /command-center/ 200; /api/dashboard-feed 503 missingEnv
-- Apex still: /command-center 404; /api/dashboard-feed 404
-- Aikido SAST: blocked pending Troy MCP sign-in
-
-Owner map:
-1 PayPal Live secret → Troy (only revenue blocker)
-2 PA M365 session → Troy
+Owner still:
+1 PayPal Live PAYPAL_CLIENT_SECRET → Troy (only revenue blocker) — reply done
+2 PA M365 sign-in → Troy
 3 Ebook voice/memo/ch02 → Troy
-4 CC live E2E → Cursor packaging done; host publish/DNS still required for apex green
-5 NinjaOne decline confirm → Troy yes/no
-6 Merge PR #42 → Troy
+4 Merge PR #42 → Troy
+5 Publish PR #43 to apex origin / DNS → Troy+Cursor (host)
 
 What Claude needs to check:
 1. Do not stamp PayPal or Command Center healthy
-2. NinjaOne accept/reschedule must stay OFF
-3. Apex 404s remain until ChatGPT custom-domain origin is replaced/published with PR #43 build
-4. No Jared replies; no duplicate pipeline creates
+2. NinjaOne stay CLOSED / accept-reschedule OFF
+3. Apex CC stays FAIL until host cutover
+4. No Jared; no duplicate creates
 --- CLAUDE HANDOFF END ---</pre>
 <style>
 .ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}

@@ -8,7 +8,7 @@
 
 ### Correction (2026-09-28, Claude-aligned)
 
-**NinjaOne:** The invite is **not** missing. Mailbox sent `Declined: TGT Technologies & NinjaOne | Overview` on **2026-09-27 22:44Z (6:44 PM ET)**. That matches the Sep 20 close-out to Max Farrell (“not to move forward”). The Mon Sep 28 10:00 AM ET slot has passed. **Remove accept/reschedule** unless Troy reopens. Owner action: Troy yes/no that the decline was intended → CLOSED.
+**NinjaOne:** The invite is **not** missing. Mailbox sent `Declined: TGT Technologies & NinjaOne | Overview` on **2026-09-27 22:44Z (6:44 PM ET)**. That matches the Sep 20 close-out to Max Farrell (“not to move forward”). The Mon Sep 28 10:00 AM ET slot has passed. **Remove accept/reschedule** unless Troy reopens. Owner action: Troy **Go** 2026-09-28 — decline intended → **CLOSED**.
 
 ---
 
@@ -21,7 +21,7 @@
 | Website public | **PASS** | `https://tgttechnologies.com/` HTTP 200; Cloudflare; Vite SPA assets `index-BkyY6VYH.js` |
 | Cart UI | **PASS** | Live bundle includes `/cart`, `$280`, brand picker, ship-to form, PayPal CTA |
 | PayPal config endpoint | **PASS (partial)** | `GET /api/paypal/config` → `environment:"live"`, `notificationsConfigured:true`, public clientId present |
-| PayPal create-order (Live auth) | **FAIL / BLOCKED** | Correct payload → `{"ok":false,"error":"paypal_auth_failed"}` — Live secret still rejected. No charge attempted. |
+| PayPal create-order (Live auth) | **FAIL / BLOCKED** | Go re-probe: `{brand:Lenovo|HP|Other,...}` → still `paypal_auth_failed`. Wrong body → `brand_required`. No charge. |
 | PayPal approve/capture/webhook/writeback/customer confirm | **BLOCKED** | Cannot proceed without Live secret fix + Troy approval for any real charge |
 | Mail delivery (prior) | **PASS (prior)** | Inbox has `TGT mailer test` 2026-09-27 19:39Z |
 
@@ -85,7 +85,7 @@ Live material items observed in mailbox (dedupe key: company+domain+thread+sourc
 
 | Company | Domain | Latest signal | CC match proven? |
 |---|---|---|---|
-| NinjaOne | ninjaone.com | Max 2026-09-26 offered Mon Sep 28 10:00 AM ET; Troy **Declined** invite 2026-09-27 22:44Z. Fits Sep 20 close-out (“not to move forward”). Slot passed. | **NO live CC match** — treat evaluation closed pending Troy yes/no |
+| NinjaOne | ninjaone.com | Declined 2026-09-27 22:44Z; Sep 20 close-out; Troy **Go** 2026-09-28 confirms intended. | **CLOSED** — no accept/reschedule; no new opp |
 | Chinron | chinron.io | Neville 2026-09-27: password reset / admin invite | **NO** |
 | Cisco / Duo | cisco.com / duosecurity.com | Jared “account ready”; Kieron MSP ticket 2179189; Duo welcome/trial | Fixture SW-DUO-CISCO only — **live match UNPROVEN** |
 | Action1 | action1.com | Weekly summary 2026-09-28 (unread) | **NO** |
@@ -112,7 +112,7 @@ Live material items observed in mailbox (dedupe key: company+domain+thread+sourc
 3. **EQ-CC-INGEST-E2E** — Outlook→write→readback→visible match not proven — Owner: Cursor (needs Graph/PA)  
 4. **EQ-AGENT-LANES-DOWN** — Agents 1–6 not running as production lanes — Owner: Cursor  
 5. **EQ-AGENT2-FLOW-UNSAVED** — Website Lead→Pipeline flow never saved — Owner: Cursor (PA designer)  
-6. **EQ-NINJAONE-CLOSED** — Meeting **declined** 2026-09-27 22:44Z (`Declined: TGT Technologies & NinjaOne | Overview`). Aligns with Sep 20 close-out to Max (“not to move forward”). Not a missing invite. Owner: Troy yes/no confirm decline was intended → then CLOSED.  
+6. **EQ-NINJAONE-CLOSED** — Meeting **declined** 2026-09-27 22:44Z (`Declined: TGT Technologies & NinjaOne | Overview`). Aligns with Sep 20 close-out to Max (“not to move forward”). Not a missing invite. Owner: Troy — **CLOSED** on Go 2026-09-28 (decline intended).  
 7. **EQ-EBOOK-VOICE-GATE** — Further rewrite blocked pending Troy voice approval — Owner: Troy  
 
 ---
