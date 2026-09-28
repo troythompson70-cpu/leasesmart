@@ -19,3 +19,9 @@ node_modules/
 sot/
 __pycache__/
 *.pyc
+
+# Synced at build time from revenue-command-center/ (do not commit)
+tgt-website/public/command-center/
+
+# Netlify CLI local state
+.netlify/
