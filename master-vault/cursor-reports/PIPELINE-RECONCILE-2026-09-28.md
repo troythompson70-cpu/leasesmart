@@ -15,5 +15,8 @@
 | Optus | — | — | not in top live hits | — | — | fixture opp-optus-coi | Keep; no create |
 | PC Matic | — | — | not in top live hits | — | — | fixture SW-016 | Keep; no create |
 | 24LiveIT / Concert / Norvet | — | — | not in top live hits this sweep | — | — | unknown | Search deeper before create |
+| NYC SBS M/WBE | sbs.nyc.gov | AAMk…AAVpyYBfAAA= | Mentor Marcos Merced / QnA Tech — Wed Oct 7 11am–12pm | 2026-09-26T11:00:59Z | IN | none | Calendar/pipeline after Troy GO; no auto RSVP |
+| NYS ESD MWBE | newnycontracts.com | AAMk…AAVpyYBdAAA= | Opportunity Showcase — Resorts World NYC Expansion | 2026-09-26T09:21:29Z | IN | none | Reconcile before create; marketing blast — triage only |
+| NYS MWBE Forum | newnycontracts.com | AAMk…AAVopXreAAA= | 2026 NYS MWBE Forum — Tue Nov 17 Albany | 2026-09-22T21:41:48Z | IN | none | Note for Troy; do not auto-register |
 
-**Status:** Reconciliation map written. Canonical SharePoint/CC write deferred until live CC readback path exists (apex APIs 404; Graph secrets absent in this env).
+**Status:** Reconciliation map written. Canonical SharePoint/CC write deferred until live CC readback path exists (apex APIs 404; Graph secrets absent in this env). No duplicate introductions sent.
