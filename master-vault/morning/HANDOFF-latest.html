@@ -3,32 +3,43 @@
 Project: LeaseSmart / TGT Technologies Inc.
 Sprint: TGT 24/7 Production Recovery
 Build ID: 20260928-tgt-247-production-recovery
-Status: COMMITTED (docs on cursor/tgt-247-production-recovery-300b)
+Status: COMMITTED
 Branch: cursor/tgt-247-production-recovery-300b
+PR: https://github.com/troythompson70-cpu/leasesmart/pull/42
+
+CORRECTION (2026-09-28):
+NinjaOne is NOT a missing invite. Mailbox sent Declined: TGT Technologies &amp; NinjaOne | Overview on 2026-09-27 22:44Z (6:44 PM ET). Fits Sep 20 close-out to Max Farrell (“not to move forward”). Remove accept/reschedule unless Troy reopens. Owner: Troy yes/no confirm decline intended → CLOSED.
 
 What was built:
-- Live re-verification across 6 workstreams
-- Vault reports + pipeline reconcile map + morning review
-- OneDrive writeback of recovery status
+- Live re-verification of all 6 workstreams
+- Vault reports + pipeline reconcile + morning review
+- OneDrive writeback + Exception Queue
+- UI evidence: ws1-homepage/cart/paypal-result.webp
 
 Test results:
-- intake-policy PASS
-- orchestrator 21/21 PASS
-- RCC AIWO-008 39/39 PASS
-- Live PayPal create-order FAIL (paypal_auth_failed)
-- Cart UI PASS; PayPal CTA BLOCKED (temporarily unavailable)
+- intake-policy PASS; orchestrator 21/21; RCC AIWO-008 39/39
+- Website PASS; Cart UI PASS
+- PayPal Live create-order FAIL (paypal_auth_failed) — revenue blocker
+- CC E2E FAIL (apex /command-center + /api/dashboard-feed 404)
 - PA live audit BLOCKED (password)
-- CC E2E FAIL (apex APIs 404)
+- Agents 1-6 STOPPED
+
+Owner map (Claude-aligned):
+1. PayPal Live secret → Troy (reply done)
+2. PA audit M365 session → Troy
+3. Ebook voice/memo/ch02 → Troy
+4. CC 404 cutover → Cursor (no Troy input)
+5. NinjaOne decline confirm → Troy yes/no
+6. Merge PR #42 → Troy
 
 What Claude needs to check:
 1. Do not stamp PayPal or Command Center healthy
-2. Owner gates: PayPal Live secret, NinjaOne calendar, ebook voice
-3. Agents 1-6 not running — recovery continues after owner secrets
-4. No duplicate pipeline creates; reconcile map only
+2. NinjaOne accept/reschedule must stay OFF the list
+3. No duplicate pipeline creates; no Jared replies
+4. Item 1 is the only revenue blocker
 
 Security: no secrets in this handoff.
---- CLAUDE HANDOFF END ---
-</pre>
+--- CLAUDE HANDOFF END ---</pre>
 <style>
 .ls-handoff-wrap{margin:24px 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 .ls-handoff-pre{background:#f8fafb;border:2px solid #e5e7eb;border-radius:12px;padding:18px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:480px;overflow:auto}

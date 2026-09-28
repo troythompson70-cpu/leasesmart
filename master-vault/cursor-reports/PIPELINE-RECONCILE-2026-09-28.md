@@ -7,7 +7,7 @@
 | Action1 | action1.com | AAMk…AAVspwSFAAA= | Weekly Update Summary by Action1 | 2026-09-28T11:06:58Z | IN | unknown live | CLAIM→reconcile only; do not create duplicate |
 | Chinron | chinron.io | AAMk…AAVr-KcwAAA= | RE: MSP NFR / Partnership Inquiry (Neville) | 2026-09-27T09:01:00Z | IN | fixture Chinron checklist only | CLAIM→password reset is owner MFA; no auto reply |
 | Chinron | chinron.io | AAMk…AAVr-KcvAAA= | Reset Your Password | 2026-09-27T08:55:54Z | IN | — | Exception Queue owner (password); do not store secrets |
-| NinjaOne | ninjaone.com | AAMk…AAVpyYB1AAA= | Re: Troy \| NinjaOne Overview — Mon Sep 28 10:00 AM ET | 2026-09-26T18:11:21Z | IN | unknown live | Meeting invite NOT on calendar — Troy accept/reschedule |
+| NinjaOne | ninjaone.com | Declined eventMessage 2026-09-27T22:44Z + Sep 20 close-out | Declined: TGT Technologies & NinjaOne \| Overview | 2026-09-27T22:44:29Z | OUT (decline) | unknown live | **CLOSED pending Troy yes/no** — not missing invite; do not accept/reschedule unless Troy reopens |
 | Cisco/Duo | cisco.com | AAMk…AAVopXstAAA= | Jared: Duo account ready | 2026-09-23T20:47:15Z | IN | fixture SW-DUO-CISCO | HARD HOLD: do not reply to Jared without Troy |
 | Cisco MSP | msp@cisco.com | ticket 2179189 thread | Confirm NFR + Managed-Customer Deployment Rights | 2026-09-22… | IN | SW-DUO-CISCO | Reconcile to existing; no new opp |
 | Acronis | acronis.com | AAMk…AAVopXsYAAA= | Marco Calle outreach | 2026-09-23T16:59:27Z | IN | unknown | CLAIM→create only if no existing Acronis opp after CC readback |

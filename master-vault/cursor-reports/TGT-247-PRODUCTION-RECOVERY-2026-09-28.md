@@ -6,6 +6,10 @@
 **Branch:** `cursor/tgt-247-production-recovery-300b`  
 **Rule:** EXECUTION → WRITE → READBACK → PERSISTENCE → VISIBLE COMMAND CENTER MATCH → INDEPENDENT VERIFICATION. Anything less = FAILED E2E.
 
+### Correction (2026-09-28, Claude-aligned)
+
+**NinjaOne:** The invite is **not** missing. Mailbox sent `Declined: TGT Technologies & NinjaOne | Overview` on **2026-09-27 22:44Z (6:44 PM ET)**. That matches the Sep 20 close-out to Max Farrell (“not to move forward”). The Mon Sep 28 10:00 AM ET slot has passed. **Remove accept/reschedule** unless Troy reopens. Owner action: Troy yes/no that the decline was intended → CLOSED.
+
 ---
 
 ## Stage scoreboard (live re-verified this run)
@@ -81,7 +85,7 @@ Live material items observed in mailbox (dedupe key: company+domain+thread+sourc
 
 | Company | Domain | Latest signal | CC match proven? |
 |---|---|---|---|
-| NinjaOne | ninjaone.com | Max Farrell 2026-09-26: reschedule Mon Sep 28 10:00 AM ET — **invite not found on Outlook calendar this run** | **NO** |
+| NinjaOne | ninjaone.com | Max 2026-09-26 offered Mon Sep 28 10:00 AM ET; Troy **Declined** invite 2026-09-27 22:44Z. Fits Sep 20 close-out (“not to move forward”). Slot passed. | **NO live CC match** — treat evaluation closed pending Troy yes/no |
 | Chinron | chinron.io | Neville 2026-09-27: password reset / admin invite | **NO** |
 | Cisco / Duo | cisco.com / duosecurity.com | Jared “account ready”; Kieron MSP ticket 2179189; Duo welcome/trial | Fixture SW-DUO-CISCO only — **live match UNPROVEN** |
 | Action1 | action1.com | Weekly summary 2026-09-28 (unread) | **NO** |
@@ -104,11 +108,11 @@ Live material items observed in mailbox (dedupe key: company+domain+thread+sourc
 ## Exception Queue (failed items with evidence)
 
 1. **EQ-PP-LIVE-AUTH** — PayPal Live create-order `paypal_auth_failed` — Owner: Troy (secret)  
-2. **EQ-CC-CLOUD-CUTOVER** — Apex CC/helper APIs 404; cloud cutover incomplete — Owner: Cursor+Troy  
+2. **EQ-CC-CLOUD-CUTOVER** — Apex `/command-center` + `/api/dashboard-feed` 404 while `/api/paypal` + `/api/intake` work — Owner: **Cursor** (no Troy input). Production router allowlists APIs; CC routes not mounted.  
 3. **EQ-CC-INGEST-E2E** — Outlook→write→readback→visible match not proven — Owner: Cursor (needs Graph/PA)  
 4. **EQ-AGENT-LANES-DOWN** — Agents 1–6 not running as production lanes — Owner: Cursor  
 5. **EQ-AGENT2-FLOW-UNSAVED** — Website Lead→Pipeline flow never saved — Owner: Cursor (PA designer)  
-6. **EQ-NINJAONE-MEETING** — Claimed Sep 28 10am ET not on calendar — Owner: Troy accept/reschedule  
+6. **EQ-NINJAONE-CLOSED** — Meeting **declined** 2026-09-27 22:44Z (`Declined: TGT Technologies & NinjaOne | Overview`). Aligns with Sep 20 close-out to Max (“not to move forward”). Not a missing invite. Owner: Troy yes/no confirm decline was intended → then CLOSED.  
 7. **EQ-EBOOK-VOICE-GATE** — Further rewrite blocked pending Troy voice approval — Owner: Troy  
 
 ---
