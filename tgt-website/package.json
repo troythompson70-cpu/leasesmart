@@ -6,13 +6,15 @@
   "scripts": {
     "dev": "vite",
     "graph:login": "node scripts/graph-login.mjs",
-    "build": "tsc -b && vite build",
+    "sync:command-center": "node scripts/sync-command-center.mjs",
+    "build": "npm run sync:command-center && tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
     "test:intake": "node --experimental-strip-types scripts/intake-validation-check.mjs && node scripts/assert-no-live-intake-probes.mjs && node --experimental-strip-types scripts/verify-dashboard-feed-check.mjs",
     "test:intake-policy": "node scripts/assert-no-live-intake-probes.mjs",
     "test:feed-verify": "node --experimental-strip-types scripts/verify-dashboard-feed-check.mjs",
     "test:website-leads": "node --experimental-strip-types scripts/website-lead-copy-check.mjs",
+    "test:cc-cutover": "node scripts/cc-cutover-check.mjs",
     "verify:dashboard-feed": "node --experimental-strip-types scripts/verify-dashboard-feed.mjs"
   },
   "dependencies": {

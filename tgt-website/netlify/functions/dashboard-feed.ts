@@ -1,5 +1,13 @@
-import type { IncomingMessage, ServerResponse } from 'node:http'
-import { graphAuthReady, missingGraphEnv, readDashboardFeedJson } from './graph-sharepoint.ts'
+/**
+ * Production /api/dashboard-feed for Netlify (or Netlify-compatible hosts).
+ * Fail-closed when Graph env is missing. Never marks VERIFIED.
+ * Types are structural (no @netlify/functions runtime dep required in this package).
+ */
+import {
+  graphAuthReady,
+  missingGraphEnv,
+  readDashboardFeedJson,
+} from '../../server/graph-sharepoint.ts'
 
 type JsonRecord = Record<string, unknown>
 
@@ -47,70 +55,61 @@ function withNewestFirst(feed: JsonRecord): JsonRecord {
   return next
 }
 
-function allowLocalOrigin(req: IncomingMessage): string {
-  const origin = String(req.headers.origin || '')
-  if (/^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i.test(origin)) return origin
-  return 'http://127.0.0.1:5173'
+function json(status: number, body: JsonRecord): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+    },
+  })
 }
 
-function sendJson(res: ServerResponse, req: IncomingMessage, status: number, body: JsonRecord): void {
-  res.statusCode = status
-  res.setHeader('Content-Type', 'application/json; charset=utf-8')
-  res.setHeader('Cache-Control', 'no-store')
-  res.setHeader('Access-Control-Allow-Origin', allowLocalOrigin(req))
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  res.end(JSON.stringify(body))
-}
-
-/**
- * Local Vite 10 Dashboard Feed proxy. Never marks VERIFIED.
- * Production path: netlify/functions/dashboard-feed.ts (same Graph read, fail-closed).
- */
-export async function handleDashboardFeedRequest(
-  req: IncomingMessage,
-  res: ServerResponse,
-): Promise<void> {
+export default async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
-    res.statusCode = 204
-    res.setHeader('Allow', 'GET, OPTIONS')
-    res.setHeader('Access-Control-Allow-Origin', allowLocalOrigin(req))
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-    res.end()
-    return
+    return new Response(null, {
+      status: 204,
+      headers: {
+        Allow: 'GET, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      },
+    })
   }
 
   if (req.method !== 'GET') {
-    sendJson(res, req, 405, { ok: false, error: 'method_not_allowed' })
-    return
+    return json(405, { ok: false, error: 'method_not_allowed' })
   }
 
   if (!graphAuthReady()) {
-    sendJson(res, req, 503, {
+    return json(503, {
       ok: false,
       verificationState: 'NOT_VERIFIED',
       error: 'Live SharePoint 10 Dashboard Feed is not connected: Graph env vars are missing.',
       missingEnv: missingGraphEnv(),
     })
-    return
   }
 
   try {
     const live = await readDashboardFeedJson()
     if (!live.feed || typeof live.feed !== 'object') {
-      sendJson(res, req, 503, {
+      return json(503, {
         ok: false,
         verificationState: 'NOT_VERIFIED',
         error: 'SharePoint 10 Dashboard Feed is not a JSON object.',
       })
-      return
     }
-    sendJson(res, req, 200, withNewestFirst(live.feed as JsonRecord))
+    return json(200, withNewestFirst(live.feed as JsonRecord))
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    sendJson(res, req, 503, {
+    return json(503, {
       ok: false,
       verificationState: 'NOT_VERIFIED',
       error: message,
     })
   }
+}
+
+export const config = {
+  path: '/api/dashboard-feed',
+  method: ['GET', 'OPTIONS'],
 }

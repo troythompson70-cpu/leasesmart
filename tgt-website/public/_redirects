@@ -1,4 +1,15 @@
 # Specific rules first. The SPA catch-all must not rewrite APIs to index.html
 # with HTTP 200 — that is a fake success and must never trip the mailbox gate.
+
+# Command Center static (synced from revenue-command-center/ at build time)
+/command-center /command-center/index.html 200
+/command-center/ /command-center/index.html 200
+
+# Dashboard feed → Netlify function (config.path also set on the function)
+/api/dashboard-feed /.netlify/functions/dashboard-feed 200
+
+# Unknown APIs stay hard-404 (do not SPA-fake success)
 /api/* /index.html 404
+
+# Website SPA
 /* /index.html 200

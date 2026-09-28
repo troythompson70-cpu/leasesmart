@@ -1,0 +1,28 @@
+# TGT website + Command Center cloud packaging.
+# Apex tgttechnologies.com currently sits on Cloudflare → custom-domains.chatgpt.site
+# (PayPal/intake only). Point production at this Netlify site (or publish dist to the
+# apex origin) to clear /command-center and /api/dashboard-feed 404s.
+
+[build]
+  base = "tgt-website"
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[context.production.environment]
+  # Fail-closed until Graph secrets are set in the Netlify UI (never in git).
+  DRY_RUN = "1"
+  GRAPH_MAILBOX_UPN = "tgates@tgttechnologies.com"
+
+[[headers]]
+  for = "/command-center/*"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store"
