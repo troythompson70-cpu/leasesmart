@@ -1,7 +1,7 @@
 /**
  * Microsoft Graph SharePoint helpers for TEAM TGT MSP.
  * Secrets stay in process env / gitignored .env. Never log values.
- * Does not mark VERIFIED. Local Vite only — not the public apex.
+ * Does not mark VERIFIED. Used by local Vite and the Netlify dashboard-feed function.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
