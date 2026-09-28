@@ -20,11 +20,7 @@ sot/
 __pycache__/
 *.pyc
 
-<<<<<<< HEAD
 # Synced at build time from revenue-command-center/ (do not commit)
-=======
-# Synced at build time from revenue-command-center/
->>>>>>> 9e2fbe8 (feat(cc): package Command Center for Netlify cloud cutover)
 tgt-website/public/command-center/
 
 # Netlify CLI local state
