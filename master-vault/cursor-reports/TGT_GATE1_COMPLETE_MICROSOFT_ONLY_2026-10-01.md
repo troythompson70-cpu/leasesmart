@@ -7,6 +7,8 @@
 > Do **not** start Gate 2 / touch `runSharePointProof()` without an explicit Troy order.  
 > All earlier Gate 1 / AppDeploy email-ingest vault docs are **SUPERSEDED** by this file.
 
+**AppDeploy REMOVED 2026-10-01** (Claude on Troy’s order): `tgt-operating-system-wjjsv6` (incl. Sledgehammer), `tgt-os-reliability-sandbox-ppxdu4`, `tgt-os-last-email-sandbox-cfnwtc` deleted; account 0 apps.
+
 **Date:** 2026-10-01  
 **Recorded by:** Cursor  
 **Closed by:** Claude (architecture gate) + Troy accept  
