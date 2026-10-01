@@ -1,9 +1,10 @@
 # TGT GATE 1 — Microsoft-only redefinition — 2026-10-01
 
 **Recorded by:** Cursor  
-**Verdict:** Gate 1 **NOT COMPLETE** — waiting on Troy one-check (`rows there` / `rows missing`)  
+**Verdict:** **SUPERSEDED by COMPLETE** — see `TGT_GATE1_COMPLETE_MICROSOFT_ONLY_2026-10-01.md`  
+**Final:** GATE 1 — COMPLETE — 100% VERIFIED — NO FURTHER MOVEMENT (`rows there` + E2E-1/2 PASS)  
 **AppDeploy:** **OUT of Gate 1** (receiver / Graph reconcile / Sledgehammer not in scope)  
-**Gate 2:** Parked until Gate 1 passes
+**Gate 2:** Unblocked for explicit start; not auto-started
 
 ## New Gate 1 definition (authoritative)
 
