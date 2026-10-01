@@ -1,5 +1,11 @@
 # TGT OS — Outlook ingestion audit (vaulted 2026-09-15)
 
+> **SUPERSEDED for TGT Command Center Gate 1 email path (2026-10-01).**  
+> Gate 1 CLOSED/FROZEN on Microsoft-only SharePoint Email Feed.  
+> Final record: `TGT_GATE1_COMPLETE_MICROSOFT_ONLY_2026-10-01.md`  
+> Do not revive AppDeploy Outlook ingest / `TGT - Email Intake` HTTP POSTs for Gate 1.  
+> This file remains historical AppDeploy audit only.
+
 **Project:** TGT Operating System (AppDeploy) + LeaseSmart vault record  
 **Build ID:** 20260915-tgt-os-outlook-audit-vault  
 **Source:** Production audit results pasted into Cursor cloud agent `Outlook ingestion audit fixes`  
