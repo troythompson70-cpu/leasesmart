@@ -1,5 +1,7 @@
 # TGT GATE 1 STATUS — 2026-09-30
 
+> **SUPERSEDED 2026-10-01.** Gate 1 is now Microsoft-only (SharePoint list SoT). AppDeploy ingest path below is retired for Gate 1. See `TGT_GATE1_MICROSOFT_ONLY_2026-10-01.md`.
+
 **Recorded by:** Cursor (cloud agent)  
 **AppDeploy app:** `tgt-operating-system-wjjsv6`  
 **Active verifier (disabled):** `sledgehammer-production-sweep-v10`  
