@@ -4,10 +4,12 @@
 > Architecture gate (Claude) closed Gate 1. Troy accepted Cursor’s SharePoint row report in place of an independent list check (`accept`).  
 > Do **not** edit `TGT-EmailFeed-IN`, `TGT-EmailFeed-OUT`, or the `TGT Email Feed` list.  
 > Do **not** reintroduce AppDeploy ingest, Graph reconcile, or Sledgehammer.  
-> Do **not** start Gate 2 / touch `runSharePointProof()` without an explicit Troy order.  
+> Gate 2 started 2026-10-01 on Troy/Claude order.  
 > All earlier Gate 1 / AppDeploy email-ingest vault docs are **SUPERSEDED** by this file.
 
 **AppDeploy REMOVED 2026-10-01** (Claude on Troy’s order): `tgt-operating-system-wjjsv6` (incl. Sledgehammer), `tgt-os-reliability-sandbox-ppxdu4`, `tgt-os-last-email-sandbox-cfnwtc` deleted; account 0 apps.
+
+**`runSharePointProof()` — RETIRED (2026-10-01).** Lived only in the deleted AppDeploy app (`tgt-operating-system-wjjsv6`). Absent from this repo; appears only in old reports. No replacement code added.
 
 **Date:** 2026-10-01  
 **Recorded by:** Cursor  
