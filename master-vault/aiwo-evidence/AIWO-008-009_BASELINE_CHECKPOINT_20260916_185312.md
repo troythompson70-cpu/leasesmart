@@ -8,6 +8,7 @@
 - last_completed_step: STEP_0_LOAD_MANDATORY_SOURCES
 - current_step: STEP_1_REPOSITORY_TRUTH
 - next_step: STEP_2_OUTLOOK_INGESTION_FIX
+- note_2026-10-01: SUPERSEDED for Command Center Gate 1 email — Gate 1 FROZEN on Microsoft-only SharePoint Email Feed (`TGT_GATE1_COMPLETE_MICROSOFT_ONLY_2026-10-01.md`). Do not revive AppDeploy Outlook ingest for Gate 1.
 - files/components_touched: (none yet — baseline only)
 - commands/tests_and_exit_codes: |
   - git fetch origin main => 0

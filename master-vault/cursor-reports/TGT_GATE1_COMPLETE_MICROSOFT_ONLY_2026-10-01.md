@@ -1,7 +1,15 @@
 # GATE 1 — COMPLETE — 100% VERIFIED — NO FURTHER MOVEMENT
 
+> **FINAL GATE 1 RECORD — FROZEN 2026-10-01.**  
+> Architecture gate (Claude) closed Gate 1. Troy accepted Cursor’s SharePoint row report in place of an independent list check (`accept`).  
+> Do **not** edit `TGT-EmailFeed-IN`, `TGT-EmailFeed-OUT`, or the `TGT Email Feed` list.  
+> Do **not** reintroduce AppDeploy ingest, Graph reconcile, or Sledgehammer.  
+> Do **not** start Gate 2 / touch `runSharePointProof()` without an explicit Troy order.  
+> All earlier Gate 1 / AppDeploy email-ingest vault docs are **SUPERSEDED** by this file.
+
 **Date:** 2026-10-01  
 **Recorded by:** Cursor  
+**Closed by:** Claude (architecture gate) + Troy accept  
 **Definition:** Microsoft-only (AppDeploy out)  
 **SoT:** SharePoint list `TGT Email Feed`  
 **Flow:** `TGT-EmailFeed-IN` (`bafc73d1-854d-4543-b6a2-b3a2240988e7`)
@@ -10,7 +18,7 @@
 
 **GATE 1 — COMPLETE — 100% VERIFIED — NO FURTHER MOVEMENT.**
 
-Freeze Gate 1. AppDeploy ingest / Graph reconcile / Sledgehammer stay **out** of this gate. Gate 2 may proceed when ordered (still parked until explicit start).
+**FROZEN.** AppDeploy ingest / Graph reconcile / Sledgehammer stay **out** of this pipeline. Gate 2 starts only on an explicit order from Troy.
 
 ## One-check result
 

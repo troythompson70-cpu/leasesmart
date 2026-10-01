@@ -6,9 +6,18 @@ This log records sprint commands, Claude reviews, GO/NO-GO decisions, and Cursor
 Secrets are stripped automatically — never paste API keys or passwords here.
 
 ---
+## 2026-10-01 — GATE 1 CLOSED / FROZEN — Microsoft-only Email Feed
+
+**Final record:** `master-vault/cursor-reports/TGT_GATE1_COMPLETE_MICROSOFT_ONLY_2026-10-01.md`  
+Path: Outlook → TGT-EmailFeed-IN → SharePoint `TGT Email Feed`.  
+AppDeploy ingest / Graph reconcile / Sledgehammer out. Gate 2 only on explicit Troy order.  
+Earlier AppDeploy Outlook-ingest vault docs marked SUPERSEDED.
+
+---
 ## 2026-09-15 — TGT-OS-OUTLOOK-INGESTION-AUDIT — Cursor Report
 
-**Build ID:** 20260915-tgt-os-outlook-audit-vault
+**Build ID:** 20260915-tgt-os-outlook-audit-vault  
+**Status for Gate 1 email path:** SUPERSEDED 2026-10-01 (see freeze entry above).
 
 Vaulted AppDeploy TGT OS Outlook ingestion audit (items 1–15). Receiving-side fixes reported deployed outside leasesmart. Item 14 (M365 Email Intake flow delivery) still needs Troy live verify; Max Farrell/NinjaOne 15:59Z Inbox message is the primary e2e candidate. No AppDeploy code changes in this repo. Report: `master-vault/cursor-reports/TGT-OS-OUTLOOK-INGESTION-AUDIT-2026-09-15.md`.
 

@@ -1,5 +1,10 @@
 # Morning Review — Tuesday, September 15, 2026
 
+> **SUPERSEDED for Command Center Gate 1 email (2026-10-01).**  
+> Gate 1 CLOSED/FROZEN — Microsoft-only SharePoint Email Feed.  
+> Final: `master-vault/cursor-reports/TGT_GATE1_COMPLETE_MICROSOFT_ONLY_2026-10-01.md`  
+> Do not chase AppDeploy `OUTLOOK_INGEST_KEY` / `TGT - Email Intake` POSTs for Gate 1.
+
 **LeaseSmart · TGT Technologies Inc.**
 **Build ID:** 20260915-tgt-os-outlook-audit-vault · **Branch:** cursor/tgt-os-outlook-audit-vault-9057
 

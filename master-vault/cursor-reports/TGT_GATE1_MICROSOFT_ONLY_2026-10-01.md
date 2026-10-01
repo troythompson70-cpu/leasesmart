@@ -1,10 +1,14 @@
 # TGT GATE 1 — Microsoft-only redefinition — 2026-10-01
 
+> **SUPERSEDED / NOT FINAL.** Gate 1 is CLOSED and FROZEN.  
+> Final record: `TGT_GATE1_COMPLETE_MICROSOFT_ONLY_2026-10-01.md`  
+> Do not execute the “ready directives” below. Do not edit EmailFeed flows or the list.
+
 **Recorded by:** Cursor  
 **Verdict:** **SUPERSEDED by COMPLETE** — see `TGT_GATE1_COMPLETE_MICROSOFT_ONLY_2026-10-01.md`  
 **Final:** GATE 1 — COMPLETE — 100% VERIFIED — NO FURTHER MOVEMENT (`rows there` + E2E-1/2 PASS)  
 **AppDeploy:** **OUT of Gate 1** (receiver / Graph reconcile / Sledgehammer not in scope)  
-**Gate 2:** Unblocked for explicit start; not auto-started
+**Gate 2:** Starts only on explicit Troy order
 
 ## New Gate 1 definition (authoritative)
 

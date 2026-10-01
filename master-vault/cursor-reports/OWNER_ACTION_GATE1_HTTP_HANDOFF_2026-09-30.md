@@ -1,14 +1,12 @@
-# SUPERSEDED — 2026-10-01
+# SUPERSEDED — 2026-10-01 — DO NOT EXECUTE
 
-**Do not execute this AppDeploy HTTP handoff.**
+**Do not execute this AppDeploy HTTP handoff.**  
+**Premium HTTP connector is unavailable; TGT has no Power Automate Premium.**
 
-Gate 1 was redefined as **Microsoft-only**:
+Gate 1 is **CLOSED and FROZEN** on the Microsoft-only path:
 
-Outlook → TGT-EmailFeed-IN → SharePoint list `TGT Email Feed` (row within ~2 minutes).
+Outlook → TGT-EmailFeed-IN → SharePoint list `TGT Email Feed`.
 
-AppDeploy ingest / Graph reconcile / Sledgehammer are **out of Gate 1**.
+Final record: `TGT_GATE1_COMPLETE_MICROSOFT_ONLY_2026-10-01.md`
 
-See instead:
-
-- `TGT_GATE1_MICROSOFT_ONLY_2026-10-01.md`
-- Troy one-check: reply `rows there` or `rows missing` on the SharePoint list (newest).
+AppDeploy ingest / Graph reconcile / Sledgehammer remain out of this pipeline.
