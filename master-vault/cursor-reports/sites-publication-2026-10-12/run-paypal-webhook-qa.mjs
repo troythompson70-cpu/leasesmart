@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { CHECKOUT_PRICE, TEST_CHECKOUT_PRICE, handlePayPalCaptureOrder, handlePayPalConfig, handlePayPalCreateOrder, handlePayPalWebhook, PAYPAL_LIVE_API } from '../server/paypal.js'
+import { CHECKOUT_PRICE, TEST_CHECKOUT_PRICE, handlePayPalCaptureOrder, handlePayPalConfig, handlePayPalCreateOrder, handlePayPalWebhook, PAYPAL_LIVE_API } from './paypal.js'
 
 const env = {
   PAYPAL_CLIENT_ID: 'live-client-id',

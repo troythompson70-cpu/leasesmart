@@ -11,12 +11,24 @@ export default function PayPalCheckout({ testMode = false } = {}) {
   const [status, setStatus] = useState('ready');
   const [message, setMessage] = useState('');
   const [brand, setBrand] = useState('');
+  const [productId, setProductId] = useState('');
+  const [products, setProducts] = useState([]);
   const [shipTo, setShipTo] = useState(emptyShip);
-  const priceLabel = testMode ? '$1.00' : '$280.00';
+  const selected = products.find((product) => product.id === productId);
+  const priceLabel = testMode ? '$1.00' : (selected?.amount ? `$${selected.amount}` : '$280.00');
 
   function updateShip(field, value) {
     setShipTo((current) => ({ ...current, [field]: value }));
   }
+
+  useEffect(() => {
+    fetch('/api/paypal/products')
+      .then((response) => response.json())
+      .then((body) => {
+        if (Array.isArray(body?.products)) setProducts(body.products.filter((product) => product.id !== 'ebook-ai-made-simple'));
+      })
+      .catch(() => setProducts([]));
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -51,9 +63,9 @@ export default function PayPalCheckout({ testMode = false } = {}) {
   async function startCheckout() {
     const postal = shipTo.postalCode.trim();
     const state = shipTo.state.trim().toUpperCase();
-    if (!['Lenovo', 'HP', 'Other'].includes(brand)) {
+    if (!productId && !['Lenovo', 'HP', 'Other'].includes(brand)) {
       setStatus('error');
-      setMessage('Choose Lenovo, HP, or Other.');
+      setMessage('Choose a product.');
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shipTo.email.trim())) {
@@ -73,7 +85,8 @@ export default function PayPalCheckout({ testMode = false } = {}) {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          brand,
+          brand: selected?.brand || brand,
+          productId: productId || undefined,
           testOrder: testMode,
           email: shipTo.email.trim(),
           shipTo: { name: shipTo.name, line1: shipTo.line1, line2: shipTo.line2, city: shipTo.city, state, postalCode: postal, country: 'US' },
@@ -108,12 +121,15 @@ export default function PayPalCheckout({ testMode = false } = {}) {
               <legend className="font-display text-lg font-semibold text-navy-900">Laptop</legend>
               <p className="mt-1 text-sm text-slate-muted">{testMode ? 'Choose one test brand. Same $1 test price. No shipment.' : 'Choose one. Same $280 price. 90-day hardware warranty.'}</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                {['Lenovo', 'HP', 'Other'].map((choice) => (
-                  <label key={choice} className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-semibold ${brand === choice ? 'border-navy-900 bg-navy-900 text-white' : 'border-slate-line text-navy-900'}`}>
-                    <input className="sr-only" type="radio" name="laptop-brand" value={choice} checked={brand === choice} onChange={() => setBrand(choice)} />
-                    {choice}
-                  </label>
-                ))}
+                {(products.length ? products : ['Lenovo', 'HP', 'Other'].map((choice) => ({ id: '', brand: choice, name: choice, amount: '280.00' }))).map((choice) => {
+                  const active = choice.id ? productId === choice.id : brand === choice.brand;
+                  return (
+                    <label key={choice.id || choice.brand} className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-semibold ${active ? 'border-navy-900 bg-navy-900 text-white' : 'border-slate-line text-navy-900'}`}>
+                      <input className="sr-only" type="radio" name="laptop-brand" value={choice.id || choice.brand} checked={active} onChange={() => { setProductId(choice.id); setBrand(choice.brand || ''); }} />
+                      {choice.name}
+                    </label>
+                  );
+                })}
               </div>
             </fieldset>
             <div className="sm:col-span-2">

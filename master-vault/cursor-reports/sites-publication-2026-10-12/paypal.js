@@ -41,8 +41,70 @@ function testCheckoutEnabled(env) {
   return env?.PAYPAL_TEST_CHECKOUT_ENABLED === 'true'
 }
 
-function checkoutAmount(body, env) {
-  return body?.testOrder === true && testCheckoutEnabled(env) ? TEST_CHECKOUT_PRICE : CHECKOUT_PRICE
+const DEFAULT_PRODUCTS = [
+  { id: 'laptop-lenovo', brand: 'Lenovo', name: 'Refurbished Lenovo laptop', amount: CHECKOUT_PRICE, currency: CHECKOUT_CURRENCY, hidden: false, purchasable: true },
+  { id: 'laptop-hp', brand: 'HP', name: 'Refurbished HP laptop', amount: CHECKOUT_PRICE, currency: CHECKOUT_CURRENCY, hidden: false, purchasable: true },
+  { id: 'laptop-other', brand: 'Other', name: 'Refurbished Other laptop', amount: CHECKOUT_PRICE, currency: CHECKOUT_CURRENCY, hidden: false, purchasable: true },
+  { id: 'ebook-ai-made-simple', brand: '', name: 'AI Made Simple', amount: null, currency: CHECKOUT_CURRENCY, hidden: true, purchasable: false },
+]
+
+function moneyAmount(value) {
+  return /^\d+\.\d{2}$/.test(String(value || '')) && value !== '0.00'
+}
+
+function normalizeProduct(item) {
+  if (!item || typeof item.id !== 'string' || !item.id.trim()) return null
+  const hidden = item.hidden === true || item.purchasable === false
+  const brand = clean(item.brand, 20)
+  const name = clean(item.name, 80)
+  if (!name) return null
+  if (hidden) return { id: item.id.trim(), brand, name, amount: null, currency: CHECKOUT_CURRENCY, hidden: true, purchasable: false }
+  if (!moneyAmount(item.amount) || (item.currency && item.currency !== CHECKOUT_CURRENCY)) return null
+  return { id: item.id.trim(), brand, name, amount: item.amount, currency: CHECKOUT_CURRENCY, hidden: false, purchasable: true }
+}
+
+export function catalogProducts(env) {
+  if (env?.PRODUCT_CATALOG == null || env.PRODUCT_CATALOG === '') return DEFAULT_PRODUCTS.map((item) => ({ ...item }))
+  let parsed
+  try {
+    parsed = JSON.parse(env.PRODUCT_CATALOG)
+  } catch {
+    return { error: 'catalog_invalid', status: 500 }
+  }
+  if (!Array.isArray(parsed)) return { error: 'catalog_invalid', status: 500 }
+  const products = []
+  for (const item of parsed) {
+    const product = normalizeProduct(item)
+    if (!product) return { error: 'catalog_invalid', status: 500 }
+    products.push(product)
+  }
+  return products
+}
+
+function findPurchasable(products, key) {
+  return products.find((product) => product.purchasable && (product.id === key || product.brand === key)) || null
+}
+
+export function resolveCheckout(body, env) {
+  const products = catalogProducts(env)
+  if (products.error) return products
+  let product
+  if (body?.productId) {
+    product = products.find((item) => item.id === body.productId) || null
+    if (!product || !product.purchasable) return { error: 'product_unavailable', status: 403 }
+  } else {
+    const brand = readBrand(body)
+    if (!brand) return { error: 'brand_required', status: 400 }
+    product = findPurchasable(products, brand)
+    if (!product) return { error: 'product_unavailable', status: 403 }
+  }
+  let amount = product.amount
+  if (body?.testOrder === true) {
+    if (!testCheckoutEnabled(env)) return { error: 'test_checkout_disabled', status: 403 }
+    amount = TEST_CHECKOUT_PRICE
+  }
+  if (body?.amount != null && body.amount !== '' && String(body.amount) !== amount) return { error: 'amount_not_allowed', status: 409 }
+  return { product, amount, brand: product.brand || product.id, name: product.name }
 }
 
 function orderAmountAllowed(order, env) {
@@ -51,8 +113,11 @@ function orderAmountAllowed(order, env) {
   const currency = unit?.amount?.currency_code
   if (currency !== CHECKOUT_CURRENCY) return false
   if (value === CHECKOUT_PRICE) return true
-  if (value !== TEST_CHECKOUT_PRICE || !testCheckoutEnabled(env)) return false
-  return String(unit?.items?.[0]?.name || '').includes('TGT TEST ORDER')
+  if (value === TEST_CHECKOUT_PRICE) return testCheckoutEnabled(env) && String(unit?.items?.[0]?.name || '').includes('TGT TEST ORDER')
+  const products = catalogProducts(env)
+  if (products.error) return false
+  const product = findPurchasable(products, unit?.custom_id)
+  return Boolean(product && product.amount === value)
 }
 
 function checkoutItemName(brand, amount) {
@@ -358,14 +423,14 @@ export async function handlePayPalCreateOrder(request, env, fetchImpl = fetch) {
     return jsonResponse({ ok: false, error: 'ship_to_required' }, 400)
   }
   const shipping = readShipping(body)
-  const brand = readBrand(body)
   const email = readBuyerEmail(body)
   if (!shipping) return jsonResponse({ ok: false, error: 'ship_to_required' }, 400)
-  if (!brand) return jsonResponse({ ok: false, error: 'brand_required' }, 400)
   if (!email) return jsonResponse({ ok: false, error: 'email_required' }, 400)
-  if (body?.testOrder === true && !testCheckoutEnabled(env)) return jsonResponse({ ok: false, error: 'test_checkout_disabled' }, 403)
-  const amount = checkoutAmount(body, env)
-  const itemName = checkoutItemName(brand, amount)
+  const resolved = resolveCheckout(body, env)
+  if (resolved.error) return jsonResponse({ ok: false, error: resolved.error }, resolved.status)
+  const amount = resolved.amount
+  const brand = resolved.brand
+  const itemName = amount === TEST_CHECKOUT_PRICE ? checkoutItemName(brand, amount) : resolved.name
   const itemDescription = amount === TEST_CHECKOUT_PRICE ? `${email} | TGT TEST ORDER - DO NOT SHIP` : email
   try {
     const response = await paypalRequest('/v2/checkout/orders', env, fetchImpl, {
@@ -375,7 +440,7 @@ export async function handlePayPalCreateOrder(request, env, fetchImpl = fetch) {
         intent: 'CAPTURE',
         purchase_units: [{
           description: checkoutDescription(brand, amount),
-          custom_id: brand,
+          custom_id: resolved.product.id,
           amount: {
             currency_code: CHECKOUT_CURRENCY,
             value: amount,
@@ -488,6 +553,22 @@ export async function handlePayPalWebhook(request, env, fetchImpl = fetch) {
     if (confirmation) buyerConfirmed = (await deliverBuyerConfirmation(env, confirmation, fetchImpl)).delivered === true
   }
   return jsonResponse({ ok: true, accepted: ALLOWED_EVENTS.has(event.event_type), creates: 0, ownerNotified, buyerConfirmed }, 200)
+}
+
+export function handlePayPalProducts(request, env) {
+  if (request.method !== 'GET') return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405, { allow: 'GET' })
+  const products = catalogProducts(env)
+  if (products.error) return jsonResponse({ ok: false, error: products.error }, products.status)
+  return jsonResponse({
+    ok: true,
+    products: products.filter((product) => product.purchasable && !product.hidden).map((product) => ({
+      id: product.id,
+      name: product.name,
+      brand: product.brand || null,
+      amount: product.amount,
+      currency: product.currency,
+    })),
+  })
 }
 
 export function handlePayPalConfig(request, env) {
