@@ -80,7 +80,7 @@ export default function PayPalCheckout({ testMode = false } = {}) {
         }),
       });
       const body = await response.json().catch(() => null);
-      if (!response.ok || !body?.approveUrl) throw new Error('create_failed');
+      if (!response.ok || !body?.approveUrl) throw new Error(body?.error || 'create_failed');
       window.location.assign(body.approveUrl);
     } catch {
       setStatus('error');

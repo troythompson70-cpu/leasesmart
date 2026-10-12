@@ -25,7 +25,7 @@ That server call is the broken path. Do not send it again to “confirm.”
 | PayPal JS SDK script for that client id | HTTP 200, `application/javascript` |
 | `/cart` page | HTTP 200, shows **$280.00** and **Pay $280.00 with PayPal** |
 
-The public client id is enough for PayPal’s browser SDK (`paypal.Buttons`). The stored server secret is what PayPal rejects. Checkout has to use the SDK when `create-order` returns `paypal_auth_failed`.
+The public client id loads PayPal’s browser SDK. Loading that script is not a payment. A browser `actions.order.create` lets the buyer change the amount, and `actions.order.capture()` never checks that PayPal captured `280.00`. That fallback was removed. Do not put it back.
 
 ## Failed — do not repeat
 
@@ -39,12 +39,19 @@ The public client id is enough for PayPal’s browser SDK (`paypal.Buttons`). Th
 | `/ai-made-simple` | Browser gets the homepage. Other clients get HTTP 404 `Not found`. Live JS has no `ai-made-simple` | Treat HTTP 200 as the ebook page |
 | Local PayPal button iframe wait | Timed out once. Stopped. | Rerun that screenshot loop |
 
-## Fix written, not published
+## Prepared source, not published
 
-`master-vault/cursor-reports/sites-paypal-sdk/PayPalCheckout.jsx`
+`master-vault/cursor-reports/sites-publication-2026-10-12/`
 
-On `paypal_auth_failed` for the $280 cart, the page loads `https://www.paypal.com/sdk/js` with the client id from `/api/paypal/config` and renders PayPal’s own button for **$280.00**. The server create-order path stays first, so a later good secret still redirects to PayPal’s approve URL.
+- `PayPalCheckout.jsx` only redirects to the server `approveUrl`. It does not load the PayPal JS SDK and it does not capture in the browser.
+- `paypal.js` sets the order amount to `280.00` on the server. Capture loads the order first and returns `409 amount_not_allowed` unless the currency is `USD` and the amount is `280.00`. A `1.00` order is allowed only when `PAYPAL_TEST_CHECKOUT_ENABLED` is exactly `true` and the item name contains `TGT TEST ORDER`. Leave that flag off.
+- `accessToken` trims the client id and secret. Trim does not repair a secret PayPal has already rejected.
+- Local QA, mocked PayPal, no live call: `PASS` including the `$1` tamper case, which did not reach capture.
 
-In the Sites checkout, `server/paypal.js` `accessToken` now trims the client id and secret before the OAuth call. That file is in the Sites source tree used for this session, not in the LeaseSmart app that Netlify ships.
+The ebook route is already in the Sites source: `src/App.jsx` renders `EbookLanding` for `/ai-made-simple` and `/ebook`. `scripts/build-sites-worker.mjs` lists both paths. `public/sitemap.xml` includes `/ai-made-simple`.
 
-`tgttechnologies.com` is still the old bundle. This repo does not publish that host. Do not deploy LeaseSmart and expect the cart to change.
+`tgttechnologies.com` is still the old bundle. This repo does not publish that host. Do not deploy LeaseSmart or Netlify and expect the cart to change.
+
+## Single authorization still required
+
+A signed-in owner session for ChatGPT Sites project `appgprj_6a8fb5d9596c8191a045ee1e5744fffd` must replace the stored Live `PAYPAL_CLIENT_SECRET` with the current secret from the same PayPal app as the public client id, then save and deploy this source. Do not paste the secret into chat, git, or this file. Do not retry git push, Codex login, or 1Password from this machine.
