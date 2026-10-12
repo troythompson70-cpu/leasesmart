@@ -63,3 +63,15 @@ No website source, PayPal secret, Command Center file, or hosting environment wa
 ## Tests
 
 Live route and PayPal probes above. No LeaseSmart unit suite was required because application code was not changed. No production deploy was run.
+
+## CEO follow-up — 2026-10-12
+
+Troy replied `ceo yu do it` (treat as approval to finish the blocked publish and PayPal secret placement).
+
+Actions taken after that approval:
+
+- 1Password MCP authentication timed out, so no vault item was opened and no PayPal secret was read or written.
+- `git ls-remote` on the Sites remote still stops with `could not read Username for 'https://git.chatgpt-team.site'`. This machine has no Sites git credential and no checkout that contains commit `cd885d5d5db2f84268e43bb71c51c14ac4666b68` as a git object. The OneDrive tarball is a source snapshot without `.git`, so that exact commit cannot be recreated or pushed from here.
+- No second PayPal create-order. No capture. No booking submit. No Command Center edit. No deploy.
+
+Still blocked on a Sites git login for project `appgprj_6a8fb5d9596c8191a045ee1e5744fffd`, then a save/deploy of that commit, then a Live secret that PayPal accepts.
