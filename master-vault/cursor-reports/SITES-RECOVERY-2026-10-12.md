@@ -1,5 +1,7 @@
 # TGT website recovery — 2026-10-12
 
+Correction: this work is the TGT Website, Sites project `appgprj_6a8fb5d9596c8191a045ee1e5744fffd`. It is not a LeaseSmart release. Do not install the cart into the LeaseSmart repository.
+
 Project: TGT Website. Sites project `appgprj_6a8fb5d9596c8191a045ee1e5744fffd`.
 Host: `https://tgttechnologies.com` (CNAME `custom-domains.chatgpt.site`).
 Not a LeaseSmart or Netlify deploy. Command Center was not touched.
