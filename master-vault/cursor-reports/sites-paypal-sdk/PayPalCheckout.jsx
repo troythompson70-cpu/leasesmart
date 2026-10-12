@@ -1,29 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+// Cart UI for the existing TGT Sites project only.
+// This file does not create or capture a PayPal order.
+// server/paypal.js sets the charge at 280.00 and captures it after PayPal approval.
+// Do not create the PayPal order in the browser. The server owns the amount and the capture.
+
+import { useEffect, useState } from 'react';
 
 const emptyShip = { name: '', email: '', line1: '', line2: '', city: '', state: '', postalCode: '' };
-
-function loadPayPalSdk(clientId) {
-  if (window.paypal) return Promise.resolve();
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=capture&commit=true`;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('sdk_failed'));
-    document.body.appendChild(script);
-  });
-}
 
 export default function PayPalCheckout({ testMode = false } = {}) {
   const [status, setStatus] = useState('ready');
   const [message, setMessage] = useState('');
   const [brand, setBrand] = useState('');
   const [shipTo, setShipTo] = useState(emptyShip);
-  const [sdkReady, setSdkReady] = useState(false);
-  const pendingRef = useRef(null);
-  const buttonHost = useRef(null);
   const priceLabel = testMode ? '$1.00' : '$280.00';
-  const amount = testMode ? '1.00' : '280.00';
 
   function updateShip(field, value) {
     setShipTo((current) => ({ ...current, [field]: value }));
@@ -59,78 +48,6 @@ export default function PayPalCheckout({ testMode = false } = {}) {
       });
   }, []);
 
-  useEffect(() => {
-    if (!sdkReady || !window.paypal || !buttonHost.current) return undefined;
-    const host = buttonHost.current;
-    host.replaceChildren();
-    const buttons = window.paypal.Buttons({
-      style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal' },
-      createOrder: (_data, actions) => {
-        const order = pendingRef.current;
-        if (!order) return Promise.reject(new Error('missing_order'));
-        const shipping = {
-          name: { full_name: order.name },
-          address: {
-            address_line_1: order.line1,
-            admin_area_2: order.city,
-            admin_area_1: order.state,
-            postal_code: order.postalCode,
-            country_code: 'US',
-          },
-        };
-        if (order.line2) shipping.address.address_line_2 = order.line2;
-        return actions.order.create({
-          intent: 'CAPTURE',
-          purchase_units: [{
-            description: `Refurbished ${order.brand} laptop, 90-day hardware warranty`,
-            custom_id: order.brand,
-            amount: {
-              currency_code: 'USD',
-              value: order.amount,
-            },
-            items: [{
-              name: `Refurbished ${order.brand} laptop`,
-              description: order.email,
-              quantity: '1',
-              category: 'PHYSICAL_GOODS',
-              unit_amount: { currency_code: 'USD', value: order.amount },
-            }],
-            shipping,
-          }],
-        });
-      },
-      onApprove: async (_data, actions) => {
-        const result = await actions.order.capture();
-        if (result?.status !== 'COMPLETED') throw new Error('capture_failed');
-        setStatus('complete');
-        setMessage(`Payment complete for $${pendingRef.current?.amount || amount}. PayPal has the order. TGT will ship to the address you entered.`);
-      },
-      onCancel: () => {
-        setStatus('ready');
-        setMessage('Checkout was cancelled. The laptop is still in the cart.');
-      },
-      onError: () => {
-        setStatus('error');
-        setMessage('PayPal could not open checkout. Use the PayPal button again.');
-      },
-    });
-    buttons.render(host);
-    return () => {
-      try { buttons.close(); } catch { /* button already closed */ }
-    };
-  }, [sdkReady, amount]);
-
-  async function openDirectPayPal(order) {
-    const configResponse = await fetch('/api/paypal/config');
-    const config = await configResponse.json().catch(() => null);
-    if (!configResponse.ok || !config?.clientId) throw new Error('config_failed');
-    pendingRef.current = order;
-    await loadPayPalSdk(config.clientId);
-    setSdkReady(true);
-    setStatus('ready');
-    setMessage('Use the PayPal button below. The charge stays ' + priceLabel + '.');
-  }
-
   async function startCheckout() {
     const postal = shipTo.postalCode.trim();
     const state = shipTo.state.trim().toUpperCase();
@@ -163,32 +80,9 @@ export default function PayPalCheckout({ testMode = false } = {}) {
         }),
       });
       const body = await response.json().catch(() => null);
-      if (response.ok && body?.approveUrl) {
-        window.location.assign(body.approveUrl);
-        return;
-      }
-      if (body?.error === 'paypal_auth_failed' && !testMode) {
-        await openDirectPayPal({
-          brand,
-          email: shipTo.email.trim(),
-          name: shipTo.name.trim(),
-          line1: shipTo.line1.trim(),
-          line2: shipTo.line2.trim(),
-          city: shipTo.city.trim(),
-          state,
-          postalCode: postal,
-          amount,
-        });
-        return;
-      }
-      throw new Error(body?.error || 'create_failed');
-    } catch (err) {
-      if (err instanceof Error && err.message === 'sdk_failed') {
-        setStatus('error');
-        setMessage('PayPal checkout is temporarily unavailable.');
-        return;
-      }
-      if (sdkReady) return;
+      if (!response.ok || !body?.approveUrl) throw new Error('create_failed');
+      window.location.assign(body.approveUrl);
+    } catch {
       setStatus('error');
       setMessage('PayPal checkout is temporarily unavailable.');
     }
@@ -257,11 +151,10 @@ export default function PayPalCheckout({ testMode = false } = {}) {
           </form>
           <div className="flex flex-col gap-4 border-t border-slate-line bg-slate-soft/50 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
             <p className="text-base font-semibold text-navy-900">Total {priceLabel}</p>
-            <button type="button" className="btn-primary" disabled={status === 'working' || status === 'complete' || sdkReady} onClick={startCheckout}>
+            <button type="button" className="btn-primary" disabled={status === 'working' || status === 'complete'} onClick={startCheckout}>
               {status === 'working' ? 'Please wait…' : status === 'complete' ? 'Payment complete' : `Pay ${priceLabel} with PayPal`}
             </button>
           </div>
-          <div ref={buttonHost} className={sdkReady ? 'px-6 pb-6 sm:px-8' : 'hidden'} />
           {message ? <p className="px-6 pb-6 text-sm text-slate-muted sm:px-8" role="status">{message}</p> : null}
           <div className="border-t border-slate-line px-6 py-4 sm:px-8">
             <a href="/#current-offer" className="text-sm font-semibold text-brand-blue hover:text-navy-900">
