@@ -39,6 +39,8 @@ That proves the unpublished server path. It does not prove a live charge. Loadin
 
 `accessToken` in the archived source still does `btoa(\`${env.PAYPAL_CLIENT_ID}:${env.PAYPAL_CLIENT_SECRET}\`)` with no trim. The trim is `sites-paypal-sdk/access-token-trim.patch`. Apply that patch to `server/paypal.js` in the iMac Sites checkout before the next save.
 
+The publication copy `sites-publication-2026-10-12/paypal.js` already contains that trim and a capture guard. Capture loads the PayPal order first and returns `409 amount_not_allowed` unless the amount is `280.00` USD. A `1.00` order is allowed only when `PAYPAL_TEST_CHECKOUT_ENABLED` is exactly `true` and the item name contains `TGT TEST ORDER`. Use that file, not the trim patch alone. Local QA of that guard passed; it was a mocked PayPal, not a live charge.
+
 ## Live evidence — old bundle
 
 Fetched 2026-10-12 without calling `POST /api/paypal/create-order`.
