@@ -25,9 +25,13 @@ const event = {
   event_type: 'PAYMENT.CAPTURE.COMPLETED',
   resource: {
     id: 'CAPTURE-1',
+    custom_id: 'laptop-lenovo',
+    amount: { currency_code: 'USD', value: '280.00' },
     payer: { email_address: 'buyer@example.com', name: { given_name: 'Jane', surname: 'Test' } },
     supplementary_data: { related_ids: { order_id: 'ORDER123456789' } },
     purchase_units: [{
+      custom_id: 'laptop-lenovo',
+      amount: { currency_code: 'USD', value: '280.00' },
       items: [{ name: 'Refurbished Lenovo laptop', description: 'buyer@example.com' }],
       shipping: {
         name: { full_name: 'Jane Test' },
@@ -176,7 +180,7 @@ const first = await handlePayPalWebhook(new Request('https://example.test/api/pa
   method: 'POST', headers, body: JSON.stringify(event),
 }), env, fetchImpl)
 assert.equal(first.status, 200)
-assert.deepEqual(await first.json(), { ok: true, accepted: true, creates: 0, ownerNotified: false, buyerConfirmed: false })
+assert.deepEqual(await first.json(), { ok: true, accepted: true, creates: 0, ownerNotified: false, buyerConfirmed: false, fulfilled: true })
 
 const replay = await handlePayPalWebhook(new Request('https://example.test/api/paypal/webhook', {
   method: 'POST', headers, body: JSON.stringify(event),
@@ -257,5 +261,78 @@ const tampered = await handlePayPalCaptureOrder(new Request('https://example.tes
 assert.equal(tampered.status, 409)
 assert.deepEqual(await tampered.json(), { ok: false, error: 'amount_not_allowed' })
 assert.equal(tamperCalls.some((call) => call.includes('/capture')), false)
+
+function fulfillmentEvent({ id, orderId, productId, value = '280.00', currency = 'USD' }) {
+  return {
+    id,
+    event_type: 'PAYMENT.CAPTURE.COMPLETED',
+    resource: {
+      id: `CAP-${id}`,
+      custom_id: productId,
+      amount: { currency_code: currency, value },
+      payer: { email_address: 'buyer@example.com', name: { given_name: 'Jane', surname: 'Test' } },
+      supplementary_data: { related_ids: { order_id: orderId } },
+      purchase_units: [{
+        custom_id: productId,
+        amount: { currency_code: currency, value },
+        items: [{ name: 'Refurbished Lenovo laptop', description: 'buyer@example.com' }],
+        shipping: event.resource.purchase_units[0].shipping,
+      }],
+    },
+  }
+}
+
+function fulfillmentFetch(urls) {
+  return async (url) => {
+    const href = String(url)
+    urls.push(href)
+    if (href.endsWith('/v1/oauth2/token')) return Response.json({ access_token: 'token' })
+    if (href.endsWith('/v1/notifications/verify-webhook-signature')) return Response.json({ verification_status: 'SUCCESS' })
+    if (href.includes('/oauth2/v2.0/token')) return Response.json({ access_token: 'graph-token' })
+    if (href.includes('/sendMail')) return new Response(null, { status: 202 })
+    throw new Error(`unexpected URL ${url}`)
+  }
+}
+
+async function postWebhook(body, urls) {
+  return handlePayPalWebhook(new Request('https://example.test/api/paypal/webhook', {
+    method: 'POST', headers, body: JSON.stringify(body),
+  }), env, fulfillmentFetch(urls))
+}
+
+for (const productId of ['laptop-lenovo', 'laptop-hp', 'laptop-other']) {
+  const urls = []
+  const suffix = productId.split('-')[1].toUpperCase()
+  const response = await postWebhook(fulfillmentEvent({
+    id: `WH-VALID-${suffix}`,
+    orderId: `ORDERVALID${suffix}1`,
+    productId,
+  }), urls)
+  assert.equal(response.status, 200)
+  assert.deepEqual(await response.json(), { ok: true, accepted: true, creates: 0, ownerNotified: true, buyerConfirmed: true, fulfilled: true })
+  assert.equal(urls.filter((url) => url.includes('/sendMail')).length, 2)
+  console.log(`PASS webhook-fulfillment-${productId}`)
+}
+
+const rejected = [
+  { id: 'WH-BAD-AMOUNT', orderId: 'ORDERBADAMOUNT01', productId: 'laptop-lenovo', value: '1.00', error: 'amount_not_allowed' },
+  { id: 'WH-BAD-CURRENCY', orderId: 'ORDERBADCURR0001', productId: 'laptop-hp', currency: 'EUR', error: 'amount_not_allowed' },
+  { id: 'WH-BAD-EBOOK', orderId: 'ORDERBADEBOOK001', productId: 'ebook-ai-made-simple', error: 'product_not_allowed' },
+  { id: 'WH-BAD-DOCK', orderId: 'ORDERBADDOCK0001', productId: 'dock', error: 'product_not_allowed' },
+  { id: 'WH-BAD-MISSING', orderId: 'ORDERBADMISSING1', productId: '', error: 'product_not_allowed' },
+]
+for (const item of rejected) {
+  const urls = []
+  const response = await postWebhook(fulfillmentEvent(item), urls)
+  assert.equal(response.status, 200)
+  assert.deepEqual(await response.json(), { ok: true, accepted: true, creates: 0, ownerNotified: false, buyerConfirmed: false, fulfilled: false, error: item.error })
+  assert.equal(urls.some((url) => url.includes('graph.microsoft.com') || url.includes('/sendMail')), false)
+  const replayUrls = []
+  const replayResponse = await postWebhook(fulfillmentEvent(item), replayUrls)
+  assert.equal(replayResponse.status, 200)
+  assert.equal((await replayResponse.json()).duplicate, true)
+  assert.equal(replayUrls.some((url) => url.includes('/sendMail')), false)
+  console.log(`PASS webhook-rejected-${item.id}`)
+}
 
 console.log('PASS: PayPal Live API target, guarded $1 test checkout, capture amount lock, capture notification guard, signature verification, 2xx handling, and replay creates=0')

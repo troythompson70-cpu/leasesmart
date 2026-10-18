@@ -12,6 +12,7 @@ const TEST_CHECKOUT_PRICE = '1.00'
 const CHECKOUT_CURRENCY = 'USD'
 const OWNER_EMAIL = 'tgates@tgttechnologies.com'
 const LAPTOP_BRANDS = new Set(['Lenovo', 'HP', 'Other'])
+const FULFILLABLE_PRODUCT_IDS = new Set(['laptop-lenovo', 'laptop-hp', 'laptop-other'])
 const noticedOrders = new Set()
 
 const jsonResponse = (body, status = 200, headers = {}) => new Response(JSON.stringify(body), {
@@ -105,6 +106,28 @@ export function resolveCheckout(body, env) {
   }
   if (body?.amount != null && body.amount !== '' && String(body.amount) !== amount) return { error: 'amount_not_allowed', status: 409 }
   return { product, amount, brand: product.brand || product.id, name: product.name }
+}
+
+function captureMoney(resource) {
+  const unit = Array.isArray(resource?.purchase_units) ? resource.purchase_units[0] : null
+  const amount = resource?.amount || unit?.payments?.captures?.[0]?.amount || unit?.amount || null
+  return {
+    value: amount?.value == null ? '' : String(amount.value),
+    currency: amount?.currency_code == null ? '' : String(amount.currency_code),
+  }
+}
+
+function captureProductId(resource) {
+  const unit = Array.isArray(resource?.purchase_units) ? resource.purchase_units[0] : null
+  const id = resource?.custom_id || unit?.custom_id
+  return typeof id === 'string' ? id.trim() : ''
+}
+
+export function webhookCaptureAllowed(resource) {
+  const money = captureMoney(resource)
+  if (money.value !== CHECKOUT_PRICE || money.currency !== CHECKOUT_CURRENCY) return { ok: false, error: 'amount_not_allowed' }
+  if (!FULFILLABLE_PRODUCT_IDS.has(captureProductId(resource))) return { ok: false, error: 'product_not_allowed' }
+  return { ok: true }
 }
 
 function orderAmountAllowed(order, env) {
@@ -547,12 +570,23 @@ export async function handlePayPalWebhook(request, env, fetchImpl = fetch) {
   let ownerNotified = false
   let buyerConfirmed = false
   if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
+    const decision = webhookCaptureAllowed(event.resource)
+    if (!decision.ok) {
+      return jsonResponse({ ok: true, accepted: true, creates: 0, ownerNotified: false, buyerConfirmed: false, fulfilled: false, error: decision.error }, 200)
+    }
     const resource = event.resource || {}
     ownerNotified = (await deliverOwnerNotice(env, ownerPurchaseNotice(resource), fetchImpl)).delivered === true
     const confirmation = buyerConfirmation(resource)
     if (confirmation) buyerConfirmed = (await deliverBuyerConfirmation(env, confirmation, fetchImpl)).delivered === true
   }
-  return jsonResponse({ ok: true, accepted: ALLOWED_EVENTS.has(event.event_type), creates: 0, ownerNotified, buyerConfirmed }, 200)
+  return jsonResponse({
+    ok: true,
+    accepted: ALLOWED_EVENTS.has(event.event_type),
+    creates: 0,
+    ownerNotified,
+    buyerConfirmed,
+    fulfilled: event.event_type === 'PAYMENT.CAPTURE.COMPLETED',
+  }, 200)
 }
 
 export function handlePayPalProducts(request, env) {
