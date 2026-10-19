@@ -184,7 +184,7 @@ async function graphAccessToken(): Promise<string> {
         } else {
           body.set(
             'scope',
-            'https://graph.microsoft.com/Files.ReadWrite.All https://graph.microsoft.com/Sites.ReadWrite.All offline_access',
+            'https://graph.microsoft.com/Files.ReadWrite.All https://graph.microsoft.com/Sites.ReadWrite.All https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.Send offline_access',
           )
         }
       } else {
@@ -464,6 +464,12 @@ export function mailboxProbeUpn(): string {
     return fromEnv
   }
   return DEFAULT_MAILBOX_PROBE_UPN
+}
+
+/** Mailbox path for app-only Graph. Delegated sign-in used a different prefix. */
+export function mailboxUserPath(suffix: string): string {
+  const tail = suffix.startsWith('/') ? suffix : `/${suffix}`
+  return `/users/${encodeURIComponent(mailboxProbeUpn())}${tail}`
 }
 
 /**

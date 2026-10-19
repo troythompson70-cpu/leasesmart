@@ -1,6 +1,7 @@
 /**
  * Banner color from the feed file age. Ignores stored ui_sync_health.status.
- * ≤30 min green, >30 min yellow, >2 hr red. system_mode SAFE wins.
+ * ≤30 min green, >30 min yellow, >2 hr red.
+ * SAFE wins. DEGRADED and STOPPED are never green.
  */
 
 const THIRTY_MIN_MS = 30 * 60 * 1000;
@@ -20,8 +21,12 @@ function modeText(feed) {
  * @returns {{ state: 'GREEN'|'YELLOW'|'RED'|'SAFE', title: string }}
  */
 export function bannerFromFeedAge(feed, now = Date.now()) {
-  if (modeText(feed) === 'SAFE') {
+  const mode = modeText(feed);
+  if (mode === 'SAFE') {
     return { state: 'SAFE', title: 'SAFE' };
+  }
+  if (mode === 'DEGRADED' || mode === 'STOPPED') {
+    return { state: 'RED', title: mode };
   }
   const stamp = Date.parse(String(feed && feed.updated_at ? feed.updated_at : ''));
   if (!Number.isFinite(stamp)) {
