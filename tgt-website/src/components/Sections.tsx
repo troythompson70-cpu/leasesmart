@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { laborDay, videos, remoteHelpItems, mspServices, categoryStrip, youtubeChannelUrl } from '../content'
+import { aiLaptopDeal, videos, remoteHelpItems, mspServices, categoryStrip, youtubeChannelUrl } from '../content'
+import { addToCart } from '../lib/cart-store'
 import { track } from '../lib/track'
 import { TipsSignupForm } from './TipsSignupForm'
 
@@ -10,17 +11,17 @@ export function LaptopPromo({ onInquire }: { onInquire: () => void }) {
         <div>
           <p className="eyebrow">Limited inventory</p>
           <h2 className="font-display text-3xl font-semibold tracking-tight text-navy-900 sm:text-4xl">
-            {laborDay.title}
+            {aiLaptopDeal.title}
           </h2>
           <p className="mt-3 font-display text-2xl font-semibold text-brand-blue sm:text-3xl">
-            {laborDay.product}
+            {aiLaptopDeal.product}
           </p>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-muted">
             Compact. Lightweight. Ready for the tools people actually use — with TGT
             remote support available when you need help.
           </p>
           <ul className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {laborDay.readyFor.map((item) => (
+            {aiLaptopDeal.readyFor.map((item) => (
               <li
                 key={item}
                 className="rounded-lg border border-slate-line bg-white px-3 py-2.5 text-sm font-semibold text-navy-900"
@@ -38,7 +39,18 @@ export function LaptopPromo({ onInquire }: { onInquire: () => void }) {
             }}
             data-cta="laptop-promo"
           >
-            {laborDay.cta}
+            {aiLaptopDeal.cta}
+          </button>
+          <button
+            type="button"
+            className="btn-primary mt-8 ml-3"
+            onClick={() => {
+              addToCart(aiLaptopDeal.sku)
+              window.location.assign('/cart')
+            }}
+            data-cta="laptop-add-cart"
+          >
+            Add to cart
           </button>
         </div>
         <div className="overflow-hidden rounded-2xl border border-slate-line bg-navy-900 shadow-[0_18px_50px_-24px_rgba(6,16,31,0.45)]">

@@ -4,7 +4,7 @@ Conversion-first rebuild of [tgttechnologies.com](https://tgttechnologies.com) t
 
 ## Homepage order
 
-1. Labor Day announcement bar  
+1. AI-ready laptop announcement bar  
 2. Hero + tips signup  
 3. $280 AI-ready laptop promo  
 4. Watch Gates videos  

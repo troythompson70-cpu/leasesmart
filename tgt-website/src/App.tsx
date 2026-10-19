@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AnnouncementBar, Hero, SiteHeader } from './components/Hero'
+import { CartPage, CheckoutPage, OrderResult } from './components/Cart'
 import { LaptopInquiryModal } from './components/LaptopInquiryModal'
 import { LeadInquiryModal, type LeadKind } from './components/LeadInquiryModal'
 import {
@@ -17,6 +18,12 @@ import {
 function App() {
   const [laptopOpen, setLaptopOpen] = useState(false)
   const [leadKind, setLeadKind] = useState<LeadKind | null>(null)
+  const path = window.location.pathname
+  if (path === '/cart') return <CartPage />
+  if (path === '/checkout') return <CheckoutPage />
+  if (path === '/order/confirmed') return <OrderResult kind="confirmed" />
+  if (path === '/order/cancelled') return <OrderResult kind="cancelled" />
+  if (path === '/order/failed') return <OrderResult kind="failed" />
 
   return (
     <>

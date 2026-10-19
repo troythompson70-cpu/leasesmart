@@ -126,7 +126,7 @@ function pass(name) {
 
 {
   // Mirror src/lib/mailto.ts — encodeURIComponent, never URLSearchParams.
-  const subject = encodeURIComponent('Labor Day $280 AI-Ready Laptop inquiry')
+  const subject = encodeURIComponent('AI-READY LAPTOP DEAL $280 inquiry')
   const body = encodeURIComponent(
     "I'm interested in the $280 AI-Ready Laptop.\n\nName: Troy\nPhone: 555-0100",
   )
@@ -136,7 +136,7 @@ function pass(name) {
   assert.equal(href.includes('%20'), true)
   assert.equal(href.includes('Name%3A%20Troy'), true)
   const bad = `mailto:info@tgttechnologies.com?${new URLSearchParams({
-    subject: 'Labor Day $280 AI-Ready Laptop inquiry',
+    subject: 'AI-READY LAPTOP DEAL $280 inquiry',
     body: 'Name: Troy',
   }).toString()}`
   assert.equal(bad.includes('+'), true)
