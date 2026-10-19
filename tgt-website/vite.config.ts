@@ -6,6 +6,7 @@ import { serveCommandCenter } from './server/command-center-static.ts'
 import { handleDashboardFeedRequest } from './server/dashboard-feed-http.ts'
 import { handleHealthRequest } from './server/health-http.ts'
 import { handleIntakeRequest } from './server/intake-http.ts'
+import { handleOpportunityDecisionRequest } from './server/opportunity-decision-http.ts'
 import { startWebsiteLeadCopyLoop } from './server/website-lead-copy.ts'
 
 function localApiPlugin(): Plugin {
@@ -22,6 +23,9 @@ function localApiPlugin(): Plugin {
       server.middlewares.use('/api/dashboard-feed', (req, res) => {
         void handleDashboardFeedRequest(req, res)
       })
+      server.middlewares.use('/api/opportunity-decision', (req, res) => {
+        void handleOpportunityDecisionRequest(req, res)
+      })
       server.middlewares.use('/api/health', (req, res) => {
         void handleHealthRequest(req, res)
       })
@@ -35,6 +39,9 @@ function localApiPlugin(): Plugin {
       })
       server.middlewares.use('/api/dashboard-feed', (req, res) => {
         void handleDashboardFeedRequest(req, res)
+      })
+      server.middlewares.use('/api/opportunity-decision', (req, res) => {
+        void handleOpportunityDecisionRequest(req, res)
       })
       server.middlewares.use('/api/health', (req, res) => {
         void handleHealthRequest(req, res)

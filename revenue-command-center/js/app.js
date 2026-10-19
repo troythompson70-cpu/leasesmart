@@ -9,6 +9,7 @@ import {
   parseListSoftwareBody,
 } from './software-checklist.js';
 import { saveAndVerify } from './save-verify.js';
+import { saveDecisionLive } from './live-decision.js';
 import { cardViewModel } from './opportunity-card.js';
 import {
   clearIncomingAttention,
@@ -16,6 +17,7 @@ import {
   buildEmailThreadLink,
   leadIdOf,
 } from './transmission.js';
+import { QUEUE_DECISIONS } from './record-decisions.js';
 import {
   auditMalformedPaths,
   CANONICAL_RCC_ROOT,
@@ -819,34 +821,62 @@ function openEmailThread(opp) {
   window.open(link.href, '_blank', 'noopener,noreferrer');
 }
 
-function onClearIncoming(id) {
+async function onClearIncoming(id) {
   const before = findOpp(id);
   if (!before) return;
-  const statusBefore = before.status;
-  const notesBefore = before.notes;
-  const txBefore = before.latest_transmission_at;
-  const previewBefore = before.message_preview;
-  const result = clearIncomingAttention(before);
-  if (!result.ok) {
-    toast(result.error || 'Clear Incoming failed', true);
+  // Production path: SharePoint write → immediate readback. No session substitute.
+  const live = await saveDecisionLive({
+    opportunityId: String(before.opportunity_id || before.id || id),
+    decision: 'clear_incoming',
+  });
+  if (live.ok && live.feed) {
+    state.feed = mergePersistedNewReplies(mergePersistedActivity(live.feed));
+    toast(live.message || 'Incoming cleared — SAVED + VERIFIED on SharePoint');
+    recompute();
     return;
   }
-  patchOpp(id, () => result.opp);
-  const after = findOpp(id);
-  const ok =
-    after &&
-    after.incoming_attention === false &&
-    after.status === statusBefore &&
-    after.notes === notesBefore &&
-    after.latest_transmission_at === txBefore &&
-    after.message_preview === previewBefore;
+  if (live.approval_required || live.status === 'APPROVAL_GATE_AUTHENTICATION') {
+    toast(
+      live.message ||
+        'Clear Incoming stopped at AUTH gate — complete graph:login / Graph secrets (no ephemeral clear)',
+      true,
+    );
+    recompute();
+    return;
+  }
   toast(
-    ok
-      ? `Incoming cleared for Opportunity ID ${leadIdOf(after)} — status unchanged`
-      : 'Clear Incoming violated permanence rules',
-    !ok,
+    live.message ||
+      'Clear Incoming failed live SharePoint write/readback — not applied locally',
+    true,
   );
-  recompute();
+  recompute(live.status === 'VERIFICATION_FAILED' ? { verificationFailed: true } : {});
+}
+
+async function persistDecisionLive(id, decision, patch = {}) {
+  const before = findOpp(id);
+  if (!before) return;
+  const live = await saveDecisionLive({
+    opportunityId: String(before.opportunity_id || before.id || id),
+    decision,
+    patch,
+  });
+  if (live.ok && live.feed) {
+    state.feed = mergePersistedNewReplies(mergePersistedActivity(live.feed));
+    toast(live.message || 'SAVED + VERIFIED');
+    recompute();
+    return;
+  }
+  if (live.approval_required || live.status === 'APPROVAL_GATE_AUTHENTICATION') {
+    toast(
+      live.message ||
+        'Decision stopped at AUTH gate — owner must complete Graph sign-in (not applied locally)',
+      true,
+    );
+    recompute();
+    return;
+  }
+  toast(live.message || 'SharePoint decision write/readback failed', true);
+  recompute(live.status === 'VERIFICATION_FAILED' ? { verificationFailed: true } : {});
 }
 
 function onAcknowledge(id) {
@@ -965,22 +995,30 @@ function onCardAction(action, id, el = null) {
     return;
   }
   if (action === 'followup' || action === 'done' || action === 'pass') {
-    const patch =
-      action === 'done'
-        ? { status: 'WON', next_action: 'Closed' }
-        : action === 'pass'
-          ? { status: 'PASS', next_action: 'Passed' }
-          : { last_action: 'Follow-up queued (manual — no auto-send)', next_action: 'Await reply' };
-    const result = saveAndVerify(state.feed, id, patch, {
-      simulateReadbackFail: false,
+    if (action === 'pass') {
+      void persistDecisionLive(id, QUEUE_DECISIONS.PASS_NOT_FIT);
+      return;
+    }
+    if (action === 'done') {
+      void persistDecisionLive(id, 'patch', { status: 'WON', next_action: 'Closed' });
+      return;
+    }
+    void persistDecisionLive(id, 'patch', {
+      last_action: 'Follow-up queued (manual — no auto-send)',
+      next_action: 'Await reply',
     });
-    state.feed = result.feed;
-    toast(result.message, result.status !== 'SAVED_VERIFIED');
-    recompute(
-      result.status === 'VERIFICATION_FAILED'
-        ? { verificationFailed: true }
-        : {},
-    );
+    return;
+  }
+  if (action === 'keep-active') {
+    void persistDecisionLive(id, QUEUE_DECISIONS.KEEP_ACTIVE);
+    return;
+  }
+  if (action === 'save-record') {
+    void persistDecisionLive(id, QUEUE_DECISIONS.SAVE_RECORD);
+    return;
+  }
+  if (action === 'remove-from-queue') {
+    void persistDecisionLive(id, QUEUE_DECISIONS.REMOVE_FROM_QUEUE);
     return;
   }
   if (action === 'open-source') {
