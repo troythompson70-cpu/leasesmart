@@ -1,15 +1,16 @@
 # AI Review Routing — Claude ↔ ChatGPT
 
 **Effective:** 2026-09-04  
-**Owner:** Troy / TGT Technologies Inc.
+**Owner:** Tee Gates / TGT Technologies Inc.  
+**Identity standard:** `master-vault/IDENTITY-STANDARD.md` (Tee Gates operational; Troy Thompson legal-only)
 
 ## Standing rule
 
-Troy **alternates** review and PM lanes between **Claude** and **ChatGPT**.
+Tee Gates **alternates** review and PM lanes between **Claude** and **ChatGPT**.
 
 - When one model hits a usage/limit wall, route the same handoff block to the other.
 - Do **not** wait on the limited model if the other is available.
-- Cursor keeps producing the standard handoff block; Troy pastes it into whichever reviewer is active.
+- Cursor keeps producing the standard handoff block; Tee Gates pastes it into whichever reviewer is active.
 
 ## Current status (2026-09-04)
 
@@ -57,9 +58,9 @@ No new architecture replaces the existing plan unless Cursor finds a **verified 
 - Gates / video placement
 - Remote Support, Referral, Business IT revenue paths
 - Linktree, TikTok, Facebook, Instagram, YouTube, LinkedIn rollout
-- Approved Troy/AI Troy photo library and next campaign
+- Approved Tee Gates / AI Gates photo library and next campaign (likeness: OWNER APPROVAL REQUIRED)
 - GA4/conversion tracking verification
-- Paid promotion planning only — no spend without Troy approval
+- Paid promotion planning only — no spend without Tee Gates approval
 - SMS remains blocked
 - Results written back to Microsoft 365 + repo
 
@@ -71,5 +72,6 @@ No new architecture replaces the existing plan unless Cursor finds a **verified 
 
 ## Change log
 
-- `2026-09-04` — Claude hit limit; Troy directing current reviews to ChatGPT; standing alternate-between-both rule recorded.
+- `2026-09-05` — Identity standard applied: operational owner named Tee Gates; Troy Thompson reserved for legal-only contexts. See `IDENTITY-STANDARD.md`.
+- `2026-09-04` — Claude hit limit; Tee Gates directing current reviews to ChatGPT; standing alternate-between-both rule recorded.
 - `2026-09-04` — ChatGPT acknowledged active reviewer role + DONE/NEEDS CORRECTION/BLOCKED/OWNER APPROVAL REQUIRED/NEXT classification scheme.

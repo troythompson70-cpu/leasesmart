@@ -2,9 +2,15 @@
 
 Upload these files to **Microsoft 365 Master Vault** for TGT record-keeping.
 
+## Identity standard
+
+Operational / brand / documentation identity: **Tee Gates**  
+Legal identity only where specifically required: **Troy Thompson**  
+Do not use `T. Gates`. Full policy: [`IDENTITY-STANDARD.md`](IDENTITY-STANDARD.md)
+
 ## AI review routing
 
-Troy **alternates between Claude and ChatGPT**. When one hits a limit, route the same handoff to the other.
+Tee Gates **alternates between Claude and ChatGPT**. When one hits a limit, route the same handoff to the other.
 
 - Standing note: [`ai-comms/AI-REVIEW-ROUTING.md`](ai-comms/AI-REVIEW-ROUTING.md)
 - **Current (2026-09-04):** Claude at limit → send reviews to **ChatGPT** until Claude resets.
@@ -13,10 +19,13 @@ Troy **alternates between Claude and ChatGPT**. When one hits a limit, route the
 
 | File | Purpose |
 |------|---------|
+| `IDENTITY-STANDARD.md` | Tee Gates vs Troy Thompson identity policy (FINAL) |
 | `ai-comms/AI-REVIEW-ROUTING.md` | Claude ↔ ChatGPT alternate review routing |
 | `LeaseSmart-Sprint-Master-Log.md` | Running log of sprint commands, Cursor reports, Claude reviews, GO/NO-GO |
-| `morning/MORNING-REVIEW-latest.md` | Troy's 2-minute morning checklist (regenerated overnight or on demand) |
+| `morning/MORNING-REVIEW-latest.md` | Owner 2-minute morning checklist (regenerated overnight or on demand) |
 | `morning/HANDOFF-latest.html` | One-click **Copy for Claude** button for latest handoff block (same text OK for ChatGPT when Claude is limited) |
+| `cursor-reports/` | Cursor execution / pre-check reports (repo mirror; M365 Master Vault is SoT) |
+| `marketing/` | Marketing Command Center repo mirror (M365 is SoT) |
 
 ## Commands (from repo root)
 
