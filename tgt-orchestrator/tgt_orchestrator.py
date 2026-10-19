@@ -38,6 +38,7 @@ from queue_engine import (  # noqa: E402
     select_next_eligible,
 )
 from audit_log import append_audit  # noqa: E402
+from state_machine import SelfVerifyForbidden, assert_transition  # noqa: E402
 
 HOME = Path.home()
 
@@ -551,26 +552,54 @@ def cmd_selftest(args: argparse.Namespace) -> int:
         assert seven["status"] == "READY"
         assert seven["lock_token"] == ""
 
-        # Failure / retry — AIWO-007 requires VERIFIED before dependents claim.
+        # Self-verify guard: a worker may never move AIWO-006 to VERIFIED,
+        # and AIWO-007 stays unclaimable until a separate reviewer does.
+        try:
+            assert_transition("READY_FOR_REVIEW", "VERIFIED", role="worker")
+            print("FAIL: worker self-verify allowed")
+            return 1
+        except SelfVerifyForbidden:
+            pass
+        try:
+            claim_work_order(qpath, "AIWO-007", owner="Claude", os_root=root)
+            print("FAIL: dependent claimed before reviewer VERIFIED")
+            return 1
+        except ClaimDenied:
+            pass
+
+        # Failure / retry on a dependency-free probe row (no VERIFIED write).
         with queue_lock(qpath):
             rows = load_queue(qpath)
-            six = next(r for r in rows if r["work_order_id"] == "AIWO-006")
-            six["status"] = "VERIFIED"
-            six["audit_status"] = "VERIFIED_BY_AUDITOR_SELFTEST"
+            probe = dict(next(r for r in rows if r["work_order_id"] == "AIWO-007"))
+            probe.update(
+                work_order_id="SELFTEST-RETRY",
+                dependencies="none",
+                status="READY",
+                claimed_by="",
+                claimed_at="",
+                heartbeat_at="",
+                lock_token="",
+                lock_expires_at="",
+                retry_count="0",
+            )
+            rows.append(probe)
             save_queue(qpath, rows)
-        claimed7 = claim_work_order(qpath, "AIWO-007", owner="Claude", os_root=root)
+        claimed_probe = claim_work_order(qpath, "SELFTEST-RETRY", owner="Claude", os_root=root)
         fail_blocked(
             qpath,
-            "AIWO-007",
-            lock_token=claimed7["lock_token"],
+            "SELFTEST-RETRY",
+            lock_token=claimed_probe["lock_token"],
             error="simulated failure",
             retryable=True,
             os_root=root,
         )
         rows = load_queue(qpath)
-        seven = next(r for r in rows if r["work_order_id"] == "AIWO-007")
-        assert seven["status"] == "READY"
-        assert seven["retry_count"] == "1"
+        six = next(r for r in rows if r["work_order_id"] == "AIWO-006")
+        probe = next(r for r in rows if r["work_order_id"] == "SELFTEST-RETRY")
+        assert probe["status"] == "READY"
+        assert probe["retry_count"] == "1"
+        assert six["status"] == "READY_FOR_REVIEW", six["status"]
+        assert all(r["status"] != "VERIFIED" for r in rows)
 
         print(
             json.dumps(
@@ -579,7 +608,8 @@ def cmd_selftest(args: argparse.Namespace) -> int:
                     "selftest": "PASS",
                     "evidence_read_back": rb,
                     "aiwo006": six["status"],
-                    "aiwo007_after_stale_and_retry": seven["status"],
+                    "aiwo007_after_stale_recovery": seven["status"],
+                    "retry_probe_after_retry": probe["status"],
                 },
                 indent=2,
             )
