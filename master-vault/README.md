@@ -13,6 +13,7 @@ Troy **alternates between Claude and ChatGPT**. When one hits a limit, route the
 
 | File | Purpose |
 |------|---------|
+| `TGT-REVENUE-DEALS-AI-TOOLS-MASTER-LEDGER.md` | **Source-of-truth mirror** for MSP/NFR/trial/AI-tool deals + AI Troy generation stream (M365 authoritative on conflict) |
 | `ai-comms/AI-REVIEW-ROUTING.md` | Claude ↔ ChatGPT alternate review routing |
 | `LeaseSmart-Sprint-Master-Log.md` | Running log of sprint commands, Cursor reports, Claude reviews, GO/NO-GO |
 | `morning/MORNING-REVIEW-latest.md` | Troy's 2-minute morning checklist (regenerated overnight or on demand) |

@@ -10,6 +10,13 @@
 - **Now:** Claude is at limit → send current handoffs/reviews to **ChatGPT**.
 - Standing note: `master-vault/ai-comms/AI-REVIEW-ROUTING.md`
 
+## Revenue deals & AI tools ledger (updated 2026-09-08)
+
+- Canonical AI-readable mirror: `master-vault/TGT-REVENUE-DEALS-AI-TOOLS-MASTER-LEDGER.md`
+- Cursor rule: `.cursor/rules/tgt-revenue-deals-ledger.mdc`
+- M365 / OneDrive remains authoritative if conflict with chat or an outdated repo copy.
+- Do not claim vendor approval or commercial/client/reseller rights unless the ledger records them.
+
 ## Current sprint status
 
 - **Build ID:** `20260902-v2.14.1-authcfg`

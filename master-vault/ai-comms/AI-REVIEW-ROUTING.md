@@ -47,6 +47,7 @@ No new architecture replaces the existing plan unless Cursor finds a **verified 
 3. Label active reviewer in execution notes: `Active reviewer: ChatGPT` or `Active reviewer: Claude`.
 4. Write implementation results to **repo + Microsoft 365** (M365 write-back when access is available).
 5. Do not invent a second competing process — same handoff, alternate destination.
+6. Before vendor/deal/AI-tool status claims, read `master-vault/TGT-REVENUE-DEALS-AI-TOOLS-MASTER-LEDGER.md` (M365 authoritative on conflict).
 
 ## Focus areas under review (from ChatGPT)
 
