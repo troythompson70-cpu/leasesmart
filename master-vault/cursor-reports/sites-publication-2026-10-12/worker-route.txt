@@ -1,0 +1,5 @@
+Add this route beside the other PayPal routes in scripts/build-sites-worker.mjs before the next Sites save:
+
+if (url.pathname === '/api/paypal/products') return handlePayPalProducts(request, env)
+
+handlePayPalProducts is exported from server/paypal.js. Copy sites-publication-2026-10-12/paypal.js to server/paypal.js in the existing Sites project.
