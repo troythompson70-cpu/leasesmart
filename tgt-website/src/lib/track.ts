@@ -1,9 +1,6 @@
-import { ga4MeasurementId } from '../content'
-
 declare global {
   interface Window {
     dataLayer?: unknown[]
-    gtag?: (...args: unknown[]) => void
   }
 }
 
@@ -26,10 +23,6 @@ export function track(event: CtaEvent, detail?: Record<string, string>): void {
   if (typeof window !== 'undefined') {
     window.dataLayer = window.dataLayer || []
     window.dataLayer.push(payload)
-
-    if (typeof window.gtag === 'function' && ga4MeasurementId) {
-      window.gtag('event', event, detail ?? {})
-    }
   }
 
   if (import.meta.env.DEV) {

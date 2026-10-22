@@ -100,5 +100,3 @@ export const mspServices = [
     image: '/media/service-hardware.jpg',
   },
 ] as const
-
-export const ga4MeasurementId = 'G-3WSD9VGVM6'
