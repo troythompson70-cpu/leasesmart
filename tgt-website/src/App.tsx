@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { CartClosed } from './components/CartClosed'
 import { AnnouncementBar, Hero, SiteHeader } from './components/Hero'
 import { LaptopInquiryModal } from './components/LaptopInquiryModal'
 import { LeadInquiryModal, type LeadKind } from './components/LeadInquiryModal'
+import { isCartPath, laptopCheckoutEnabled } from './lib/site-flags'
 import {
   BottomSignup,
   BusinessIt,
@@ -17,6 +19,11 @@ import {
 function App() {
   const [laptopOpen, setLaptopOpen] = useState(false)
   const [leadKind, setLeadKind] = useState<LeadKind | null>(null)
+  const cartPath = isCartPath(window.location.pathname)
+
+  if (cartPath && !laptopCheckoutEnabled) {
+    return <CartClosed />
+  }
 
   return (
     <>

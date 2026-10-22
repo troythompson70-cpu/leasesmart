@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { laborDay, videos, remoteHelpItems, mspServices, categoryStrip, youtubeChannelUrl } from '../content'
+import { laptopCheckoutEnabled } from '../lib/site-flags'
 import { track } from '../lib/track'
 import { TipsSignupForm } from './TipsSignupForm'
 
 export function LaptopPromo({ onInquire }: { onInquire: () => void }) {
+  if (!laptopCheckoutEnabled) return null
   return (
     <section id="laptop" className="section-pad border-b border-slate-line bg-slate-soft">
       <div className="wrap grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
@@ -444,13 +446,15 @@ export function SiteFooter({
           <a className="hover:text-blue-200" href="#signup">
             Sign up for tips
           </a>
-          <button
-            type="button"
-            className="text-left hover:text-blue-200"
-            onClick={onLaptop}
-          >
-            $280 AI-ready laptop
-          </button>
+          {laptopCheckoutEnabled ? (
+            <button
+              type="button"
+              className="text-left hover:text-blue-200"
+              onClick={onLaptop}
+            >
+              $280 AI-ready laptop
+            </button>
+          ) : null}
           <button
             type="button"
             className="text-left hover:text-blue-200"
