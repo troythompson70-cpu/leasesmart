@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import type { FormEvent } from 'react'
-import { submitAssessmentInquiry, type AssessmentInquiryPayload } from '../lib/intake'
+import { CONTACT_EMAIL } from '../content'
+import { intakeConfig, submitAssessmentInquiry, type AssessmentInquiryPayload } from '../lib/intake'
 import { track, type CtaEvent } from '../lib/track'
 
 export type LeadKind = 'remote' | 'referral' | 'gates' | 'assessment' | 'contact'
@@ -180,11 +181,23 @@ export function LeadInquiryModal({ kind, onClose }: LeadInquiryModalProps) {
             </button>
           </div>
         ) : (
-          <form className="mt-5 grid gap-3" onSubmit={(event) => void onSubmit(event)}>
+          <form
+            className="mt-5 grid gap-3"
+            method="post"
+            action={intakeConfig.apiEndpoint}
+            onSubmit={(event) => void onSubmit(event)}
+          >
+            <noscript>
+              <p className="text-sm leading-relaxed text-navy-900">
+                This form needs JavaScript to send. Email {CONTACT_EMAIL} instead.
+              </p>
+            </noscript>
             <label className="grid gap-1.5 text-sm font-medium text-navy-900">
               Name
               <input
                 className="field"
+                name="name"
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -196,6 +209,8 @@ export function LeadInquiryModal({ kind, onClose }: LeadInquiryModalProps) {
                 Business name
                 <input
                   className="field"
+                  name="company"
+                  autoComplete="organization"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                   disabled={status === 'submitting'}
@@ -207,6 +222,8 @@ export function LeadInquiryModal({ kind, onClose }: LeadInquiryModalProps) {
               <input
                 className="field"
                 type="email"
+                name="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -218,6 +235,8 @@ export function LeadInquiryModal({ kind, onClose }: LeadInquiryModalProps) {
               <input
                 className="field"
                 type="tel"
+                name="phone"
+                autoComplete="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
@@ -228,6 +247,7 @@ export function LeadInquiryModal({ kind, onClose }: LeadInquiryModalProps) {
               Details
               <textarea
                 className="field min-h-28"
+                name="message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 disabled={status === 'submitting'}
