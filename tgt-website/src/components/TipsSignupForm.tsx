@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { tipTopics, type TipTopicId } from '../content'
-import { submitNewsletterSignup } from '../lib/intake'
+import { intakeConfig, submitNewsletterSignup } from '../lib/intake'
 import { track } from '../lib/track'
 
 type TipsSignupFormProps = {
@@ -89,6 +89,8 @@ export function TipsSignupForm({
   return (
     <form
       id={id}
+      method="post"
+      action={intakeConfig.apiEndpoint}
       onSubmit={(event) => void onSubmit(event)}
       className={`rounded-2xl border p-5 shadow-[0_18px_50px_-24px_rgba(6,16,31,0.45)] sm:p-6 ${
         dark
