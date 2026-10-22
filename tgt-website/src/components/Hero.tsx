@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { categoryStrip, laborDay } from '../content'
 import { scrollToHash } from '../lib/scroll-to'
+import { laptopCheckoutEnabled } from '../lib/site-flags'
 import { track } from '../lib/track'
 import { TipsSignupForm } from './TipsSignupForm'
 
@@ -9,21 +10,24 @@ type HeaderProps = {
 }
 
 export function AnnouncementBar({ onLaptopClick }: { onLaptopClick: () => void }) {
+  if (!laptopCheckoutEnabled) return null
   return (
     <div className="relative z-[60] border-b border-brand-blue/40 bg-brand-blue text-white">
       <div className="wrap flex flex-col items-start justify-between gap-2 py-2.5 sm:flex-row sm:items-center">
         <p className="text-sm font-semibold tracking-wide">{laborDay.bar}</p>
-        <button
-          type="button"
-          className="rounded-md bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-brand-blue"
-          onClick={() => {
-            track('laptop_inquiry', { method: 'announcement_bar' })
-            onLaptopClick()
-          }}
-          data-cta="announcement-laptop"
-        >
-          SHOP / INQUIRE
-        </button>
+        {laptopCheckoutEnabled ? (
+          <button
+            type="button"
+            className="rounded-md bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-brand-blue"
+            onClick={() => {
+              track('laptop_inquiry', { method: 'announcement_bar' })
+              onLaptopClick()
+            }}
+            data-cta="announcement-laptop"
+          >
+            SHOP / INQUIRE
+          </button>
+        ) : null}
       </div>
     </div>
   )
@@ -42,7 +46,7 @@ export function SiteHeader({ onLaptopClick }: HeaderProps) {
 
   const links = [
     { label: 'Tips', href: '#signup' },
-    { label: 'Laptop', href: '#laptop' },
+    ...(laptopCheckoutEnabled ? [{ label: 'Laptop', href: '#laptop' }] : []),
     { label: 'Videos', href: '#videos' },
     { label: 'Gates', href: '#gates' },
     { label: 'Remote Help', href: '#remote-help' },
@@ -94,18 +98,20 @@ export function SiteHeader({ onLaptopClick }: HeaderProps) {
           <a href="#signup" className="btn-primary !py-2.5" data-cta="nav-signup">
             SIGN UP FREE
           </a>
-          <button
-            type="button"
-            className={`rounded-md border px-4 py-2.5 text-sm font-bold ${
-              scrolled
-                ? 'border-slate-line text-navy-900'
-                : 'border-white/30 text-white'
-            }`}
-            onClick={onLaptopClick}
-            data-cta="nav-laptop"
-          >
-            $280 LAPTOP
-          </button>
+          {laptopCheckoutEnabled ? (
+            <button
+              type="button"
+              className={`rounded-md border px-4 py-2.5 text-sm font-bold ${
+                scrolled
+                  ? 'border-slate-line text-navy-900'
+                  : 'border-white/30 text-white'
+              }`}
+              onClick={onLaptopClick}
+              data-cta="nav-laptop"
+            >
+              $280 LAPTOP
+            </button>
+          ) : null}
         </div>
 
         <button
@@ -142,16 +148,18 @@ export function SiteHeader({ onLaptopClick }: HeaderProps) {
             <a href="#signup" className="btn-primary mt-2" onClick={() => setOpen(false)}>
               SIGN UP FREE
             </a>
-            <button
-              type="button"
-              className="btn-outline mt-2"
-              onClick={() => {
-                setOpen(false)
-                onLaptopClick()
-              }}
-            >
-              GET THE $280 LAPTOP
-            </button>
+            {laptopCheckoutEnabled ? (
+              <button
+                type="button"
+                className="btn-outline mt-2"
+                onClick={() => {
+                  setOpen(false)
+                  onLaptopClick()
+                }}
+              >
+                GET THE $280 LAPTOP
+              </button>
+            ) : null}
           </div>
         </div>
       ) : null}
@@ -209,17 +217,19 @@ export function Hero({
             >
               SIGN UP FREE FOR TGT TIPS
             </a>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => {
-                track('laptop_inquiry', { method: 'hero' })
-                onLaptopClick()
-              }}
-              data-cta="hero-laptop"
-            >
-              SHOP THE $280 AI-READY LAPTOP
-            </button>
+            {laptopCheckoutEnabled ? (
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  track('laptop_inquiry', { method: 'hero' })
+                  onLaptopClick()
+                }}
+                data-cta="hero-laptop"
+              >
+                SHOP THE $280 AI-READY LAPTOP
+              </button>
+            ) : null}
             <button
               type="button"
               className="btn-secondary"
