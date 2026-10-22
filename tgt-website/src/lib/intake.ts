@@ -5,19 +5,17 @@ import {
 } from './intake-probe-guard.ts'
 import { type TipTopicId } from '../content.ts'
 
-export type IntakeMode = 'api' | 'formspark' | 'unconfigured'
+export type IntakeMode = 'api' | 'unconfigured'
 
 export type IntakeConfig = {
   mode: IntakeMode
   apiEndpoint: string
-  formsparkId: string
 }
 
 /** Matches the live tgttechnologies.com intake contract (schema 1.1). */
 export const intakeConfig: IntakeConfig = {
   mode: 'api',
   apiEndpoint: '/api/intake',
-  formsparkId: '',
 }
 
 export const NEWSLETTER_CONSENT_TEXT_VERSION = 'tgt-tips-email-v1-2026-09-08'
