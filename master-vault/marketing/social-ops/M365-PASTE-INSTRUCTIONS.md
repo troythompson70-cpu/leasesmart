@@ -14,6 +14,8 @@ and
 
 `master-vault/marketing/social-ops/PLATFORM-STATUS-2026-09-04.md`
 
-into that folder once Cursor has M365 write access or Troy pastes manually.
+into that folder once Cursor has M365 write access or Tee Gates pastes manually.
 
 No secrets included.
+
+**Identity:** Operational docs use Tee Gates. Troy Thompson only where legal identity is specifically required. See `master-vault/IDENTITY-STANDARD.md`.
