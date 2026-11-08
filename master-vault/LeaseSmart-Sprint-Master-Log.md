@@ -213,3 +213,117 @@ Implemented in `tgt-website/`: laptop modal posts `laptop_inquiry` (assessment f
 
 Full record: `master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md`.
 
+---
+## 2026-11-08 — TGT-00 — CURSOR CLOUD RECOVERY — Cursor Report
+
+**Build ID:** 20261108-tgt00-recovery
+
+**Run type:** Read-only audit + single safe CI defect fix (no production change)
+
+### Recovery audit summary
+
+| System | Status |
+|---|---|
+| leasesmart `main` | Clean, up to date with remote |
+| tgt-website `main` | Clean, up to date with remote |
+| LeaseSmart regression chain (C1Pro, 61/61) | **PASS** |
+| tgt-orchestrator unit tests (23/23) | **PASS** |
+| tgt-website build | **PASS** (`dist/assets/index-*.js` clean) |
+| tgt-website lint (oxlint) | **PASS** (0 errors) |
+| tgt-website assertion scripts (GA/Formspark/POST/laptop-hidden) | **ALL PASS** |
+| tgt-website no-live-intake-probes policy | **PASS** |
+| Gate 1 (Microsoft-only, frozen 2026-10-01) | FROZEN — no action |
+| Gate 3 (`TGT-EmailFeed-HEALTH` flow) | Live and ON — PR #46 open, awaiting Troy merge |
+| PayPal webhook fulfillment (PR #48) | Draft — awaiting ChatGPT Sites credentials |
+| TGT completion brief (PR #49) | Blocked — iMac local path not mounted |
+| Open PRs leasesmart | 25 open (top-priority: #46, #48, #49) |
+
+### Single fix executed
+
+**tgt-website CI failure (repo: `troythompson70-cpu/tgt-website`)**: Node.js CI workflow ran `npm test` but no `test` script exists in `package.json`. Build step already used `--if-present`. Changed `npm test` → `npm run test --if-present`. PR opened on `cursor/fix-ci-npm-test-missing-1778`. No production change, no secrets, no consequential config change.
+
+### Blockers (unchanged from last session)
+
+1. ChatGPT Sites `appgprj_6a8fb5d9596c8191a045ee1e5744fffd` — not accessible from cloud agent. Blocks PayPal deploy, e-book activation, and OpenAI service enablement.
+2. iMac local folder (`/Users/t-imac/Documents/ChatGPT/AI TROY/TGT-SITE-DEVIN-PILOT`) — not mounted. Blocks completion brief import.
+3. Microsoft Graph credentials (5 env vars) absent in cloud environment — SharePoint intake writes unavailable.
+4. Teams connector for Gate 3 alarm — owner: Troy.
+5. GitHub Pages for `leasesmart` — disable still pending Troy (API 403 from Cursor).
+
+### Next actions for Troy
+
+1. Merge `cursor/fix-ci-npm-test-missing-1778` on `tgt-website` → restores green CI.
+2. Merge PR #46 (Gate 3 health flow vault record) → closes the Gate 3 docs gap.
+3. Open ChatGPT Sites → run `install.sh` for `appgprj_6a8fb5d9596c8191a045ee1e5744fffd` → deploy → set PayPal secret → enables PR #48 to go live.
+4. Confirm Supabase SMTP project (`iajaftjnfxrywqgccdef`) SMTP config is active for LeaseSmart login emails.
+5. Disable GitHub Pages for `leasesmart` repo (API 403 blocks Cursor from doing this).
+
+**Recorded by:** Cursor (cloud recovery run 2026-11-08)
+
+
+---
+## 2026-11-08 — TGT-00 P0 — FULL PARALLEL AUDIT — Cursor Report
+
+**Build ID:** 20261108-tgt00-p0-parallel-audit
+
+**Run type:** Read-only parallel test execution across all project tracks. No production changes. No new features.
+
+### Full Test Execution Results
+
+| Suite | Scope | Result |
+|---|---|---|
+| `sprint-c1pro-regression-test.mjs` (chain) | LeaseSmart full app chain | **61/61 PASS** |
+| `sprint-d4-regression-test.mjs` | D4 rate limiter + security log | **43/43 PASS** |
+| `sprint-e1-regression-test.mjs` | E1 HUD/HPD live import | **58/58 PASS** |
+| `sprint-f1-regression-test.mjs` (+ chain) | F1 AI comms bridge + chain | **46/46 PASS** (chain: 36/36 inner) |
+| `rcc-sync-health-acceptance-test.mjs` | RCC sync-health UI guardrail | **26/26 PASS** |
+| `rcc-orphan-discovery-acceptance-test.mjs` | RCC orphan discovery integrity | **13/13 PASS** |
+| `revenue-command-center/tests/aiwo008_regression.mjs` | AIWO-008 RCC regression | **39/39 PASS** |
+| `revenue-command-center/tests/banner-age.mjs` | RCC banner age GREEN/YELLOW/RED | **PASS** |
+| `tgt-orchestrator` pytest (23 tests, main) | Orchestrator core unit tests | **23/23 PASS** |
+| `paypal-flow.test.mjs` (PR #48 branch, local mock) | PayPal cart QA | **7/7 PASS** |
+| `run-paypal-webhook-qa.mjs` (PR #48 branch, local mock) | PayPal webhook fulfillment guard | **8/8 PASS** (3 valid + 5 rejected) |
+| `run-packaged-route-qa.mjs` (PR #48 branch, local mock) | Sites install guard | **4/4 PASS** |
+| `tgt-website` assert scripts (4 scripts) | GA/Formspark/POST/laptop/no-live-probes | **ALL PASS** |
+| `tgt-website` build (Vite) | tgt-website production bundle | **PASS** |
+| `tgt-website` lint (oxlint) | tgt-website code quality | **PASS** (0 errors) |
+
+**All test suites: PASS. Zero regressions introduced.**
+
+### Open Work Order Status
+
+| Work Order | PR | Status | Blocking Item |
+|---|---|---|---|
+| TGT website CI fix | tgt-website #1 | **DONE — awaiting Troy merge** | None — ready |
+| Gate 1 (Outlook→SharePoint) | — | **DONE VERIFIED — FROZEN** | — |
+| Gate 3 (EmailFeed-HEALTH daily alarm) | #46 | **DONE — awaiting Troy merge** | None — flow is ON |
+| Gate 2 A1 SAFE mode condition | #32 | **IN PROGRESS — blocked** | PA auth in cloud (M365 device-code requires human MFA) |
+| RCC revenue-flow UI gate (schema 2.2) | #17 | **IN PROGRESS — blocked** | Graph env vars absent; SharePoint SoT not live-verified |
+| RCC live production path (write+readback) | #41 | **IN PROGRESS — blocked** | Graph env vars (`GRAPH_*` not in cloud environment) |
+| RCC orphan discovery integrity | #21 | **IN PROGRESS** | Awaiting Graph auth for live readback |
+| Orchestrator approval gates | #40 | **IN PROGRESS — 28/28 tests PASS on branch** | Awaiting Troy merge review |
+| Graph integration candidate | #25 | **IN PROGRESS — 23/23 PASS on branch** | AppDeploy 402 (credit reset); secrets not set |
+| PayPal webhook fulfillment guard | #48 | **IN PROGRESS — 19/19 PASS locally** | ChatGPT Sites access + PayPal `PAYPAL_CLIENT_SECRET` |
+| AI Made Simple / e-book route | — | **IN PROGRESS — route exists in Sites source** | Same: Sites access + define product/price/fulfillment |
+| TGT completion brief | #49 | **BLOCKED** | iMac local path not mounted |
+| Command Center cloud cutover (Netlify) | #43 | **IN PROGRESS** | DNS cutover + Graph env in Netlify UI |
+| AIWO-008/009 (Jared pipeline) | #23, #24 | **IN PROGRESS — Gemini audit pending** | Awaiting Gemini Independent Auditor verdict |
+| AI Gates pre-check / Tee Gates identity | #7 | **DONE — awaiting Troy merge** | None |
+| TGT Revenue Deals ledger | #13 | **DONE — awaiting Troy merge** | None |
+
+### Single Production Defect Found and Fixed
+
+**tgt-website CI** (`troythompson70-cpu/tgt-website` PR #1) — `npm test` with no test script = CI fail every push since 2026-09-13. Fixed: `npm run test --if-present`. **Ready to merge.**
+
+### Items Requiring Troy Action Only
+
+1. Merge `tgt-website` PR #1 — restores green CI.
+2. Merge leasesmart PR #46 — Gate 3 vault docs.
+3. Merge PR #7, #13 — identity standard + revenue ledger docs.
+4. Open ChatGPT Sites → install + deploy `sites-publication-2026-10-12/` → set `PAYPAL_CLIENT_SECRET` → enables PayPal live.
+5. Set Graph secrets (`GRAPH_TENANT_ID`, `GRAPH_CLIENT_ID`, `GRAPH_CLIENT_SECRET`, `GRAPH_ACCESS_TOKEN`, `GRAPH_REFRESH_TOKEN`) in host environment (AppDeploy or Netlify) — unlocks live RCC, dashboard feed, opportunity decisions, Gate 2 A1.
+6. Complete Power Automate device-code MFA for Gate 2 A1 SAFE save.
+7. Disable GitHub Pages on leasesmart repo (API 403 blocks Cursor).
+8. Confirm Supabase SMTP on project `iajaftjnfxrywqgccdef` (not `jufxyuqcgijaiuyratlp`).
+
+**Recorded by:** Cursor (TGT-00 P0 parallel audit run 2026-11-08T04:40 UTC)
