@@ -213,3 +213,50 @@ Implemented in `tgt-website/`: laptop modal posts `laptop_inquiry` (assessment f
 
 Full record: `master-vault/cursor-reports/LAPTOP-INTAKE-API-2026-09-08.md`.
 
+---
+## 2026-11-08 — TGT-00 — CURSOR CLOUD RECOVERY — Cursor Report
+
+**Build ID:** 20261108-tgt00-recovery
+
+**Run type:** Read-only audit + single safe CI defect fix (no production change)
+
+### Recovery audit summary
+
+| System | Status |
+|---|---|
+| leasesmart `main` | Clean, up to date with remote |
+| tgt-website `main` | Clean, up to date with remote |
+| LeaseSmart regression chain (C1Pro, 61/61) | **PASS** |
+| tgt-orchestrator unit tests (23/23) | **PASS** |
+| tgt-website build | **PASS** (`dist/assets/index-*.js` clean) |
+| tgt-website lint (oxlint) | **PASS** (0 errors) |
+| tgt-website assertion scripts (GA/Formspark/POST/laptop-hidden) | **ALL PASS** |
+| tgt-website no-live-intake-probes policy | **PASS** |
+| Gate 1 (Microsoft-only, frozen 2026-10-01) | FROZEN — no action |
+| Gate 3 (`TGT-EmailFeed-HEALTH` flow) | Live and ON — PR #46 open, awaiting Troy merge |
+| PayPal webhook fulfillment (PR #48) | Draft — awaiting ChatGPT Sites credentials |
+| TGT completion brief (PR #49) | Blocked — iMac local path not mounted |
+| Open PRs leasesmart | 25 open (top-priority: #46, #48, #49) |
+
+### Single fix executed
+
+**tgt-website CI failure (repo: `troythompson70-cpu/tgt-website`)**: Node.js CI workflow ran `npm test` but no `test` script exists in `package.json`. Build step already used `--if-present`. Changed `npm test` → `npm run test --if-present`. PR opened on `cursor/fix-ci-npm-test-missing-1778`. No production change, no secrets, no consequential config change.
+
+### Blockers (unchanged from last session)
+
+1. ChatGPT Sites `appgprj_6a8fb5d9596c8191a045ee1e5744fffd` — not accessible from cloud agent. Blocks PayPal deploy, e-book activation, and OpenAI service enablement.
+2. iMac local folder (`/Users/t-imac/Documents/ChatGPT/AI TROY/TGT-SITE-DEVIN-PILOT`) — not mounted. Blocks completion brief import.
+3. Microsoft Graph credentials (5 env vars) absent in cloud environment — SharePoint intake writes unavailable.
+4. Teams connector for Gate 3 alarm — owner: Troy.
+5. GitHub Pages for `leasesmart` — disable still pending Troy (API 403 from Cursor).
+
+### Next actions for Troy
+
+1. Merge `cursor/fix-ci-npm-test-missing-1778` on `tgt-website` → restores green CI.
+2. Merge PR #46 (Gate 3 health flow vault record) → closes the Gate 3 docs gap.
+3. Open ChatGPT Sites → run `install.sh` for `appgprj_6a8fb5d9596c8191a045ee1e5744fffd` → deploy → set PayPal secret → enables PR #48 to go live.
+4. Confirm Supabase SMTP project (`iajaftjnfxrywqgccdef`) SMTP config is active for LeaseSmart login emails.
+5. Disable GitHub Pages for `leasesmart` repo (API 403 blocks Cursor from doing this).
+
+**Recorded by:** Cursor (cloud recovery run 2026-11-08)
+
